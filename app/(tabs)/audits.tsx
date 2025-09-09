@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native'lucide-react-native';
+import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native';
 
 const audits = [
   {

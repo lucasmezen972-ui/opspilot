@@ -229,6 +229,7 @@ export default function TasksScreen() {
                     </TouchableOpacity>
                   )}
                 </View>
+                </View>
               )}
             </TouchableOpacity>
           );
