@@ -1,30 +1,41 @@
-import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+type NotificationsModule = typeof import('expo-notifications');
+
+function getNotifications(): NotificationsModule | undefined {
+  if (Platform.OS === 'web') {
+    console.log('Push notifications not supported on web');
+    return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const Notifications = require('expo-notifications') as NotificationsModule;
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+
+  return Notifications;
+}
 
 export function usePushNotifications() {
   useEffect(() => {
-    registerForPushNotificationsAsync();
+    const Notifications = getNotifications();
+    if (!Notifications) return;
+    registerForPushNotificationsAsync(Notifications);
   }, []);
 }
 
-async function registerForPushNotificationsAsync() {
-  // Only load expo-device on native platforms
-  if (Platform.OS === 'web') {
-    console.log('Push notifications not supported on web');
-    return;
-  }
-
+async function registerForPushNotificationsAsync(
+  Notifications: NotificationsModule,
+): Promise<void> {
   // expo-device cannot be imported on web, so require dynamically
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ExpoDevice = require('expo-device');
@@ -56,6 +67,8 @@ async function registerForPushNotificationsAsync() {
 }
 
 export async function scheduleAuditReminder(date: Date, body: string) {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Rappel d\u2019audit',
@@ -66,6 +79,8 @@ export async function scheduleAuditReminder(date: Date, body: string) {
 }
 
 export async function sendInternalAlert(message: string) {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Communication interne',
