@@ -1,41 +1,41 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useAudits() {
-  const [audits, setAudits] = useState<any[]>([])
+  const [audits, setAudits] = useState<Audit[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const { profile } = useAuth()
 
   useEffect(() => {
-    if (profile?.id) {
+    if (profile?.organization_id) {
       fetchAudits()
     }
   }, [profile])
 
   const fetchAudits = async () => {
+    if (!profile?.organization_id) return
+
     try {
       setLoading(true)
-      setError(null)
-      console.log('📊 Récupération des audits...')
-      
-      const { data, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('audits')
-        .select('*')
+        .select(`
+          *,
+          profiles(full_name),
+          stores(name)
+        `)
+        .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
 
-      if (fetchError) {
-        console.error('❌ Erreur récupération audits:', fetchError)
-        setError(fetchError.message)
+      if (error) {
+        console.error('Erreur lors de la récupération des audits:', error)
         return
       }
 
-      console.log('✅ Audits récupérés:', data?.length || 0)
       setAudits(data || [])
-    } catch (error: any) {
-      console.error('❌ Erreur inattendue audits:', error)
-      setError(error.message || 'Erreur inattendue')
+    } catch (error) {
+      console.error('Erreur:', error)
     } finally {
       setLoading(false)
     }
@@ -47,116 +47,143 @@ export function useAudits() {
     location?: string
     due_date?: string
   }) => {
-    if (!profile?.id) return { error: 'Utilisateur non connecté' }
+    if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
 
     try {
-      console.log('🆕 Création audit:', auditData.title)
-      
-      const { data, error: createError } = await supabase
+      const { data, error } = await supabase
         .from('audits')
         .insert({
-          organization_id: profile.organization_id || '550e8400-e29b-41d4-a716-446655440000',
-          store_id: profile.store_id || '550e8400-e29b-41d4-a716-446655440001',
+          ...auditData,
+          organization_id: profile.organization_id,
+          store_id: profile.store_id,
           auditor_id: profile.id,
-          title: auditData.title,
-          description: auditData.description,
-          location: auditData.location,
           status: 'pending',
           max_score: 100,
           issues_count: 0,
-          due_date: auditData.due_date
+          photos: [],
         })
         .select()
         .single()
 
-      if (createError) {
-        console.error('❌ Erreur création audit:', createError)
-        return { error: createError.message }
+      if (error) {
+        console.error('Erreur lors de la création de l\'audit:', error)
+        return { error }
       }
 
-      console.log('✅ Audit créé:', data)
       setAudits([data, ...audits])
       return { data }
-    } catch (error: any) {
-      console.error('❌ Erreur inattendue création audit:', error)
-      return { error: error.message || 'Erreur inattendue' }
+    } catch (error) {
+      console.error('Erreur:', error)
+      return { error }
     }
   }
 
-  const updateAuditStatus = async (auditId: string, status: string, score?: number) => {
+  const updateAuditStatus = async (auditId: string, status: Audit['status'], additionalData?: Partial<Audit>) => {
     try {
-      console.log('🔄 Mise à jour audit:', auditId, status)
-      
-      const updateData: any = { 
+      const updateData: any = {
         status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        ...additionalData
       }
-      
-      if (score !== undefined) {
-        updateData.score = score
-      }
-      if (status === 'completed') {
-        updateData.completed_at = new Date().toISOString()
-      }
-      if (status === 'in_progress') {
+
+      if (status === 'in_progress' && !additionalData?.started_at) {
         updateData.started_at = new Date().toISOString()
       }
 
-      const { data, error: updateError } = await supabase
+      if (status === 'completed' && !additionalData?.completed_at) {
+        updateData.completed_at = new Date().toISOString()
+      }
+
+      const { data, error } = await supabase
         .from('audits')
         .update(updateData)
         .eq('id', auditId)
         .select()
         .single()
 
-      if (updateError) {
-        console.error('❌ Erreur mise à jour audit:', updateError)
-        return { error: updateError.message }
+      if (error) {
+        console.error('Erreur lors de la mise à jour de l\'audit:', error)
+        return { error }
       }
 
-      console.log('✅ Audit mis à jour:', data)
+      // Mettre à jour la liste locale
       setAudits(audits.map(a => a.id === auditId ? data : a))
+      
+      // Mettre à jour les stats du profil si l'audit est terminé
+      if (status === 'completed' && profile) {
+        await updateProfileStats()
+      }
+
       return { data }
-    } catch (error: any) {
-      console.error('❌ Erreur inattendue mise à jour audit:', error)
-      return { error: error.message || 'Erreur inattendue' }
+    } catch (error) {
+      console.error('Erreur:', error)
+      return { error }
     }
   }
 
-  const addPhotoToAudit = async (auditId: string, imageUrl: string, comment?: string) => {
+  const updateProfileStats = async () => {
+    if (!profile) return
+
     try {
-      console.log('📸 Ajout photo à audit:', auditId)
+      const { data: completedAudits } = await supabase
+        .from('audits')
+        .select('score')
+        .eq('auditor_id', profile.id)
+        .eq('status', 'completed')
+
+      if (completedAudits && completedAudits.length > 0) {
+        const totalAudits = completedAudits.length
+        const avgScore = completedAudits
+          .filter(a => a.score !== null)
+          .reduce((sum, a) => sum + (a.score || 0), 0) / totalAudits
+
+        await supabase
+          .from('profiles')
+          .update({
+            total_audits: totalAudits,
+            avg_score: Math.round(avgScore * 100) / 100,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', profile.id)
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des stats:', error)
+    }
+  }
+
+  const addPhotoToAudit = async (auditId: string, photoUrl: string) => {
+    const audit = audits.find(a => a.id === auditId)
+    if (!audit) return { error: 'Audit non trouvé' }
+
+    try {
+      const updatedPhotos = [...audit.photos, photoUrl]
       
-      const { data, error: photoError } = await supabase
-        .from('audit_photos')
-        .insert({
-          organization_id: profile?.organization_id,
-          audit_id: auditId,
-          image_url: imageUrl,
-          comment: comment || 'Photo ajoutée depuis l\'application',
-          uploaded_by: profile?.id
+      const { data, error } = await supabase
+        .from('audits')
+        .update({ 
+          photos: updatedPhotos,
+          updated_at: new Date().toISOString()
         })
+        .eq('id', auditId)
         .select()
         .single()
 
-      if (photoError) {
-        console.error('❌ Erreur ajout photo:', photoError)
-        return { error: photoError.message }
+      if (error) {
+        console.error('Erreur lors de l\'ajout de la photo:', error)
+        return { error }
       }
 
-      console.log('✅ Photo ajoutée:', data)
-      await fetchAudits()
+      setAudits(audits.map(a => a.id === auditId ? data : a))
       return { data }
-    } catch (error: any) {
-      console.error('❌ Erreur inattendue ajout photo:', error)
-      return { error: error.message || 'Erreur inattendue' }
+    } catch (error) {
+      console.error('Erreur:', error)
+      return { error }
     }
   }
 
   return {
     audits,
     loading,
-    error,
     createAudit,
     updateAuditStatus,
     addPhotoToAudit,

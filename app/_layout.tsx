@@ -7,23 +7,24 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function RootLayout() {
   useFrameworkReady();
-  const { user, loading, ready, error } = useAuth();
+  const { user, loading, error } = useAuth();
 
-  if (__DEV__) {
-    console.log('🚀 App State:', {
-      configured: !!(process.env.EXPO_PUBLIC_SUPABASE_URL?.includes('supabase.co')),
-      authenticated: !!user,
-      loading,
-      ready,
-      hasError: !!error
-    })
-  }
+  // Vérification de la configuration Supabase
+  console.log('🚀 OpsPilot - État Application:', {
+    supabaseConfigured: !!process.env.EXPO_PUBLIC_SUPABASE_URL && 
+                       process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co',
+    userAuthenticated: !!user,
+    isLoading: loading,
+    hasError: !!error
+  });
 
-  if (loading || !ready) {
+  if (loading) {
+    console.log('⏳ Application en cours de chargement...')
     return null; // Ou un écran de chargement
   }
 
   if (!user) {
+    console.log('🔓 Utilisateur non connecté - Affichage écran auth')
     return (
       <>
         <AuthScreen />
@@ -32,6 +33,7 @@ export default function RootLayout() {
     );
   }
 
+  console.log('🔐 Utilisateur connecté - Affichage app principale')
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>

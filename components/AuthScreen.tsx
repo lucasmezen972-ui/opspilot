@@ -1,85 +1,35 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { LogIn, UserPlus } from 'lucide-react-native'
 import { useAuth } from '../hooks/useAuth'
 import ConnectedStatus from './ConnectedStatus'
-import NetworkDiagnostic from './NetworkDiagnostic'
-import { loginSchema, signUpSchema } from '../utils/validation'
-import { Alert } from 'react-native'
 
 export default function AuthScreen() {
-  const { signIn, signUp, error: authError } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
   const [localError, setLocalError] = useState('')
-  const [testResult, setTestResult] = useState('')
-  const [testing, setTesting] = useState(false)
+  const { signIn, signUp, error: authError } = useAuth()
 
-  // Remplir avec les identifiants de démo (DEV SEULEMENT)
+  // Pré-remplir avec les identifiants de démo
   const fillDemoCredentials = () => {
-    if (__DEV__) {
-      setEmail('marie.dupont@opspilot.com')
-      setPassword('demo123')
-      setLocalError('')
-    }
-  }
-
-  // Test automatique de connexion (DEV SEULEMENT)
-  const runConnectionTest = async () => {
-    if (!__DEV__) return
-    
-    setTesting(true)
-    setTestResult('🔄 Test en cours...')
+    setEmail('demo@opspilot.com')
+    setPassword('demo123')
     setLocalError('')
-
-    try {
-      console.log('🧪 Test automatique de connexion...')
-      
-      // Tester avec marie.dupont@opspilot.com
-      const result1 = await signIn('marie.dupont@opspilot.com', 'demo123')
-      
-      if (!result1.error) {
-        setTestResult('✅ SUCCÈS: marie.dupont@opspilot.com fonctionne !')
-        return
-      }
-
-      // Tester avec demo@opspilot.com si le premier échoue
-      const result2 = await signIn('demo@opspilot.com', 'demo123')
-      
-      if (!result2.error) {
-        setTestResult('✅ SUCCÈS: demo@opspilot.com fonctionne !')
-        return
-      }
-
-      // Aucun ne marche
-      setTestResult('❌ ÉCHEC: Aucun utilisateur démo trouvé')
-      setLocalError(`Test 1: ${result1.error?.message}\nTest 2: ${result2.error?.message}`)
-      
-    } catch (error: any) {
-      setTestResult('❌ ERREUR: ' + error.message)
-      setLocalError(error.toString())
-    } finally {
-      setTesting(false)
-    }
   }
 
   const handleAuth = async () => {
     setLocalError('')
+    
+    if (!email || !password) {
+      setLocalError('Veuillez remplir tous les champs')
+      return
+    }
 
-    // Validation avec Zod
-    try {
-      if (isLogin) {
-        loginSchema.parse({ email, password })
-      } else {
-        signUpSchema.parse({ email, password, fullName })
-      }
-    } catch (error: any) {
-      const zodError = error?.issues?.[0]?.message || 'Champs invalides'
-      setLocalError(zodError)
-      Alert.alert('Validation', zodError)
+    if (!isLogin && !fullName) {
+      setLocalError('Veuillez entrer votre nom complet')
       return
     }
 
@@ -113,9 +63,6 @@ export default function AuthScreen() {
 
   // Afficher l'erreur la plus récente
   const displayError = localError || authError
-  const hasNetworkError = displayError?.includes('502') || displayError?.includes('network') || displayError?.includes('fetch')
-  const hasInvalidCredentials = displayError?.includes('Invalid login credentials')
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -128,35 +75,17 @@ export default function AuthScreen() {
 
       {/* Indicateur de statut Supabase */}
       <View style={styles.statusContainer}>
-        <ConnectedStatus isConnected={true} />
+        <ConnectedStatus 
+          isConnected={!!(process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co')}
+        />
       </View>
 
       {/* Erreurs */}
       {displayError && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>❌ {displayError}</Text>
-          {hasInvalidCredentials && (
-            <View style={styles.instructionContainer}>
-              <Text style={styles.instructionTitle}>🔧 L'utilisateur démo n'existe pas encore !</Text>
-              <Text style={styles.instructionText}>
-                1. Ouvrez Supabase puis SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication Users{'\n'}5. Cliquez Add user puis Create new user{'\n'}6. Email: demo@opspilot.com Password: demo123
-              </Text>
-            </View>
-          )}
-          {displayError?.includes('Network request failed') && (
-            <View style={styles.networkErrorContainer}>
-              <Text style={styles.networkErrorTitle}>🌐 Erreur de réseau détectée</Text>
-              <Text style={styles.networkErrorText}>
-                1. Vérifiez votre connexion internet{'\n'}2. Cliquez "Connect to Supabase" en haut à droite{'\n'}3. Redémarrez l'application si le problème persiste
-              </Text>
-            </View>
-          )}
         </View>
       )}
-
-      {/* Diagnostic réseau si erreur 502 */}
-      {hasNetworkError && <NetworkDiagnostic />}
-
       <View style={styles.form}>
         <Text style={styles.formTitle}>
           {isLogin ? 'Connexion' : 'Créer un compte'}
@@ -216,41 +145,12 @@ export default function AuthScreen() {
       </View>
 
       <View style={styles.demoInfo}>
-        <Text style={styles.demoTitle}>🎯 Compte de démonstration</Text>
-        
+        <Text style={styles.demoTitle}>Compte de démonstration</Text>
         <TouchableOpacity onPress={fillDemoCredentials} style={styles.demoButton}>
-          <LogIn size={16} color="#1E40AF" />
-          <View style={styles.demoButtonContent}>
-            <Text style={styles.demoButtonMainText}>CONNEXION DÉMO</Text>
-            <Text style={styles.demoButtonSubText}>Email: marie.dupont@opspilot.com</Text>
-            <Text style={styles.demoButtonSubText}>Mot de passe: demo123</Text>
-          </View>
+          <Text style={styles.demoButtonText}>📧 demo@opspilot.com</Text>
+          <Text style={styles.demoButtonText}>🔐 demo123</Text>
+          <Text style={styles.demoClickText}>👆 Cliquez pour remplir automatiquement</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          onPress={runConnectionTest} 
-          style={[styles.testButton, testing && styles.testButtonDisabled]}
-          disabled={testing}
-        >
-          <Text style={styles.testButtonText}>
-            {testing ? '🔄 Test en cours...' : '🧪 Test automatique'}
-          </Text>
-        </TouchableOpacity>
-        
-        {testResult && (
-          <View style={styles.testResult}>
-            <Text style={styles.testResultText}>{testResult}</Text>
-          </View>
-        )}
-        
-        {displayError && !hasNetworkError && (
-          <View style={styles.helpContainer}>
-            <Text style={styles.helpTitle}>💡 L'utilisateur démo n'existe pas</Text>
-            <Text style={styles.helpText}>
-              1. Ouvrez Supabase puis SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication Users{'\n'}5. Cliquez Add user Create new user{'\n'}6. Email: demo@opspilot.com Password: demo123
-            </Text>
-          </View>
-        )}
       </View>
     </View>
   )
@@ -295,6 +195,16 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     marginBottom: 20,
+  },
+  statusIndicator: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 8,
+  },
+  statusText: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#6B7280',
   },
   form: {
     backgroundColor: '#FFFFFF',
@@ -369,25 +279,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  instructionContainer: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#FEF3C7',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
-  },
-  instructionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#92400E',
-    marginBottom: 8,
-  },
-  instructionText: {
-    fontSize: 12,
-    color: '#92400E',
-    lineHeight: 16,
-  },
   demoInfo: {
     backgroundColor: '#EFF6FF',
     borderRadius: 12,
@@ -398,108 +289,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#1E40AF',
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: 'center',
   },
   demoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#1D4ED8',
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  demoButtonContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  demoButtonMainText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  demoButtonSubText: {
-    fontSize: 12,
-    color: '#DBEAFE',
-    marginBottom: 2,
-  },
-  testButton: {
-    backgroundColor: '#059669',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 12,
-    alignItems: 'center',
-    shadowColor: '#059669',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  testButtonDisabled: {
-    opacity: 0.6,
-  },
-  testButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  testResult: {
-    backgroundColor: '#F0FDF4',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#059669',
-  },
-  testResultText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#166534',
-    textAlign: 'center',
-  },
-  helpContainer: {
-    backgroundColor: '#FEF3C7',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
-  },
-  helpTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#92400E',
-    marginBottom: 8,
-  },
-  helpText: {
-    fontSize: 12,
-    color: '#92400E',
-    lineHeight: 16,
-  },
-  networkErrorContainer: {
     backgroundColor: '#DBEAFE',
     borderRadius: 8,
     padding: 12,
-    marginTop: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#2563EB',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
   },
-  networkErrorTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E40AF',
-    marginBottom: 8,
-  },
-  networkErrorText: {
+  demoButtonText: {
     fontSize: 12,
+    color: '#3730A3',
+    textAlign: 'center',
+    marginBottom: 2,
+    fontFamily: 'monospace',
+    fontWeight: '600',
+  },
+  demoClickText: {
+    fontSize: 10,
     color: '#1E40AF',
-    lineHeight: 16,
+    textAlign: 'center',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 })

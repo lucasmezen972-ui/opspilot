@@ -2,22 +2,24 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useAuth } from '../../hooks/useAuth';
 import { useAudits } from '../../hooks/useAudits';
 import { useTasks } from '../../hooks/useTasks';
-import { useNotifications } from '../../hooks/useNotifications';
 import { TrendingUp, Users, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Award, Target, Calendar, ChartBar as BarChart3, Scan, MessageCircle, BookOpen } from 'lucide-react-native';
-import { Bell } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import NotificationCenter from '../../components/NotificationCenter';
 
 export default function HomeScreen() {
-  const [showNotifications, setShowNotifications] = useState(false);
   const { profile } = useAuth();
   const { audits } = useAudits();
   const { tasks } = useTasks();
-  const { unreadCount } = useNotifications();
 
-  const completedAuditsToday = audits.length;
-  const completedTasksToday = tasks.filter(t => t.status === 'completed').length;
+  const completedAuditsToday = audits.filter(a => 
+    a.status === 'completed' && 
+    new Date(a.completed_at!).toDateString() === new Date().toDateString()
+  ).length;
+
+  const completedTasksToday = tasks.filter(t => 
+    t.status === 'completed' && 
+    new Date(t.completed_at!).toDateString() === new Date().toDateString()
+  ).length;
+
   const pendingTasks = tasks.filter(t => t.status === 'pending').length;
 
   return (
@@ -25,22 +27,12 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Bonjour, {profile?.full_name || profile?.email?.split('@')[0] || 'Utilisateur'} !</Text>
+          <Text style={styles.greeting}>Bonjour, {profile?.full_name?.split(' ')[0] || 'Utilisateur'} !</Text>
           <Text style={styles.subtitle}>Prêt pour une journée productive ?</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.notificationButton}
-          onPress={() => setShowNotifications(true)}
-        >
-          <Bell size={24} color="#2563EB" />
-          {unreadCount > 0 && (
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationBadgeText}>
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.logo}>
+          <Text style={styles.logoText}>OP</Text>
+        </View>
       </View>
 
       {/* Stats Cards */}
@@ -152,19 +144,19 @@ export default function HomeScreen() {
           <View style={styles.summaryItem}>
             <BarChart3 size={20} color="#2563EB" />
             <Text style={styles.summaryLabel}>Audits</Text>
-            <Text style={styles.summaryValue}>{audits.length}</Text>
+            <Text style={styles.summaryValue}>{audits.filter(a => a.status === 'completed').length}</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Target size={20} color="#10B981" />
             <Text style={styles.summaryLabel}>Tâches</Text>
-            <Text style={styles.summaryValue}>{tasks.length}</Text>
+            <Text style={styles.summaryValue}>{tasks.filter(t => t.status === 'completed').length}</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <BookOpen size={20} color="#F59E0B" />
             <Text style={styles.summaryLabel}>Formations</Text>
-            <Text style={styles.summaryValue}>3</Text>
+            <Text style={styles.summaryValue}>{profile?.completed_trainings || 0}</Text>
           </View>
         </View>
       </View>
@@ -180,11 +172,11 @@ export default function HomeScreen() {
           </View>
           <View style={styles.leaderboardTeaser}>
             <View style={styles.rankBadge}>
-              <Text style={styles.rankText}>#1</Text>
+              <Text style={styles.rankText}>#{profile.level || 1}</Text>
             </View>
             <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>{profile.email}</Text>
-              <Text style={styles.activityTime}>425 XP • Niveau 4</Text>
+              <Text style={styles.activityTitle}>{profile.full_name}</Text>
+              <Text style={styles.activityTime}>{profile.xp || 0} XP • Niveau {profile.level || 1}</Text>
             </View>
             <TouchableOpacity style={styles.viewProfileButton} onPress={() => router.push('/profile')}>
               <Text style={styles.viewProfileText}>Voir profil</Text>
@@ -201,27 +193,15 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Votre progression</Text>
         <View style={styles.gamificationPanel}>
           <View style={styles.levelInfo}>
-            <Text style={styles.levelTitle}>
-              {profile?.level && profile.level >= 5 ? 'Expert Magasin' : 
-               profile?.level && profile.level >= 3 ? 'Employé Confirmé' : 'Débutant'}
-            </Text>
-            <Text style={styles.levelSubtitle}>
-              Niveau {profile?.level || 1} • {profile?.xp || 0}/1000 XP
-            </Text>
+            <Text style={styles.levelTitle}>Expert Magasin</Text>
+            <Text style={styles.levelSubtitle}>Niveau 4 • 850/1000 XP</Text>
           </View>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${((profile?.xp || 0) % 1000) / 10}%` }]} />
+            <View style={[styles.progressFill, { width: '85%' }]} />
           </View>
-          <Text style={styles.progressText}>
-            Plus que {1000 - ((profile?.xp || 0) % 1000)} XP pour le niveau suivant !
-          </Text>
+          <Text style={styles.progressText}>Plus que 150 XP pour le niveau suivant !</Text>
         </View>
       </View>
-
-      <NotificationCenter
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
     </ScrollView>
   );
 }
@@ -251,30 +231,17 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
   },
-  notificationButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#EFF6FF',
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
   },
-  notificationBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#EF4444',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  notificationBadgeText: {
+  logoText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 18,
     fontWeight: '700',
   },
   statsContainer: {

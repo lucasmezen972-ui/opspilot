@@ -5,30 +5,12 @@ import { CircleCheck as CheckCircle, Wifi } from 'lucide-react-native'
 interface ConnectedStatusProps {
   isConnected: boolean
   dataCount?: number
-  databaseHealth?: any
 }
 
-export default function ConnectedStatus({ isConnected, dataCount, databaseHealth }: ConnectedStatusProps) {
+export default function ConnectedStatus({ isConnected, dataCount }: ConnectedStatusProps) {
   const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-  const hasValidConfig = supabaseUrl && 
-                        supabaseUrl !== 'https://placeholder.supabase.co' &&
-                        supabaseKey && 
-                        supabaseKey !== 'placeholder-anon-key'
+  const hasValidConfig = isConnected && supabaseUrl && supabaseUrl !== 'https://placeholder.supabase.co'
 
-  const getHealthStatus = () => {
-    if (!databaseHealth) return 'Vérification'
-    
-    if (databaseHealth.connection && databaseHealth.tables && databaseHealth.data) {
-      return '🟢 Backend opérationnel'
-    } else if (databaseHealth.connection && databaseHealth.tables) {
-      return '🟡 Tables OK, données manquantes'
-    } else if (databaseHealth.connection) {
-      return '🟠 Connexion OK, tables manquantes'
-    } else {
-      return '🔴 Problème de connexion'
-    }
-  }
   return (
     <View style={[styles.container, hasValidConfig ? styles.connected : styles.disconnected]}>
       {hasValidConfig ? (
@@ -38,7 +20,7 @@ export default function ConnectedStatus({ isConnected, dataCount, databaseHealth
       )}
       <Text style={[styles.text, hasValidConfig ? styles.connectedText : styles.disconnectedText]}>
         {hasValidConfig ? 
-          `${getHealthStatus()}${dataCount ? ` ${dataCount} enregistrements` : ''}` :
+          `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}` : 
           '⚠️ Cliquez "Connect to Supabase" en haut à droite'
         }
       </Text>

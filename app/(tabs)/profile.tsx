@@ -1,8 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { User, Settings, Award, ChartBar as BarChart3, Bell, CircleHelp as HelpCircle, LogOut, Shield, Smartphone, Globe, Star, Trophy, Target, Clock } from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert } from 'react-native';
-import { useAuth } from '../../hooks/useAuth';
 
 const achievements = [
   { id: 1, title: 'Premier audit', description: 'Terminé votre premier audit', icon: '🎯', date: '15 Jan 2024' },
@@ -19,31 +16,6 @@ const statistics = [
 ];
 
 export default function ProfileScreen() {
-  const { signOut, profile } = useAuth();
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Déconnexion', 
-          style: 'destructive',
-          onPress: () => signOut()
-        }
-      ]
-    );
-  };
-
-  const handleSettingsAction = (action: string) => {
-    Alert.alert(
-      action,
-      'Cette fonctionnalité sera disponible dans une future version.',
-      [{ text: 'OK' }]
-    );
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -61,7 +33,7 @@ export default function ProfileScreen() {
             <User size={32} color="#2563EB" />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{profile?.email?.split('@')[0] || 'Utilisateur'}</Text>
+            <Text style={styles.profileName}>Marie Dupont</Text>
             <Text style={styles.profileRole}>Responsable Magasin</Text>
             <Text style={styles.profileLocation}>Supermarché Central - Paris 15ème</Text>
           </View>
@@ -123,38 +95,23 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Paramètres</Text>
           <View style={styles.settingsMenu}>
-            <TouchableOpacity 
-              style={styles.settingsItem}
-              onPress={() => handleSettingsAction('Notifications')}
-            >
+            <TouchableOpacity style={styles.settingsItem}>
               <Bell size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Notifications</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.settingsItem}
-              onPress={() => handleSettingsAction('Confidentialité')}
-            >
+            <TouchableOpacity style={styles.settingsItem}>
               <Shield size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Confidentialité</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.settingsItem}
-              onPress={() => handleSettingsAction('Appareil')}
-            >
+            <TouchableOpacity style={styles.settingsItem}>
               <Smartphone size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Appareil</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.settingsItem}
-              onPress={() => handleSettingsAction('Langue')}
-            >
+            <TouchableOpacity style={styles.settingsItem}>
               <Globe size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Langue</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.settingsItem}
-              onPress={() => handleSettingsAction('Support')}
-            >
+            <TouchableOpacity style={styles.settingsItem}>
               <HelpCircle size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Support</Text>
             </TouchableOpacity>
@@ -163,7 +120,7 @@ export default function ProfileScreen() {
 
         {/* Logout */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <TouchableOpacity style={styles.logoutButton}>
             <LogOut size={20} color="#EF4444" />
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>

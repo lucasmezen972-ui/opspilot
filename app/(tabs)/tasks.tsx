@@ -1,17 +1,43 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Plus, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, MapPin, Flag, User } from 'lucide-react-native';
-import { useState } from 'react';
-import { useTasks } from '../../hooks/useTasks';
-import { useAuth } from '../../hooks/useAuth';
-import TaskModal from '../../components/TaskModal';
-import TaskDetailModal from '../../components/TaskDetailModal';
+
+const tasks = [
+  {
+    id: 1,
+    title: 'Vérification des DLC rayon frais',
+    description: 'Contrôler toutes les dates de péremption du rayon frais et retirer les produits expirés',
+    priority: 'high',
+    status: 'pending',
+    assignee: 'Marie Dupont',
+    location: 'Rayon frais',
+    dueDate: '2024-01-15 14:00',
+    estimatedTime: '30 min',
+  },
+  {
+    id: 2,
+    title: 'Réassort conserves',
+    description: 'Compléter les rayons de conserves selon la liste fournie',
+    priority: 'medium',
+    status: 'in_progress',
+    assignee: 'Pierre Martin',
+    location: 'Allée 3',
+    dueDate: '2024-01-15 16:00',
+    estimatedTime: '45 min',
+  },
+  {
+    id: 3,
+    title: 'Nettoyage vitrine boucherie',
+    description: 'Nettoyage complet de la vitrine et changement de l\'étiquetage',
+    priority: 'low',
+    status: 'completed',
+    assignee: 'Jean Leroy',
+    location: 'Boucherie',
+    dueDate: '2024-01-15 11:00',
+    estimatedTime: '20 min',
+  },
+];
 
 export default function TasksScreen() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
-  const { tasks, loading, updateTaskStatus } = useTasks();
-  const { hasPermission } = useAuth();
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return '#EF4444';
@@ -57,14 +83,6 @@ export default function TasksScreen() {
     }
   };
 
-  const completedTasks = tasks.filter(t => t.status === 'completed').length
-  const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length
-
-  const handleTaskPress = (task: any) => {
-    setSelectedTask(task)
-  }
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -78,137 +96,95 @@ export default function TasksScreen() {
       {/* Quick Stats */}
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{pendingTasks}</Text>
+          <Text style={styles.quickStatNumber}>8</Text>
           <Text style={styles.quickStatLabel}>À faire</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{inProgressTasks}</Text>
+          <Text style={styles.quickStatNumber}>3</Text>
           <Text style={styles.quickStatLabel}>En cours</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{completedTasks}</Text>
+          <Text style={styles.quickStatNumber}>15</Text>
           <Text style={styles.quickStatLabel}>Terminées</Text>
         </View>
       </View>
 
       {/* Create New Task Button */}
-      {hasPermission('tasks', 'create') && (
-        <TouchableOpacity style={styles.createButton} onPress={() => setShowCreateModal(true)}>
-          <Plus size={24} color="#FFFFFF" />
-          <Text style={styles.createButtonText}>Nouvelle tâche</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.createButton}>
+        <Plus size={24} color="#FFFFFF" />
+        <Text style={styles.createButtonText}>Nouvelle tâche</Text>
+      </TouchableOpacity>
 
       {/* Tasks List */}
       <ScrollView style={styles.tasksList}>
-        {tasks.length === 0 ? (
-          <View style={styles.emptyState}>
-            <CheckCircle size={48} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>Aucune tâche</Text>
-            <Text style={styles.emptySubtitle}>Créez votre première tâche pour commencer</Text>
-          </View>
-        ) : (
-          tasks.map((task) => {
-            const StatusIcon = getStatusIcon(task.status || 'pending');
-            const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed'
-            return (
-              <TouchableOpacity 
-                key={task.id} 
-                style={[styles.taskCard, isOverdue && styles.taskCardOverdue]}
-                onPress={() => handleTaskPress(task)}
-              >
-                <View style={styles.taskHeader}>
-                  <View style={styles.taskTitleSection}>
-                    <Text style={styles.taskTitle}>{task.title}</Text>
-                    <View style={styles.taskMeta}>
-                      <View style={[styles.priority, { backgroundColor: `${getPriorityColor(task.priority || 'medium')}20` }]}>
-                        <Flag size={12} color={getPriorityColor(task.priority || 'medium')} />
-                        <Text style={[styles.priorityText, { color: getPriorityColor(task.priority || 'medium') }]}>
-                          {getPriorityText(task.priority || 'medium')}
-                        </Text>
-                      </View>
-                      <View style={[styles.taskStatus, { backgroundColor: `${getStatusColor(task.status || 'pending')}20` }]}>
-                        <StatusIcon size={12} color={getStatusColor(task.status || 'pending')} />
-                        <Text style={[styles.taskStatusText, { color: getStatusColor(task.status || 'pending') }]}>
-                          {getStatusText(task.status || 'pending')}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                {task.description && (
-                  <Text style={styles.taskDescription}>{task.description}</Text>
-                )}
-
-                <View style={styles.taskDetails}>
-                  <View style={styles.taskDetailRow}>
-                    <User size={14} color="#6B7280" />
-                    <Text style={styles.taskDetailText}>
-                      Créée le {new Date(task.created_at).toLocaleDateString('fr-FR')}
-                    </Text>
-                  </View>
-                  {task.due_date && (
-                    <View style={styles.taskDetailRow}>
-                      <Calendar size={14} color={isOverdue ? '#EF4444' : '#6B7280'} />
-                      <Text style={[styles.taskDetailText, isOverdue && styles.overdueText]}>
-                        Échéance: {new Date(task.due_date).toLocaleDateString('fr-FR')}
-                        {isOverdue && ' (En retard)'}
+        {tasks.map((task) => {
+          const StatusIcon = getStatusIcon(task.status);
+          return (
+            <TouchableOpacity key={task.id} style={styles.taskCard}>
+              <View style={styles.taskHeader}>
+                <View style={styles.taskTitleSection}>
+                  <Text style={styles.taskTitle}>{task.title}</Text>
+                  <View style={styles.taskMeta}>
+                    <View style={[styles.priority, { backgroundColor: `${getPriorityColor(task.priority)}20` }]}>
+                      <Flag size={12} color={getPriorityColor(task.priority)} />
+                      <Text style={[styles.priorityText, { color: getPriorityColor(task.priority) }]}>
+                        {getPriorityText(task.priority)}
                       </Text>
                     </View>
-                  )}
-                  {task.estimated_time_minutes && (
-                    <View style={styles.taskDetailRow}>
-                      <Clock size={14} color="#6B7280" />
-                      <Text style={styles.taskDetailText}>{task.estimated_time_minutes} min estimées</Text>
+                    <View style={[styles.taskStatus, { backgroundColor: `${getStatusColor(task.status)}20` }]}>
+                      <StatusIcon size={12} color={getStatusColor(task.status)} />
+                      <Text style={[styles.taskStatusText, { color: getStatusColor(task.status) }]}>
+                        {getStatusText(task.status)}
+                      </Text>
                     </View>
+                  </View>
+                </View>
+              </View>
+
+              <Text style={styles.taskDescription}>{task.description}</Text>
+
+              <View style={styles.taskDetails}>
+                <View style={styles.taskDetailRow}>
+                  <User size={14} color="#6B7280" />
+                  <Text style={styles.taskDetailText}>{task.assignee}</Text>
+                </View>
+                <View style={styles.taskDetailRow}>
+                  <MapPin size={14} color="#6B7280" />
+                  <Text style={styles.taskDetailText}>{task.location}</Text>
+                </View>
+                <View style={styles.taskDetailRow}>
+                  <Calendar size={14} color="#6B7280" />
+                  <Text style={styles.taskDetailText}>{task.dueDate}</Text>
+                </View>
+                <View style={styles.taskDetailRow}>
+                  <Clock size={14} color="#6B7280" />
+                  <Text style={styles.taskDetailText}>{task.estimatedTime}</Text>
+                </View>
+              </View>
+
+              {task.status !== 'completed' && (
+                <View style={styles.taskActions}>
+                  {task.status === 'pending' ? (
+                    <TouchableOpacity style={styles.startButton}>
+                      <Text style={styles.startButtonText}>Commencer</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity style={styles.completeButton}>
+                      <CheckCircle size={16} color="#FFFFFF" />
+                      <Text style={styles.completeButtonText}>Terminer</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
-
-                {task.status !== 'completed' && (
-                  <View style={styles.taskActions}>
-                    {task.status === 'pending' ? (
-                      <TouchableOpacity 
-                        style={styles.startButton}
-                        onPress={() => updateTaskStatus(task.id, 'in_progress')}
-                      >
-                        <Clock size={16} color="#3B82F6" />
-                        <Text style={styles.startButtonText}>Démarrer</Text>
-                      </TouchableOpacity>
-                    ) : task.status === 'in_progress' && (
-                      <TouchableOpacity 
-                        style={styles.completeButton}
-                        onPress={() => updateTaskStatus(task.id, 'completed')}
-                      >
-                        <CheckCircle size={16} color="#FFFFFF" />
-                        <Text style={styles.completeButtonText}>Terminer</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })
-        )}
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* Floating Action Button */}
-      {hasPermission('tasks', 'create') && (
-        <TouchableOpacity style={styles.fab} onPress={() => setShowCreateModal(true)}>
-          <Plus size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      )}
-
-      <TaskModal 
-        visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
-
-      <TaskDetailModal
-        visible={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
-        task={selectedTask}
-      />
+      <TouchableOpacity style={styles.fab}>
+        <Plus size={24} color="#FFFFFF" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -287,24 +263,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 0,
   },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
   taskCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -375,21 +333,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginLeft: 8,
   },
-  taskCardOverdue: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
-  },
-  overdueText: {
-    color: '#EF4444',
-    fontWeight: '600',
-  },
   taskActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
   startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#EFF6FF',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -401,7 +349,6 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontSize: 12,
     fontWeight: '500',
-    marginLeft: 4,
   },
   completeButton: {
     flexDirection: 'row',

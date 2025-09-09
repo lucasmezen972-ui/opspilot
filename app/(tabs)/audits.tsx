@@ -1,17 +1,37 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Plus, Search, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, FileText, Camera, MapPin, ChartBar as BarChart3, TrendingUp, Play } from 'lucide-react-native';
-import { useState } from 'react';
-import { useAudits } from '../../hooks/useAudits';
-import { useAuth } from '../../hooks/useAuth';
-import AuditModal from '../../components/AuditModal';
-import { router } from 'expo-router';
+import { Plus, Search, Filter, Clock, CircleCheck as CheckCircle, CircleAlert as AlertCircle, FileText, Camera, MapPin } from 'lucide-react-native';
+
+const audits = [
+  {
+    id: 1,
+    title: 'Contrôle rayon frais',
+    status: 'completed',
+    date: '2024-01-15',
+    location: 'Rayon frais - Zone A',
+    score: 92,
+    issues: 2,
+  },
+  {
+    id: 2,
+    title: 'Audit sécurité',
+    status: 'in_progress',
+    date: '2024-01-15',
+    location: 'Magasin général',
+    score: null,
+    issues: 0,
+  },
+  {
+    id: 3,
+    title: 'Contrôle hygiène',
+    status: 'pending',
+    date: '2024-01-16',
+    location: 'Zone préparation',
+    score: null,
+    issues: 0,
+  },
+];
 
 export default function AuditsScreen() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedAudit, setSelectedAudit] = useState<any>(null);
-  const { audits, loading, updateAuditStatus } = useAudits();
-  const { hasPermission } = useAuth();
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
@@ -25,24 +45,10 @@ export default function AuditsScreen() {
     switch (status) {
       case 'completed': return CheckCircle;
       case 'in_progress': return Clock;
-      case 'pending': return AlertTriangle;
+      case 'pending': return AlertCircle;
       default: return Clock;
     }
   };
-
-  const handleAuditPress = (audit: any) => {
-    setSelectedAudit(audit)
-    // Navigation vers détail audit (à implémenter)
-    console.log('Ouvrir audit:', audit.title)
-  }
-
-  const handleStartAudit = async (auditId: string) => {
-    await updateAuditStatus(auditId, 'in_progress')
-  }
-
-  const completedAudits = audits.filter(a => a.status === 'completed').length
-  const inProgressAudits = audits.filter(a => a.status === 'in_progress').length
-  const pendingAudits = audits.filter(a => a.status === 'pending').length
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -71,121 +77,81 @@ export default function AuditsScreen() {
       {/* Quick Stats */}
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{pendingAudits}</Text>
+          <Text style={styles.quickStatNumber}>5</Text>
           <Text style={styles.quickStatLabel}>À faire</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{inProgressAudits}</Text>
+          <Text style={styles.quickStatNumber}>2</Text>
           <Text style={styles.quickStatLabel}>En cours</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{completedAudits}</Text>
+          <Text style={styles.quickStatNumber}>12</Text>
           <Text style={styles.quickStatLabel}>Terminés</Text>
         </View>
       </View>
 
       {/* Create New Audit Button */}
-      {hasPermission('audits', 'create') && (
-        <TouchableOpacity style={styles.createButton} onPress={() => setShowCreateModal(true)}>
-          <Plus size={24} color="#FFFFFF" />
-          <Text style={styles.createButtonText}>Créer un audit</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.createButton}>
+        <Plus size={24} color="#FFFFFF" />
+        <Text style={styles.createButtonText}>Créer un audit</Text>
+      </TouchableOpacity>
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
-        {audits.length === 0 ? (
-          <View style={styles.emptyState}>
-            <FileText size={48} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>Aucun audit</Text>
-            <Text style={styles.emptySubtitle}>Créez votre premier audit pour commencer</Text>
-          </View>
-        ) : (
-          audits.map((audit) => {
-            const StatusIcon = getStatusIcon(audit.status);
-            return (
-              <TouchableOpacity 
-                key={audit.id} 
-                style={styles.auditCard}
-                onPress={() => handleAuditPress(audit)}
-              >
-                <View style={styles.auditHeader}>
-                  <View style={styles.auditTitleSection}>
-                    <Text style={styles.auditTitle}>{audit.title}</Text>
-                    <View style={styles.auditLocation}>
-                      <MapPin size={14} color="#6B7280" />
-                      <Text style={styles.auditLocationText}>
-                        {audit.location || audit.store_name || 'Localisation non définie'}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={[styles.auditStatus, { backgroundColor: `${getStatusColor(audit.status)}20` }]}>
-                    <StatusIcon size={16} color={getStatusColor(audit.status)} />
-                    <Text style={[styles.auditStatusText, { color: getStatusColor(audit.status) }]}>
-                      {getStatusText(audit.status)}
-                    </Text>
+        {audits.map((audit) => {
+          const StatusIcon = getStatusIcon(audit.status);
+          return (
+            <TouchableOpacity key={audit.id} style={styles.auditCard}>
+              <View style={styles.auditHeader}>
+                <View style={styles.auditTitleSection}>
+                  <Text style={styles.auditTitle}>{audit.title}</Text>
+                  <View style={styles.auditLocation}>
+                    <MapPin size={14} color="#6B7280" />
+                    <Text style={styles.auditLocationText}>{audit.location}</Text>
                   </View>
                 </View>
-
-                <View style={styles.auditDetails}>
-                  <Text style={styles.auditDate}>
-                    Créé le {new Date(audit.created_at).toLocaleDateString('fr-FR')}
+                <View style={[styles.auditStatus, { backgroundColor: `${getStatusColor(audit.status)}20` }]}>
+                  <StatusIcon size={16} color={getStatusColor(audit.status)} />
+                  <Text style={[styles.auditStatusText, { color: getStatusColor(audit.status) }]}>
+                    {getStatusText(audit.status)}
                   </Text>
-                  <View style={styles.auditScore}>
-                    <Text style={styles.auditScoreText}>
-                      Score: {audit.score ? `${audit.score}/${audit.max_score}` : '--'}
-                    </Text>
-                  </View>
-                  {audit.issues_count > 0 && (
-                    <View style={styles.auditIssues}>
-                      <AlertCircle size={12} color="#F59E0B" />
-                      <Text style={styles.auditIssuesText}>{audit.issues_count} problème(s)</Text>
-                    </View>
-                  )}
                 </View>
+              </View>
 
-                <View style={styles.auditActions}>
-                  {audit.status === 'pending' && (
-                    <TouchableOpacity 
-                      style={[styles.actionButton, styles.startButton]}
-                      onPress={() => handleStartAudit(audit.id)}
-                    >
-                      <Play size={16} color="#FFFFFF" />
-                      <Text style={styles.startButtonText}>Commencer</Text>
-                    </TouchableOpacity>
-                  )}
-                  
-                  {audit.photos && audit.photos.length > 0 && (
-                    <TouchableOpacity style={styles.actionButton}>
-                      <Camera size={16} color="#2563EB" />
-                      <Text style={styles.actionButtonText}>{audit.photos.length} photo(s)</Text>
-                    </TouchableOpacity>
-                  )}
-                  
-                  {audit.status === 'completed' && (
-                    <TouchableOpacity style={styles.actionButton}>
-                      <BarChart3 size={16} color="#10B981" />
-                      <Text style={[styles.actionButtonText, { color: '#10B981' }]}>Voir rapport</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
+              <View style={styles.auditDetails}>
+                <Text style={styles.auditDate}>{audit.date}</Text>
+                {audit.score && (
+                  <View style={styles.auditScore}>
+                    <Text style={styles.auditScoreText}>Score: {audit.score}%</Text>
+                  </View>
+                )}
+                {audit.issues > 0 && (
+                  <View style={styles.auditIssues}>
+                    <AlertCircle size={14} color="#F59E0B" />
+                    <Text style={styles.auditIssuesText}>{audit.issues} problèmes</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.auditActions}>
+                <TouchableOpacity style={styles.actionButton}>
+                  <Camera size={16} color="#2563EB" />
+                  <Text style={styles.actionButtonText}>Photos</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionButton}>
+                  <FileText size={16} color="#2563EB" />
+                  <Text style={styles.actionButtonText}>Rapport</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* Floating Action Button */}
-      {hasPermission('audits', 'create') && (
-        <TouchableOpacity style={styles.fab} onPress={() => setShowCreateModal(true)}>
-          <Camera size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      )}
-
-      <AuditModal 
-        visible={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
+      <TouchableOpacity style={styles.fab}>
+        <Camera size={24} color="#FFFFFF" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -267,24 +233,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 0,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
   },
   auditCard: {
     backgroundColor: '#FFFFFF',
@@ -378,24 +326,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     color: '#2563EB',
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  auditIssues: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  auditIssuesText: {
-    fontSize: 12,
-    color: '#D97706',
-    marginLeft: 4,
-  },
-  startButton: {
-    backgroundColor: '#3B82F6',
-  },
-  startButtonText: {
-    fontSize: 12,
-    color: '#FFFFFF',
     fontWeight: '500',
     marginLeft: 4,
   },

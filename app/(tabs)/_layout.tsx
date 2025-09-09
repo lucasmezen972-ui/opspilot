@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User, Brain } from 'lucide-react-native';
+import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
 export default function TabLayout() {
@@ -20,7 +20,8 @@ export default function TabLayout() {
             <Home size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="audits"
         options={{
           title: 'Audits',
@@ -28,7 +29,8 @@ export default function TabLayout() {
             <ClipboardCheck size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="products"
         options={{
           title: 'Produits',
@@ -36,7 +38,8 @@ export default function TabLayout() {
             <Package size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="tasks"
         options={{
           title: 'Tâches',
@@ -44,7 +47,8 @@ export default function TabLayout() {
             <CheckSquare size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="training"
         options={{
           title: 'Formation',
@@ -52,7 +56,8 @@ export default function TabLayout() {
             <GraduationCap size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="chat"
         options={{
           title: 'Messages',
@@ -60,15 +65,8 @@ export default function TabLayout() {
             <MessageCircle size={size} color={color} />
           ),
         }}
-      /><Tabs.Screen
-        name="advanced"
-        options={{
-          title: 'Avancé',
-          tabBarIcon: ({ size, color }) => (
-            <Brain size={size} color={color} />
-          ),
-        }}
-      /><Tabs.Screen
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',

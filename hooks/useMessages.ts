@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase, type Message, type Conversation } from '../lib/supabase'
+import { supabase, type Message } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [conversations, setConversations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const { profile } = useAuth()
 
@@ -24,18 +24,10 @@ export function useMessages() {
         .from('conversations')
         .select('*')
         .eq('organization_id', profile.organization_id)
-        .contains('participants', [profile.id])
         .order('last_message_at', { ascending: false })
 
       if (error) {
-        // Si la table n'existe pas, ne pas faire crasher l'app
-        if (error.code === 'PGRST205') {
-          console.log('ℹ️ Table conversations pas encore créée')
-          setConversations([])
-          setLoading(false)
-          return
-        }
-        console.error('Erreur conversations:', error)
+        console.error('Erreur lors de la récupération des conversations:', error)
         return
       }
 
@@ -53,19 +45,13 @@ export function useMessages() {
         .from('messages')
         .select(`
           *,
-          sender:profiles!sender_id(full_name, avatar_url, email)
+          profiles(full_name, avatar_url)
         `)
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true })
 
       if (error) {
-        // Si la table n'existe pas, ne pas faire crasher l'app
-        if (error.code === 'PGRST205') {
-          console.log('ℹ️ Table messages pas encore créée')
-          setMessages([])
-          return
-        }
-        console.error('Erreur messages:', error)
+        console.error('Erreur lors de la récupération des messages:', error)
         return
       }
 
@@ -76,7 +62,7 @@ export function useMessages() {
   }
 
   const sendMessage = async (conversationId: string, content: string, type: Message['type'] = 'text') => {
-    if (!profile?.id) return { error: 'Utilisateur non connecté' }
+    if (!profile) return { error: 'Utilisateur non connecté' }
 
     try {
       const { data, error } = await supabase
@@ -85,22 +71,22 @@ export function useMessages() {
           conversation_id: conversationId,
           sender_id: profile.id,
           content,
-          message_type: type,
+          type,
           attachments: [],
-          read_by: [profile.id]
+          read_by: [profile.id],
         })
         .select(`
           *,
-          sender:profiles!sender_id(full_name, avatar_url, email)
+          profiles(full_name, avatar_url)
         `)
         .single()
 
       if (error) {
-        console.error('Erreur envoi message:', error)
+        console.error('Erreur lors de l\'envoi du message:', error)
         return { error }
       }
 
-      // Mettre à jour la conversation
+      // Mettre à jour la dernière activité de la conversation
       await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -115,7 +101,7 @@ export function useMessages() {
   }
 
   const markAsRead = async (messageId: string) => {
-    if (!profile?.id) return
+    if (!profile) return
 
     try {
       const message = messages.find(m => m.id === messageId)
@@ -129,7 +115,7 @@ export function useMessages() {
         .eq('id', messageId)
 
       if (error) {
-        console.error('Erreur marquage lu:', error)
+        console.error('Erreur lors du marquage comme lu:', error)
         return
       }
 
@@ -157,11 +143,7 @@ export function useMessages() {
         },
         (payload) => {
           const newMessage = payload.new as Message
-          // Vérifier si le message appartient à une conversation de l'utilisateur
-          const userConversations = conversations.map(c => c.id)
-          if (userConversations.includes(newMessage.conversation_id)) {
-            setMessages(current => [...current, newMessage])
-          }
+          setMessages(current => [...current, newMessage])
         }
       )
       .subscribe()
@@ -175,39 +157,23 @@ export function useMessages() {
     if (!profile?.organization_id) return { error: 'Organisation non définie' }
 
     try {
-      // Ajouter l'utilisateur actuel aux participants
-      const allParticipants = [...participants, profile.id]
-
       const { data, error } = await supabase
         .from('conversations')
         .insert({
           organization_id: profile.organization_id,
           name,
           type,
-          participants: allParticipants,
-          created_by: profile.id
+          participants,
         })
         .select()
         .single()
 
       if (error) {
-        console.error('Erreur création conversation:', error)
+        console.error('Erreur lors de la création de la conversation:', error)
         return { error }
       }
 
       setConversations([data, ...conversations])
-
-      // Message système de création
-      await supabase
-        .from('messages')
-        .insert({
-          conversation_id: data.id,
-          sender_id: profile.id,
-          content: `Conversation "${name}" créée`,
-          message_type: 'system',
-          read_by: [profile.id]
-        })
-
       return { data }
     } catch (error) {
       console.error('Erreur:', error)
@@ -216,25 +182,13 @@ export function useMessages() {
   }
 
   const getUnreadCount = (conversationId: string) => {
-    if (!profile?.id) return 0
+    if (!profile) return 0
     
     return messages.filter(m => 
       m.conversation_id === conversationId && 
       !m.read_by.includes(profile.id) &&
       m.sender_id !== profile.id
     ).length
-  }
-
-  const searchMessages = (query: string, conversationId?: string) => {
-    let searchMessages = messages
-    
-    if (conversationId) {
-      searchMessages = messages.filter(m => m.conversation_id === conversationId)
-    }
-
-    return searchMessages.filter(m =>
-      m.content.toLowerCase().includes(query.toLowerCase())
-    )
   }
 
   return {
@@ -246,7 +200,6 @@ export function useMessages() {
     markAsRead,
     createConversation,
     getUnreadCount,
-    searchMessages,
     refetch: fetchConversations,
   }
 }

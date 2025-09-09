@@ -1,7 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video } from 'lucide-react-native';
-import { useState } from 'react';
-import MessageModal from '../../components/MessageModal';
 
 const conversations = [
   {
@@ -65,14 +63,6 @@ const messages = [
 ];
 
 export default function ChatScreen() {
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState('');
-
-  const openConversation = (conversationName: string) => {
-    setSelectedConversation(conversationName);
-    setShowMessageModal(true);
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -92,11 +82,7 @@ export default function ChatScreen() {
       <ScrollView style={styles.conversationsList}>
         <Text style={styles.sectionTitle}>Conversations</Text>
         {conversations.map((conversation) => (
-          <TouchableOpacity 
-            key={conversation.id} 
-            style={styles.conversationCard}
-            onPress={() => openConversation(conversation.name)}
-          >
+          <TouchableOpacity key={conversation.id} style={styles.conversationCard}>
             <View style={styles.conversationInfo}>
               <View style={styles.conversationHeader}>
                 <View style={styles.conversationTitleSection}>
@@ -179,21 +165,12 @@ export default function ChatScreen() {
               placeholder="Tapez votre message..."
               multiline
             />
-            <TouchableOpacity 
-              style={styles.sendButton}
-              onPress={() => openConversation('Équipe Magasin')}
-            >
+            <TouchableOpacity style={styles.sendButton}>
               <Send size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-
-      <MessageModal 
-        visible={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        conversationName={selectedConversation}
-      />
     </View>
   );
 }

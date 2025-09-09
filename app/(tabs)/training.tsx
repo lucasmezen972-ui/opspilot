@@ -1,8 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Play, BookOpen, Award, Clock, CircleCheck as CheckCircle, Star, Users, Target, TrendingUp } from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert } from 'react-native';
-import { useTraining } from '../../hooks/useTraining';
 
 const courses = [
   {
@@ -48,22 +45,6 @@ const achievements = [
 ];
 
 export default function TrainingScreen() {
-  const { trainings, loading } = useTraining();
-
-  const startCourse = (courseTitle: string) => {
-    Alert.alert(
-      'Formation',
-      `Démarrer la formation "${courseTitle}" ?`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Commencer', 
-          onPress: () => Alert.alert('Formation', 'Fonctionnalité en développement.')
-        }
-      ]
-    );
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
@@ -198,10 +179,7 @@ export default function TrainingScreen() {
                   </Text>
                 </View>
                 
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => startCourse(course.title)}
-                >
+                <TouchableOpacity style={styles.actionButton}>
                   <Play size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>
                     {course.status === 'not_started' ? 'Commencer' : 

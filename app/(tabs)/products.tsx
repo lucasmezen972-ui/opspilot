@@ -1,13 +1,43 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Scan, Search, Filter, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Package, Calendar, DollarSign, TrendingDown, TrendingUp } from 'lucide-react-native';
-import { useState } from 'react';
-import { useProducts } from '../../hooks/useProducts';
-import ScannerModal from '../../components/ScannerModal';
+
+const products = [
+  {
+    id: 1,
+    name: 'Yaourt Nature Bio',
+    barcode: '3456789012345',
+    price: 2.49,
+    stock: 45,
+    status: 'ok',
+    expiry: '2024-01-25',
+    image: 'https://images.pexels.com/photos/1060180/pexels-photo-1060180.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
+    category: 'Produits laitiers',
+  },
+  {
+    id: 2,
+    name: 'Pain de mie complet',
+    barcode: '2345678901234',
+    price: 1.89,
+    stock: 12,
+    status: 'low_stock',
+    expiry: '2024-01-18',
+    image: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
+    category: 'Boulangerie',
+  },
+  {
+    id: 3,
+    name: 'Pommes Golden',
+    barcode: '1234567890123',
+    price: 3.20,
+    stock: 0,
+    status: 'out_of_stock',
+    expiry: '2024-01-20',
+    image: 'https://images.pexels.com/photos/102104/pexels-photo-102104.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
+    category: 'Fruits & Légumes',
+  },
+];
 
 export default function ProductsScreen() {
-  const [showScannerModal, setShowScannerModal] = useState(false);
-  const { products, loading } = useProducts();
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ok': return '#10B981';
@@ -70,71 +100,57 @@ export default function ProductsScreen() {
       </View>
 
       {/* Scanner Button */}
-      <TouchableOpacity style={styles.scannerButton} onPress={() => setShowScannerModal(true)}>
+      <TouchableOpacity style={styles.scannerButton}>
         <Scan size={24} color="#FFFFFF" />
         <Text style={styles.scannerButtonText}>Scanner un produit</Text>
       </TouchableOpacity>
 
       {/* Products List */}
       <ScrollView style={styles.productsList}>
-        {products.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Package size={48} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>Aucun produit</Text>
-            <Text style={styles.emptySubtitle}>Scannez votre premier produit pour commencer</Text>
-          </View>
-        ) : (
-          products.map((product) => {
-            const StatusIcon = getStatusIcon('ok');
-            return (
-              <TouchableOpacity key={product.id} style={styles.productCard}>
-                <View style={styles.productImagePlaceholder}>
-                  <Package size={24} color="#6B7280" />
-                </View>
+        {products.map((product) => {
+          const StatusIcon = getStatusIcon(product.status);
+          return (
+            <TouchableOpacity key={product.id} style={styles.productCard}>
+              <Image source={{ uri: product.image }} style={styles.productImage} />
               
-                <View style={styles.productInfo}>
-                  <View style={styles.productHeader}>
-                    <Text style={styles.productName}>{product.name}</Text>
-                    <View style={[styles.productStatus, { backgroundColor: `${getStatusColor('ok')}20` }]}>
-                      <StatusIcon size={12} color={getStatusColor('ok')} />
-                      <Text style={[styles.productStatusText, { color: getStatusColor('ok') }]}>
-                        {getStatusText('ok')}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.productBarcode}>Code: {product.barcode || 'Non défini'}</Text>
-
-                  <View style={styles.productDetails}>
-                    {product.dlc && (
-                      <View style={styles.productDetailItem}>
-                        <Calendar size={14} color="#6B7280" />
-                        <Text style={styles.productDetailText}>DLC: {new Date(product.dlc).toLocaleDateString()}</Text>
-                      </View>
-                    )}
-                    <View style={styles.productDetailItem}>
-                      <Calendar size={14} color="#6B7280" />
-                      <Text style={styles.productDetailText}>
-                        Stock: {product.stock_quantity || 0} unités
-                      </Text>
-                    </View>
+              <View style={styles.productInfo}>
+                <View style={styles.productHeader}>
+                  <Text style={styles.productName}>{product.name}</Text>
+                  <View style={[styles.productStatus, { backgroundColor: `${getStatusColor(product.status)}20` }]}>
+                    <StatusIcon size={12} color={getStatusColor(product.status)} />
+                    <Text style={[styles.productStatusText, { color: getStatusColor(product.status) }]}>
+                      {getStatusText(product.status)}
+                    </Text>
                   </View>
                 </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
+
+                <Text style={styles.productCategory}>{product.category}</Text>
+                <Text style={styles.productBarcode}>Code: {product.barcode}</Text>
+
+                <View style={styles.productDetails}>
+                  <View style={styles.productDetailItem}>
+                    <DollarSign size={14} color="#6B7280" />
+                    <Text style={styles.productDetailText}>{product.price}€</Text>
+                  </View>
+                  <View style={styles.productDetailItem}>
+                    <Package size={14} color="#6B7280" />
+                    <Text style={styles.productDetailText}>Stock: {product.stock}</Text>
+                  </View>
+                  <View style={styles.productDetailItem}>
+                    <Calendar size={14} color="#6B7280" />
+                    <Text style={styles.productDetailText}>DLC: {product.expiry}</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => setShowScannerModal(true)}>
+      <TouchableOpacity style={styles.fab}>
         <Scan size={24} color="#FFFFFF" />
       </TouchableOpacity>
-
-      <ScannerModal 
-        visible={showScannerModal}
-        onClose={() => setShowScannerModal(false)}
-      />
     </View>
   );
 }
@@ -198,24 +214,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'center',
   },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
   scannerButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -253,14 +251,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  productImagePlaceholder: {
+  productImage: {
     width: 60,
     height: 60,
     borderRadius: 8,
     marginRight: 16,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   productInfo: {
     flex: 1,
