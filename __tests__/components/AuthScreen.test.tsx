@@ -6,6 +6,7 @@ import {
   expect,
   vi,
   beforeEach,
+  afterEach,
   type MockedFunction,
 } from 'vitest';
 
@@ -22,9 +23,11 @@ const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
 describe('AuthScreen Component', () => {
   const mockSignIn = vi.fn();
   const mockSignUp = vi.fn();
+  const originalDev = (globalThis as any).__DEV__;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (globalThis as any).__DEV__ = false;
     mockUseAuth.mockReturnValue({
       user: null,
       profile: null,
@@ -38,6 +41,10 @@ describe('AuthScreen Component', () => {
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
     });
+  });
+
+  afterEach(() => {
+    (globalThis as any).__DEV__ = originalDev;
   });
 
   it('should render login form by default', () => {
@@ -116,12 +123,22 @@ describe('AuthScreen Component', () => {
     });
   });
 
-  it('should display demo account information', () => {
+  it('should display demo account information in development mode', () => {
+    (globalThis as any).__DEV__ = true;
     const { getByText } = render(<AuthScreen />);
 
     expect(getByText('Compte de démonstration')).toBeTruthy();
     expect(getByText('Email: demo@opspilot.com')).toBeTruthy();
     expect(getByText('Mot de passe: demo123')).toBeTruthy();
+  });
+
+  it('should not display demo account information in production mode', () => {
+    (globalThis as any).__DEV__ = false;
+    const { queryByText } = render(<AuthScreen />);
+
+    expect(queryByText('Compte de démonstration')).toBeNull();
+    expect(queryByText('Email: demo@opspilot.com')).toBeNull();
+    expect(queryByText('Mot de passe: demo123')).toBeNull();
   });
 
   it('should show loading state when authenticating', () => {

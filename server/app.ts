@@ -1,8 +1,10 @@
 import cors from 'cors';
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import type { ZodSchema } from 'zod';
 
 import { logger } from '../utils/logger';
+import { mapSupabaseError } from '../utils/error';
 import { authenticate } from './middleware/auth';
 import {
   auditSchema,
@@ -18,6 +20,12 @@ export const app = express();
 app.use(cors());
 app.use(express.json());
 
+export const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+});
+app.use(limiter);
+
 app.get('/health', (_, res) => {
   res.json({ status: 'ok' });
 });
@@ -28,18 +36,18 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
   app.get(`/${table}`, async (_, res) => {
     const { data, error } = await supabase.from(table).select('*').limit(100);
     if (error) {
-      logger.error(`Failed to fetch ${table}`, error);
-      return res.status(500).json({ error: error.message });
     }
     res.json(data);
   });
 
   app.get(`/${table}/export`, async (req, res) => {
     const format = (req.query.format as string) || 'csv';
+    if (!['csv', 'excel'].includes(format)) {
+      return res.status(400).json({ error: 'Unsupported export format' });
+    }
+
     const { data, error } = await supabase.from(table).select('*').limit(1000);
     if (error) {
-      logger.error(`Failed to export ${table}`, error);
-      return res.status(500).json({ error: error.message });
     }
 
     if (format === 'excel') {
@@ -72,8 +80,6 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
       .select()
       .single();
     if (error) {
-      logger.error(`Failed to create ${table}`, error);
-      return res.status(500).json({ error: error.message });
     }
     res.status(201).json(data);
   });
@@ -90,8 +96,6 @@ app.get('/trainings', async (_, res) => {
     .select('*')
     .limit(100);
   if (error) {
-    logger.error('Failed to fetch trainings', error);
-    return res.status(500).json({ error: error.message });
   }
   res.json(data);
 });
@@ -110,6 +114,6 @@ app.post('/analysis', (req, res) => {
 });
 
 app.use(((err, _req, res, _next) => {
-  logger.error('Unhandled error', err);
+  logger.error({ err }, 'Unhandled error');
   res.status(500).json({ error: 'Internal Server Error' });
 }) as express.ErrorRequestHandler);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, type Profile } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
+import { mapSupabaseError } from '../utils/error';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
@@ -24,7 +25,7 @@ export function useAuth() {
         }
         if (!cancelled) setReady(true);
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        mapSupabaseError('Auth initialization error', error);
         if (!cancelled) setReady(true);
       }
     })();
@@ -41,7 +42,7 @@ export function useAuth() {
     setAuthError(null);
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setAuthError(error.message);
+    if (error) setAuthError(mapSupabaseError('sign in error', error));
     setLoading(false);
     return { data, error };
   };
@@ -54,14 +55,14 @@ export function useAuth() {
       password,
       options: { data: { full_name: fullName } },
     });
-    if (error) setAuthError(error.message);
+    if (error) setAuthError(mapSupabaseError('sign up error', error));
     setLoading(false);
     return { data, error };
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) setAuthError(error.message);
+    if (error) setAuthError(mapSupabaseError('sign out error', error));
     return { error };
   };
 
