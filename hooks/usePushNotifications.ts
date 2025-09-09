@@ -26,6 +26,7 @@ async function registerForPushNotificationsAsync() {
 
   const Device = require('expo-device');
   if (!Device?.isDevice) {
+  }
   if (Platform.OS === 'web') {
     console.log('Push notifications not supported on web');
     return;
