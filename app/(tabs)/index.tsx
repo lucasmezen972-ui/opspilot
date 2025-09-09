@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { useAuth } from '../../hooks/useAuth';
 import { useAudits } from '../../hooks/useAudits';
 import { useTasks } from '../../hooks/useTasks';
+import { useBitcoinPrice } from '../../hooks/useBitcoinPrice';
 import { TrendingUp, Users, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Award, Target, Calendar, ChartBar as BarChart3, Scan, MessageCircle, BookOpen } from 'lucide-react-native';
 import { router } from 'expo-router';
 
@@ -9,6 +10,7 @@ export default function HomeScreen() {
   const { profile } = useAuth();
   const { audits } = useAudits();
   const { tasks } = useTasks();
+  const { price } = useBitcoinPrice();
 
   const completedAuditsToday = audits.filter(a => 
     a.status === 'completed' && 
@@ -51,6 +53,11 @@ export default function HomeScreen() {
           <AlertTriangle size={24} color="#F59E0B" />
           <Text style={styles.statNumber}>{pendingTasks}</Text>
           <Text style={styles.statLabel}>Actions requises</Text>
+        </View>
+        <View style={styles.statCard}>
+          <TrendingUp size={24} color="#F472B6" />
+          <Text style={styles.statNumber}>{price ? price.toFixed(2) : '--'}</Text>
+          <Text style={styles.statLabel}>BTC/USD</Text>
         </View>
       </View>
 
@@ -246,6 +253,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: 20,
     gap: 12,
   },
