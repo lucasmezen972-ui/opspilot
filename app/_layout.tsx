@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, type Profile } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
-import { mapSupabaseError } from '../utils/error';
+import { mapSupabaseError } from '../utils/error'
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 interface AuthError extends Error {
   message: string;
 }
@@ -239,4 +240,10 @@ export function useAuth() {
   };
 
   return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
+}
+
+        )
+    }
+  }
+  )
 }
