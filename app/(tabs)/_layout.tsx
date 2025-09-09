@@ -1,10 +1,24 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User } from 'lucide-react-native';
+import {
+  Chrome as Home,
+  ClipboardCheck,
+  Package,
+  SquareCheck as CheckSquare,
+  GraduationCap,
+  MessageCircle,
+  User,
+} from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 export default function TabLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          Haptics.selectionAsync();
+        },
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#2563EB',
