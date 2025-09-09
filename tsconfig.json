@@ -26,6 +26,7 @@
     "lib",
     "test",
     "__tests__",
+    "server",
     "global.d.ts",
     "vitest.config.ts",
     ".expo/types/**/*.ts",

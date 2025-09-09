@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video, Bot, Sparkles } from 'lucide-react-native';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { getChatAssistantResponse } from '../../lib/openai';
-import { Alert } from 'react-native';
 
 export default function ChatScreen() {
   const { profile } = useAuth();

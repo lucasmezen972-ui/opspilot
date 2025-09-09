@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Scan, Search, Filter, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Package, Calendar, DollarSign, TrendingDown, TrendingUp, Plus } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { useProducts } from '../../hooks/useProducts';
-import { Alert } from 'react-native';
 
 export default function ProductsScreen() {
   const { products, loading, scanProduct, updateProductStock } = useProducts();

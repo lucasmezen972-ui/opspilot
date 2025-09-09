@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Plus, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, MapPin, Flag, User } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../hooks/useAuth';
-import { Alert } from 'react-native';
 
 export default function TasksScreen() {
   const { tasks, loading, updateTaskStatus } = useTasks();
