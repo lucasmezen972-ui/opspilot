@@ -27,6 +27,12 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, '.'),
       'react-native': 'react-native-web',
+      exceljs: resolve(__dirname, 'test/mocks/exceljs.ts'),
+      'expo-device': resolve(__dirname, 'test/mocks/expo-device.ts'),
+      'expo-notifications': resolve(
+        __dirname,
+        'test/mocks/expo-notifications.ts',
+      ),
     },
   },
 })
