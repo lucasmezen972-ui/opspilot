@@ -1,134 +1,242 @@
-import { useEffect, useState } from 'react'
-import { supabase, type Product } from '../lib/supabase'
-import { useAuth } from './useAuth'
-import { mapSupabaseError } from '../utils/error'
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { supabase, type Profile } from '../lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
+import { mapSupabaseError } from '../utils/error';
+interface AuthError extends Error {
+  message: string;
+}
 
-export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const { profile } = useAuth()
+interface AuthState {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  ready: boolean;
+  loading: boolean;
+  authError: string | null;
+}
+
+
+export function useAuth() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (profile?.organization_id) {
-      fetchProducts()
-    }
-  }, [profile])
+    mountedRef.current = true;
 
-  const fetchProducts = async () => {
-    if (!profile?.organization_id) return
+    (async () => {
+      try {
+        console.log('[Auth] Initializing authentication...');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (mountedRef.current) {
+          setSession(session ?? null);
+          setUser(session?.user ?? null);
+          console.log('[Auth] Session loaded:', session ? 'authenticated' : 'anonymous');
+        }
+        
+        if (session?.user?.id && mountedRef.current) {
+          await fetchProfile(session.user.id);
+        }
+        
+        if (mountedRef.current) {
+          setReady(true);
+          console.log('[Auth] Authentication ready');
+        }
+      } catch (error) {
+        console.error('[Auth] Initialization error:', error);
+        if (mountedRef.current) {
+          setReady(true);
+          setAuthError(error instanceof Error ? error.message : 'Authentication initialization failed');
+        }
+      }
+    })();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Auth] Auth state changed:', event, session ? 'authenticated' : 'anonymous');
+      
+      if (mountedRef.current) {
+        setSession(s ?? null);
+        setUser(s?.user ?? null);
+        
+        // Fetch profile when user signs in
+        if (event === 'SIGNED_IN' && session?.user?.id) {
+          await fetchProfile(session.user.id);
+        }
+        
+        // Clear profile when user signs out
+        if (event === 'SIGNED_OUT') {
+          setProfile(null);
+          setAuthError(null);
+        }
+      }
+    });
+
+    return () => { 
+      mountedRef.current = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!email?.trim() || !password?.trim()) {
+      const error = 'Email et mot de passe requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
 
     try {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('organization_id', profile.organization_id)
-        .order('name')
-
+      console.log('[Auth] Signing in user:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim().toLowerCase(), 
+        password 
+      });
+      
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des produits', error)
-        return
+        console.error('[Auth] Sign in error:', error);
+        setAuthError(error.message);
+      } else {
+        console.log('[Auth] Sign in successful');
+        setAuthError(null);
       }
-
-      setProducts(data || [])
-    } catch (error) {
-      mapSupabaseError('Erreur fetchProducts', error)
+      
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      console.error('[Auth] Sign in exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
     } finally {
-      setLoading(false)
-    }
-  }
-
-  const scanProduct = async (barcode: string) => {
-    if (!profile?.organization_id) return null
-
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('organization_id', profile.organization_id)
-        .eq('barcode', barcode)
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        mapSupabaseError('Erreur lors du scan', error)
-        return null
+      if (mountedRef.current) {
+        setLoading(false);
       }
-
-      return data
-    } catch (error) {
-      mapSupabaseError('Erreur scanProduct', error)
-      return null
     }
-  }
+  }, []);
 
-  const updateProductStock = async (productId: string, newStock: number) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+    if (!email?.trim() || !password?.trim() || !fullName?.trim()) {
+      const error = 'Tous les champs sont requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    if (password.length < 6) {
+      const error = 'Le mot de passe doit contenir au moins 6 caractères';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
+
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .update({
-          stock_quantity: newStock,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', productId)
-        .select()
-        .single()
+      console.log('[Auth] Signing up user:', email);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: { 
+          data: { 
+            full_name: fullName.trim() 
+          } 
+        },
+      });
 
       if (error) {
-        return { error: mapSupabaseError('Erreur lors de la mise à jour du stock', error) }
+        console.error('[Auth] Sign up error:', error);
+        setAuthError(error.message);
+      } else {
+        console.log('[Auth] Sign up successful');
+        setAuthError(null);
       }
 
-      // Mettre à jour la liste locale
-      setProducts(products.map(p => p.id === productId ? data : p))
-
-      return { data }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur updateProductStock', error) }
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      console.error('[Auth] Sign up exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }
+  }, []);
 
-  const createProduct = async (productData: Partial<Product>) => {
-    if (!profile?.organization_id) return { error: 'Organisation non définie' }
+  const signOut = useCallback(async () => {
+    try {
+      console.log('[Auth] Signing out user');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[Auth] Sign out error:', error);
+        setAuthError(error.message);
+      } else {
+        console.log('[Auth] Sign out successful');
+        setAuthError(null);
+        if (mountedRef.current) {
+          setProfile(null);
+        }
+      }
+      
+      return { error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la déconnexion';
+      console.error('[Auth] Sign out exception:', err);
+      setAuthError(errorMessage);
+      return { error: { message: errorMessage } };
+    }
+  }, []);
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    if (!userId) {
+      const error = 'User ID requis';
+      console.error('[Auth] Fetch profile error:', error);
+      return { data: null, error: { message: error } };
+    }
 
     try {
+      console.log('[Auth] Fetching profile for user:', userId);
       const { data, error } = await supabase
-        .from('products')
-        .insert({
-          ...productData,
-          organization_id: profile.organization_id,
-          added_by: profile.id,
-        })
-        .select()
-        .single()
+        .from('profiles')
+        .select(`
+          id,
+          organization_id,
+          store_id,
+          email,
+          full_name,
+          phone,
+          avatar_url,
+          role,
+          department_id,
+          level,
+          xp,
+          total_audits,
+          avg_score,
+          completed_trainings,
+          active_time_hours,
+          last_active,
+          is_active,
+          created_at,
 
-      if (error) {
-        return { error: mapSupabaseError('Erreur lors de la création du produit', error) }
-      }
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return { error: 'Utilisateur non connecté' };
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (!error && data) setProfile(data);
+    return { data, error };
+  };
 
-      setProducts([...products, data])
-      return { data }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur createProduct', error) }
-    }
-  }
-
-  const getProductStatus = (product: Product) => {
-    if (product.stock_quantity === 0) return 'out_of_stock'
-    if (
-      product.min_stock !== null &&
-      product.min_stock !== undefined &&
-      product.stock_quantity <= product.min_stock
-    )
-      return 'low_stock'
-    return 'ok'
-  }
-
-  return {
-    products,
-    loading,
-    scanProduct,
-    updateProductStock,
-    createProduct,
-    getProductStatus,
-    refetch: fetchProducts,
-  }
+  return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
 }

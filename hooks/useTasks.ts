@@ -1,167 +1,242 @@
-import { useEffect, useState } from 'react'
-import { supabase, type Task } from '../lib/supabase'
-import { useAuth } from './useAuth'
-import { isOnline, loadOfflineTasks, setOfflineTasks, queueTask } from '../lib/offline'
-import { mapSupabaseError } from '../utils/error'
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { supabase, type Profile } from '../lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
+import { mapSupabaseError } from '../utils/error';
+interface AuthError extends Error {
+  message: string;
+}
 
-export function useTasks() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(true)
-  const { profile } = useAuth()
+interface AuthState {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  ready: boolean;
+  loading: boolean;
+  authError: string | null;
+}
+
+
+export function useAuth() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (profile?.organization_id) {
-      fetchTasks()
-    }
-  }, [profile])
+    mountedRef.current = true;
 
-  const fetchTasks = async () => {
-    if (!profile?.organization_id) return
+    (async () => {
+      try {
+        console.log('[Auth] Initializing authentication...');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (mountedRef.current) {
+          setSession(session ?? null);
+          setUser(session?.user ?? null);
+          console.log('[Auth] Session loaded:', session ? 'authenticated' : 'anonymous');
+        }
+        
+        if (session?.user?.id && mountedRef.current) {
+          await fetchProfile(session.user.id);
+        }
+        
+        if (mountedRef.current) {
+          setReady(true);
+          console.log('[Auth] Authentication ready');
+        }
+      } catch (error) {
+        console.error('[Auth] Initialization error:', error);
+        if (mountedRef.current) {
+          setReady(true);
+          setAuthError(error instanceof Error ? error.message : 'Authentication initialization failed');
+        }
+      }
+    })();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Auth] Auth state changed:', event, session ? 'authenticated' : 'anonymous');
+      
+      if (mountedRef.current) {
+        setSession(s ?? null);
+        setUser(s?.user ?? null);
+        
+        // Fetch profile when user signs in
+        if (event === 'SIGNED_IN' && session?.user?.id) {
+          await fetchProfile(session.user.id);
+        }
+        
+        // Clear profile when user signs out
+        if (event === 'SIGNED_OUT') {
+          setProfile(null);
+          setAuthError(null);
+        }
+      }
+    });
+
+    return () => { 
+      mountedRef.current = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!email?.trim() || !password?.trim()) {
+      const error = 'Email et mot de passe requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
 
     try {
-      setLoading(true)
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('tasks')
-          .select(`
-            *,
-            assigned_profile:profiles!tasks_assigned_to_fkey(full_name),
-            creator_profile:profiles!tasks_created_by_fkey(full_name),
-            stores(name)
-          `)
-          .eq('organization_id', profile.organization_id)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          mapSupabaseError('Erreur lors de la récupération des tâches', error)
-          return
-        }
-
-        setTasks(data || [])
-        await setOfflineTasks(data || [])
+      console.log('[Auth] Signing in user:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim().toLowerCase(), 
+        password 
+      });
+      
+      if (error) {
+        console.error('[Auth] Sign in error:', error);
+        setAuthError(error.message);
       } else {
-        const local = await loadOfflineTasks()
-        setTasks(local)
+        console.log('[Auth] Sign in successful');
+        setAuthError(null);
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchTasks', error)
+      
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      console.error('[Auth] Sign in exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
     } finally {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }
+  }, []);
 
-  const createTask = async (taskData: {
-    title: string
-    description?: string
-    location?: string
-    priority: Task['priority']
-    assigned_to: string
-    estimated_time_minutes?: number
-    due_date?: string
-  }) => {
-    if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+    if (!email?.trim() || !password?.trim() || !fullName?.trim()) {
+      const error = 'Tous les champs sont requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    if (password.length < 6) {
+      const error = 'Le mot de passe doit contenir au moins 6 caractères';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
 
     try {
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('tasks')
-          .insert({
-            ...taskData,
-            organization_id: profile.organization_id,
-            store_id: profile.store_id,
-            created_by: profile.id,
-            status: 'pending',
-          })
-          .select()
-          .single()
+      console.log('[Auth] Signing up user:', email);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: { 
+          data: { 
+            full_name: fullName.trim() 
+          } 
+        },
+      });
 
-        if (error) {
-          return { error: mapSupabaseError('Erreur lors de la création de la tâche', error) }
-        }
-
-        setTasks([data, ...tasks])
-        await setOfflineTasks([data, ...tasks])
-        return { data }
+      if (error) {
+        console.error('[Auth] Sign up error:', error);
+        setAuthError(error.message);
       } else {
-        const offlineId = `offline-${Date.now()}`
-        const localTask: any = {
-          ...taskData,
-          organization_id: profile.organization_id,
-          store_id: profile.store_id,
-          created_by: profile.id,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-          local_id: offlineId,
-          id: offlineId,
-        }
-        setTasks([localTask, ...tasks])
-        await queueTask(localTask)
-        return { data: localTask }
+        console.log('[Auth] Sign up successful');
+        setAuthError(null);
       }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur createTask', error) }
-    }
-  }
 
-  const updateTaskStatus = async (taskId: string, status: Task['status']) => {
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      console.error('[Auth] Sign up exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
     try {
-      const updateData: any = {
-        status,
-        updated_at: new Date().toISOString()
-      }
-
-      if (status === 'completed') {
-        updateData.completed_at = new Date().toISOString()
-      }
-
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('tasks')
-          .update(updateData)
-          .eq('id', taskId)
-          .select()
-          .single()
-
-        if (error) {
-          return { error: mapSupabaseError('Erreur lors de la mise à jour de la tâche', error) }
-        }
-
-        setTasks(tasks.map(t => t.id === taskId ? data : t))
-        await setOfflineTasks(tasks.map(t => t.id === taskId ? data : t))
-        return { data }
+      console.log('[Auth] Signing out user');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[Auth] Sign out error:', error);
+        setAuthError(error.message);
       } else {
-        const existing: any = tasks.find(t => t.id === taskId)
-        if (!existing) return { error: 'Tâche introuvable' }
-        const localUpdated = { ...existing, ...updateData }
-        setTasks(tasks.map(t => t.id === taskId ? localUpdated : t))
-        await queueTask(localUpdated)
-        return { data: localUpdated }
+        console.log('[Auth] Sign out successful');
+        setAuthError(null);
+        if (mountedRef.current) {
+          setProfile(null);
+        }
       }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur updateTaskStatus', error) }
+      
+      return { error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la déconnexion';
+      console.error('[Auth] Sign out exception:', err);
+      setAuthError(errorMessage);
+      return { error: { message: errorMessage } };
     }
-  }
+  }, []);
 
-  const getMyTasks = () => {
-    return tasks.filter(task => task.assigned_to === profile?.id)
-  }
+  const fetchProfile = useCallback(async (userId: string) => {
+    if (!userId) {
+      const error = 'User ID requis';
+      console.error('[Auth] Fetch profile error:', error);
+      return { data: null, error: { message: error } };
+    }
 
-  const getTasksByStatus = (status: Task['status']) => {
-    return tasks.filter(task => task.status === status)
-  }
+    try {
+      console.log('[Auth] Fetching profile for user:', userId);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          organization_id,
+          store_id,
+          email,
+          full_name,
+          phone,
+          avatar_url,
+          role,
+          department_id,
+          level,
+          xp,
+          total_audits,
+          avg_score,
+          completed_trainings,
+          active_time_hours,
+          last_active,
+          is_active,
+          created_at,
 
-  const getTasksByPriority = (priority: Task['priority']) => {
-    return tasks.filter(task => task.priority === priority)
-  }
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return { error: 'Utilisateur non connecté' };
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (!error && data) setProfile(data);
+    return { data, error };
+  };
 
-  return {
-    tasks,
-    loading,
-    createTask,
-    updateTaskStatus,
-    getMyTasks,
-    getTasksByStatus,
-    getTasksByPriority,
-    refetch: fetchTasks,
-  }
+  return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
 }

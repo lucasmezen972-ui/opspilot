@@ -1,295 +1,242 @@
-import { useEffect, useState } from 'react'
-import { supabase, type Audit } from '../lib/supabase'
-import { useAuth } from './useAuth'
-import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
-import { mapSupabaseError } from '../utils/error'
-
-let Location: typeof import('expo-location') | undefined
-try {
-  Location = require('expo-location')
-} catch {}
-
-const getCurrentLocation = async () => {
-  if (!Location) return undefined
-  try {
-    const { status } = await Location.requestForegroundPermissionsAsync()
-    if (status !== 'granted') return undefined
-    const { coords } = await Location.getCurrentPositionAsync({})
-    return { latitude: coords.latitude, longitude: coords.longitude }
-  } catch (err) {
-    console.warn('Erreur localisation', err)
-    return undefined
-  }
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { supabase, type Profile } from '../lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
+import { mapSupabaseError } from '../utils/error';
+interface AuthError extends Error {
+  message: string;
 }
 
-export function useAudits() {
-  const [audits, setAudits] = useState<Audit[]>([])
-  const [loading, setLoading] = useState(true)
-  const { profile } = useAuth()
+interface AuthState {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  ready: boolean;
+  loading: boolean;
+  authError: string | null;
+}
+
+
+export function useAuth() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (profile?.organization_id) {
-      fetchAudits()
-    }
-  }, [profile])
+    mountedRef.current = true;
 
-  const fetchAudits = async () => {
-    if (!profile?.organization_id) return
+    (async () => {
+      try {
+        console.log('[Auth] Initializing authentication...');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (mountedRef.current) {
+          setSession(session ?? null);
+          setUser(session?.user ?? null);
+          console.log('[Auth] Session loaded:', session ? 'authenticated' : 'anonymous');
+        }
+        
+        if (session?.user?.id && mountedRef.current) {
+          await fetchProfile(session.user.id);
+        }
+        
+        if (mountedRef.current) {
+          setReady(true);
+          console.log('[Auth] Authentication ready');
+        }
+      } catch (error) {
+        console.error('[Auth] Initialization error:', error);
+        if (mountedRef.current) {
+          setReady(true);
+          setAuthError(error instanceof Error ? error.message : 'Authentication initialization failed');
+        }
+      }
+    })();
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Auth] Auth state changed:', event, session ? 'authenticated' : 'anonymous');
+      
+      if (mountedRef.current) {
+        setSession(s ?? null);
+        setUser(s?.user ?? null);
+        
+        // Fetch profile when user signs in
+        if (event === 'SIGNED_IN' && session?.user?.id) {
+          await fetchProfile(session.user.id);
+        }
+        
+        // Clear profile when user signs out
+        if (event === 'SIGNED_OUT') {
+          setProfile(null);
+          setAuthError(null);
+        }
+      }
+    });
+
+    return () => { 
+      mountedRef.current = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!email?.trim() || !password?.trim()) {
+      const error = 'Email et mot de passe requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
 
     try {
-      setLoading(true)
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('audits')
-          .select(`
-            *,
-            profiles(full_name),
-            stores(name)
-          `)
-          .eq('organization_id', profile.organization_id)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          mapSupabaseError('Erreur lors de la récupération des audits', error)
-          return
-        }
-
-        setAudits(data || [])
-        await setOfflineAudits(data || [])
+      console.log('[Auth] Signing in user:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim().toLowerCase(), 
+        password 
+      });
+      
+      if (error) {
+        console.error('[Auth] Sign in error:', error);
+        setAuthError(error.message);
       } else {
-        const local = await loadOfflineAudits()
-        setAudits(local)
+        console.log('[Auth] Sign in successful');
+        setAuthError(null);
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchAudits', error)
+      
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur de connexion';
+      console.error('[Auth] Sign in exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
     } finally {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }
+  }, []);
 
-  const createAudit = async (auditData: {
-    title: string
-    description?: string
-    location?: string
-    due_date?: string
-  }) => {
-    if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+    if (!email?.trim() || !password?.trim() || !fullName?.trim()) {
+      const error = 'Tous les champs sont requis';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    if (password.length < 6) {
+      const error = 'Le mot de passe doit contenir au moins 6 caractères';
+      setAuthError(error);
+      return { data: null, error: { message: error } };
+    }
+
+    setAuthError(null);
+    setLoading(true);
 
     try {
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('audits')
-          .insert({
-            ...auditData,
-            organization_id: profile.organization_id,
-            store_id: profile.store_id,
-            auditor_id: profile.id,
-            status: 'pending',
-            max_score: 100,
-            issues_count: 0,
-            photos: [],
-          })
-          .select()
-          .single()
+      console.log('[Auth] Signing up user:', email);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: { 
+          data: { 
+            full_name: fullName.trim() 
+          } 
+        },
+      });
 
-        if (error) {
-          return { error: mapSupabaseError("Erreur lors de la création de l'audit", error) }
-        }
-
-        setAudits([data, ...audits])
-        await setOfflineAudits([data, ...audits])
-        return { data }
+      if (error) {
+        console.error('[Auth] Sign up error:', error);
+        setAuthError(error.message);
       } else {
-        const offlineId = `offline-${Date.now()}`
-        const localAudit: Audit & { local_id: string } = {
-          ...auditData,
-          organization_id: profile.organization_id,
-          store_id: profile.store_id,
-          auditor_id: profile.id,
-          status: 'pending',
-          max_score: 100,
-          issues_count: 0,
-          photos: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          local_id: offlineId,
-          id: offlineId,
-        }
-        setAudits([localAudit, ...audits])
-        await queueAudit(localAudit)
-        return { data: localAudit }
+        console.log('[Auth] Sign up successful');
+        setAuthError(null);
       }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur createAudit', error) }
+
+      return { data, error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      console.error('[Auth] Sign up exception:', err);
+      setAuthError(errorMessage);
+      return { data: null, error: { message: errorMessage } };
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }
+  }, []);
 
-  const updateAuditStatus = async (auditId: string, status: Audit['status'], additionalData?: Partial<Audit>) => {
+  const signOut = useCallback(async () => {
     try {
-      const updateData: any = {
-        status,
-        updated_at: new Date().toISOString(),
-        ...additionalData
-      }
-
-      if (status === 'in_progress' && !additionalData?.started_at) {
-        updateData.started_at = new Date().toISOString()
-      }
-
-      if (status === 'completed' && !additionalData?.completed_at) {
-        updateData.completed_at = new Date().toISOString()
-      }
-
-      if (status === 'completed') {
-        const { data: responses, error: respError } = await supabase
-          .from('audit_responses')
-          .select('score, audit_items(points)')
-          .eq('audit_id', auditId)
-
-        if (!respError && responses) {
-          let total = 0
-          let max = 0
-          let issues = 0
-          ;(responses as { score: number | null; audit_items: { points: number }[] }[]).forEach(r => {
-            const itemMax = r.audit_items[0]?.points ?? 0
-            const s = r.score ?? 0
-            total += s
-            max += itemMax
-            if (s < itemMax) issues++
-          })
-          updateData.score = total
-          updateData.max_score = max
-          updateData.issues_count = issues
-        }
-      }
-
-      if (status === 'in_progress') {
-        const loc = await getCurrentLocation()
-        if (loc) {
-          updateData.start_latitude = loc.latitude
-          updateData.start_longitude = loc.longitude
-        }
-      }
-
-      if (status === 'completed') {
-        const loc = await getCurrentLocation()
-        if (loc) {
-          updateData.end_latitude = loc.latitude
-          updateData.end_longitude = loc.longitude
-        }
-      }
-
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('audits')
-          .update(updateData)
-          .eq('id', auditId)
-          .select()
-          .single()
-
-        if (error) {
-          return { error: mapSupabaseError("Erreur lors de la mise à jour de l'audit", error) }
-        }
-
-        setAudits(audits.map(a => a.id === auditId ? data : a))
-
-        if (status === 'completed' && profile) {
-          await updateProfileStats()
-        }
-
-        await setOfflineAudits(audits.map(a => a.id === auditId ? data : a))
-        return { data }
+      console.log('[Auth] Signing out user');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[Auth] Sign out error:', error);
+        setAuthError(error.message);
       } else {
-        const existing = audits.find(a => a.id === auditId)
-        if (!existing) return { error: 'Audit non trouvé' }
-        const localUpdated = { ...existing, ...updateData }
-        setAudits(audits.map(a => a.id === auditId ? localUpdated : a))
-        await queueAudit(localUpdated)
-        return { data: localUpdated }
+        console.log('[Auth] Sign out successful');
+        setAuthError(null);
+        if (mountedRef.current) {
+          setProfile(null);
+        }
       }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur updateAuditStatus', error) }
+      
+      return { error };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la déconnexion';
+      console.error('[Auth] Sign out exception:', err);
+      setAuthError(errorMessage);
+      return { error: { message: errorMessage } };
     }
-  }
+  }, []);
 
-  const updateProfileStats = async () => {
-    if (!profile) return
+  const fetchProfile = useCallback(async (userId: string) => {
+    if (!userId) {
+      const error = 'User ID requis';
+      console.error('[Auth] Fetch profile error:', error);
+      return { data: null, error: { message: error } };
+    }
 
     try {
-      const { data: completedAudits } = await supabase
-        .from('audits')
-        .select('score')
-        .eq('auditor_id', profile.id)
-        .eq('status', 'completed')
+      console.log('[Auth] Fetching profile for user:', userId);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          organization_id,
+          store_id,
+          email,
+          full_name,
+          phone,
+          avatar_url,
+          role,
+          department_id,
+          level,
+          xp,
+          total_audits,
+          avg_score,
+          completed_trainings,
+          active_time_hours,
+          last_active,
+          is_active,
+          created_at,
 
-      if (completedAudits && completedAudits.length > 0) {
-        const totalAudits = completedAudits.length
-        const avgScore = completedAudits
-          .filter(a => a.score !== null)
-          .reduce((sum, a) => sum + (a.score || 0), 0) / totalAudits
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return { error: 'Utilisateur non connecté' };
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (!error && data) setProfile(data);
+    return { data, error };
+  };
 
-        await supabase
-          .from('profiles')
-          .update({
-            total_audits: totalAudits,
-            avg_score: Math.round(avgScore * 100) / 100,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', profile.id)
-      }
-    } catch (error) {
-      mapSupabaseError('Erreur lors de la mise à jour des stats', error)
-    }
-  }
-
-  const addPhotoToAudit = async (auditId: string, photoUrl: string) => {
-    const audit = audits.find(a => a.id === auditId)
-    if (!audit) return { error: 'Audit non trouvé' }
-
-    try {
-      const updatedPhotos = [...audit.photos, photoUrl]
-
-      if (await isOnline()) {
-        const { data, error } = await supabase
-          .from('audits')
-          .update({
-            photos: updatedPhotos,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', auditId)
-          .select()
-          .single()
-
-        if (error) {
-          return { error: mapSupabaseError("Erreur lors de l'ajout de la photo", error) }
-        }
-
-        setAudits(audits.map(a => a.id === auditId ? data : a))
-        await setOfflineAudits(audits.map(a => a.id === auditId ? data : a))
-        return { data }
-      } else {
-        await queuePhoto(auditId, photoUrl)
-        const localAudit = audits.find(a => a.id === auditId)
-        if (localAudit) {
-          const updated = { ...localAudit, photos: updatedPhotos }
-          const updatedList = audits.map(a => a.id === auditId ? updated : a)
-          setAudits(updatedList)
-          await setOfflineAudits(updatedList)
-          return { data: updated }
-        }
-        return { error: 'Audit non trouvé' }
-      }
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur addPhotoToAudit', error) }
-    }
-  }
-
-  return {
-    audits,
-    loading,
-    createAudit,
-    updateAuditStatus,
-    addPhotoToAudit,
-    refetch: fetchAudits,
-  }
+  return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
 }
