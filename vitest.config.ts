@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
-import babel from 'vite-plugin-babel'
+import { resolve } from 'path';
+import babel from 'vite-plugin-babel';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [
@@ -8,10 +8,10 @@ export default defineConfig({
       babelConfig: {
         presets: [
           ['@babel/preset-env', { targets: { node: 'current' } }],
-          '@babel/preset-typescript'
-        ]
-      }
-    })
+          '@babel/preset-typescript',
+        ],
+      },
+    }),
   ],
   test: {
     globals: true,
@@ -27,6 +27,8 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, '.'),
       'react-native': 'react-native-web',
+      'expo-notifications': resolve(__dirname, 'test/mocks/expo-notifications'),
+      'expo-device': resolve(__dirname, 'test/mocks/expo-device'),
     },
   },
-})
+});

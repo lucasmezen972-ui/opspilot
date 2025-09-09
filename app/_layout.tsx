@@ -1,30 +1,33 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '../hooks/useAuth';
+
 import AuthScreen from '../components/AuthScreen';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { useAuth } from '../hooks/useAuth';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import { isSupabaseConfigured } from '../utils/supabaseConfig';
+
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function RootLayout() {
   useFrameworkReady();
   const { user, loading, error } = useAuth();
+  usePushNotifications();
 
   // Vérification de la configuration Supabase
   console.log('🚀 OpsPilot - État Application:', {
     supabaseConfigured: isSupabaseConfigured(),
     userAuthenticated: !!user,
     isLoading: loading,
-    hasError: !!error
+    hasError: !!error,
   });
 
   if (loading) {
-    console.log('⏳ Application en cours de chargement...')
+    console.log('⏳ Application en cours de chargement...');
     return null; // Ou un écran de chargement
   }
 
   if (!user) {
-    console.log('🔓 Utilisateur non connecté - Affichage écran auth')
+    console.log('🔓 Utilisateur non connecté - Affichage écran auth');
     return (
       <>
         <AuthScreen />
@@ -33,7 +36,7 @@ export default function RootLayout() {
     );
   }
 
-  console.log('🔐 Utilisateur connecté - Affichage app principale')
+  console.log('🔐 Utilisateur connecté - Affichage app principale');
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
