@@ -1,6 +1,8 @@
 // @ts-nocheck
-import '@testing-library/jest-native/extend-expect'
 import { vi as jest } from 'vitest'
+
+// Redirect react-native imports to react-native-web for testing
+jest.mock('react-native', () => require('react-native-web/dist/cjs'))
 
 // Mock Expo modules
 jest.mock('expo-router', () => ({
@@ -35,14 +37,11 @@ jest.mock('expo-constants', () => ({
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
-  const { Text } = require('react-native')
-  
   return new Proxy({}, {
-    get: (target, prop) => {
-      return React.forwardRef((props: any, ref: any) => 
-        React.createElement(Text, { ...props, ref }, prop.toString())
+    get: (target, prop) =>
+      React.forwardRef((props: any, ref: any) =>
+        React.createElement('span', { ...props, ref }, prop.toString())
       )
-    }
   })
 })
 
