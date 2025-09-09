@@ -1,17 +1,26 @@
-import React from 'react'
-import { render } from '@testing-library/react'
-import ManagerDashboard from '../../app/(tabs)/manager'
-import { useAuth } from '../../hooks/useAuth'
-import { useAudits } from '../../hooks/useAudits'
-import { useTasks } from '../../hooks/useTasks'
+import { render } from '@testing-library/react';
+import React from 'react';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  type MockedFunction,
+} from 'vitest';
 
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useAudits')
-vi.mock('../../hooks/useTasks')
+import ManagerDashboard from '../../app/(tabs)/manager';
+import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
+import { useTasks } from '../../hooks/useTasks';
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
-const mockUseAudits = useAudits as jest.MockedFunction<typeof useAudits>
-const mockUseTasks = useTasks as jest.MockedFunction<typeof useTasks>
+vi.mock('../../hooks/useAuth');
+vi.mock('../../hooks/useAudits');
+vi.mock('../../hooks/useTasks');
+
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
+const mockUseAudits = useAudits as MockedFunction<typeof useAudits>;
+const mockUseTasks = useTasks as MockedFunction<typeof useTasks>;
 
 describe('ManagerDashboard', () => {
   beforeEach(() => {
@@ -19,13 +28,15 @@ describe('ManagerDashboard', () => {
       user: { id: 'manager-1' } as any,
       profile: { full_name: 'Marie Dupont', role: 'manager' } as any,
       session: null,
+      ready: true,
       loading: false,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
+      fetchProfile: vi.fn(),
+    });
 
     mockUseAudits.mockReturnValue({
       audits: [
@@ -37,7 +48,7 @@ describe('ManagerDashboard', () => {
       updateAuditStatus: vi.fn(),
       addPhotoToAudit: vi.fn(),
       refetch: vi.fn(),
-    })
+    });
 
     mockUseTasks.mockReturnValue({
       tasks: [
@@ -51,15 +62,15 @@ describe('ManagerDashboard', () => {
       getTasksByStatus: vi.fn(),
       getTasksByPriority: vi.fn(),
       refetch: vi.fn(),
-    })
-  })
+    });
+  });
 
   it('renders manager stats', () => {
-    const { getByText, getAllByText } = render(<ManagerDashboard />)
+    const { getByText, getAllByText } = render(<ManagerDashboard />);
 
-    expect(getByText('Dashboard Manager')).toBeTruthy()
-    expect(getByText('Audits en cours')).toBeTruthy()
-    expect(getByText('Tâches en attente')).toBeTruthy()
-    expect(getAllByText('1')).toHaveLength(2)
-  })
-})
+    expect(getByText('Dashboard Manager')).toBeTruthy();
+    expect(getByText('Audits en cours')).toBeTruthy();
+    expect(getByText('Tâches en attente')).toBeTruthy();
+    expect(getAllByText('1')).toHaveLength(2);
+  });
+});

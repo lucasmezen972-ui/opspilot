@@ -1,19 +1,21 @@
-import React from 'react'
-import { render } from '@testing-library/react'
-import RootLayout from '../../app/_layout'
-import { useAuth } from '../../hooks/useAuth'
+import { render } from '@testing-library/react';
+import React from 'react';
+import { describe, it, expect, vi, type MockedFunction } from 'vitest';
+
+import RootLayout from '../../app/_layout';
+import { useAuth } from '../../hooks/useAuth';
 
 // Mock useAuth hook
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(),
-}))
+}));
 
 // Mock useFrameworkReady
 vi.mock('@/hooks/useFrameworkReady', () => ({
   useFrameworkReady: vi.fn(),
-}))
+}));
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
 
 describe('Authentication Flow Integration', () => {
   it('should show AuthScreen when user is not authenticated', () => {
@@ -21,19 +23,21 @@ describe('Authentication Flow Integration', () => {
       user: null,
       profile: null,
       session: null,
+      ready: true,
       loading: false,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
+      fetchProfile: vi.fn(),
+    });
 
-    const { getByText } = render(<RootLayout />)
-    
-    expect(getByText('OpsPilot')).toBeTruthy()
-    expect(getByText('Connexion')).toBeTruthy()
-  })
+    const { getByText } = render(<RootLayout />);
+
+    expect(getByText('OpsPilot')).toBeTruthy();
+    expect(getByText('Connexion')).toBeTruthy();
+  });
 
   it('should show main app when user is authenticated', () => {
     mockUseAuth.mockReturnValue({
@@ -56,36 +60,40 @@ describe('Authentication Flow Integration', () => {
         updated_at: '2024-01-15T10:00:00Z',
       },
       session: { user: { id: 'user-1' } } as any,
+      ready: true,
       loading: false,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
+      fetchProfile: vi.fn(),
+    });
 
-    const { queryByText } = render(<RootLayout />)
-    
+    const { queryByText } = render(<RootLayout />);
+
     // Should not show auth screen
-    expect(queryByText('Connexion')).toBeFalsy()
-  })
+    expect(queryByText('Connexion')).toBeFalsy();
+  });
 
   it('should show loading state initially', () => {
     mockUseAuth.mockReturnValue({
       user: null,
       profile: null,
       session: null,
+      ready: false,
       loading: true,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
+      fetchProfile: vi.fn(),
+    });
 
-    const { container } = render(<RootLayout />)
+    const { container } = render(<RootLayout />);
 
     // Should not render anything while loading
-    expect(container.firstChild).toBeNull()
-  })
-})
+    expect(container.firstChild).toBeNull();
+  });
+});

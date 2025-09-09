@@ -1,18 +1,18 @@
-import React, { ReactElement } from 'react'
-import { render, RenderOptions } from '@testing-library/react-native'
+import { render, RenderOptions } from '@testing-library/react';
+import React, { ReactElement } from 'react';
 
 // Mock providers for testing
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>
-}
+  return <>{children}</>;
+};
 
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>,
-) => render(ui, { wrapper: AllTheProviders, ...options })
+) => render(ui, { wrapper: AllTheProviders, ...options });
 
-export * from '@testing-library/react-native'
-export { customRender as render }
+export * from '@testing-library/react';
+export { customRender };
 
 // Common test data
 export const mockUser = {
@@ -20,7 +20,7 @@ export const mockUser = {
   email: 'test@example.com',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-15T10:00:00Z',
-}
+};
 
 export const mockProfile = {
   id: 'user-1',
@@ -38,7 +38,7 @@ export const mockProfile = {
   last_active: '2024-01-15T10:00:00Z',
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-15T10:00:00Z',
-}
+};
 
 export const mockAudit = {
   id: 'audit-1',
@@ -60,7 +60,7 @@ export const mockAudit = {
   due_date: '2024-01-20T10:00:00Z',
   created_at: '2024-01-15T08:00:00Z',
   updated_at: '2024-01-15T08:00:00Z',
-}
+};
 
 export const mockTask = {
   id: 'task-1',
@@ -78,12 +78,13 @@ export const mockTask = {
   completed_at: null,
   created_at: '2024-01-15T08:00:00Z',
   updated_at: '2024-01-15T08:00:00Z',
-}
+};
 
 // Helper functions
 export const createMockSupabaseResponse = (data: any, error: any = null) => ({
   data,
   error,
-})
+});
 
-export const waitForNextTick = () => new Promise(resolve => setTimeout(resolve, 0))
+export const waitForNextTick = () =>
+  new Promise((resolve) => setTimeout(resolve, 0));
