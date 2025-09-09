@@ -3,6 +3,24 @@ import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
 
+let Location: any
+try {
+  Location = require('expo-location')
+} catch {}
+
+const getCurrentLocation = async () => {
+  if (!Location) return undefined
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== 'granted') return undefined
+    const { coords } = await Location.getCurrentPositionAsync({})
+    return { latitude: coords.latitude, longitude: coords.longitude }
+  } catch (err) {
+    console.warn('Erreur localisation', err)
+    return undefined
+  }
+}
+
 export function useAudits() {
   const [audits, setAudits] = useState<Audit[]>([])
   const [loading, setLoading] = useState(true)
@@ -120,6 +138,22 @@ export function useAudits() {
 
       if (status === 'completed' && !additionalData?.completed_at) {
         updateData.completed_at = new Date().toISOString()
+      }
+
+      if (status === 'in_progress') {
+        const loc = await getCurrentLocation()
+        if (loc) {
+          updateData.start_latitude = loc.latitude
+          updateData.start_longitude = loc.longitude
+        }
+      }
+
+      if (status === 'completed') {
+        const loc = await getCurrentLocation()
+        if (loc) {
+          updateData.end_latitude = loc.latitude
+          updateData.end_longitude = loc.longitude
+        }
       }
 
       if (await isOnline()) {

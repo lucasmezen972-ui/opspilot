@@ -164,6 +164,10 @@ create table if not exists public.audits (
   notes text,
   started_at timestamptz,
   completed_at timestamptz,
+  start_latitude numeric(10,8),
+  start_longitude numeric(11,8),
+  end_latitude numeric(10,8),
+  end_longitude numeric(11,8),
   due_date timestamptz,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
