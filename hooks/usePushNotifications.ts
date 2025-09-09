@@ -1,12 +1,20 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
+interface NotificationPermission {
+  status: string;
+}
+
+interface NotificationToken {
+  data: string;
+}
+
 interface NotificationsModule {
   AndroidImportance: { MAX: number };
   SchedulableTriggerInputTypes: { DATE: string };
-  getPermissionsAsync(): Promise<{ status: string }>;
-  requestPermissionsAsync(): Promise<{ status: string }>;
-  getExpoPushTokenAsync(): Promise<{ data: string }>;
+  getPermissionsAsync(): Promise<NotificationPermission>;
+  requestPermissionsAsync(): Promise<NotificationPermission>;
+  getExpoPushTokenAsync(): Promise<NotificationToken>;
   setNotificationHandler(handler: {
     handleNotification: () => Promise<{
       shouldShowAlert: boolean;
@@ -27,37 +35,45 @@ interface NotificationsModule {
 }
 
 function getNotifications(): NotificationsModule | undefined {
+  // Skip notifications entirely on web
   if (Platform.OS === 'web') {
-    console.log('Push notifications not supported on web');
+    console.log('[Notifications] Web platform - notifications disabled');
     return undefined;
   }
 
-  let Notifications: NotificationsModule;
   try {
-    const req = eval('require') as (name: string) => NotificationsModule;
-    const moduleName = 'expo-' + 'notifications';
-    Notifications = req(moduleName);
-  } catch {
-    const moduleName = 'expo-' + 'notifications';
-    console.log(moduleName + ' package not available');
+    // Dynamic require to avoid bundling issues
+    const Notifications = require('expo-notifications') as NotificationsModule;
+    
+    // Set up notification handler
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+
+    return Notifications;
+  } catch (error) {
+    console.log('[Notifications] expo-notifications not available:', error);
     return undefined;
   }
-
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-
-  return Notifications;
 }
 
 export function usePushNotifications() {
   useEffect(() => {
+    if (Platform.OS === 'web') return;
+    
+    const Notifications = getNotifications();
+    if (!Notifications) return;
+
+    // Initialize push notifications
+    registerForPushNotificationsAsync(Notifications).catch((error) => {
+      console.warn('[Notifications] Registration failed:', error);
+    });
   }, []);
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase, type Task } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { isOnline, loadOfflineTasks, setOfflineTasks, queueTask } from '../lib/offline'
+import { mapSupabaseError } from '../utils/error'
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -32,7 +33,7 @@ export function useTasks() {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.error('Erreur lors de la récupération des tâches:', error)
+          mapSupabaseError('Erreur lors de la récupération des tâches', error)
           return
         }
 
@@ -43,7 +44,7 @@ export function useTasks() {
         setTasks(local)
       }
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchTasks', error)
     } finally {
       setLoading(false)
     }
@@ -75,8 +76,7 @@ export function useTasks() {
           .single()
 
         if (error) {
-          console.error('Erreur lors de la création de la tâche:', error)
-          return { error }
+          return { error: mapSupabaseError('Erreur lors de la création de la tâche', error) }
         }
 
         setTasks([data, ...tasks])
@@ -99,8 +99,7 @@ export function useTasks() {
         return { data: localTask }
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur createTask', error) }
     }
   }
 
@@ -124,8 +123,7 @@ export function useTasks() {
           .single()
 
         if (error) {
-          console.error('Erreur lors de la mise à jour de la tâche:', error)
-          return { error }
+          return { error: mapSupabaseError('Erreur lors de la mise à jour de la tâche', error) }
         }
 
         setTasks(tasks.map(t => t.id === taskId ? data : t))
@@ -140,8 +138,7 @@ export function useTasks() {
         return { data: localUpdated }
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur updateTaskStatus', error) }
     }
   }
 

@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+const supabaseUrl = process.env.SUPABASE_URL
+if (!supabaseUrl) throw new Error('SUPABASE_URL is required')
+
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+if (!supabaseKey) throw new Error('SUPABASE_SERVICE_KEY is required')
 
 export const supabase = createClient(supabaseUrl, supabaseKey)

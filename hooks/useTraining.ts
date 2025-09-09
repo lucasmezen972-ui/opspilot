@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, type Training, type UserTrainingProgress } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { mapSupabaseError } from '../utils/error'
 
 export function useTraining() {
   const [courses, setCourses] = useState<Training[]>([])
@@ -28,7 +29,7 @@ export function useTraining() {
         .order('created_at', { ascending: false })
 
       if (coursesError) {
-        console.error('Erreur lors de la récupération des cours:', coursesError)
+        mapSupabaseError('Erreur lors de la récupération des cours', coursesError)
         return
       }
 
@@ -41,13 +42,13 @@ export function useTraining() {
         .eq('user_id', profile.id)
 
       if (progressError) {
-        console.error('Erreur lors de la récupération de la progression:', progressError)
+        mapSupabaseError('Erreur lors de la récupération de la progression', progressError)
         return
       }
 
       setProgress(progressData || [])
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchTrainingData', error)
     } finally {
       setLoading(false)
     }
@@ -78,15 +79,13 @@ export function useTraining() {
         .single()
 
       if (error) {
-        console.error('Erreur lors du démarrage du cours:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors du démarrage du cours', error) }
       }
 
       setProgress([...progress, data])
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur startCourse', error) }
     }
   }
 
@@ -107,8 +106,7 @@ export function useTraining() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la mise à jour de la progression:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors de la mise à jour de la progression', error) }
       }
 
       // Mettre à jour la liste locale
@@ -123,8 +121,7 @@ export function useTraining() {
 
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur updateProgress', error) }
     }
   }
 
@@ -152,8 +149,7 @@ export function useTraining() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la validation du quiz:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors de la validation du quiz', error) }
       }
 
       setProgress(progress.map(p => 
@@ -167,8 +163,7 @@ export function useTraining() {
 
       return { data, passed }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur completeQuiz', error) }
     }
   }
 
@@ -186,7 +181,7 @@ export function useTraining() {
         })
         .eq('id', profile.id)
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des stats de formation:', error)
+      mapSupabaseError('Erreur lors de la mise à jour des stats de formation', error)
     }
   }
 
@@ -206,7 +201,7 @@ export function useTraining() {
         })
         .eq('id', profile.id)
     } catch (error) {
-      console.error('Erreur lors de l\'ajout d\'XP:', error)
+      mapSupabaseError("Erreur lors de l'ajout d'XP", error)
     }
   }
 

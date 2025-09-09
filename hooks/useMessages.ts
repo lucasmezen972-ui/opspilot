@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, type Message, type Conversation } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { mapSupabaseError } from '../utils/error'
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -27,13 +28,13 @@ export function useMessages() {
         .order('last_message_at', { ascending: false })
 
       if (error) {
-        console.error('Erreur lors de la récupération des conversations:', error)
+        mapSupabaseError('Erreur lors de la récupération des conversations', error)
         return
       }
 
       setConversations(data || [])
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchConversations', error)
     } finally {
       setLoading(false)
     }
@@ -51,13 +52,13 @@ export function useMessages() {
         .order('created_at', { ascending: true })
 
       if (error) {
-        console.error('Erreur lors de la récupération des messages:', error)
+        mapSupabaseError('Erreur lors de la récupération des messages', error)
         return
       }
 
       setMessages(data || [])
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchMessages', error)
     }
   }
 
@@ -86,8 +87,7 @@ export function useMessages() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de l\'envoi du message:', error)
-        return { error }
+        return { error: mapSupabaseError("Erreur lors de l'envoi du message", error) }
       }
 
       // Mettre à jour la dernière activité de la conversation
@@ -99,8 +99,7 @@ export function useMessages() {
       setMessages([...messages, data])
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur envoi message', error) }
     }
   }
 
@@ -119,7 +118,7 @@ export function useMessages() {
         .eq('id', messageId)
 
       if (error) {
-        console.error('Erreur lors du marquage comme lu:', error)
+        mapSupabaseError('Erreur lors du marquage comme lu', error)
         return
       }
 
@@ -129,7 +128,7 @@ export function useMessages() {
           : m
       ))
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur markAsRead', error)
     }
   }
 
@@ -173,15 +172,13 @@ export function useMessages() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la création de la conversation:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors de la création de la conversation', error) }
       }
 
       setConversations([data, ...conversations])
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur createConversation', error) }
     }
   }
 
