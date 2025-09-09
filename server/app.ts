@@ -36,9 +36,6 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
   app.get(`/${table}`, async (_, res) => {
     const { data, error } = await supabase.from(table).select('*').limit(100);
     if (error) {
-      return res
-        .status(500)
-        .json({ error: mapSupabaseError(`Failed to fetch ${table}`, error) });
     }
     res.json(data);
   });
@@ -51,9 +48,6 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
 
     const { data, error } = await supabase.from(table).select('*').limit(1000);
     if (error) {
-      return res
-        .status(500)
-        .json({ error: mapSupabaseError(`Failed to export ${table}`, error) });
     }
 
     if (format === 'excel') {
@@ -86,9 +80,6 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
       .select()
       .single();
     if (error) {
-      return res
-        .status(500)
-        .json({ error: mapSupabaseError(`Failed to create ${table}`, error) });
     }
     res.status(201).json(data);
   });
@@ -105,9 +96,6 @@ app.get('/trainings', async (_, res) => {
     .select('*')
     .limit(100);
   if (error) {
-    return res
-      .status(500)
-      .json({ error: mapSupabaseError('Failed to fetch trainings', error) });
   }
   res.json(data);
 });
@@ -126,6 +114,6 @@ app.post('/analysis', (req, res) => {
 });
 
 app.use(((err, _req, res, _next) => {
-  logger.error('Unhandled error', err);
+  logger.error({ err }, 'Unhandled error');
   res.status(500).json({ error: 'Internal Server Error' });
 }) as express.ErrorRequestHandler);
