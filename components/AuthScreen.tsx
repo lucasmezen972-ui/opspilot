@@ -4,6 +4,8 @@ import { LogIn, UserPlus } from 'lucide-react-native'
 import { useAuth } from '../hooks/useAuth'
 import ConnectedStatus from './ConnectedStatus'
 import NetworkDiagnostic from './NetworkDiagnostic'
+import { loginSchema, signUpSchema } from '../utils/validation'
+import { Alert } from 'react-native'
 
 export default function AuthScreen() {
   const { signIn, signUp, error: authError } = useAuth()
@@ -25,8 +27,10 @@ export default function AuthScreen() {
     }
   }
 
-  // Test automatique de connexion
+  // Test automatique de connexion (DEV SEULEMENT)
   const runConnectionTest = async () => {
+    if (!__DEV__) return
+    
     setTesting(true)
     setTestResult('🔄 Test en cours...')
     setLocalError('')

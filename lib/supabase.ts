@@ -11,15 +11,14 @@ const isConfigured = supabaseUrl !== 'https://placeholder.supabase.co' &&
                     supabaseUrl.includes('supabase.co') &&
                     supabaseAnonKey.length > 50
 
-// Vérification de la configuration
-console.log('🔗 Configuration Supabase:', {
-  url: supabaseUrl,
-  urlValid: supabaseUrl !== 'https://placeholder.supabase.co' && supabaseUrl.includes('supabase.co'),
-  hasAnonKey: !!supabaseAnonKey && supabaseAnonKey !== 'placeholder-anon-key',
-  keyLength: supabaseAnonKey.length,
-  isConfigured: isConfigured,
-  environment: process.env.NODE_ENV || 'development'
-})
+// Vérification de la configuration (DEV SEULEMENT)
+if (__DEV__) {
+  console.log('🔗 Supabase Config:', {
+    urlOk: !!supabaseUrl?.includes('supabase.co'),
+    keyLength: supabaseAnonKey?.length || 0,
+    configured: isConfigured
+  })
+}
 
 // Retry exponentiel pour 502 et timeouts
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -39,7 +38,6 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       
       clearTimeout(timeoutId)
       
-      // Retry sur 502 seulement
       if (response.status !== 502) {
         return response
       }
@@ -48,7 +46,7 @@ const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       
     } catch (error) {
       if (attempt >= 2) throw error
-      console.warn(`🔄 Retry ${attempt + 1}/3:`, error)
+      if (__DEV__) console.warn(`🔄 Retry ${attempt + 1}/3`)
     }
     
     attempt++

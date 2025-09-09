@@ -35,7 +35,7 @@ export function useAuth() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          await fetchUserProfile(session.user.id, cancelled)
+          await fetchUserProfile(session.user.id)
         } else {
           setProfile(null)
           setReady(true)
@@ -62,7 +62,7 @@ export function useAuth() {
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        await fetchUserProfile(session.user.id, cancelled)
+        await fetchUserProfile(session.user.id)
       } else {
         setProfile(null)
         setReady(true)
@@ -78,7 +78,7 @@ export function useAuth() {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('👤 Récupération profil utilisateur:', userId)
+      if (__DEV__) console.log('👤 Récupération profil utilisateur:', userId)
       
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -87,25 +87,28 @@ export function useAuth() {
         .maybeSingle()
 
       if (profileError && profileError.code !== 'PGRST116') {
-        console.error('❌ Erreur récupération profil:', profileError)
+        if (__DEV__) console.error('❌ Erreur récupération profil:', profileError)
         setError('Erreur lors de la récupération du profil')
+        setReady(true)
         setLoading(false)
         return
       }
 
       if (!profileData) {
-        console.log('🆕 Profil non trouvé, création automatique...')
+        if (__DEV__) console.log('🆕 Profil non trouvé, création automatique...')
         await createUserProfile(userId)
         return
       }
 
-      console.log('✅ Profil récupéré:', profileData)
+      if (__DEV__) console.log('✅ Profil récupéré')
       setProfile(profileData)
       setError(null)
+      setReady(true)
       setLoading(false)
     } catch (error) {
-      console.error('❌ Erreur inattendue profil:', error)
+      if (__DEV__) console.error('❌ Erreur inattendue profil:', error)
       setError('Erreur inattendue lors de la récupération des données')
+      setReady(true)
       setLoading(false)
     }
   }
@@ -114,12 +117,13 @@ export function useAuth() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        console.log('❌ Utilisateur non trouvé pour création profil')
+        if (__DEV__) console.log('❌ Utilisateur non trouvé pour création profil')
+        setReady(true)
         setLoading(false)
         return
       }
 
-      console.log('🆕 Création profil pour:', user.email)
+      if (__DEV__) console.log('🆕 Création profil pour:', user.email)
 
       // Utiliser UPSERT pour éviter les conflits de clés
       const { data: newProfile, error: createError } = await supabase
@@ -146,25 +150,28 @@ export function useAuth() {
         .single()
 
       if (createError) {
-        console.error('❌ Erreur création profil:', createError)
+        if (__DEV__) console.error('❌ Erreur création profil:', createError)
         setError(`Erreur profil: ${createError.message}`)
+        setReady(true)
         setLoading(false)
         return
       }
 
-      console.log('✅ Profil créé:', newProfile)
+      if (__DEV__) console.log('✅ Profil créé')
       setProfile(newProfile)
       setError(null)
+      setReady(true)
       setLoading(false)
     } catch (error) {
-      console.error('❌ Erreur création profil:', error)
+      if (__DEV__) console.error('❌ Erreur création profil:', error)
       setError('Erreur inattendue lors de la création du profil')
+      setReady(true)
       setLoading(false)
     }
   }
 
   const signIn = async (email: string, password: string) => {
-    console.log('🔑 Connexion pour:', email)
+    if (__DEV__) console.log('🔑 Connexion pour:', email)
     setError(null)
     setLoading(true)
 
@@ -181,7 +188,7 @@ export function useAuth() {
     })
     
     if (error) {
-      console.error('❌ Erreur connexion:', error)
+      if (__DEV__) console.error('❌ Erreur connexion:', error)
       if (error.message?.includes('Network request failed')) {
         setError('Erreur de connexion. Vérifiez votre réseau et la configuration Supabase.')
       } else {
@@ -189,7 +196,7 @@ export function useAuth() {
       }
       setLoading(false)
     } else {
-      console.log('✅ Connexion réussie:', data.user?.email)
+      if (__DEV__) console.log('✅ Connexion réussie:', data.user?.email)
       setError(null)
     }
     
@@ -197,7 +204,7 @@ export function useAuth() {
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    console.log('📝 Inscription pour:', email)
+    if (__DEV__) console.log('📝 Inscription pour:', email)
     setError(null)
     setLoading(true)
 
@@ -219,7 +226,7 @@ export function useAuth() {
     })
     
     if (error) {
-      console.error('❌ Erreur inscription:', error)
+      if (__DEV__) console.error('❌ Erreur inscription:', error)
       if (error.message?.includes('Network request failed')) {
         setError('Erreur de connexion. Vérifiez votre réseau et la configuration Supabase.')
       } else {
@@ -227,7 +234,7 @@ export function useAuth() {
       }
       setLoading(false)
     } else {
-      console.log('✅ Inscription réussie:', data.user?.email)
+      if (__DEV__) console.log('✅ Inscription réussie:', data.user?.email)
       setError(null)
     }
     
@@ -235,13 +242,13 @@ export function useAuth() {
   }
 
   const signOut = async () => {
-    console.log('🚪 Déconnexion...')
+    if (__DEV__) console.log('🚪 Déconnexion...')
     
     const { error } = await supabase.auth.signOut()
     if (error) {
-      console.error('❌ Erreur déconnexion:', error)
+      if (__DEV__) console.error('❌ Erreur déconnexion:', error)
     } else {
-      console.log('✅ Déconnexion réussie')
+      if (__DEV__) console.log('✅ Déconnexion réussie')
       setProfile(null)
       setError(null)
     }
