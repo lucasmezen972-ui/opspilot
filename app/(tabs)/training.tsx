@@ -1,50 +1,60 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Play, BookOpen, Award, Clock, CircleCheck as CheckCircle, Star, Users, Target, TrendingUp } from 'lucide-react-native';
-
-const courses = [
-  {
-    id: 1,
-    title: 'Accueil client excellence',
-    description: 'Apprenez les meilleures techniques d\'accueil et de service client',
-    duration: '25 min',
-    lessons: 5,
-    progress: 80,
-    status: 'in_progress',
-    difficulty: 'Débutant',
-    points: 50,
-  },
-  {
-    id: 2,
-    title: 'Hygiène et sécurité alimentaire',
-    description: 'Formation obligatoire sur les normes HACCP et la sécurité alimentaire',
-    duration: '45 min',
-    lessons: 8,
-    progress: 100,
-    status: 'completed',
-    difficulty: 'Intermédiaire',
-    points: 100,
-  },
-  {
-    id: 3,
-    title: 'Gestion des stocks et inventaire',
-    description: 'Maîtrisez les techniques de gestion des stocks et d\'inventaire',
-    duration: '35 min',
-    lessons: 6,
-    progress: 0,
-    status: 'not_started',
-    difficulty: 'Avancé',
-    points: 75,
-  },
-];
-
-const achievements = [
-  { id: 1, title: 'Premier cours terminé', icon: '🎓', unlocked: true },
-  { id: 2, title: 'Semaine parfaite', icon: '⭐', unlocked: true },
-  { id: 3, title: 'Expert formation', icon: '🏆', unlocked: false },
-  { id: 4, title: 'Mentor', icon: '👨‍🏫', unlocked: false },
-];
+import { Play, BookOpen, Award, Clock, CircleCheck as CheckCircle, Star, Users, Target, TrendingUp, Sparkles, Plus } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { generateTrainingContent } from '../../lib/openai';
+import { Alert } from 'react-native';
 
 export default function TrainingScreen() {
+  const { profile } = useAuth();
+  const [courses, setCourses] = useState([
+    {
+      id: '1',
+      title: 'Accueil client excellence',
+      description: 'Apprenez les meilleures techniques d\'accueil et de service client',
+      duration_minutes: 25,
+      progress: 80,
+      status: 'in_progress',
+      difficulty: 'beginner',
+      xp_reward: 50,
+    },
+    {
+      id: '2',
+      title: 'Hygiène et sécurité alimentaire',
+      description: 'Formation obligatoire sur les normes HACCP et la sécurité alimentaire',
+      duration_minutes: 45,
+      progress: 100,
+      status: 'completed',
+      difficulty: 'intermediate',
+      xp_reward: 100,
+    },
+    {
+      id: '3',
+      title: 'Gestion des stocks et inventaire',
+      description: 'Maîtrisez les techniques de gestion des stocks et d\'inventaire',
+      duration_minutes: 35,
+      progress: 0,
+      status: 'not_started',
+      difficulty: 'advanced',
+      xp_reward: 75,
+    }
+  ]);
+
+  const [achievements] = useState([
+    { id: 1, title: 'Premier cours terminé', icon: '🎓', unlocked: true },
+    { id: 2, title: 'Semaine parfaite', icon: '⭐', unlocked: true },
+    { id: 3, title: 'Expert formation', icon: '🏆', unlocked: false },
+    { id: 4, title: 'Mentor', icon: '👨‍🏫', unlocked: false },
+  ]);
+
+  const [generatingCourse, setGeneratingCourse] = useState(false);
+
+  // Stats calculées
+  const completedCourses = courses.filter(c => c.status === 'completed').length;
+  const totalStudyTime = courses.filter(c => c.status === 'completed')
+    .reduce((total, course) => total + course.duration_minutes, 0);
+  const avgScore = 87; // Pourrait être calculé depuis les vrais résultats
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
@@ -65,10 +75,98 @@ export default function TrainingScreen() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Débutant': return '#10B981';
-      case 'Intermédiaire': return '#F59E0B';
-      case 'Avancé': return '#EF4444';
+      case 'beginner': return '#10B981';
+      case 'intermediate': return '#F59E0B';
+      case 'advanced': return '#EF4444';
       default: return '#6B7280';
+    }
+  };
+
+  const getDifficultyText = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'Débutant';
+      case 'intermediate': return 'Intermédiaire';
+      case 'advanced': return 'Avancé';
+      default: return 'Inconnu';
+    }
+  };
+
+  const handleStartCourse = (courseId: string) => {
+    setCourses(courses.map(course => 
+      course.id === courseId 
+        ? { ...course, status: 'in_progress', progress: Math.max(1, course.progress) }
+        : course
+    ));
+    Alert.alert('Formation démarrée', 'Vous pouvez maintenant suivre cette formation !');
+  };
+
+  const handleContinueCourse = (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (course && course.progress < 100) {
+      const newProgress = Math.min(100, course.progress + 20);
+      const newStatus = newProgress === 100 ? 'completed' : 'in_progress';
+      
+      setCourses(courses.map(c => 
+        c.id === courseId 
+          ? { ...c, progress: newProgress, status: newStatus }
+          : c
+      ));
+      
+      if (newStatus === 'completed') {
+        Alert.alert('Félicitations !', `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`);
+      } else {
+        Alert.alert('Progression', `Formation mise à jour : ${newProgress}% terminé`);
+      }
+    }
+  };
+
+  const generateAICourse = async () => {
+    if (!process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+      Alert.alert('IA non disponible', 'Clé OpenAI manquante pour générer du contenu de formation.');
+      return;
+    }
+
+    const topics = [
+      'Techniques de vente cross-selling',
+      'Gestion des clients difficiles',
+      'Optimisation de la présentation produits',
+      'Procédures d\'ouverture/fermeture de magasin',
+      'Sécurité au travail dans la grande distribution'
+    ];
+
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    const difficulties = ['beginner', 'intermediate', 'advanced'];
+    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+
+    setGeneratingCourse(true);
+
+    try {
+      const content = await generateTrainingContent(randomTopic, randomDifficulty as any);
+      
+      const newCourse = {
+        id: Date.now().toString(),
+        title: content.title,
+        description: content.content.substring(0, 150) + '...',
+        duration_minutes: 30,
+        progress: 0,
+        status: 'not_started' as const,
+        difficulty: randomDifficulty as any,
+        xp_reward: randomDifficulty === 'beginner' ? 50 : randomDifficulty === 'intermediate' ? 75 : 100,
+        ai_generated: true,
+        full_content: content
+      };
+
+      setCourses([newCourse, ...courses]);
+      
+      Alert.alert(
+        '🤖 Formation IA créée !',
+        `"${content.title}" a été généré et ajouté à vos formations disponibles.`
+      );
+    } catch (error) {
+      Alert.alert('Erreur', 'Impossible de générer la formation IA.');
+      console.error('Erreur génération formation:', error);
+    } finally {
+      setGeneratingCourse(false);
     }
   };
 
@@ -79,7 +177,7 @@ export default function TrainingScreen() {
         <Text style={styles.title}>Formation</Text>
         <View style={styles.pointsBadge}>
           <Star size={16} color="#F59E0B" />
-          <Text style={styles.pointsText}>425 XP</Text>
+          <Text style={styles.pointsText}>{profile?.xp || 0} XP</Text>
         </View>
       </View>
 
@@ -89,17 +187,17 @@ export default function TrainingScreen() {
           <View style={styles.progressStats}>
             <View style={styles.progressStatItem}>
               <BookOpen size={20} color="#2563EB" />
-              <Text style={styles.progressStatNumber}>12</Text>
+              <Text style={styles.progressStatNumber}>{completedCourses}</Text>
               <Text style={styles.progressStatLabel}>Cours terminés</Text>
             </View>
             <View style={styles.progressStatItem}>
               <Clock size={20} color="#F59E0B" />
-              <Text style={styles.progressStatNumber}>8h 30m</Text>
+              <Text style={styles.progressStatNumber}>{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</Text>
               <Text style={styles.progressStatLabel}>Temps d'étude</Text>
             </View>
             <View style={styles.progressStatItem}>
               <TrendingUp size={20} color="#10B981" />
-              <Text style={styles.progressStatNumber}>87%</Text>
+              <Text style={styles.progressStatNumber}>{avgScore}%</Text>
               <Text style={styles.progressStatLabel}>Score moyen</Text>
             </View>
           </View>
@@ -126,7 +224,22 @@ export default function TrainingScreen() {
 
         {/* Courses */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Formations disponibles</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Formations disponibles</Text>
+            {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
+              <TouchableOpacity 
+                style={styles.aiGenerateButton}
+                onPress={generateAICourse}
+                disabled={generatingCourse}
+              >
+                <Sparkles size={16} color="#F59E0B" />
+                <Text style={styles.aiGenerateButtonText}>
+                  {generatingCourse ? 'Génération...' : 'IA'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
           {courses.map((course) => (
             <TouchableOpacity key={course.id} style={styles.courseCard}>
               <View style={styles.courseHeader}>
@@ -136,22 +249,28 @@ export default function TrainingScreen() {
                 </View>
                 <View style={styles.coursePoints}>
                   <Star size={14} color="#F59E0B" />
-                  <Text style={styles.coursePointsText}>{course.points}</Text>
+                  <Text style={styles.coursePointsText}>{course.xp_reward}</Text>
                 </View>
+                {course.ai_generated && (
+                  <View style={styles.aiGeneratedBadge}>
+                    <Sparkles size={12} color="#8B5CF6" />
+                    <Text style={styles.aiGeneratedText}>IA</Text>
+                  </View>
+                )}
               </View>
 
               <View style={styles.courseMeta}>
                 <View style={styles.courseMetaItem}>
                   <Clock size={14} color="#6B7280" />
-                  <Text style={styles.courseMetaText}>{course.duration}</Text>
+                  <Text style={styles.courseMetaText}>{course.duration_minutes} min</Text>
                 </View>
                 <View style={styles.courseMetaItem}>
                   <BookOpen size={14} color="#6B7280" />
-                  <Text style={styles.courseMetaText}>{course.lessons} leçons</Text>
+                  <Text style={styles.courseMetaText}>Formation complète</Text>
                 </View>
                 <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(course.difficulty)}20` }]}>
                   <Text style={[styles.difficultyText, { color: getDifficultyColor(course.difficulty) }]}>
-                    {course.difficulty}
+                    {getDifficultyText(course.difficulty)}
                   </Text>
                 </View>
               </View>
@@ -179,7 +298,16 @@ export default function TrainingScreen() {
                   </Text>
                 </View>
                 
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={() => {
+                    if (course.status === 'not_started') {
+                      handleStartCourse(course.id);
+                    } else {
+                      handleContinueCourse(course.id);
+                    }
+                  }}
+                >
                   <Play size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>
                     {course.status === 'not_started' ? 'Commencer' : 
@@ -199,22 +327,22 @@ export default function TrainingScreen() {
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>1</Text>
               </View>
-              <Text style={styles.leaderboardName}>Marie Dupont (Vous)</Text>
-              <Text style={styles.leaderboardPoints}>425 XP</Text>
+              <Text style={styles.leaderboardName}>{profile?.full_name || 'Vous'}</Text>
+              <Text style={styles.leaderboardPoints}>{profile?.xp || 0} XP</Text>
             </View>
             <View style={styles.leaderboardItem}>
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>2</Text>
               </View>
               <Text style={styles.leaderboardName}>Pierre Martin</Text>
-              <Text style={styles.leaderboardPoints}>398 XP</Text>
+              <Text style={styles.leaderboardPoints}>{Math.max(0, (profile?.xp || 0) - 50)} XP</Text>
             </View>
             <View style={styles.leaderboardItem}>
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>3</Text>
               </View>
               <Text style={styles.leaderboardName}>Jean Leroy</Text>
-              <Text style={styles.leaderboardPoints}>356 XP</Text>
+              <Text style={styles.leaderboardPoints}>{Math.max(0, (profile?.xp || 0) - 100)} XP</Text>
             </View>
           </View>
         </View>
@@ -301,6 +429,28 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 16,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  aiGenerateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  aiGenerateButtonText: {
+    color: '#D97706',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
   achievementsList: {
     flexDirection: 'row',
   },
@@ -375,6 +525,21 @@ const styles = StyleSheet.create({
   coursePointsText: {
     color: '#D97706',
     fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 2,
+  },
+  aiGeneratedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  aiGeneratedText: {
+    color: '#8B5CF6',
+    fontSize: 10,
     fontWeight: '600',
     marginLeft: 2,
   },

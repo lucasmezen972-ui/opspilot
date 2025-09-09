@@ -1,43 +1,34 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Plus, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, MapPin, Flag, User } from 'lucide-react-native';
-
-const tasks = [
-  {
-    id: 1,
-    title: 'Vérification des DLC rayon frais',
-    description: 'Contrôler toutes les dates de péremption du rayon frais et retirer les produits expirés',
-    priority: 'high',
-    status: 'pending',
-    assignee: 'Marie Dupont',
-    location: 'Rayon frais',
-    dueDate: '2024-01-15 14:00',
-    estimatedTime: '30 min',
-  },
-  {
-    id: 2,
-    title: 'Réassort conserves',
-    description: 'Compléter les rayons de conserves selon la liste fournie',
-    priority: 'medium',
-    status: 'in_progress',
-    assignee: 'Pierre Martin',
-    location: 'Allée 3',
-    dueDate: '2024-01-15 16:00',
-    estimatedTime: '45 min',
-  },
-  {
-    id: 3,
-    title: 'Nettoyage vitrine boucherie',
-    description: 'Nettoyage complet de la vitrine et changement de l\'étiquetage',
-    priority: 'low',
-    status: 'completed',
-    assignee: 'Jean Leroy',
-    location: 'Boucherie',
-    dueDate: '2024-01-15 11:00',
-    estimatedTime: '20 min',
-  },
-];
+import { useState } from 'react';
+import { useTasks } from '../../hooks/useTasks';
+import { useAuth } from '../../hooks/useAuth';
+import { Alert } from 'react-native';
 
 export default function TasksScreen() {
+  const { tasks, loading, updateTaskStatus } = useTasks();
+  const { profile } = useAuth();
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'my' | 'pending' | 'in_progress'>('all');
+
+  // Filtrer les tâches
+  let filteredTasks = tasks;
+  switch (selectedFilter) {
+    case 'my':
+      filteredTasks = tasks.filter(t => t.assigned_to === profile?.id);
+      break;
+    case 'pending':
+      filteredTasks = tasks.filter(t => t.status === 'pending');
+      break;
+    case 'in_progress':
+      filteredTasks = tasks.filter(t => t.status === 'in_progress');
+      break;
+  }
+
+  // Statistiques
+  const pendingCount = tasks.filter(t => t.status === 'pending').length;
+  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return '#EF4444';
@@ -83,6 +74,20 @@ export default function TasksScreen() {
     }
   };
 
+  const handleStartTask = async (taskId: string) => {
+    const result = await updateTaskStatus(taskId, 'in_progress');
+    if (!result.error) {
+      Alert.alert('Tâche démarrée', 'Vous pouvez maintenant travailler sur cette tâche.');
+    }
+  };
+
+  const handleCompleteTask = async (taskId: string) => {
+    const result = await updateTaskStatus(taskId, 'completed');
+    if (!result.error) {
+      Alert.alert('Félicitations !', 'Tâche terminée avec succès !');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -96,28 +101,65 @@ export default function TasksScreen() {
       {/* Quick Stats */}
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>8</Text>
+          <Text style={styles.quickStatNumber}>{pendingCount}</Text>
           <Text style={styles.quickStatLabel}>À faire</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>3</Text>
+          <Text style={styles.quickStatNumber}>{inProgressCount}</Text>
           <Text style={styles.quickStatLabel}>En cours</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>15</Text>
+          <Text style={styles.quickStatNumber}>{completedCount}</Text>
           <Text style={styles.quickStatLabel}>Terminées</Text>
         </View>
       </View>
 
+      {/* Filters */}
+      <View style={styles.filtersContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
+          {[
+            { key: 'all', label: 'Toutes' },
+            { key: 'my', label: 'Mes tâches' },
+            { key: 'pending', label: 'À faire' },
+            { key: 'in_progress', label: 'En cours' }
+          ].map((filter) => (
+            <TouchableOpacity
+              key={filter.key}
+              style={[
+                styles.filterButton,
+                selectedFilter === filter.key && styles.filterButtonActive
+              ]}
+              onPress={() => setSelectedFilter(filter.key as any)}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                selectedFilter === filter.key && styles.filterButtonTextActive
+              ]}>
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {/* Create New Task Button */}
-      <TouchableOpacity style={styles.createButton}>
+      <TouchableOpacity 
+        style={styles.createButton}
+        onPress={() => Alert.alert('Bientôt disponible', 'La création de tâche sera bientôt disponible.')}
+      >
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Nouvelle tâche</Text>
       </TouchableOpacity>
 
       {/* Tasks List */}
       <ScrollView style={styles.tasksList}>
-        {tasks.map((task) => {
+        {loading && filteredTasks.length === 0 && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Chargement des tâches...</Text>
+          </View>
+        )}
+        
+        {filteredTasks.map((task) => {
           const StatusIcon = getStatusIcon(task.status);
           return (
             <TouchableOpacity key={task.id} style={styles.taskCard}>
@@ -146,7 +188,9 @@ export default function TasksScreen() {
               <View style={styles.taskDetails}>
                 <View style={styles.taskDetailRow}>
                   <User size={14} color="#6B7280" />
-                  <Text style={styles.taskDetailText}>{task.assignee}</Text>
+                  <Text style={styles.taskDetailText}>
+                    {task.assigned_to === profile?.id ? 'Vous' : 'Autre utilisateur'}
+                  </Text>
                 </View>
                 <View style={styles.taskDetailRow}>
                   <MapPin size={14} color="#6B7280" />
@@ -155,21 +199,27 @@ export default function TasksScreen() {
                 <View style={styles.taskDetailRow}>
                   <Calendar size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>{task.dueDate}</Text>
-                </View>
+                    {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Pas d\'échéance'}
                 <View style={styles.taskDetailRow}>
                   <Clock size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>{task.estimatedTime}</Text>
-                </View>
+                    {task.estimated_time_minutes ? `${task.estimated_time_minutes} min` : 'Non estimé'}
               </View>
 
               {task.status !== 'completed' && (
                 <View style={styles.taskActions}>
                   {task.status === 'pending' ? (
-                    <TouchableOpacity style={styles.startButton}>
+                    <TouchableOpacity 
+                      style={styles.startButton}
+                      onPress={() => handleStartTask(task.id)}
+                    >
                       <Text style={styles.startButtonText}>Commencer</Text>
                     </TouchableOpacity>
                   ) : (
-                    <TouchableOpacity style={styles.completeButton}>
+                    <TouchableOpacity 
+                      style={styles.completeButton}
+                      onPress={() => handleCompleteTask(task.id)}
+                    >
                       <CheckCircle size={16} color="#FFFFFF" />
                       <Text style={styles.completeButtonText}>Terminer</Text>
                     </TouchableOpacity>
@@ -179,6 +229,16 @@ export default function TasksScreen() {
             </TouchableOpacity>
           );
         })}
+        
+        {!loading && filteredTasks.length === 0 && (
+          <View style={styles.emptyState}>
+            <CheckCircle size={48} color="#9CA3AF" />
+            <Text style={styles.emptyStateTitle}>Aucune tâche</Text>
+            <Text style={styles.emptyStateText}>
+              {selectedFilter === 'all' ? 'Aucune tâche disponible.' : `Aucune tâche ${selectedFilter === 'my' ? 'qui vous est assignée' : selectedFilter === 'pending' ? 'en attente' : 'en cours'}.`}
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Floating Action Button */}
@@ -237,6 +297,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginTop: 4,
+  },
+  filtersContainer: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  filtersScroll: {
+    paddingHorizontal: 20,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    marginRight: 8,
+  },
+  filterButtonActive: {
+    backgroundColor: '#2563EB',
+  },
+  filterButtonText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  filterButtonTextActive: {
+    color: '#FFFFFF',
   },
   createButton: {
     flexDirection: 'row',
@@ -364,11 +450,36 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 4,
   },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#6B7280',
+    fontSize: 16,
+  },
+  emptyState: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
   fab: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    bottom: 90, // Ajuster pour éviter le chevauchement avec la barre d'onglets
+    bottom: 90,
     width: 56,
     height: 56,
     borderRadius: 28,
