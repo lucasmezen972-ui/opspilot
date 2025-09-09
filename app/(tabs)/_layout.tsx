@@ -20,8 +20,7 @@ export default function TabLayout() {
             <Home size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="audits"
         options={{
           title: 'Audits',
@@ -29,8 +28,7 @@ export default function TabLayout() {
             <ClipboardCheck size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="products"
         options={{
           title: 'Produits',
@@ -38,8 +36,7 @@ export default function TabLayout() {
             <Package size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="tasks"
         options={{
           title: 'Tâches',
@@ -47,8 +44,7 @@ export default function TabLayout() {
             <CheckSquare size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="training"
         options={{
           title: 'Formation',
@@ -56,8 +52,7 @@ export default function TabLayout() {
             <GraduationCap size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="chat"
         options={{
           title: 'Messages',
@@ -65,8 +60,7 @@ export default function TabLayout() {
             <MessageCircle size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="advanced"
         options={{
           title: 'Avancé',
@@ -74,8 +68,7 @@ export default function TabLayout() {
             <Brain size={size} color={color} />
           ),
         }}
-      />
-      <Tabs.Screen
+      /><Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',

@@ -6,7 +6,7 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 
 // Validation de la configuration
-const isConfigured = supabaseUrl !== 'https://placeholder.supabase.co' && 
+export const isConfigured = supabaseUrl !== 'https://placeholder.supabase.co' && 
                     supabaseAnonKey !== 'placeholder-anon-key' &&
                     supabaseUrl.includes('supabase.co') &&
                     supabaseAnonKey.length > 50
