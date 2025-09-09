@@ -16,11 +16,13 @@ export default function AuthScreen() {
   const [testResult, setTestResult] = useState('')
   const [testing, setTesting] = useState(false)
 
-  // Pré-remplir avec les identifiants de démo
+  // Remplir avec les identifiants de démo (DEV SEULEMENT)
   const fillDemoCredentials = () => {
-    setEmail('marie.dupont@opspilot.com')
-    setPassword('demo123')
-    setLocalError('')
+    if (__DEV__) {
+      setEmail('marie.dupont@opspilot.com')
+      setPassword('demo123')
+      setLocalError('')
+    }
   }
 
   // Test automatique de connexion
@@ -62,14 +64,18 @@ export default function AuthScreen() {
 
   const handleAuth = async () => {
     setLocalError('')
-    
-    if (!email || !password) {
-      setLocalError('Veuillez remplir tous les champs')
-      return
-    }
 
-    if (!isLogin && !fullName) {
-      setLocalError('Veuillez entrer votre nom complet')
+    // Validation avec Zod
+    try {
+      if (isLogin) {
+        loginSchema.parse({ email, password })
+      } else {
+        signUpSchema.parse({ email, password, fullName })
+      }
+    } catch (error: any) {
+      const zodError = error?.issues?.[0]?.message || 'Champs invalides'
+      setLocalError(zodError)
+      Alert.alert('Validation', zodError)
       return
     }
 

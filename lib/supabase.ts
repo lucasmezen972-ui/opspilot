@@ -21,6 +21,43 @@ console.log('🔗 Configuration Supabase:', {
   environment: process.env.NODE_ENV || 'development'
 })
 
+// Retry exponentiel pour 502 et timeouts
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+const customFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  let attempt = 0
+  
+  while (attempt < 3) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
+      
+      const response = await fetch(input, {
+        ...init,
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      // Retry sur 502 seulement
+      if (response.status !== 502) {
+        return response
+      }
+      
+      if (attempt >= 2) return response // Max 3 tentatives
+      
+    } catch (error) {
+      if (attempt >= 2) throw error
+      console.warn(`🔄 Retry ${attempt + 1}/3:`, error)
+    }
+    
+    attempt++
+    await sleep(300 * attempt) // Backoff: 300ms, 600ms, 900ms
+  }
+  
+  throw new Error('Max retries exceeded')
+}
+
 // Configuration avec timeout et retry pour éviter les erreurs 502
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -30,23 +67,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
   global: {
-    fetch: async (url, options = {}) => {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 10000)
-        
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        return response
-      } catch (error) {
-        console.error('🌐 Erreur fetch Supabase:', error)
-        throw error
-      }
-    }
+    fetch: customFetch
   },
   db: {
     schema: 'public',

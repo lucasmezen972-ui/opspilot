@@ -7,46 +7,73 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    console.log('🔍 Initialisation useAuth...')
+    if (__DEV__) console.log('🔍 Init useAuth...')
     
-    // Récupérer la session actuelle
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        console.error('❌ Erreur session:', error)
-        setError(error.message)
-        setLoading(false)
-        return
-      }
+    let cancelled = false
+    
+    // Initialisation async avec protection race condition
+    const initialize = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (cancelled) return
+        
+        if (error) {
+          if (__DEV__) console.error('❌ Session error:', error)
+          setError(error.message)
+          setReady(true)
+          setLoading(false)
+          return
+        }
 
-      console.log('📱 Session récupérée:', session ? 'Connecté' : 'Non connecté')
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      } else {
-        setLoading(false)
+        if (__DEV__) console.log('📱 Session:', session ? 'Connected' : 'Not connected')
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          await fetchUserProfile(session.user.id, cancelled)
+        } else {
+          setProfile(null)
+          setReady(true)
+          setLoading(false)
+        }
+      } catch (error: any) {
+        if (!cancelled) {
+          if (__DEV__) console.error('❌ Init error:', error)
+          setError(error.message)
+          setReady(true)
+          setLoading(false)
+        }
       }
-    })
+    }
 
-    // Écouter les changements d'authentification
+    initialize()
+
+    // Écouter changements auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Changement auth:', event, session ? 'Connecté' : 'Déconnecté')
+      if (cancelled) return
+      
+      if (__DEV__) console.log('🔄 Auth change:', event)
       setSession(session)
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        await fetchUserProfile(session.user.id)
+        await fetchUserProfile(session.user.id, cancelled)
       } else {
         setProfile(null)
+        setReady(true)
         setLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
   const fetchUserProfile = async (userId: string) => {
@@ -231,6 +258,7 @@ export function useAuth() {
     user,
     profile,
     loading,
+    ready,
     error,
     signIn,
     signUp,

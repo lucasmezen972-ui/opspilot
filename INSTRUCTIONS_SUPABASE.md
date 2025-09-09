@@ -1,69 +1,67 @@
-# 🚀 INSTRUCTIONS SUPABASE - OPSPILOT
+## 🚀 CONFIGURATION SUPABASE RAPIDE
 
-## 📋 ÉTAPES À SUIVRE :
+### **PROBLÈME : "Click to connect to Supabase"**
+L'app affiche ce message car Supabase n'est pas encore configuré.
 
-### **1. Ouvrez votre projet Supabase**
-- Allez sur [supabase.com](https://supabase.com)
-- Connectez-vous et ouvrez votre projet OpsPilot
+---
 
-### **2. Ouvrez l'éditeur SQL**
-- Dans le menu de gauche, cliquez sur **"SQL Editor"**
-- Cliquez sur **"New query"** (nouvelle requête)
+### **SOLUTION EXPRESS (2 MINUTES) :**
 
-### **3. Copiez le script complet**
-- Ouvrez le fichier `SCRIPT_SUPABASE_COMPLET.sql`
-- **SÉLECTIONNEZ TOUT** (Ctrl+A)
-- **COPIEZ TOUT** (Ctrl+C)
+#### **1. Cliquez sur "Connect to Supabase"** 
+- **En haut à droite** de l'interface Bolt
+- Bolt va automatiquement tout configurer
 
-### **4. Collez et exécutez**
-- **COLLEZ** dans l'éditeur SQL Supabase (Ctrl+V)
-- Cliquez sur le bouton **"RUN"** (Exécuter) 
-- ⚠️ **L'exécution peut prendre 10-20 secondes**
+#### **2. OU Configuration manuelle :**
 
-### **5. Vérifiez le succès** ✅
-Vous devriez voir des messages comme :
-```
-🎉 BACKEND OPSPILOT CRÉÉ AVEC SUCCÈS !
-✅ 18 tables créées avec relations
-✅ Index de performance ajoutés
-✅ Sécurité RLS configurée
-✅ Données de démo insérées
+**A. Créer le projet Supabase :**
+1. Allez sur [supabase.com](https://supabase.com)
+2. **"New Project"** 
+3. Notez **URL** et **anon key** (Settings > API)
+
+**B. Configurer les variables :**
+- **Cliquez** sur le fichier `.env` 
+- **Remplacez** les placeholders par vos vraies valeurs :
+```env
+EXPO_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs... (votre vraie clé)
 ```
 
-### **6. Testez l'application**
-- Retournez à votre app OpsPilot
-- Cliquez sur **"🧪 TESTER CONNEXION + DÉMO"**
-- Ou connectez-vous avec : **demo@opspilot.com** / **demo123**
+**C. Créer la base de données :**
+1. **Supabase** → **SQL Editor** → **"New query"**
+2. **Copiez** tout le fichier `create_complete_opspilot_schema.sql`
+3. **Collez** et cliquez **"RUN"** 
+4. **Attendez** 10-15 secondes
 
-## 🎯 CE QUI VA MARCHER :
+**D. Créer l'utilisateur démo :**
+1. **Copiez** le fichier `create_demo_user_final.sql`
+2. **Collez** dans SQL Editor et **"RUN"**
+3. **Ou** : Authentication → Users → Add user → Create new user
+   - Email: `demo@opspilot.com` 
+   - Password: `demo123`
 
-✅ **Toutes les fonctionnalités** OpsPilot
-✅ **18 tables enterprise** avec relations parfaites
-✅ **Données réalistes** pour tester
-✅ **Sécurité RLS** configurée
-✅ **Performance optimisée** avec index
-✅ **Compte démo** fonctionnel
-✅ **Backend multi-tenant** complet
+---
 
-## ⚠️ EN CAS DE PROBLÈME :
+### ✅ **VÉRIFICATION FINALE :**
+1. **Rafraîchissez** l'app (F5)
+2. **Connectez-vous** : `demo@opspilot.com` / `demo123`
+3. **Vérifiez** que tous les onglets marchent
 
-### **Erreur "table already exists"**
-- C'est normal, le script nettoie d'abord
-- Continuez l'exécution
+---
 
-### **Erreur de permission**
-- Vérifiez que vous êtes propriétaire du projet
-- Ou créez un nouveau projet Supabase
+### 🎯 **RÉSULTAT ATTENDU :**
+- ✅ **Plus de message** "Connect to Supabase"
+- ✅ **Connexion réussie** avec Marie Dupont
+- ✅ **Dashboard** avec vraies statistiques
+- ✅ **Toutes fonctionnalités** opérationnelles
 
-### **Script trop long**
-- Copiez par sections de 500 lignes
-- Ou utilisez l'upload de fichier SQL
+---
 
-## 🆘 AIDE SUPPLÉMENTAIRE :
+## 🆘 **EN CAS DE PROBLÈME :**
 
-Si ça ne marche pas :
-1. **Envoyez-moi** le message d'erreur exact
-2. **Dites-moi** à quelle ligne ça bloque
-3. **Je vais corriger** immédiatement !
+**"Invalid login credentials"** → L'utilisateur demo n'existe pas → Exécutez `create_demo_user_final.sql`
 
-**L'application OpsPilot sera parfaite après ça !** 🎖️
+**"Network request failed"** → Problème de configuration → Vérifiez URL/clé dans `.env`
+
+**App qui reste bloquée** → Rafraîchissez (F5) ou redémarrez le dev server
+
+**Autres erreurs** → Envoyez-moi le message exact pour un fix immédiat !
