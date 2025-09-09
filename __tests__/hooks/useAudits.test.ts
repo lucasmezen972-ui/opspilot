@@ -3,8 +3,8 @@ import { useAudits } from '../../hooks/useAudits'
 import { useAuth } from '../../hooks/useAuth'
 
 // Mock useAuth hook
-jest.mock('../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }))
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
@@ -34,11 +34,11 @@ describe('useAudits Hook', () => {
       profile: mockProfile,
       session: null,
       loading: false,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
   })
 

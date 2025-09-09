@@ -4,18 +4,18 @@ import AuthScreen from '../../components/AuthScreen'
 import { useAuth } from '../../hooks/useAuth'
 
 // Mock useAuth hook
-jest.mock('../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }))
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 
 describe('AuthScreen Component', () => {
-  const mockSignIn = jest.fn()
-  const mockSignUp = jest.fn()
+  const mockSignIn = vi.fn()
+  const mockSignUp = vi.fn()
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockUseAuth.mockReturnValue({
       user: null,
       profile: null,
@@ -23,9 +23,9 @@ describe('AuthScreen Component', () => {
       loading: false,
       signIn: mockSignIn,
       signUp: mockSignUp,
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
   })
 
@@ -107,9 +107,9 @@ describe('AuthScreen Component', () => {
       loading: true,
       signIn: mockSignIn,
       signUp: mockSignUp,
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
 
     const { rerender } = render(<AuthScreen />)

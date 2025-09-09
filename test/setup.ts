@@ -1,5 +1,21 @@
 // @ts-nocheck
 import { vi as jest } from 'vitest'
+import { createRequire } from 'module'
+import React from 'react'
+
+// Ensure any import of "react-native" resolves to the web implementation before modules load
+const require = createRequire(import.meta.url)
+const Module = require('module')
+const originalResolveFilename = Module._resolveFilename
+Module._resolveFilename = function (request: string, parent, isMain, options) {
+  if (request === 'react-native') {
+    request = 'react-native-web/dist/cjs'
+  }
+  return originalResolveFilename.call(this, request, parent, isMain, options)
+}
+
+// Provide a global jest variable for test files
+;(globalThis as any).jest = jest
 
 // Redirect react-native imports to react-native-web for testing
 jest.mock('react-native', () => require('react-native-web/dist/cjs'))
@@ -37,12 +53,16 @@ jest.mock('expo-constants', () => ({
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
-  return new Proxy({}, {
-    get: (target, prop) =>
-      React.forwardRef((props: any, ref: any) =>
-        React.createElement('span', { ...props, ref }, prop.toString())
-      )
-  })
+  return new Proxy(
+    {},
+    {
+      get: (_target, prop) =>
+        React.forwardRef((props: any, ref: any) =>
+          React.createElement('span', { ...props, ref }, prop.toString())
+        ),
+      has: () => true,
+    }
+  )
 })
 
 // Mock AsyncStorage
