@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { LogIn, UserPlus } from 'lucide-react-native'
 import ConnectedStatus from './ConnectedStatus'
@@ -12,7 +12,13 @@ export default function AuthScreen() {
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
   const [localError, setLocalError] = useState('')
-  const { signIn, signUp, error: authError } = useAuth()
+  const { signIn, signUp, authError } = useAuth()
+
+  useEffect(() => {
+    if (__DEV__) {
+      // runConnectionTest(); // garder uniquement en DEV si besoin
+    }
+  }, [])
 
   const handleAuth = async () => {
     setLocalError('')
@@ -36,15 +42,9 @@ export default function AuthScreen() {
       } else {
         result = await signUp(email, password, fullName)
       }
-
-      if (result.error) {
-        setLocalError(result.error.message || 'Erreur de connexion')
-      } else if (!isLogin) {
-        setLocalError('')
-        setIsLogin(true)
-      }
-    } catch (err) {
-      setLocalError("Une erreur inattendue s'est produite")
+      if (result.error) throw result.error
+    } catch (e: any) {
+      setLocalError(e?.message ?? 'Erreur')
     } finally {
       setLoading(false)
     }
@@ -143,14 +143,7 @@ export default function AuthScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.demoInfo}>
-        <Text style={styles.demoTitle}>Compte de démonstration</Text>
-        <View style={styles.demoButton}>
-          <Text style={styles.demoButtonText}>Email: demo@opspilot.com</Text>
-          <Text style={styles.demoButtonText}>Mot de passe: demo123</Text>
-        </View>
-        <Text style={styles.demoClickText}>Cliquez pour remplir automatiquement</Text>
-      </View>
+      {/* Bloc UI démo supprimé */}
     </View>
   )
 }
@@ -277,41 +270,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  demoInfo: {
-    backgroundColor: '#EFF6FF',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 24,
-  },
-  demoTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E40AF',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  demoButton: {
-    backgroundColor: '#DBEAFE',
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-  },
-  demoButtonText: {
-    fontSize: 12,
-    color: '#3730A3',
-    textAlign: 'center',
-    marginBottom: 2,
-    fontFamily: 'monospace',
-    fontWeight: '600',
-  },
-  demoClickText: {
-    fontSize: 10,
-    color: '#1E40AF',
-    textAlign: 'center',
-    marginTop: 4,
-    fontStyle: 'italic',
   },
 })
 

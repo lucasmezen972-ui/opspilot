@@ -1,0 +1,7 @@
+{
+  "extends": ["universe/native", "universe/shared/typescript-analysis"],
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module", "project": "./tsconfig.json" },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+  }
+}
