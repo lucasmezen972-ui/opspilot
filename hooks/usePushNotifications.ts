@@ -58,9 +58,6 @@ function getNotifications(): NotificationsModule | undefined {
 
 export function usePushNotifications() {
   useEffect(() => {
-    const Notifications = getNotifications();
-    if (!Notifications) return;
-    registerForPushNotificationsAsync(Notifications);
   }, []);
 }
 
