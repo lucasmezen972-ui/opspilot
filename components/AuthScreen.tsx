@@ -224,6 +224,15 @@ export default function AuthScreen() {
             <Text style={styles.testResultText}>{testResult}</Text>
           </View>
         )}
+        
+        {displayError && !hasNetworkError && (
+          <View style={styles.helpContainer}>
+            <Text style={styles.helpTitle}>💡 L'utilisateur démo n'existe pas ?</Text>
+            <Text style={styles.helpText}>
+              Suivez les instructions dans INSTRUCTIONS_SUPABASE.md pour créer la base de données et l'utilisateur démo.
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   )
@@ -436,5 +445,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#166534',
     textAlign: 'center',
+  },
+  helpContainer: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#F59E0B',
+  },
+  helpTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400E',
+    marginBottom: 8,
+  },
+  helpText: {
+    fontSize: 12,
+    color: '#92400E',
+    lineHeight: 16,
   },
 })

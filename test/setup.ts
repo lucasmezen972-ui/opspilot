@@ -33,14 +33,12 @@ jest.mock('expo-constants', () => ({
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
-  const MockIcon = ({ color, size, ...props }) => {
-  }
-  const { Text } = require('react-native')
+  const { View } = require('react-native')
   
   return new Proxy({}, {
     get: (target, prop) => {
       return React.forwardRef((props: any, ref: any) => 
-        React.createElement(Text, { ...props, ref }, prop.toString())
+        React.createElement(View, { ...props, ref, testID: `mock-icon-${prop.toString()}` })
       )
     }
   })
