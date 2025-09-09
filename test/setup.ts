@@ -1,4 +1,6 @@
+// @ts-nocheck
 import '@testing-library/jest-native/extend-expect'
+import { jest } from '@jest/globals'
 
 // Mock Expo modules
 jest.mock('expo-router', () => ({
