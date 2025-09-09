@@ -3,15 +3,6 @@ import { Platform } from 'react-native';
 // Offline sync utilities for the mobile app
 // This file handles local database operations and sync logic
 
-let cryptoJs: any = null;
-try {
-  if (Platform.OS !== 'web') {
-    cryptoJs = require('crypto-js');
-  }
-} catch (error) {
-  console.warn('[Offline] CryptoJS not available, encryption disabled');
-}
-
 export async function initOfflineDatabase() {
   if (Platform.OS === 'web') {
     console.log('[Offline] Skipping SQLite init on web platform');
@@ -56,30 +47,11 @@ export function isOnline(): boolean {
 }
 
 export function encryptData(data: string): string {
-  if (!cryptoJs) {
-    console.warn('[Offline] Encryption not available, returning plain data');
-    return data;
-  }
-  
-  try {
-    return cryptoJs.AES.encrypt(data, 'offline-key').toString();
-  } catch (error) {
-    console.warn('[Offline] Encryption failed, returning plain data');
-    return data;
-  }
+  console.warn('[Offline] Encryption not implemented, returning plain data');
+  return data;
 }
 
 export function decryptData(encryptedData: string): string {
-  if (!cryptoJs) {
-    console.warn('[Offline] Decryption not available, returning data as-is');
-    return encryptedData;
-  }
-  
-  try {
-    const bytes = cryptoJs.AES.decrypt(encryptedData, 'offline-key');
-    return bytes.toString(cryptoJs.enc.Utf8);
-  } catch (error) {
-    console.warn('[Offline] Decryption failed, returning data as-is');
-    return encryptedData;
-  }
+  console.warn('[Offline] Decryption not implemented, returning data as-is');
+  return encryptedData;
 }
