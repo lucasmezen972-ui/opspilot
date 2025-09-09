@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 
-import { app } from '../../server/app';
+import { app, limiter } from '../../server/app';
 
 vi.mock('../../server/supabase', () => ({
   supabase: {
@@ -86,5 +86,14 @@ describe('OpsPilot backend', () => {
     expect(res.body.actionPlans).toHaveLength(1);
     expect(res.body.audits).toHaveLength(1);
     expect(res.body.actionPlans[0].steps[0]).toContain('baisse des ventes');
+  });
+
+  it('rate limits after 100 requests in a minute', async () => {
+    limiter.resetKey('::ffff:127.0.0.1');
+    for (let i = 0; i < 100; i++) {
+      await request(app).get('/health');
+    }
+    const res = await request(app).get('/health');
+    expect(res.status).toBe(429);
   });
 });
