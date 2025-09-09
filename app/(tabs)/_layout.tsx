@@ -14,6 +14,8 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#6B7280',
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabBarLabel,
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarActiveBackgroundColor: '#EEF2FF',
       }}>
       <Tabs.Screen
         name="index"
@@ -101,6 +103,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     height: 72,
+  },
+  tabBarItem: {
+    borderRadius: 8,
+    marginHorizontal: 4,
   },
   tabBarLabel: {
     fontSize: 12,
