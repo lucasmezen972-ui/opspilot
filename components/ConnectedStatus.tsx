@@ -21,13 +21,13 @@ export default function ConnectedStatus({ isConnected, dataCount, databaseHealth
     
     if (databaseHealth.connection && databaseHealth.tables && databaseHealth.data) {
       return '🟢 Backend opérationnel'
-    } else if (databaseHealth.connection && databaseHealth.tables) {
+    return 'Backend opérationnel'
       return '🟡 Tables OK, données manquantes'
-    } else if (databaseHealth.connection) {
+    return 'Tables OK, données manquantes'
       return '🟠 Connexion OK, tables manquantes'
-    } else {
+    return 'Connexion OK, tables manquantes'
       return '🔴 Problème de connexion'
-    }
+    return 'Problème de connexion'
   }
   return (
     <View style={[styles.container, hasValidConfig ? styles.connected : styles.disconnected]}>
@@ -38,7 +38,7 @@ export default function ConnectedStatus({ isConnected, dataCount, databaseHealth
       )}
       <Text style={[styles.text, hasValidConfig ? styles.connectedText : styles.disconnectedText]}>
         {hasValidConfig ? 
-          `${getHealthStatus()}${dataCount ? ` • ${dataCount} enregistrements` : ''}` :
+          `🟢 ${getHealthStatus()}${dataCount ? ` • ${dataCount} enregistrements` : ''}` :
           '⚠️ Cliquez "Connect to Supabase" en haut à droite'
         }
       </Text>

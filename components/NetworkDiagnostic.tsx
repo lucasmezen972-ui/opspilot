@@ -75,11 +75,11 @@ export default function NetworkDiagnostic() {
           <Text style={styles.sectionTitle}>🔧 Configuration</Text>
           <View style={styles.resultItem}>
             {getStatusIcon(!!diagnosticResults.env?.supabaseUrl)}
-            <Text>URL Supabase: {diagnosticResults.env?.supabaseUrl || 'NON DÉFINIE'}</Text>
+            <Text style={styles.resultText}>URL Supabase: {diagnosticResults.env?.supabaseUrl || 'NON DÉFINIE'}</Text>
           </View>
           <View style={styles.resultItem}>
             {getStatusIcon(diagnosticResults.env?.hasAnonKey)}
-            <Text>Clé API: {diagnosticResults.env?.hasAnonKey ? 'PRÉSENTE' : 'MANQUANTE'} ({diagnosticResults.env?.keyLength || 0} chars)</Text>
+            <Text style={styles.resultText}>Clé API: {diagnosticResults.env?.hasAnonKey ? 'PRÉSENTE' : 'MANQUANTE'} ({diagnosticResults.env?.keyLength || 0} chars)</Text>
           </View>
         </View>
 
@@ -88,7 +88,7 @@ export default function NetworkDiagnostic() {
           <Text style={styles.sectionTitle}>🌐 Connectivité</Text>
           <View style={styles.resultItem}>
             {getStatusIcon(diagnosticResults.internetConnection)}
-            <Text>Internet: {diagnosticResults.internetConnection ? 'CONNECTÉ' : 'PROBLÈME'}</Text>
+            <Text style={styles.resultText}>Internet: {diagnosticResults.internetConnection ? 'CONNECTÉ' : 'PROBLÈME'}</Text>
           </View>
           {diagnosticResults.internetError && (
             <Text style={styles.errorText}>{diagnosticResults.internetError.toString()}</Text>
@@ -108,11 +108,11 @@ export default function NetworkDiagnostic() {
               <>
                 <View style={styles.resultItem}>
                   {getStatusIcon(diagnosticResults.supabaseConnection.ok)}
-                  <Text>Status: {diagnosticResults.supabaseConnection.status}</Text>
+                  <Text style={styles.resultText}>Status: {diagnosticResults.supabaseConnection.status}</Text>
                 </View>
                 <View style={styles.resultItem}>
                   {getStatusIcon(diagnosticResults.supabaseConnection.ok)}
-                  <Text>Connexion: {diagnosticResults.supabaseConnection.ok ? 'OK' : 'ÉCHEC'}</Text>
+                  <Text style={styles.resultText}>Connexion: {diagnosticResults.supabaseConnection.ok ? 'OK' : 'ÉCHEC'}</Text>
                 </View>
               </>
             )}
@@ -167,6 +167,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
+  },
+  resultText: {
+    fontSize: 12,
+    color: '#374151',
+    marginLeft: 8,
+    flex: 1,
   },
   errorContainer: {
     flexDirection: 'row',
