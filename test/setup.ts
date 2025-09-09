@@ -1,26 +1,26 @@
-import '@testing-library/jest-native/extend-expect'
+import '@testing-library/react-native/extend-expect'
 
 // Mock Expo modules
-jest.mock('expo-router', () => ({
+vi.mock('expo-router', () => ({
   router: {
-    push: jest.fn(),
-    back: jest.fn(),
-    replace: jest.fn(),
+    push: vi.fn(),
+    back: vi.fn(),
+    replace: vi.fn(),
   },
   useRouter: () => ({
-    push: jest.fn(),
-    back: jest.fn(),
-    replace: jest.fn(),
+    push: vi.fn(),
+    back: vi.fn(),
+    replace: vi.fn(),
   }),
   Stack: ({ children }: { children: React.ReactNode }) => children,
   Tabs: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-jest.mock('expo-status-bar', () => ({
+vi.mock('expo-status-bar', () => ({
   StatusBar: () => null,
 }))
 
-jest.mock('expo-constants', () => ({
+vi.mock('expo-constants', () => ({
   default: {
     expoConfig: {
       extra: {
@@ -32,7 +32,7 @@ jest.mock('expo-constants', () => ({
 }))
 
 // Mock Lucide React Native icons
-jest.mock('lucide-react-native', () => {
+vi.mock('lucide-react-native', () => {
   const { View } = require('react-native')
   
   return new Proxy({}, {
@@ -45,31 +45,31 @@ jest.mock('lucide-react-native', () => {
 })
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+vi.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 }))
 
 // Mock Supabase
-jest.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
-      getSession: jest.fn(),
-      onAuthStateChange: jest.fn(),
-      signInWithPassword: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn(),
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
     },
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      single: jest.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      single: vi.fn(),
     })),
   },
 }))
@@ -77,6 +77,6 @@ jest.mock('../lib/supabase', () => ({
 // Global test utilities
 global.console = {
   ...console,
-  warn: jest.fn(),
-  error: jest.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 }

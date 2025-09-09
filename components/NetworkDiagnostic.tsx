@@ -23,7 +23,7 @@ export default function NetworkDiagnostic() {
       results.internetConnection = response.status === 200
     } catch (error) {
       results.internetConnection = false
-      results.internetError = error
+      results.internetError = error as Error
     }
 
     // 3. Test Supabase
@@ -41,7 +41,7 @@ export default function NetworkDiagnostic() {
           headers: Object.fromEntries(supabaseResponse.headers.entries())
         }
       } catch (error) {
-        results.supabaseConnection = { error: error.toString() }
+        results.supabaseConnection = { error: (error as Error).toString() }
       }
     }
 
