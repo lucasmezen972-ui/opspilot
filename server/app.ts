@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import type { ZodSchema } from 'zod';
 
 import { logger } from '../utils/logger';
@@ -18,6 +19,12 @@ import { generatePlanAndAudit } from '../utils/planner';
 export const app = express();
 app.use(cors());
 app.use(express.json());
+
+export const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+});
+app.use(limiter);
 
 app.get('/health', (_, res) => {
   res.json({ status: 'ok' });

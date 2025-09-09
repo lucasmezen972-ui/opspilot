@@ -45,6 +45,7 @@
     "expo-system-ui": "~5.0.5",
     "expo-web-browser": "~14.1.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.1.0",
     "lucide-react-native": "^0.475.0",
     "openai": "^5.20.0",
     "react": "19.0.0",
