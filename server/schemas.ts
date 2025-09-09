@@ -5,6 +5,10 @@ export const auditSchema = z.object({
   description: z.string().optional(),
   status: z.string().optional(),
   score: z.number().int().optional(),
+  start_latitude: z.number().optional(),
+  start_longitude: z.number().optional(),
+  end_latitude: z.number().optional(),
+  end_longitude: z.number().optional(),
 })
 
 export const taskSchema = z.object({
