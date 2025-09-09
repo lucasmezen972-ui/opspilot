@@ -1,68 +1,123 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video } from 'lucide-react-native';
-
-const conversations = [
-  {
-    id: 1,
-    name: 'Équipe Magasin',
-    lastMessage: 'Nouvelle livraison prévue à 14h',
-    timestamp: '10:30',
-    unread: 2,
-    type: 'group',
-    online: true,
-  },
-  {
-    id: 2,
-    name: 'Pierre Martin',
-    lastMessage: 'Je termine l\'audit rayon frais',
-    timestamp: '09:45',
-    unread: 0,
-    type: 'direct',
-    online: true,
-  },
-  {
-    id: 3,
-    name: 'Support Technique',
-    lastMessage: 'Votre ticket a été traité',
-    timestamp: 'Hier',
-    unread: 1,
-    type: 'support',
-    online: false,
-  },
-];
-
-const messages = [
-  {
-    id: 1,
-    sender: 'Marie Dupont',
-    content: 'Bonjour tout le monde ! J\'ai terminé l\'inventaire du rayon frais.',
-    timestamp: '10:30',
-    isMe: true,
-  },
-  {
-    id: 2,
-    sender: 'Pierre Martin',
-    content: 'Parfait ! Moi je m\'occupe du rayon boulangerie maintenant.',
-    timestamp: '10:32',
-    isMe: false,
-  },
-  {
-    id: 3,
-    sender: 'Jean Leroy',
-    content: 'Attention, il y a eu un problème avec la caisse 3. Elle est hors service temporairement.',
-    timestamp: '10:35',
-    isMe: false,
-  },
-  {
-    id: 4,
-    sender: 'Marie Dupont',
-    content: 'Merci pour l\'info Jean. J\'ai signalé le problème au support technique.',
-    timestamp: '10:36',
-    isMe: true,
-  },
-];
+import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video, Bot, Sparkles } from 'lucide-react-native';
+import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { getChatAssistantResponse } from '../../lib/openai';
+import { Alert } from 'react-native';
 
 export default function ChatScreen() {
+  const { profile } = useAuth();
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(1);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: profile?.full_name || 'Vous',
+      content: 'Bonjour tout le monde ! J\'ai terminé l\'inventaire du rayon frais.',
+      timestamp: '10:30',
+      isMe: true,
+    },
+    {
+      id: 2,
+      sender: 'Pierre Martin',
+      content: 'Parfait ! Moi je m\'occupe du rayon boulangerie maintenant.',
+      timestamp: '10:32',
+      isMe: false,
+    },
+    {
+      id: 3,
+      sender: 'Jean Leroy',
+      content: 'Attention, il y a eu un problème avec la caisse 3. Elle est hors service temporairement.',
+      timestamp: '10:35',
+      isMe: false,
+    },
+    {
+      id: 4,
+      sender: profile?.full_name || 'Vous',
+      content: 'Merci pour l\'info Jean. J\'ai signalé le problème au support technique.',
+      timestamp: '10:36',
+      isMe: true,
+    },
+  ]);
+
+  const [conversations] = useState([
+    {
+      id: 1,
+      name: 'Équipe Magasin',
+      lastMessage: 'Nouvelle livraison prévue à 14h',
+      timestamp: '10:30',
+      unread: 2,
+      type: 'group',
+      online: true,
+    },
+    {
+      id: 2,
+      name: 'Assistant IA OpsPilot',
+      lastMessage: 'Comment puis-je vous aider aujourd\'hui ?',
+      timestamp: '09:45',
+      unread: 0,
+      type: 'ai',
+      online: true,
+    },
+    {
+      id: 3,
+      name: 'Support Technique',
+      lastMessage: 'Votre ticket a été traité',
+      timestamp: 'Hier',
+      unread: 1,
+      type: 'support',
+      online: false,
+    },
+  ]);
+
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    const message = {
+      id: messages.length + 1,
+      sender: profile?.full_name || 'Vous',
+      content: newMessage.trim(),
+      timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      isMe: true,
+    };
+
+    setMessages([...messages, message]);
+    setNewMessage('');
+
+    // Si c'est la conversation IA, obtenir une réponse
+    if (selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+      try {
+        const aiResponse = await getChatAssistantResponse(
+          message.content,
+          `Utilisateur: ${profile?.full_name}, Rôle: ${profile?.role}, Magasin: OpsPilot Demo`
+        );
+
+        setTimeout(() => {
+          const aiMessage = {
+            id: messages.length + 2,
+            sender: 'Assistant IA OpsPilot',
+            content: aiResponse,
+            timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            isMe: false,
+            isAI: true,
+          };
+          setMessages(current => [...current, aiMessage]);
+        }, 1000);
+      } catch (error) {
+        console.error('Erreur assistant IA:', error);
+      }
+    }
+  };
+
+  const getConversationIcon = (type: string) => {
+    switch (type) {
+      case 'group': return Users;
+      case 'ai': return Bot;
+      case 'support': return Bell;
+      default: return Users;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -81,41 +136,60 @@ export default function ChatScreen() {
       {/* Conversations List */}
       <ScrollView style={styles.conversationsList}>
         <Text style={styles.sectionTitle}>Conversations</Text>
-        {conversations.map((conversation) => (
-          <TouchableOpacity key={conversation.id} style={styles.conversationCard}>
-            <View style={styles.conversationInfo}>
-              <View style={styles.conversationHeader}>
-                <View style={styles.conversationTitleSection}>
-                  <Text style={styles.conversationName}>{conversation.name}</Text>
-                  <View style={styles.conversationMeta}>
-                    {conversation.type === 'group' && (
-                      <Users size={12} color="#6B7280" />
-                    )}
-                    {conversation.online && (
-                      <View style={styles.onlineIndicator} />
-                    )}
+        {conversations.map((conversation) => {
+          const IconComponent = getConversationIcon(conversation.type);
+          return (
+            <TouchableOpacity 
+              key={conversation.id} 
+              style={[
+                styles.conversationCard,
+                selectedConversation === conversation.id && styles.conversationCardActive
+              ]}
+              onPress={() => setSelectedConversation(conversation.id)}
+            >
+              <View style={styles.conversationInfo}>
+                <View style={styles.conversationHeader}>
+                  <View style={styles.conversationTitleSection}>
+                    <Text style={styles.conversationName}>{conversation.name}</Text>
+                    <View style={styles.conversationMeta}>
+                      <IconComponent size={12} color={conversation.type === 'ai' ? '#8B5CF6' : '#6B7280'} />
+                      {conversation.online && (
+                        <View style={styles.onlineIndicator} />
+                      )}
+                    </View>
                   </View>
+                  <Text style={styles.conversationTimestamp}>{conversation.timestamp}</Text>
                 </View>
-                <Text style={styles.conversationTimestamp}>{conversation.timestamp}</Text>
+                <Text style={styles.conversationLastMessage}>{conversation.lastMessage}</Text>
               </View>
-              <Text style={styles.conversationLastMessage}>{conversation.lastMessage}</Text>
-            </View>
-            {conversation.unread > 0 && (
-              <View style={styles.unreadBadge}>
-                <Text style={styles.unreadText}>{conversation.unread}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ))}
+              {conversation.unread > 0 && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadText}>{conversation.unread}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
 
         {/* Current Conversation */}
         <View style={styles.currentConversation}>
           <View style={styles.conversationHeaderActive}>
             <View style={styles.conversationInfoActive}>
-              <Text style={styles.conversationNameActive}>Équipe Magasin</Text>
+              <Text style={styles.conversationNameActive}>
+                {conversations.find(c => c.id === selectedConversation)?.name || 'Conversation'}
+              </Text>
               <View style={styles.conversationStatusActive}>
-                <View style={styles.onlineIndicator} />
-                <Text style={styles.conversationStatusText}>3 membres actifs</Text>
+                {selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY ? (
+                  <>
+                    <Sparkles size={12} color="#8B5CF6" />
+                    <Text style={styles.conversationStatusText}>Assistant IA disponible</Text>
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.onlineIndicator} />
+                    <Text style={styles.conversationStatusText}>3 membres actifs</Text>
+                  </>
+                )}
               </View>
             </View>
             <View style={styles.conversationActions}>
@@ -162,10 +236,17 @@ export default function ChatScreen() {
           <View style={styles.messageInput}>
             <TextInput
               style={styles.messageTextInput}
+              value={newMessage}
+              onChangeText={setNewMessage}
               placeholder="Tapez votre message..."
               multiline
+              onSubmitEditing={sendMessage}
             />
-            <TouchableOpacity style={styles.sendButton}>
+            <TouchableOpacity 
+              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+              onPress={sendMessage}
+              disabled={!newMessage.trim()}
+            >
               <Send size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
@@ -229,6 +310,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  conversationCardActive: {
+    borderWidth: 2,
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF',
   },
   conversationInfo: {
     flex: 1,
@@ -409,5 +495,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 });
