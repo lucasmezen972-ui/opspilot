@@ -77,6 +77,14 @@ describe('OpsPilot backend', () => {
     expect(Number(res.header['content-length'])).toBeGreaterThan(0);
   });
 
+  it('rejects unsupported export formats', async () => {
+    const res = await request(app)
+      .get('/audits/export?format=pdf')
+      .set('Authorization', 'Bearer test-token');
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({ error: 'Unsupported export format' });
+  });
+
   it('generates plans and audits from problems', async () => {
     const res = await request(app)
       .post('/analysis')
