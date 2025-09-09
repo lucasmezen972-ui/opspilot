@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import { Brain, TrendingUp, Award, AlertTriangle, CheckCircle, Clock, Target } from 'lucide-react-native'
+import { Brain, TrendingUp, Award, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Clock, Target } from 'lucide-react-native'
 import { useAIRecommendations } from '../hooks/useAIRecommendations'
 
 export default function AIRecommendationsPanel() {
