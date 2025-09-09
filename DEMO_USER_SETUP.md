@@ -1,5 +1,7 @@
 # Configuration du Utilisateur Démo
 
+> Ce compte de test est réservé aux démonstrations et ne doit jamais être utilisé en production.
+
 ## Création rapide via Dashboard Supabase
 
 1. **Aller dans Supabase Dashboard**
