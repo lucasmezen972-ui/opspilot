@@ -1,6 +1,6 @@
 // @ts-nocheck
 import '@testing-library/jest-native/extend-expect'
-import { jest } from '@jest/globals'
+import { vi as jest } from 'vitest'
 
 // Mock Expo modules
 jest.mock('expo-router', () => ({
@@ -35,8 +35,6 @@ jest.mock('expo-constants', () => ({
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
-  const MockIcon = ({ color, size, ...props }) => {
-  }
   const { Text } = require('react-native')
   
   return new Proxy({}, {

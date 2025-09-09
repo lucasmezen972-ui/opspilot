@@ -46,8 +46,8 @@ export default function ProductsScreen() {
     // Simulation d'un scan de code-barres
     setTimeout(async () => {
       const testBarcodes = ['3456789012345', '2345678901234', '1234567890123'];
-      const randomBarcode = testBarcodes[Math.floor(Math.random() * testBarcodes.length)];
-      
+      const randomBarcode = testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
+
       const scannedProduct = await scanProduct(randomBarcode);
       
       if (scannedProduct) {
@@ -405,7 +405,6 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 20,
     right: 20,
     bottom: 90,
     width: 56,

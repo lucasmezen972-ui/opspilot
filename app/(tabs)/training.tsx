@@ -134,7 +134,7 @@ export default function TrainingScreen() {
       'Sécurité au travail dans la grande distribution'
     ];
 
-    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+      const randomTopic = topics[Math.floor(Math.random() * topics.length)]!;
     const difficulties = ['beginner', 'intermediate', 'advanced'];
     const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
 
