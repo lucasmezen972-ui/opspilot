@@ -1,8 +1,11 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User } from 'lucide-react-native';
+import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User, LayoutDashboard } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function TabLayout() {
+  const { profile } = useAuth();
+
   return (
     <Tabs
       screenOptions={{
@@ -66,6 +69,17 @@ export default function TabLayout() {
           ),
         }}
       />
+      {profile?.role === 'manager' && (
+        <Tabs.Screen
+          name="manager"
+          options={{
+            title: 'Manager',
+            tabBarIcon: ({ size, color }) => (
+              <LayoutDashboard size={size} color={color} />
+            ),
+          }}
+        />
+      )}
       <Tabs.Screen
         name="profile"
         options={{
