@@ -5,10 +5,12 @@ import AuthScreen from '../components/AuthScreen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { isSupabaseConfigured } from '../utils/supabaseConfig';
 import { useOfflineSync } from '../hooks/useOfflineSync';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 export default function RootLayout() {
   useFrameworkReady();
   useOfflineSync();
+  usePushNotifications();
   const { user, loading, error } = useAuth();
 
   // Vérification de la configuration Supabase
