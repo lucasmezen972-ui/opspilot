@@ -20,10 +20,7 @@ export function useProducts() {
       setLoading(true)
       const { data, error } = await supabase
         .from('products')
-        .select(`
-          *,
-          product_categories(name, color)
-        `)
+        .select('*')
         .eq('organization_id', profile.organization_id)
         .order('name')
 
@@ -65,14 +62,10 @@ export function useProducts() {
 
   const updateProductStock = async (productId: string, newStock: number) => {
     try {
-      const status = newStock === 0 ? 'out_of_stock' : 
-                    newStock <= 10 ? 'low_stock' : 'ok'
-
       const { data, error } = await supabase
         .from('products')
-        .update({ 
+        .update({
           stock_quantity: newStock,
-          status,
           updated_at: new Date().toISOString()
         })
         .eq('id', productId)
@@ -86,7 +79,7 @@ export function useProducts() {
 
       // Mettre à jour la liste locale
       setProducts(products.map(p => p.id === productId ? data : p))
-      
+
       return { data }
     } catch (error) {
       console.error('Erreur:', error)
@@ -121,12 +114,24 @@ export function useProducts() {
     }
   }
 
+  const getProductStatus = (product: Product) => {
+    if (product.stock_quantity === 0) return 'out_of_stock'
+    if (
+      product.min_stock !== null &&
+      product.min_stock !== undefined &&
+      product.stock_quantity <= product.min_stock
+    )
+      return 'low_stock'
+    return 'ok'
+  }
+
   return {
     products,
     loading,
     scanProduct,
     updateProductStock,
     createProduct,
+    getProductStatus,
     refetch: fetchProducts,
   }
 }

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, type Profile } from '../lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
 
 export function useAuth() {
-  const [session, setSession] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -67,7 +68,7 @@ export function useAuth() {
     return { data, error };
   };
 
-  const updateProfile = async (updates: any) => {
+  const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: 'Utilisateur non connecté' };
     const { data, error } = await supabase
       .from('profiles')
