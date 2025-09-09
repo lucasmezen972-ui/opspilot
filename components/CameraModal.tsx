@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, Image } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, Image, PanResponder } from 'react-native'
+import Svg, { Path } from 'react-native-svg'
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
 import { X, Camera, RotateCcw, Sparkles, CircleCheck as CheckCircle } from 'lucide-react-native'
 import { analyzeAuditImage } from '../lib/openai'
@@ -7,7 +8,7 @@ import { analyzeAuditImage } from '../lib/openai'
 interface CameraModalProps {
   visible: boolean
   onClose: () => void
-  onPhotoTaken: (uri: string, analysis?: any) => void
+  onPhotoTaken: (uri: string, analysis?: any, annotations?: string[]) => void
   auditType?: string
 }
 
@@ -17,6 +18,31 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
   const [photoUri, setPhotoUri] = useState<string | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysis, setAnalysis] = useState<any>(null)
+  const [paths, setPaths] = useState<string[]>([])
+  const [currentPath, setCurrentPath] = useState('')
+  const pathRef = useRef('')
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: evt => {
+        const { locationX, locationY } = evt.nativeEvent
+        pathRef.current = `M ${locationX} ${locationY}`
+        setCurrentPath(pathRef.current)
+      },
+      onPanResponderMove: evt => {
+        const { locationX, locationY } = evt.nativeEvent
+        pathRef.current += ` L ${locationX} ${locationY}`
+        setCurrentPath(pathRef.current)
+      },
+      onPanResponderRelease: () => {
+        if (pathRef.current) {
+          setPaths(prev => [...prev, pathRef.current])
+          pathRef.current = ''
+          setCurrentPath('')
+        }
+      },
+    })
+  ).current
   const cameraRef = useRef<CameraView>(null)
 
   if (!permission) {
@@ -76,7 +102,7 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
 
   const confirmPhoto = () => {
     if (photoUri) {
-      onPhotoTaken(photoUri, analysis)
+      onPhotoTaken(photoUri, analysis, paths)
       resetState()
       onClose()
     }
@@ -85,12 +111,17 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
   const retakePhoto = () => {
     setPhotoUri(null)
     setAnalysis(null)
+    setPaths([])
+    setCurrentPath('')
   }
 
   const resetState = () => {
     setPhotoUri(null)
     setAnalysis(null)
     setAnalyzing(false)
+    setPaths([])
+    setCurrentPath('')
+    pathRef.current = ''
   }
 
   const handleClose = () => {
@@ -100,6 +131,12 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
 
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'))
+  }
+
+  const clearAnnotations = () => {
+    setPaths([])
+    setCurrentPath('')
+    pathRef.current = ''
   }
 
   if (photoUri) {
@@ -115,7 +152,16 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
 
           <View style={styles.previewContainer}>
             <Image source={{ uri: photoUri }} style={styles.previewImage} />
-            
+            <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+              {paths.map((p, index) => (
+                <Path key={index} d={p} stroke="#F59E0B" strokeWidth={3} fill="none" />
+              ))}
+              {currentPath !== '' && (
+                <Path d={currentPath} stroke="#F59E0B" strokeWidth={3} fill="none" />
+              )}
+            </Svg>
+            <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers} />
+
             {analyzing && (
               <View style={styles.analysisOverlay}>
                 <Sparkles size={32} color="#FFFFFF" />
@@ -143,6 +189,9 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
           )}
 
           <View style={styles.previewActions}>
+            <TouchableOpacity style={styles.clearButton} onPress={clearAnnotations}>
+              <Text style={styles.clearButtonText}>Effacer</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.retakeButton} onPress={retakePhoto}>
               <Text style={styles.retakeButtonText}>Reprendre</Text>
             </TouchableOpacity>
@@ -390,7 +439,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 20,
     backgroundColor: '#000000',
-    gap: 16,
+    gap: 12,
+  },
+  clearButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+  },
+  clearButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
   },
   retakeButton: {
     flex: 1,

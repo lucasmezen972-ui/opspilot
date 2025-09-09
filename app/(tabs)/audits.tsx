@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native';
+import CameraModal from '../../components/CameraModal';
 
 const audits = [
   {
@@ -57,6 +59,12 @@ export default function AuditsScreen() {
       case 'pending': return 'À faire';
       default: return 'Inconnu';
     }
+  };
+
+  const [cameraVisible, setCameraVisible] = useState(false);
+
+  const handlePhotoTaken = (uri: string, analysis?: any, annotations?: string[]) => {
+    console.log('Photo prise', uri, annotations);
   };
 
   return (
@@ -149,9 +157,15 @@ export default function AuditsScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity style={styles.fab} onPress={() => setCameraVisible(true)}>
         <Camera size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      <CameraModal
+        visible={cameraVisible}
+        onClose={() => setCameraVisible(false)}
+        onPhotoTaken={handlePhotoTaken}
+      />
     </View>
   );
 }
