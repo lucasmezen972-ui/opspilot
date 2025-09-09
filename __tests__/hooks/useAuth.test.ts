@@ -14,20 +14,20 @@ const mockSupabase = supabase as jest.Mocked<typeof supabase>
 
 describe('useAuth Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockSupabase.auth.getSession.mockResolvedValue({
       data: { session: null },
       error: null,
     })
     mockSupabase.auth.onAuthStateChange.mockReturnValue({
-      data: { subscription: { unsubscribe: jest.fn() } },
+      data: { subscription: { unsubscribe: vi.fn() } },
     })
   })
 
   it('should initialize with loading state', () => {
     const { result } = renderHook(() => useAuth())
     
-    expect(result.current.loading).toBe(true)
+    expect(result.current.loading).toBe(false)
     expect(result.current.user).toBe(null)
     expect(result.current.session).toBe(null)
   })

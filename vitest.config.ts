@@ -19,6 +19,9 @@ export default defineConfig({
     setupFiles: ['./test/setup.ts'],
     include: ['**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
     exclude: ['node_modules', 'dist', '.expo'],
+    deps: {
+      inline: ['@testing-library/react-native'],
+    },
   },
   resolve: {
     alias: {

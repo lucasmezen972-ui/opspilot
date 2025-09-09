@@ -6,9 +6,9 @@ import { useAudits } from '../../hooks/useAudits'
 import { useTasks } from '../../hooks/useTasks'
 
 // Mock all hooks
-jest.mock('../../hooks/useAuth')
-jest.mock('../../hooks/useAudits')
-jest.mock('../../hooks/useTasks')
+vi.mock('../../hooks/useAuth')
+vi.mock('../../hooks/useAudits')
+vi.mock('../../hooks/useTasks')
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
 const mockUseAudits = useAudits as jest.MockedFunction<typeof useAudits>
@@ -83,31 +83,31 @@ describe('HomeScreen', () => {
       profile: mockProfile,
       session: null,
       loading: false,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
 
     mockUseAudits.mockReturnValue({
       audits: mockAudits,
       loading: false,
-      createAudit: jest.fn(),
-      updateAuditStatus: jest.fn(),
-      addPhotoToAudit: jest.fn(),
-      refetch: jest.fn(),
+      createAudit: vi.fn(),
+      updateAuditStatus: vi.fn(),
+      addPhotoToAudit: vi.fn(),
+      refetch: vi.fn(),
     })
 
     mockUseTasks.mockReturnValue({
       tasks: mockTasks,
       loading: false,
-      createTask: jest.fn(),
-      updateTaskStatus: jest.fn(),
-      getMyTasks: jest.fn().mockReturnValue(mockTasks),
-      getTasksByStatus: jest.fn(),
-      getTasksByPriority: jest.fn(),
-      refetch: jest.fn(),
+      createTask: vi.fn(),
+      updateTaskStatus: vi.fn(),
+      getMyTasks: vi.fn().mockReturnValue(mockTasks),
+      getTasksByStatus: vi.fn(),
+      getTasksByPriority: vi.fn(),
+      refetch: vi.fn(),
     })
   })
 
@@ -171,21 +171,21 @@ describe('HomeScreen', () => {
     mockUseAudits.mockReturnValue({
       audits: [],
       loading: false,
-      createAudit: jest.fn(),
-      updateAuditStatus: jest.fn(),
-      addPhotoToAudit: jest.fn(),
-      refetch: jest.fn(),
+      createAudit: vi.fn(),
+      updateAuditStatus: vi.fn(),
+      addPhotoToAudit: vi.fn(),
+      refetch: vi.fn(),
     })
 
     mockUseTasks.mockReturnValue({
       tasks: [],
       loading: false,
-      createTask: jest.fn(),
-      updateTaskStatus: jest.fn(),
-      getMyTasks: jest.fn().mockReturnValue([]),
-      getTasksByStatus: jest.fn(),
-      getTasksByPriority: jest.fn(),
-      refetch: jest.fn(),
+      createTask: vi.fn(),
+      updateTaskStatus: vi.fn(),
+      getMyTasks: vi.fn().mockReturnValue([]),
+      getTasksByStatus: vi.fn(),
+      getTasksByPriority: vi.fn(),
+      refetch: vi.fn(),
     })
 
     const { getByText } = render(<HomeScreen />)

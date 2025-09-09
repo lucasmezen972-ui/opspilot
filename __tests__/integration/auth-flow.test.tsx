@@ -4,13 +4,13 @@ import RootLayout from '../../app/_layout'
 import { useAuth } from '../../hooks/useAuth'
 
 // Mock useAuth hook
-jest.mock('../../hooks/useAuth', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
 }))
 
 // Mock useFrameworkReady
-jest.mock('@/hooks/useFrameworkReady', () => ({
-  useFrameworkReady: jest.fn(),
+vi.mock('@/hooks/useFrameworkReady', () => ({
+  useFrameworkReady: vi.fn(),
 }))
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
@@ -22,11 +22,11 @@ describe('Authentication Flow Integration', () => {
       profile: null,
       session: null,
       loading: false,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
 
     const { getByText } = render(<RootLayout />)
@@ -57,11 +57,11 @@ describe('Authentication Flow Integration', () => {
       },
       session: { user: { id: 'user-1' } } as any,
       loading: false,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
 
     const { queryByText } = render(<RootLayout />)
@@ -76,16 +76,16 @@ describe('Authentication Flow Integration', () => {
       profile: null,
       session: null,
       loading: true,
-      signIn: jest.fn(),
-      signUp: jest.fn(),
-      signOut: jest.fn(),
-      updateProfile: jest.fn(),
-      refetchProfile: jest.fn(),
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      updateProfile: vi.fn(),
+      refetchProfile: vi.fn(),
     })
 
-    const { container } = render(<RootLayout />)
-    
+    const { UNSAFE_root } = render(<RootLayout />)
+
     // Should not render anything while loading
-    expect(container.children.length).toBe(0)
+    expect(UNSAFE_root?.children.length).toBe(0)
   })
 })
