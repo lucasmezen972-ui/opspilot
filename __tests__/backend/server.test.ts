@@ -1,31 +1,57 @@
 import request from 'supertest';
 import { describe, it, expect, beforeAll, vi } from 'vitest';
+import jwt from 'jsonwebtoken';
 
 import { app } from '../../server/app';
 
+const JWT_SECRET = 'test-secret';
+const validToken = jwt.sign({ sub: '1' }, JWT_SECRET);
+
 vi.mock('../../server/supabase', () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        limit: () =>
-          Promise.resolve({
-            data: [{ id: '1', title: 'Test' }],
-            error: null,
+    from: (table: string) => {
+      if (table === 'auth_tokens') {
+        return {
+          select: () => ({
+            eq: () => ({
+              single: () =>
+                Promise.resolve({
+                  data: {
+                    token: validToken,
+                    revoked: false,
+                    expires_at: new Date(Date.now() + 100000).toISOString(),
+                  },
+                  error: null,
+                }),
+            }),
           }),
-      }),
-      insert: () => ({
+        };
+      }
+      return {
         select: () => ({
-          single: () =>
-            Promise.resolve({ data: { id: '1', title: 'Test' }, error: null }),
+          limit: () =>
+            Promise.resolve({
+              data: [{ id: '1', title: 'Test' }],
+              error: null,
+            }),
         }),
-      }),
-    }),
+        insert: () => ({
+          select: () => ({
+            single: () =>
+              Promise.resolve({
+                data: { id: '1', title: 'Test' },
+                error: null,
+              }),
+          }),
+        }),
+      };
+    },
   },
 }));
 
 describe('OpsPilot backend', () => {
   beforeAll(() => {
-    process.env.API_TOKEN = 'test-token';
+    process.env.JWT_SECRET = JWT_SECRET;
   });
 
   it('returns ok on health check', async () => {
@@ -42,7 +68,7 @@ describe('OpsPilot backend', () => {
   it('validates request body', async () => {
     const res = await request(app)
       .post('/audits')
-      .set('Authorization', 'Bearer test-token')
+      .set('Authorization', `Bearer ${validToken}`)
       .send({});
     expect(res.status).toBe(400);
   });
@@ -50,7 +76,7 @@ describe('OpsPilot backend', () => {
   it('accepts valid request', async () => {
     const res = await request(app)
       .post('/audits')
-      .set('Authorization', 'Bearer test-token')
+      .set('Authorization', `Bearer ${validToken}`)
       .send({ title: 'Test' });
     expect(res.status).toBe(201);
     expect(res.body).toEqual({ id: '1', title: 'Test' });
@@ -59,7 +85,7 @@ describe('OpsPilot backend', () => {
   it('exports data in CSV format', async () => {
     const res = await request(app)
       .get('/audits/export?format=csv')
-      .set('Authorization', 'Bearer test-token');
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.header['content-type']).toContain('text/csv');
     expect(res.text).toContain('id,title');
@@ -69,7 +95,7 @@ describe('OpsPilot backend', () => {
   it('exports data in Excel format', async () => {
     const res = await request(app)
       .get('/audits/export?format=excel')
-      .set('Authorization', 'Bearer test-token');
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.header['content-type']).toContain(
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -80,7 +106,7 @@ describe('OpsPilot backend', () => {
   it('generates plans and audits from problems', async () => {
     const res = await request(app)
       .post('/analysis')
-      .set('Authorization', 'Bearer test-token')
+      .set('Authorization', `Bearer ${validToken}`)
       .send({ problems: ['baisse des ventes'] });
     expect(res.status).toBe(200);
     expect(res.body.actionPlans).toHaveLength(1);
