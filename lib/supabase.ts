@@ -20,4 +20,4 @@ export const supabase: SupabaseClient = createClient(
   { global: { fetch: customFetch } }
 );
 
-if (__DEV__) console.log('[Supabase] client initialisé');
+if (typeof __DEV__ !== 'undefined' && __DEV__) console.log('[Supabase] client initialisé');

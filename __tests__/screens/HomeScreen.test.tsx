@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { render } from '@testing-library/react'
 import HomeScreen from '../../app/(tabs)/index'
 import { useAuth } from '../../hooks/useAuth'
 import { useAudits } from '../../hooks/useAudits'

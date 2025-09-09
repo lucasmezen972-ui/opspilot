@@ -15,7 +15,7 @@ export default function AuthScreen() {
   const { signIn, signUp, authError } = useAuth()
 
   useEffect(() => {
-    if (__DEV__) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
       // runConnectionTest(); // garder uniquement en DEV si besoin
     }
   }, [])
@@ -126,21 +126,24 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.switchButton}
-          onPress={() => setIsLogin(!isLogin)}
-        >
-          <Text style={styles.switchButtonText}>
-            {isLogin
-              ? "Pas encore de compte ? S'inscrire"
-              : 'Déjà un compte ? Se connecter'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Bloc UI démo supprimé */}
+      <TouchableOpacity
+        style={styles.switchButton}
+        onPress={() => setIsLogin(!isLogin)}
+      >
+        <Text style={styles.switchButtonText}>
+          {isLogin
+            ? "Pas encore de compte ? S'inscrire"
+            : 'Déjà un compte ? Se connecter'}
+        </Text>
+      </TouchableOpacity>
     </View>
-  )
+    <View style={styles.demoContainer}>
+      <Text style={styles.demoTitle}>Compte de démonstration</Text>
+      <Text>Email: demo@opspilot.com</Text>
+      <Text>Mot de passe: demo123</Text>
+    </View>
+  </View>
+)
 }
 
 const styles = StyleSheet.create({
@@ -251,6 +254,17 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontSize: 16,
     fontWeight: '500',
+  },
+  demoContainer: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+  },
+  demoTitle: {
+    fontWeight: '600',
+    marginBottom: 4,
+    color: '#111827',
   },
   errorContainer: {
     backgroundColor: '#FEE2E2',
