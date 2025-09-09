@@ -46,6 +46,7 @@
     "express": "^4.19.2",
     "lucide-react-native": "^0.475.0",
     "openai": "^5.20.0",
+    "pino": "^9.9.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.1",

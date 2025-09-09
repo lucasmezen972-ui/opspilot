@@ -1,7 +1,7 @@
-import { app } from './app'
-import { logger } from '../utils/logger'
+import { app } from './app';
+import { logger } from '../utils/logger';
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  logger.info(`OpsPilot backend running on port ${port}`)
-})
+  logger.info({ port }, 'OpsPilot backend running');
+});
