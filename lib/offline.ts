@@ -1,10 +1,13 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase'
+import { Platform } from 'react-native'
 
 // Dynamic imports to avoid issues in non-native environments (like tests)
 let SQLite: any;
 let NetInfo: any;
 try {
-  SQLite = require('expo-sqlite');
+  if (Platform.OS !== 'web') {
+    SQLite = require('expo-sqlite');
+  }
 } catch {
   // SQLite n'est pas disponible (tests ou environnement web)
 }
@@ -14,10 +17,10 @@ try {
   // NetInfo n'est pas disponible
 }
 
-const db = SQLite ? SQLite.openDatabase('opspilot.db') : null;
+const db = SQLite && Platform.OS !== 'web' ? SQLite.openDatabase('opspilot.db') : null;
 
 export const initOfflineDatabase = () => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql(
       'CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL, synced INTEGER DEFAULT 0)',
@@ -33,7 +36,7 @@ export const initOfflineDatabase = () => {
 
 const runQuery = (sql: string, params: any[] = []): Promise<any[]> => {
   return new Promise((resolve) => {
-    if (!db) return resolve([]);
+    if (!db || Platform.OS === 'web') return resolve([]);
     db.transaction((tx: any) => {
       tx.executeSql(
         sql,
@@ -67,7 +70,7 @@ export const isOnline = async (): Promise<boolean> => {
 
 // ----- Helpers pour les tâches -----
 export const setOfflineTasks = async (tasks: any[]) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql('DELETE FROM tasks');
     tasks.forEach((t) => {
@@ -84,7 +87,7 @@ export const loadOfflineTasks = async (): Promise<any[]> => {
 };
 
 export const queueTask = async (task: any) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql('INSERT INTO tasks (data, synced) VALUES (?, 0)', [
       JSON.stringify(task),
@@ -94,7 +97,7 @@ export const queueTask = async (task: any) => {
 
 // ----- Helpers pour les audits -----
 export const setOfflineAudits = async (audits: any[]) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql('DELETE FROM audits');
     audits.forEach((a) => {
@@ -111,7 +114,7 @@ export const loadOfflineAudits = async (): Promise<any[]> => {
 };
 
 export const queueAudit = async (audit: any) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql('INSERT INTO audits (data, synced) VALUES (?, 0)', [
       JSON.stringify(audit),
@@ -121,7 +124,7 @@ export const queueAudit = async (audit: any) => {
 
 // ----- Photos -----
 export const queuePhoto = async (auditId: string, uri: string) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql(
       'INSERT INTO photos (uri, audit_id, synced) VALUES (?, ?, 0)',
@@ -131,7 +134,7 @@ export const queuePhoto = async (auditId: string, uri: string) => {
 };
 
 const updatePhotoAuditIds = (oldId: string, newId: string) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql('UPDATE photos SET audit_id = ? WHERE audit_id = ?', [
       newId,
@@ -141,7 +144,7 @@ const updatePhotoAuditIds = (oldId: string, newId: string) => {
 };
 
 const markSynced = (table: string, id: number) => {
-  if (!db) return;
+  if (!db || Platform.OS === 'web') return;
   db.transaction((tx: any) => {
     tx.executeSql(`UPDATE ${table} SET synced = 1 WHERE id = ?`, [id]);
   });
@@ -151,7 +154,7 @@ const getUnsynced = (table: string): Promise<any[]> =>
   runQuery(`SELECT * FROM ${table} WHERE synced = 0`);
 
 export const syncPendingData = async () => {
-  if (!(await isOnline()) || !db) return;
+  if (!(await isOnline()) || !db || Platform.OS === 'web') return;
 
   // Tâches
   const tasks = await getUnsynced('tasks');

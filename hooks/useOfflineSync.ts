@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { initOfflineDatabase, syncPendingData } from '../lib/offline'
 
 let NetInfo: any
@@ -10,6 +11,9 @@ try {
 
 export function useOfflineSync() {
   useEffect(() => {
+    // Skip offline sync on web platform
+    if (Platform.OS === 'web') return
+    
     initOfflineDatabase()
 
     const unsubscribe = NetInfo?.addEventListener

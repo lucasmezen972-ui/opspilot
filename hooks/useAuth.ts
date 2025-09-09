@@ -13,13 +13,20 @@ export function useAuth() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!cancelled) {
-        setSession(session ?? null);
-        setUser(session?.user ?? null);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!cancelled) {
+          setSession(session ?? null);
+          setUser(session?.user ?? null);
+        }
+        if (session?.user?.id && !cancelled) {
+          await fetchProfile(session.user.id);
+        }
+        if (!cancelled) setReady(true);
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (!cancelled) setReady(true);
       }
-      if (session?.user?.id) await fetchProfile(session.user.id);
-      if (!cancelled) setReady(true);
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       if (!cancelled) {
