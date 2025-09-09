@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
@@ -19,14 +20,6 @@ export function usePushNotifications() {
 
 async function registerForPushNotificationsAsync() {
   // Only load expo-device on native platforms
-  if (Platform.OS === 'web') {
-    console.log('Push notifications not supported on web');
-    return;
-  }
-
-  const Device = require('expo-device');
-  if (!Device?.isDevice) {
-  }
   if (Platform.OS === 'web') {
     console.log('Push notifications not supported on web');
     return;
@@ -63,7 +56,7 @@ async function registerForPushNotificationsAsync() {
 export async function scheduleAuditReminder(date: Date, body: string) {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Rappel d\u2019audit',
+      title: 'Rappel d’audit',
       body,
     },
     trigger: { date, type: Notifications.SchedulableTriggerInputTypes.DATE },
