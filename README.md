@@ -125,7 +125,11 @@ L'application contient des données de démonstration réalistes :
 
 - **Intégration API** pour données temps réel
 - **Mode hors-ligne complet** avec SQLite
+  - Stockage local des audits, tâches et photos
+  - Synchronisation automatique dès le retour en ligne
 - **Push notifications** natives
+  - Rappels d'audits et de tâches
+  - Alertes en temps réel pour la communication interne
 - **Export avancé** (Excel, CSV)
 - **Intégration caméra** pour annotations
 - **Géolocalisation** pour audits multi-sites
