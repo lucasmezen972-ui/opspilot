@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { LogIn, UserPlus } from 'lucide-react-native'
-import { useAuth } from '../hooks/useAuth'
 import ConnectedStatus from './ConnectedStatus'
+import { useAuth } from '../hooks/useAuth'
 import { loginSchema } from '../utils/validation'
-
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true)
@@ -15,61 +14,44 @@ export default function AuthScreen() {
   const [localError, setLocalError] = useState('')
   const { signIn, signUp, error: authError } = useAuth()
 
-
   const handleAuth = async () => {
     setLocalError('')
-      const parsed = loginSchema.safeParse({ email, password });
-  if (!parsed.success) {
-    setLocalError(parsed.error.issues[0]?.message ?? "Champs invalides");
-    return;
-  }
-    
-      const parsed = loginSchema.safeParse({ email, password });
-      if (!parsed.success) {
-    setLocalError(parsed.error?.issues?.[0]?.message ?? "Champs invalides");
-    return;
-  }
-    
-    
 
-        if (!isLogin && !fullName) {
-      setLocalError('Veuillez entrer votre nom complet');
-      return;
+    const parsed = loginSchema.safeParse({ email, password })
+    if (!parsed.success) {
+      setLocalError(parsed.error.issues[0]?.message ?? 'Champs invalides')
+      return
     }
 
-    
+    if (!isLogin && !fullName) {
+      setLocalError('Veuillez entrer votre nom complet')
+      return
     }
 
     setLoading(true)
-
     try {
       let result
       if (isLogin) {
-        console.log('🔑 Connexion avec:', email)
         result = await signIn(email, password)
       } else {
-        console.log('📝 Inscription avec:', email)
         result = await signUp(email, password, fullName)
       }
 
       if (result.error) {
-        console.error('❌ Erreur auth:', result.error)
         setLocalError(result.error.message || 'Erreur de connexion')
       } else if (!isLogin) {
-        console.log('✅ Inscription réussie')
         setLocalError('')
         setIsLogin(true)
       }
-    } catch (error) {
-      console.error('❌ Erreur inattendue:', error)
-      setLocalError('Une erreur inattendue s\'est produite')
+    } catch (err) {
+      setLocalError("Une erreur inattendue s'est produite")
     } finally {
       setLoading(false)
     }
   }
 
-  // Afficher l'erreur la plus récente
   const displayError = localError || authError
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -77,22 +59,26 @@ export default function AuthScreen() {
           <Text style={styles.logoText}>OP</Text>
         </View>
         <Text style={styles.title}>OpsPilot</Text>
-        <Text style={styles.subtitle}>Votre copilote pour des opérations terrain efficaces</Text>
+        <Text style={styles.subtitle}>
+          Votre copilote pour des opérations terrain efficaces
+        </Text>
       </View>
 
-      {/* Indicateur de statut Supabase */}
       <View style={styles.statusContainer}>
-        <ConnectedStatus 
-          isConnected={!!(process.env.EXPO_PUBLIC_SUPABASE_URL && process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co')}
+        <ConnectedStatus
+          isConnected={!!(
+            process.env.EXPO_PUBLIC_SUPABASE_URL &&
+            process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
+          )}
         />
       </View>
 
-      {/* Erreurs */}
       {displayError && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>❌ {displayError}</Text>
         </View>
       )}
+
       <View style={styles.form}>
         <Text style={styles.formTitle}>
           {isLogin ? 'Connexion' : 'Créer un compte'}
@@ -137,7 +123,11 @@ export default function AuthScreen() {
             <UserPlus size={20} color="#FFFFFF" />
           )}
           <Text style={styles.buttonText}>
-            {loading ? 'Chargement...' : isLogin ? 'Se connecter' : 'S\'inscrire'}
+            {loading
+              ? 'Chargement...'
+              : isLogin
+                ? 'Se connecter'
+                : "S'inscrire"}
           </Text>
         </TouchableOpacity>
 
@@ -146,11 +136,22 @@ export default function AuthScreen() {
           onPress={() => setIsLogin(!isLogin)}
         >
           <Text style={styles.switchButtonText}>
-            {isLogin ? 'Pas encore de compte ? S\'inscrire' : 'Déjà un compte ? Se connecter'}
+            {isLogin
+              ? "Pas encore de compte ? S'inscrire"
+              : 'Déjà un compte ? Se connecter'}
           </Text>
         </TouchableOpacity>
       </View>
-     <>
+
+      <View style={styles.demoInfo}>
+        <Text style={styles.demoTitle}>Compte de démonstration</Text>
+        <View style={styles.demoButton}>
+          <Text style={styles.demoButtonText}>Email: demo@opspilot.com</Text>
+          <Text style={styles.demoButtonText}>Mot de passe: demo123</Text>
+        </View>
+        <Text style={styles.demoClickText}>Cliquez pour remplir automatiquement</Text>
+      </View>
+    </View>
   )
 }
 
@@ -313,3 +314,4 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 })
+
