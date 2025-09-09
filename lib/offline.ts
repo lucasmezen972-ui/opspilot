@@ -5,12 +5,12 @@ import { Platform } from 'react-native';
 
 export async function initOfflineDatabase() {
   if (Platform.OS === 'web') {
-    console.log('[Offline] Skipping SQLite init on web platform');
+    console.log('[Offline] Skipping local DB init on web platform');
     return { success: true, message: 'Web platform - no local DB needed' };
   }
-  
+
   try {
-    // Initialize SQLite database for mobile platforms
+    // Initialize local database for mobile platforms
     console.log('[Offline] Initializing offline database...');
     // Mobile-specific database initialization would go here
     return { success: true, message: 'Offline database initialized' };
