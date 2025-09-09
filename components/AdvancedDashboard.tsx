@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import { 
-  TrendingUp, 
-  AlertTriangle, 
-  Target, 
-  Award, 
-  Brain, 
-  Shield, 
-  Clock,
-  ChartBar as BarChart3 
-} from 'lucide-react-native'
+import { TrendingUp, TriangleAlert as AlertTriangle, Target, Award, Brain, Shield, Clock, ChartBar as BarChart3 } from 'lucide-react-native'
 import { useAdvancedLMS } from '../hooks/useAdvancedLMS'
 import { useAdvancedAudit } from '../hooks/useAdvancedAudit'
 import { useAuth } from '../hooks/useAuth'

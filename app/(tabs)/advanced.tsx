@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import { Brain, Shield, BarChart3, Settings } from 'lucide-react-native'
+import { Brain, Shield, ChartBar as BarChart3, Settings } from 'lucide-react-native'
 import AdvancedDashboard from '../../components/AdvancedDashboard'
 import SecurityConfig from '../../components/SecurityConfig'
 

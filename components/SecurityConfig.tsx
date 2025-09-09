@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
-import { Shield, Key, AlertTriangle, CheckCircle, Eye, EyeOff } from 'lucide-react-native'
+import { Shield, Key, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Eye, EyeOff } from 'lucide-react-native'
 
 export default function SecurityConfig() {
   const [securityChecks, setSecurityChecks] = useState<any>({})
