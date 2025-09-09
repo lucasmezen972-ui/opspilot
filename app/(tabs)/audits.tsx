@@ -331,7 +331,6 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 20,
     right: 20,
     bottom: 90, // Ajuster pour éviter le chevauchement avec la barre d'onglets
     width: 56,
