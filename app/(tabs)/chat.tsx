@@ -84,7 +84,7 @@ export default function ChatScreen() {
     setNewMessage('');
 
     // Si c'est la conversation IA, obtenir une réponse
-    if (selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+    if (selectedConversation === 2) {
       try {
         const aiResponse = await getChatAssistantResponse(
           message.content,
@@ -178,7 +178,7 @@ export default function ChatScreen() {
                 {conversations.find(c => c.id === selectedConversation)?.name || 'Conversation'}
               </Text>
               <View style={styles.conversationStatusActive}>
-                {selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY ? (
+                {selectedConversation === 2 ? (
                   <>
                     <Sparkles size={12} color="#8B5CF6" />
                     <Text style={styles.conversationStatusText}>Assistant IA disponible</Text>
