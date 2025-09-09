@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, Image } from 'react-native'
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
-import { X, Camera, RotateCcw, Sparkles, CheckCircle } from 'lucide-react-native'
+import { X, Camera, RotateCcw, Sparkles, CircleCheck as CheckCircle } from 'lucide-react-native'
 import { analyzeAuditImage } from '../lib/openai'
 
 interface CameraModalProps {

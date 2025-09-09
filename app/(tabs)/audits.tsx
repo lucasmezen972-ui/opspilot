@@ -1,20 +1,37 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Search, Filter, Plus, MapPin, CheckCircle, Clock, AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native';
-import { useState } from 'react';
-import { useAudits } from '../../hooks/useAudits';
-import AuditModal from '../../components/AuditModal';
-import CameraModal from '../../components/CameraModal';
+import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native'lucide-react-native';
+
+const audits = [
+  {
+    id: 1,
+    title: 'Contrôle rayon frais',
+    status: 'completed',
+    date: '2024-01-15',
+    location: 'Rayon frais - Zone A',
+    score: 92,
+    issues: 2,
+  },
+  {
+    id: 2,
+    title: 'Audit sécurité',
+    status: 'in_progress',
+    date: '2024-01-15',
+    location: 'Magasin général',
+    score: null,
+    issues: 0,
+  },
+  {
+    id: 3,
+    title: 'Contrôle hygiène',
+    status: 'pending',
+    date: '2024-01-16',
+    location: 'Zone préparation',
+    score: null,
+    issues: 0,
+  },
+];
 
 export default function AuditsScreen() {
-  const { audits, loading, updateAuditStatus, addPhotoToAudit } = useAudits();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCameraModal, setShowCameraModal] = useState(false);
-  const [selectedAuditId, setSelectedAuditId] = useState<string | null>(null);
-
-  const completedAudits = audits.filter(a => a.status === 'completed').length;
-  const inProgressAudits = audits.filter(a => a.status === 'in_progress').length;
-  const pendingAudits = audits.filter(a => a.status === 'pending').length;
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
@@ -42,44 +59,6 @@ export default function AuditsScreen() {
     }
   };
 
-  const handleStartAudit = async (auditId: string) => {
-    await updateAuditStatus(auditId, 'in_progress');
-  };
-
-  const handleCompleteAudit = async (auditId: string) => {
-    const audit = audits.find(a => a.id === auditId);
-    if (audit) {
-      // Score simulé basé sur le nombre d'issues
-      const simulatedScore = Math.max(60, 100 - (audit.issues_count * 10));
-      await updateAuditStatus(auditId, 'completed', { 
-        score: simulatedScore,
-        completed_at: new Date().toISOString()
-      });
-    }
-  };
-
-  const handleTakePhoto = (auditId: string) => {
-    setSelectedAuditId(auditId);
-    setShowCameraModal(true);
-  };
-
-  const handlePhotoTaken = async (photoUri: string, analysis?: any) => {
-    if (selectedAuditId) {
-      await addPhotoToAudit(selectedAuditId, photoUri);
-      
-      // Si l'analyse IA a détecté des problèmes, mettre à jour le compteur
-      if (analysis?.issues?.length > 0) {
-        const audit = audits.find(a => a.id === selectedAuditId);
-        if (audit) {
-          await updateAuditStatus(selectedAuditId, audit.status, {
-            issues_count: audit.issues_count + analysis.issues.length
-          });
-        }
-      }
-    }
-    setSelectedAuditId(null);
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -98,33 +77,27 @@ export default function AuditsScreen() {
       {/* Quick Stats */}
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{pendingAudits}</Text>
+          <Text style={styles.quickStatNumber}>5</Text>
           <Text style={styles.quickStatLabel}>À faire</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{inProgressAudits}</Text>
+          <Text style={styles.quickStatNumber}>2</Text>
           <Text style={styles.quickStatLabel}>En cours</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{completedAudits}</Text>
+          <Text style={styles.quickStatNumber}>12</Text>
           <Text style={styles.quickStatLabel}>Terminés</Text>
         </View>
       </View>
 
       {/* Create New Audit Button */}
-      <TouchableOpacity style={styles.createButton} onPress={() => setShowCreateModal(true)}>
+      <TouchableOpacity style={styles.createButton}>
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Créer un audit</Text>
       </TouchableOpacity>
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
-        {loading && audits.length === 0 && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Chargement des audits...</Text>
-          </View>
-        )}
-        
         {audits.map((audit) => {
           const StatusIcon = getStatusIcon(audit.status);
           return (
@@ -146,59 +119,25 @@ export default function AuditsScreen() {
               </View>
 
               <View style={styles.auditDetails}>
-                <Text style={styles.auditDate}>
-                  {new Date(audit.created_at).toLocaleDateString()}
-                </Text>
+                <Text style={styles.auditDate}>{audit.date}</Text>
                 {audit.score && (
                   <View style={styles.auditScore}>
                     <Text style={styles.auditScoreText}>Score: {audit.score}%</Text>
                   </View>
                 )}
-                {audit.issues_count > 0 && (
+                {audit.issues > 0 && (
                   <View style={styles.auditIssues}>
                     <AlertCircle size={14} color="#F59E0B" />
-                    <Text style={styles.auditIssuesText}>{audit.issues_count} problèmes</Text>
+                    <Text style={styles.auditIssuesText}>{audit.issues} problèmes</Text>
                   </View>
                 )}
               </View>
 
               <View style={styles.auditActions}>
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => handleTakePhoto(audit.id)}
-                >
+                <TouchableOpacity style={styles.actionButton}>
                   <Camera size={16} color="#2563EB" />
-                  <Text style={styles.actionButtonText}>
-                    Photos ({audit.photos?.length || 0})
-                  </Text>
+                  <Text style={styles.actionButtonText}>Photos</Text>
                 </TouchableOpacity>
-                
-                {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-                  <TouchableOpacity style={styles.aiActionButton}>
-                    <Sparkles size={16} color="#F59E0B" />
-                    <Text style={styles.aiActionButtonText}>IA</Text>
-                  </TouchableOpacity>
-                )}
-                
-                {audit.status === 'pending' && (
-                  <TouchableOpacity 
-                    style={styles.startButton}
-                    onPress={() => handleStartAudit(audit.id)}
-                  >
-                    <Text style={styles.startButtonText}>Commencer</Text>
-                  </TouchableOpacity>
-                )}
-                
-                {audit.status === 'in_progress' && (
-                  <TouchableOpacity 
-                    style={styles.completeButton}
-                    onPress={() => handleCompleteAudit(audit.id)}
-                  >
-                    <CheckCircle size={16} color="#FFFFFF" />
-                    <Text style={styles.completeButtonText}>Terminer</Text>
-                  </TouchableOpacity>
-                )}
-                
                 <TouchableOpacity style={styles.actionButton}>
                   <FileText size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>Rapport</Text>
@@ -207,25 +146,12 @@ export default function AuditsScreen() {
             </TouchableOpacity>
           );
         })}
-        
-        {!loading && audits.length === 0 && (
-          <View style={styles.emptyState}>
-            <FileText size={48} color="#9CA3AF" />
-            <Text style={styles.emptyStateTitle}>Aucun audit</Text>
-            <Text style={styles.emptyStateText}>
-              Créez votre premier audit pour commencer les contrôles qualité.
-            </Text>
-          </View>
-        )}
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => setShowCameraModal(true)}>
+      <TouchableOpacity style={styles.fab}>
         <Camera size={24} color="#FFFFFF" />
       </TouchableOpacity>
-      
-      <AuditModal visible={showCreateModal} onClose={() => setShowCreateModal(false)} />
-      <CameraModal visible={showCameraModal} onClose={() => setShowCameraModal(false)} onPhotoTaken={handlePhotoTaken} />
     </View>
   );
 }
@@ -403,77 +329,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 4,
   },
-  aiActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: '#FEF3C7',
-    borderRadius: 6,
-  },
-  aiActionButtonText: {
-    fontSize: 10,
-    color: '#D97706',
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  startButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2563EB',
-  },
-  startButtonText: {
-    fontSize: 12,
-    color: '#2563EB',
-    fontWeight: '500',
-  },
-  completeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#10B981',
-    borderRadius: 8,
-  },
-  completeButtonText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  loadingContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#6B7280',
-    fontSize: 16,
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
   fab: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    bottom: 90,
+    bottom: 90, // Ajuster pour éviter le chevauchement avec la barre d'onglets
     width: 56,
     height: 56,
     borderRadius: 28,
