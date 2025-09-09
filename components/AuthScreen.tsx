@@ -137,11 +137,13 @@ export default function AuthScreen() {
         </Text>
       </TouchableOpacity>
     </View>
-    <View style={styles.demoContainer}>
-      <Text style={styles.demoTitle}>Compte de démonstration</Text>
-      <Text>Email: demo@opspilot.com</Text>
-      <Text>Mot de passe: demo123</Text>
-    </View>
+    {typeof __DEV__ !== 'undefined' && __DEV__ && (
+      <View style={styles.demoContainer}>
+        <Text style={styles.demoTitle}>Compte de démonstration</Text>
+        <Text>Email: demo@opspilot.com</Text>
+        <Text>Mot de passe: demo123</Text>
+      </View>
+    )}
   </View>
 )
 }

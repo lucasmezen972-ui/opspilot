@@ -112,6 +112,10 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - **Suivi de progression** personnalisé
 - **Système de récompenses** lié à la formation
 
+## 🧪 Compte de test pour démonstrations
+
+Pour effectuer des démonstrations sans utiliser de comptes réels, utilisez un compte de test dédié. Les instructions de configuration se trouvent dans [DEMO_USER_SETUP.md](./DEMO_USER_SETUP.md). Ce compte est réservé aux environnements de développement ou de présentation.
+
 ## 📊 Données d'Example
 
 L'application contient des données de démonstration réalistes :
