@@ -3,7 +3,7 @@ import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
 
-let Location: any
+let Location: typeof import('expo-location') | undefined
 try {
   Location = require('expo-location')
 } catch {}
@@ -101,7 +101,7 @@ export function useAudits() {
         return { data }
       } else {
         const offlineId = `offline-${Date.now()}`
-        const localAudit: any = {
+        const localAudit: Audit & { local_id: string } = {
           ...auditData,
           organization_id: profile.organization_id,
           store_id: profile.store_id,
@@ -111,6 +111,7 @@ export function useAudits() {
           issues_count: 0,
           photos: [],
           created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
           local_id: offlineId,
           id: offlineId,
         }
@@ -138,6 +139,29 @@ export function useAudits() {
 
       if (status === 'completed' && !additionalData?.completed_at) {
         updateData.completed_at = new Date().toISOString()
+      }
+
+      if (status === 'completed') {
+        const { data: responses, error: respError } = await supabase
+          .from('audit_responses')
+          .select('score, audit_items(points)')
+          .eq('audit_id', auditId)
+
+        if (!respError && responses) {
+          let total = 0
+          let max = 0
+          let issues = 0
+          ;(responses as { score: number | null; audit_items: { points: number }[] }[]).forEach(r => {
+            const itemMax = r.audit_items[0]?.points ?? 0
+            const s = r.score ?? 0
+            total += s
+            max += itemMax
+            if (s < itemMax) issues++
+          })
+          updateData.score = total
+          updateData.max_score = max
+          updateData.issues_count = issues
+        }
       }
 
       if (status === 'in_progress') {
@@ -178,7 +202,7 @@ export function useAudits() {
         await setOfflineAudits(audits.map(a => a.id === auditId ? data : a))
         return { data }
       } else {
-        const existing: any = audits.find(a => a.id === auditId)
+        const existing = audits.find(a => a.id === auditId)
         if (!existing) return { error: 'Audit non trouvé' }
         const localUpdated = { ...existing, ...updateData }
         setAudits(audits.map(a => a.id === auditId ? localUpdated : a))

@@ -14,7 +14,9 @@ Notifications.setNotificationHandler({
 
 export function usePushNotifications() {
   useEffect(() => {
-    registerForPushNotificationsAsync();
+    if (Platform.OS !== 'web') {
+      registerForPushNotificationsAsync();
+    }
   }, []);
 }
 

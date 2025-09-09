@@ -134,7 +134,8 @@ export function useTraining() {
     const course = courses.find(c => c.id === courseId)
     if (!course) return { error: 'Cours non trouvé' }
 
-    const passed = score >= course.passing_score
+    // Passing score is fixed at 70%
+    const passed = score >= 70
     
     try {
       const { data, error } = await supabase
@@ -159,7 +160,7 @@ export function useTraining() {
         p.training_id === courseId ? data : p
       ))
 
-      // Si réussi, ajouter les XP et vérifier les badges
+      // Si réussi, ajouter les XP
       if (passed) {
         await addXP(course.xp_reward)
       }
