@@ -128,7 +128,7 @@ L'application contient des données de démonstration réalistes :
 ## 🔄 Évolutions Futures
 
 - **Intégration API** pour données temps réel
-- **Mode hors-ligne complet** avec SQLite
+- **Mode hors-ligne complet**
   - Stockage local des audits, tâches et photos
   - Synchronisation automatique dès le retour en ligne
 - **Push notifications** natives
