@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render } from '@testing-library/react';
 import { describe, it, expect, afterEach } from 'vitest';
 import ConnectedStatus from '../../components/ConnectedStatus';
 

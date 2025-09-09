@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { render } from '@testing-library/react'
 import RootLayout from '../../app/_layout'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -83,9 +83,9 @@ describe('Authentication Flow Integration', () => {
       refetchProfile: vi.fn(),
     })
 
-    const { UNSAFE_root } = render(<RootLayout />)
+    const { container } = render(<RootLayout />)
 
     // Should not render anything while loading
-    expect(UNSAFE_root?.children.length).toBe(0)
+    expect(container.firstChild).toBeNull()
   })
 })
