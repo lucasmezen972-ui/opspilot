@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, type Task } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { isOnline, loadOfflineTasks, setOfflineTasks, queueTask } from '../lib/offline'
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -18,23 +19,29 @@ export function useTasks() {
 
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          assigned_profile:profiles!tasks_assigned_to_fkey(full_name),
-          creator_profile:profiles!tasks_created_by_fkey(full_name),
-          stores(name)
-        `)
-        .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false })
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select(`
+            *,
+            assigned_profile:profiles!tasks_assigned_to_fkey(full_name),
+            creator_profile:profiles!tasks_created_by_fkey(full_name),
+            stores(name)
+          `)
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Erreur lors de la récupération des tâches:', error)
-        return
+        if (error) {
+          console.error('Erreur lors de la récupération des tâches:', error)
+          return
+        }
+
+        setTasks(data || [])
+        await setOfflineTasks(data || [])
+      } else {
+        const local = await loadOfflineTasks()
+        setTasks(local)
       }
-
-      setTasks(data || [])
     } catch (error) {
       console.error('Erreur:', error)
     } finally {
@@ -54,25 +61,43 @@ export function useTasks() {
     if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
 
     try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert({
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert({
+            ...taskData,
+            organization_id: profile.organization_id,
+            store_id: profile.store_id,
+            created_by: profile.id,
+            status: 'pending',
+          })
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Erreur lors de la création de la tâche:', error)
+          return { error }
+        }
+
+        setTasks([data, ...tasks])
+        await setOfflineTasks([data, ...tasks])
+        return { data }
+      } else {
+        const offlineId = `offline-${Date.now()}`
+        const localTask: any = {
           ...taskData,
           organization_id: profile.organization_id,
           store_id: profile.store_id,
           created_by: profile.id,
           status: 'pending',
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Erreur lors de la création de la tâche:', error)
-        return { error }
+          created_at: new Date().toISOString(),
+          local_id: offlineId,
+          id: offlineId,
+        }
+        setTasks([localTask, ...tasks])
+        await queueTask(localTask)
+        return { data: localTask }
       }
-
-      setTasks([data, ...tasks])
-      return { data }
     } catch (error) {
       console.error('Erreur:', error)
       return { error }
@@ -90,22 +115,30 @@ export function useTasks() {
         updateData.completed_at = new Date().toISOString()
       }
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .update(updateData)
-        .eq('id', taskId)
-        .select()
-        .single()
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('tasks')
+          .update(updateData)
+          .eq('id', taskId)
+          .select()
+          .single()
 
-      if (error) {
-        console.error('Erreur lors de la mise à jour de la tâche:', error)
-        return { error }
+        if (error) {
+          console.error('Erreur lors de la mise à jour de la tâche:', error)
+          return { error }
+        }
+
+        setTasks(tasks.map(t => t.id === taskId ? data : t))
+        await setOfflineTasks(tasks.map(t => t.id === taskId ? data : t))
+        return { data }
+      } else {
+        const existing: any = tasks.find(t => t.id === taskId)
+        if (!existing) return { error: 'Tâche introuvable' }
+        const localUpdated = { ...existing, ...updateData }
+        setTasks(tasks.map(t => t.id === taskId ? localUpdated : t))
+        await queueTask(localUpdated)
+        return { data: localUpdated }
       }
-
-      // Mettre à jour la liste locale
-      setTasks(tasks.map(t => t.id === taskId ? data : t))
-      
-      return { data }
     } catch (error) {
       console.error('Erreur:', error)
       return { error }
