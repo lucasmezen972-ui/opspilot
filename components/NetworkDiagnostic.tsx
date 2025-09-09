@@ -101,8 +101,7 @@ export default function NetworkDiagnostic() {
             <Text style={styles.sectionTitle}>🗄️ Supabase</Text>
             {diagnosticResults.supabaseConnection.error ? (
               <View style={styles.errorContainer}>
-                <AlertTriangle size={16} color="#EF4444" />
-                <Text style={styles.errorText}>ERREUR: {diagnosticResults.supabaseConnection.error}</Text>
+                <AlertTriangle size={16} color="#EF4444" /><Text style={styles.errorText}>ERREUR: {diagnosticResults.supabaseConnection.error}</Text>
               </View>
             ) : (
               <>
