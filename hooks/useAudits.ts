@@ -3,6 +3,29 @@ import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
 
+let Location: any
+try {
+  Location = require('expo-location')
+} catch {
+  // Module non disponible (tests, web)
+}
+
+const getCurrentLocation = async () => {
+  if (!Location) return null
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== 'granted') return null
+    const pos = await Location.getCurrentPositionAsync({})
+    return {
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude
+    }
+  } catch (err) {
+    console.warn('Erreur géolocalisation:', err)
+    return null
+  }
+}
+
 export function useAudits() {
   const [audits, setAudits] = useState<Audit[]>([])
   const [loading, setLoading] = useState(true)
@@ -116,10 +139,20 @@ export function useAudits() {
 
       if (status === 'in_progress' && !additionalData?.started_at) {
         updateData.started_at = new Date().toISOString()
+        const coords = await getCurrentLocation()
+        if (coords) {
+          updateData.start_latitude = coords.latitude
+          updateData.start_longitude = coords.longitude
+        }
       }
 
       if (status === 'completed' && !additionalData?.completed_at) {
         updateData.completed_at = new Date().toISOString()
+        const coords = await getCurrentLocation()
+        if (coords) {
+          updateData.end_latitude = coords.latitude
+          updateData.end_longitude = coords.longitude
+        }
       }
 
       if (await isOnline()) {

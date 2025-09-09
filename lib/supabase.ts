@@ -21,3 +21,30 @@ export const supabase: SupabaseClient = createClient(
 );
 
 if (typeof __DEV__ !== 'undefined' && __DEV__) console.log('[Supabase] client initialisé');
+
+export interface Audit {
+  id: string
+  organization_id: string
+  store_id: string | null
+  auditor_id: string
+  title: string
+  description: string | null
+  location: string | null
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
+  score: number | null
+  max_score: number
+  issues_count: number
+  photos: string[]
+  notes: string | null
+  started_at: string | null
+  completed_at: string | null
+  due_date: string | null
+  start_latitude: number | null
+  start_longitude: number | null
+  end_latitude: number | null
+  end_longitude: number | null
+  created_at: string
+  updated_at: string
+  profiles?: { full_name: string } | null
+  stores?: { name: string } | null
+}
