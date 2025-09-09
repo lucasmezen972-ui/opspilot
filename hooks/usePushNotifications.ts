@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
@@ -24,14 +25,8 @@ async function registerForPushNotificationsAsync() {
     return;
   }
 
-  const Device = require('expo-device');
-  if (!Device?.isDevice) {
-  }
-  if (Platform.OS === 'web') {
-    console.log('Push notifications not supported on web');
-    return;
-  }
-
+  // expo-device cannot be imported on web, so require dynamically
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const Device = require('expo-device');
   if (!Device?.isDevice) {
     console.log('Push notifications require a physical device');
