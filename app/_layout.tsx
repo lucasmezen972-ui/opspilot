@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../hooks/useAuth';
 import AuthScreen from '../components/AuthScreen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { isSupabaseConfigured } from '../utils/supabaseConfig';
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -11,8 +12,7 @@ export default function RootLayout() {
 
   // Vérification de la configuration Supabase
   console.log('🚀 OpsPilot - État Application:', {
-    supabaseConfigured: !!process.env.EXPO_PUBLIC_SUPABASE_URL && 
-                       process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co',
+    supabaseConfigured: isSupabaseConfigured(),
     userAuthenticated: !!user,
     isLoading: loading,
     hasError: !!error

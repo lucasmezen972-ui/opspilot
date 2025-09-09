@@ -1,46 +1,34 @@
-import React from 'react'
-import { render } from '@testing-library/react-native'
-import ConnectedStatus from '../../components/ConnectedStatus'
+import React from 'react';
+import { render } from '@testing-library/react-native';
+import { describe, it, expect, afterEach } from 'vitest';
+import ConnectedStatus from '../../components/ConnectedStatus';
 
 describe('ConnectedStatus Component', () => {
-  it('should show connected state when isConnected is true', () => {
-    const { getByText } = render(<ConnectedStatus isConnected={true} />)
-    
-    expect(getByText('✅ Supabase connecté')).toBeTruthy()
-  })
+  afterEach(() => {
+    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+  });
 
-  it('should show disconnected state when isConnected is false', () => {
-    const { getByText } = render(<ConnectedStatus isConnected={false} />)
-    
-    expect(getByText('⏳ En attente de connexion Supabase')).toBeTruthy()
-  })
+  it('shows connected state when configuration is valid', () => {
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
+    const { getByText } = render(<ConnectedStatus />);
+    expect(getByText('✅ Supabase connecté')).toBeTruthy();
+  });
 
-  it('should show data count when provided and connected', () => {
-    const { getByText } = render(<ConnectedStatus isConnected={true} dataCount={42} />)
-    
-    expect(getByText('✅ Supabase connecté • 42 enregistrements')).toBeTruthy()
-  })
+  it('shows missing config message when url is absent', () => {
+    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
+    const { getByText } = render(<ConnectedStatus />);
+    expect(getByText('❌ URL Supabase manquante')).toBeTruthy();
+  });
 
-  it('should not show data count when disconnected', () => {
-    const { getByText, queryByText } = render(<ConnectedStatus isConnected={false} dataCount={42} />)
-    
-    expect(getByText('⏳ En attente de connexion Supabase')).toBeTruthy()
-    expect(queryByText('42 enregistrements')).toBeFalsy()
-  })
+  it('shows placeholder config message when url is placeholder', () => {
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://placeholder.supabase.co';
+    const { getByText } = render(<ConnectedStatus />);
+    expect(getByText('❌ URL Supabase invalide')).toBeTruthy();
+  });
 
-  it('should apply correct styles for connected state', () => {
-    const { getByText } = render(<ConnectedStatus isConnected={true} />)
-    const textElement = getByText('✅ Supabase connecté')
-    
-    // The text should exist (basic test for style application)
-    expect(textElement).toBeTruthy()
-  })
-
-  it('should apply correct styles for disconnected state', () => {
-    const { getByText } = render(<ConnectedStatus isConnected={false} />)
-    const textElement = getByText('⏳ En attente de connexion Supabase')
-    
-    // The text should exist (basic test for style application)
-    expect(textElement).toBeTruthy()
-  })
-})
+  it('shows data count when provided', () => {
+    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
+    const { getByText } = render(<ConnectedStatus dataCount={42} />);
+    expect(getByText('✅ Supabase connecté • 42 enregistrements')).toBeTruthy();
+  });
+});
