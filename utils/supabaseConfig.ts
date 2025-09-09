@@ -8,7 +8,8 @@ export interface SupabaseConfigResult {
 export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
   const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
   if (!url) return { status: 'missing' };
-  if (url === 'https://placeholder.supabase.co') return { status: 'placeholder' };
+  if (url === 'https://placeholder.supabase.co')
+    return { status: 'placeholder' };
   return { status: 'valid', url };
 };
 
