@@ -81,17 +81,15 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
       if (photo?.uri) {
         setPhotoUri(photo.uri)
         
-        // Analyser l'image avec OpenAI si disponible
-        if (process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-          setAnalyzing(true)
-          try {
-            const aiAnalysis = await analyzeAuditImage(photo.uri, auditType)
-            setAnalysis(aiAnalysis)
-          } catch (error) {
-            console.warn('Analyse IA indisponible:', error)
-          } finally {
-            setAnalyzing(false)
-          }
+        // Analyser l'image via le serveur OpenAI
+        setAnalyzing(true)
+        try {
+          const aiAnalysis = await analyzeAuditImage(photo.uri, auditType)
+          setAnalysis(aiAnalysis)
+        } catch (error) {
+          console.warn('Analyse IA indisponible:', error)
+        } finally {
+          setAnalyzing(false)
         }
       }
     } catch (error) {
@@ -241,12 +239,10 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
             Centrez l'élément à auditer dans le cadre
           </Text>
           
-          {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-            <View style={styles.aiHint}>
-              <Sparkles size={16} color="#F59E0B" />
-              <Text style={styles.aiHintText}>Analyse IA automatique activée</Text>
-            </View>
-          )}
+          <View style={styles.aiHint}>
+            <Sparkles size={16} color="#F59E0B" />
+            <Text style={styles.aiHintText}>Analyse IA automatique activée</Text>
+          </View>
         </View>
       </View>
     </Modal>
