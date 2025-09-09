@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
+import { mapSupabaseError } from '../utils/error'
 
 let Location: typeof import('expo-location') | undefined
 try {
@@ -49,7 +50,7 @@ export function useAudits() {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.error('Erreur lors de la récupération des audits:', error)
+          mapSupabaseError('Erreur lors de la récupération des audits', error)
           return
         }
 
@@ -60,7 +61,7 @@ export function useAudits() {
         setAudits(local)
       }
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchAudits', error)
     } finally {
       setLoading(false)
     }
@@ -92,8 +93,7 @@ export function useAudits() {
           .single()
 
         if (error) {
-          console.error('Erreur lors de la création de l\'audit:', error)
-          return { error }
+          return { error: mapSupabaseError("Erreur lors de la création de l'audit", error) }
         }
 
         setAudits([data, ...audits])
@@ -120,8 +120,7 @@ export function useAudits() {
         return { data: localAudit }
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur createAudit', error) }
     }
   }
 
@@ -189,8 +188,7 @@ export function useAudits() {
           .single()
 
         if (error) {
-          console.error('Erreur lors de la mise à jour de l\'audit:', error)
-          return { error }
+          return { error: mapSupabaseError("Erreur lors de la mise à jour de l'audit", error) }
         }
 
         setAudits(audits.map(a => a.id === auditId ? data : a))
@@ -210,8 +208,7 @@ export function useAudits() {
         return { data: localUpdated }
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur updateAuditStatus', error) }
     }
   }
 
@@ -241,7 +238,7 @@ export function useAudits() {
           .eq('id', profile.id)
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour des stats:', error)
+      mapSupabaseError('Erreur lors de la mise à jour des stats', error)
     }
   }
 
@@ -264,8 +261,7 @@ export function useAudits() {
           .single()
 
         if (error) {
-          console.error('Erreur lors de l\'ajout de la photo:', error)
-          return { error }
+          return { error: mapSupabaseError("Erreur lors de l'ajout de la photo", error) }
         }
 
         setAudits(audits.map(a => a.id === auditId ? data : a))
@@ -284,8 +280,7 @@ export function useAudits() {
         return { error: 'Audit non trouvé' }
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur addPhotoToAudit', error) }
     }
   }
 
