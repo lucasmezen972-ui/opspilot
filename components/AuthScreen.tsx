@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { LogIn, UserPlus } from 'lucide-react-native'
 import { useAuth } from '../hooks/useAuth'
 import ConnectedStatus from './ConnectedStatus'
+import { loginSchema } from '../utils/validation'
+
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true)
@@ -13,24 +15,29 @@ export default function AuthScreen() {
   const [localError, setLocalError] = useState('')
   const { signIn, signUp, error: authError } = useAuth()
 
-  // Pré-remplir avec les identifiants de démo
-  const fillDemoCredentials = () => {
-    setEmail('demo@opspilot.com')
-    setPassword('demo123')
-    setLocalError('')
-  }
 
   const handleAuth = async () => {
     setLocalError('')
+      const parsed = loginSchema.safeParse({ email, password });
+  if (!parsed.success) {
+    setLocalError(parsed.error.issues[0]?.message ?? "Champs invalides");
+    return;
+  }
     
-    if (!email || !password) {
-      setLocalError('Veuillez remplir tous les champs')
-      return
+      const parsed = loginSchema.safeParse({ email, password });
+      if (!parsed.success) {
+    setLocalError(parsed.error?.issues?.[0]?.message ?? "Champs invalides");
+    return;
+  }
+    
+    
+
+        if (!isLogin && !fullName) {
+      setLocalError('Veuillez entrer votre nom complet');
+      return;
     }
 
-    if (!isLogin && !fullName) {
-      setLocalError('Veuillez entrer votre nom complet')
-      return
+    
     }
 
     setLoading(true)
@@ -143,16 +150,7 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.demoInfo}>
-        <Text style={styles.demoTitle}>Compte de démonstration</Text>
-        <TouchableOpacity onPress={fillDemoCredentials} style={styles.demoButton}>
-          <Text style={styles.demoButtonText}>📧 demo@opspilot.com</Text>
-          <Text style={styles.demoButtonText}>🔐 demo123</Text>
-          <Text style={styles.demoClickText}>👆 Cliquez pour remplir automatiquement</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+     <>
   )
 }
 
