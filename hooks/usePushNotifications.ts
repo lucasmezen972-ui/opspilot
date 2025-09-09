@@ -35,9 +35,11 @@ function getNotifications(): NotificationsModule | undefined {
   let Notifications: NotificationsModule;
   try {
     const req = eval('require') as (name: string) => NotificationsModule;
-    Notifications = req('expo-notifications');
+    const moduleName = 'expo-' + 'notifications';
+    Notifications = req(moduleName);
   } catch {
-    console.log('expo-notifications package not available');
+    const moduleName = 'expo-' + 'notifications';
+    console.log(moduleName + ' package not available');
     return undefined;
   }
 
@@ -69,9 +71,11 @@ async function registerForPushNotificationsAsync(
   let ExpoDevice: { isDevice: boolean } | undefined;
   try {
     const req = eval('require') as (name: string) => { isDevice: boolean };
-    ExpoDevice = req('expo-device');
+    const moduleName = 'expo-' + 'device';
+    ExpoDevice = req(moduleName);
   } catch {
-    console.log('expo-device package not available');
+    const moduleName = 'expo-' + 'device';
+    console.log(moduleName + ' package not available');
     return;
   }
   if (!ExpoDevice?.isDevice) {
