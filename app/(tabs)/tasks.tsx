@@ -198,12 +198,16 @@ export default function TasksScreen() {
                 </View>
                 <View style={styles.taskDetailRow}>
                   <Calendar size={14} color="#6B7280" />
-                  <Text style={styles.taskDetailText}>{task.dueDate}</Text>
+                  <Text style={styles.taskDetailText}>
                     {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Pas d\'échéance'}
+                  </Text>
+                </View>
                 <View style={styles.taskDetailRow}>
                   <Clock size={14} color="#6B7280" />
-                  <Text style={styles.taskDetailText}>{task.estimatedTime}</Text>
+                  <Text style={styles.taskDetailText}>
                     {task.estimated_time_minutes ? `${task.estimated_time_minutes} min` : 'Non estimé'}
+                  </Text>
+                </View>
               </View>
 
               {task.status !== 'completed' && (
@@ -477,9 +481,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
     bottom: 90,
+    right: 20,
     width: 56,
     height: 56,
     borderRadius: 28,
