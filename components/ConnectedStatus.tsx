@@ -1,31 +1,47 @@
-import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import { CircleCheck as CheckCircle, Wifi } from 'lucide-react-native'
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { CircleCheck as CheckCircle, Wifi, CircleAlert } from 'lucide-react-native';
+import { getSupabaseConfigStatus } from '../utils/supabaseConfig';
 
 interface ConnectedStatusProps {
-  isConnected: boolean
-  dataCount?: number
+  dataCount?: number;
 }
 
-export default function ConnectedStatus({ isConnected, dataCount }: ConnectedStatusProps) {
-  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
-  const hasValidConfig = isConnected && supabaseUrl && supabaseUrl !== 'https://placeholder.supabase.co'
+export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
+  const { status } = getSupabaseConfigStatus();
+
+  let message = '⚠️ Cliquez "Connect to Supabase" en haut à droite';
+  let containerStyle = styles.disconnected;
+  let textStyle = styles.disconnectedText;
+  let Icon = Wifi;
+  let iconColor = '#6B7280';
+
+  if (status === 'missing') {
+    message = '❌ URL Supabase manquante';
+    containerStyle = styles.error;
+    textStyle = styles.errorText;
+    Icon = CircleAlert;
+    iconColor = '#DC2626';
+  } else if (status === 'placeholder') {
+    message = '❌ URL Supabase invalide';
+    containerStyle = styles.error;
+    textStyle = styles.errorText;
+    Icon = CircleAlert;
+    iconColor = '#DC2626';
+  } else if (status === 'valid') {
+    message = `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}`;
+    containerStyle = styles.connected;
+    textStyle = styles.connectedText;
+    Icon = CheckCircle;
+    iconColor = '#10B981';
+  }
 
   return (
-    <View style={[styles.container, hasValidConfig ? styles.connected : styles.disconnected]}>
-      {hasValidConfig ? (
-        <CheckCircle size={16} color="#10B981" />
-      ) : (
-        <Wifi size={16} color="#6B7280" />
-      )}
-      <Text style={[styles.text, hasValidConfig ? styles.connectedText : styles.disconnectedText]}>
-        {hasValidConfig ? 
-          `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}` : 
-          '⚠️ Cliquez "Connect to Supabase" en haut à droite'
-        }
-      </Text>
+    <View style={[styles.container, containerStyle]}>
+      <Icon size={16} color={iconColor} />
+      <Text style={[styles.text, textStyle]}>{message}</Text>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -42,6 +58,9 @@ const styles = StyleSheet.create({
   disconnected: {
     backgroundColor: '#F3F4F6',
   },
+  error: {
+    backgroundColor: '#FEE2E2',
+  },
   text: {
     fontSize: 12,
     marginLeft: 6,
@@ -53,4 +72,8 @@ const styles = StyleSheet.create({
   disconnectedText: {
     color: '#6B7280',
   },
-})
+  errorText: {
+    color: '#DC2626',
+    fontWeight: '500',
+  },
+});

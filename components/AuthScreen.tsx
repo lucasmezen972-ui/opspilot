@@ -65,12 +65,7 @@ export default function AuthScreen() {
       </View>
 
       <View style={styles.statusContainer}>
-        <ConnectedStatus
-          isConnected={!!(
-            process.env.EXPO_PUBLIC_SUPABASE_URL &&
-            process.env.EXPO_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
-          )}
-        />
+        <ConnectedStatus />
       </View>
 
       {displayError && (
