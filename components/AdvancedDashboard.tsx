@@ -4,6 +4,7 @@ import { TrendingUp, TriangleAlert as AlertTriangle, Target, Award, Brain, Shiel
 import { useAdvancedLMS } from '../hooks/useAdvancedLMS'
 import { useAdvancedAudit } from '../hooks/useAdvancedAudit'
 import { useAuth } from '../hooks/useAuth'
+import AIRecommendationsPanel from './AIRecommendationsPanel'
 
 export default function AdvancedDashboard() {
   const { profile } = useAuth()
@@ -36,12 +37,15 @@ export default function AdvancedDashboard() {
       {/* Header intelligente */}
       <View style={styles.intelligentHeader}>
         <Text style={styles.welcomeText}>
-          Bonjour {profile?.full_name?.split(' ')[0]} 👋
+          <Text>Bonjour </Text>
+          <Text>{profile?.full_name?.split(' ')[0] || 'Utilisateur'}</Text>
+          <Text> 👋</Text>
         </Text>
         <Text style={styles.roleText}>
-          {profile?.role === 'admin' ? 'Administrateur' : 
-           profile?.role === 'manager' ? 'Responsable' : 'Employé'} • 
-          Niveau {profile?.level || 1}
+          <Text>{profile?.role === 'admin' ? 'Administrateur' : 
+           profile?.role === 'manager' ? 'Responsable' : 'Employé'}</Text>
+          <Text> • Niveau </Text>
+          <Text>{profile?.level || 1}</Text>
         </Text>
         
         {insights.length > 0 && (
@@ -72,6 +76,9 @@ export default function AdvancedDashboard() {
             </View>
           )}
         </View>
+
+      {/* Panel IA intégré */}
+      <AIRecommendationsPanel />
         
         <View style={styles.metricCard}>
           <Award size={24} color="#F59E0B" />
