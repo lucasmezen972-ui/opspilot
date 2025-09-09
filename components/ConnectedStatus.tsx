@@ -21,13 +21,13 @@ export default function ConnectedStatus({ isConnected, dataCount, databaseHealth
     
     if (databaseHealth.connection && databaseHealth.tables && databaseHealth.data) {
       return '🟢 Backend opérationnel'
-    return 'Backend opérationnel'
+    } else if (databaseHealth.connection && databaseHealth.tables) {
       return '🟡 Tables OK, données manquantes'
-    return 'Tables OK, données manquantes'
+    } else if (databaseHealth.connection) {
       return '🟠 Connexion OK, tables manquantes'
-    return 'Connexion OK, tables manquantes'
+    } else {
       return '🔴 Problème de connexion'
-    return 'Problème de connexion'
+    }
   }
   return (
     <View style={[styles.container, hasValidConfig ? styles.connected : styles.disconnected]}>
