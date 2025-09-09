@@ -2,6 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import { supabase } from './supabase'
 import { logger } from '../utils/logger'
+import { authenticate } from './middleware/auth'
+import { auditSchema, taskSchema, productSchema } from './schemas'
 
 export const app = express()
 app.use(cors())
@@ -10,6 +12,8 @@ app.use(express.json())
 app.get('/health', (_, res) => {
   res.json({ status: 'ok' })
 })
+
+app.use(authenticate)
 
 // Audits
 app.get('/audits', async (_, res) => {
@@ -22,7 +26,11 @@ app.get('/audits', async (_, res) => {
 })
 
 app.post('/audits', async (req, res) => {
-  const { data, error } = await supabase.from('audits').insert(req.body).select().single()
+  const parsed = auditSchema.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.flatten() })
+  }
+  const { data, error } = await supabase.from('audits').insert(parsed.data).select().single()
   if (error) {
     logger.error('Failed to create audit', error)
     return res.status(500).json({ error: error.message })
@@ -41,7 +49,11 @@ app.get('/tasks', async (_, res) => {
 })
 
 app.post('/tasks', async (req, res) => {
-  const { data, error } = await supabase.from('tasks').insert(req.body).select().single()
+  const parsed = taskSchema.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.flatten() })
+  }
+  const { data, error } = await supabase.from('tasks').insert(parsed.data).select().single()
   if (error) {
     logger.error('Failed to create task', error)
     return res.status(500).json({ error: error.message })
@@ -60,7 +72,11 @@ app.get('/products', async (_, res) => {
 })
 
 app.post('/products', async (req, res) => {
-  const { data, error } = await supabase.from('products').insert(req.body).select().single()
+  const parsed = productSchema.safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.flatten() })
+  }
+  const { data, error } = await supabase.from('products').insert(parsed.data).select().single()
   if (error) {
     logger.error('Failed to create product', error)
     return res.status(500).json({ error: error.message })
