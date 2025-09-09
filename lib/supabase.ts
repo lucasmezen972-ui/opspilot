@@ -67,17 +67,17 @@ export type Message = {
 export type Product = {
   id: string;
   organization_id: string;
-  store_id?: string | null;
   name: string;
   barcode?: string | null;
-  stock_quantity: number;
-  status: 'ok' | 'low_stock' | 'out_of_stock';
-  updated_at?: string | null;
-  min_stock?: number | null;
-  image_url?: string | null;
   category?: string | null;
   price?: number | null;
+  stock_quantity: number;
+  min_stock?: number | null;
   dlc?: string | null;
+  image_url?: string | null;
+  added_by?: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Task = {
@@ -98,26 +98,30 @@ export type Task = {
   completed_at?: string | null;
 };
 
-export type TrainingCourse = {
+export type Training = {
   id: string;
   organization_id: string;
   title: string;
-  description?: string | null;
+  content?: string | null;
+  category?: string | null;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   duration_minutes: number;
   xp_reward: number;
-  passing_score: number;
+  is_active: boolean;
   created_at?: string;
   updated_at?: string;
   ai_generated?: boolean;
 };
 
-export type TrainingProgress = {
+export type UserTrainingProgress = {
   id: string;
   user_id: string;
-  course_id: string;
+  training_id: string;
   status: 'not_started' | 'in_progress' | 'completed';
   progress_percentage: number;
+  score?: number | null;
   started_at?: string | null;
   completed_at?: string | null;
-  score?: number | null;
+  created_at?: string;
+  updated_at?: string;
 };

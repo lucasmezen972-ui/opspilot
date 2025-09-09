@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase, type TrainingCourse, type TrainingProgress } from '../lib/supabase'
+import { supabase, type Training, type UserTrainingProgress } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useTraining() {
-  const [courses, setCourses] = useState<TrainingCourse[]>([])
-  const [progress, setProgress] = useState<TrainingProgress[]>([])
+  const [courses, setCourses] = useState<Training[]>([])
+  const [progress, setProgress] = useState<UserTrainingProgress[]>([])
   const [loading, setLoading] = useState(true)
   const { profile } = useAuth()
 
@@ -22,7 +22,7 @@ export function useTraining() {
       
       // Récupérer les cours
       const { data: coursesData, error: coursesError } = await supabase
-        .from('training_courses')
+        .from('trainings')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
@@ -36,7 +36,7 @@ export function useTraining() {
 
       // Récupérer la progression de l'utilisateur
       const { data: progressData, error: progressError } = await supabase
-        .from('training_progress')
+        .from('user_training_progress')
         .select('*')
         .eq('user_id', profile.id)
 
@@ -58,7 +58,7 @@ export function useTraining() {
 
     try {
       // Vérifier si la progression existe déjà
-      const existingProgress = progress.find(p => p.course_id === courseId)
+      const existingProgress = progress.find(p => p.training_id === courseId)
       
       if (existingProgress) {
         return { data: existingProgress }
@@ -66,10 +66,10 @@ export function useTraining() {
 
       // Créer une nouvelle progression
       const { data, error } = await supabase
-        .from('training_progress')
+        .from('user_training_progress')
         .insert({
           user_id: profile.id,
-          course_id: courseId,
+          training_id: courseId,
           status: 'in_progress',
           progress_percentage: 0,
           started_at: new Date().toISOString(),
@@ -95,14 +95,14 @@ export function useTraining() {
 
     try {
       const { data, error } = await supabase
-        .from('training_progress')
+        .from('user_training_progress')
         .update({
           progress_percentage: progressPercentage,
           status: progressPercentage >= 100 ? 'completed' : 'in_progress',
           completed_at: progressPercentage >= 100 ? new Date().toISOString() : null,
         })
         .eq('user_id', profile.id)
-        .eq('course_id', courseId)
+        .eq('training_id', courseId)
         .select()
         .single()
 
@@ -113,7 +113,7 @@ export function useTraining() {
 
       // Mettre à jour la liste locale
       setProgress(progress.map(p => 
-        p.course_id === courseId ? data : p
+        p.training_id === courseId ? data : p
       ))
 
       // Si le cours est terminé, mettre à jour les stats du profil
@@ -138,7 +138,7 @@ export function useTraining() {
     
     try {
       const { data, error } = await supabase
-        .from('training_progress')
+        .from('user_training_progress')
         .update({
           score,
           status: passed ? 'completed' : 'in_progress',
@@ -146,7 +146,7 @@ export function useTraining() {
           completed_at: passed ? new Date().toISOString() : null,
         })
         .eq('user_id', profile.id)
-        .eq('course_id', courseId)
+        .eq('training_id', courseId)
         .select()
         .single()
 
@@ -156,13 +156,12 @@ export function useTraining() {
       }
 
       setProgress(progress.map(p => 
-        p.course_id === courseId ? data : p
+        p.training_id === courseId ? data : p
       ))
 
       // Si réussi, ajouter les XP et vérifier les badges
       if (passed) {
         await addXP(course.xp_reward)
-        await checkAchievements()
       }
 
       return { data, passed }
@@ -210,54 +209,8 @@ export function useTraining() {
     }
   }
 
-  const checkAchievements = async () => {
-    if (!profile) return
-
-    try {
-      // Vérifier les badges basés sur les formations terminées
-      const completedCount = progress.filter(p => p.status === 'completed').length
-
-      const { data: achievements } = await supabase
-        .from('achievements')
-        .select('*')
-        .eq('organization_id', profile.organization_id)
-        .eq('condition_type', 'training_master')
-
-      if (achievements) {
-        for (const achievement of achievements) {
-          const requiredCount = achievement.condition_value?.count || 1
-          
-          if (completedCount >= requiredCount) {
-            // Vérifier si l'utilisateur a déjà ce badge
-            const { data: existingBadge } = await supabase
-              .from('user_achievements')
-              .select('id')
-              .eq('user_id', profile.id)
-              .eq('achievement_id', achievement.id)
-              .single()
-
-            if (!existingBadge) {
-              // Attribuer le badge
-              await supabase
-                .from('user_achievements')
-                .insert({
-                  user_id: profile.id,
-                  achievement_id: achievement.id,
-                })
-
-              // Ajouter les XP du badge
-              await addXP(achievement.xp_reward)
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la vérification des badges:', error)
-    }
-  }
-
   const getCourseProgress = (courseId: string) => {
-    return progress.find(p => p.course_id === courseId)
+    return progress.find(p => p.training_id === courseId)
   }
 
   const getCompletedCourses = () => {

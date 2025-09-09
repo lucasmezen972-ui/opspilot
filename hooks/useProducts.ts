@@ -95,7 +95,7 @@ export function useProducts() {
   }
 
   const createProduct = async (productData: Partial<Product>) => {
-    if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
+    if (!profile?.organization_id) return { error: 'Organisation non définie' }
 
     try {
       const { data, error } = await supabase
@@ -103,7 +103,7 @@ export function useProducts() {
         .insert({
           ...productData,
           organization_id: profile.organization_id,
-          store_id: profile.store_id,
+          added_by: profile.id,
         })
         .select()
         .single()
