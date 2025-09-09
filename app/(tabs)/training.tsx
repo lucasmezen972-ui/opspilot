@@ -1,9 +1,24 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Play, BookOpen, Award, Clock, CircleCheck as CheckCircle, Star, Users, Target, TrendingUp, Sparkles, Plus } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
+import {
+  Play,
+  BookOpen,
+  Clock,
+  CircleCheck as CheckCircle,
+  Star,
+  TrendingUp,
+  Sparkles,
+} from 'lucide-react-native';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
 import { useAuth } from '../../hooks/useAuth';
 import { generateTrainingContent } from '../../lib/openai';
-import { Alert } from 'react-native';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
@@ -11,33 +26,39 @@ export default function TrainingScreen() {
     {
       id: '1',
       title: 'Accueil client excellence',
-      description: 'Apprenez les meilleures techniques d\'accueil et de service client',
+      description:
+        "Apprenez les meilleures techniques d'accueil et de service client",
       duration_minutes: 25,
       progress: 80,
       status: 'in_progress',
       difficulty: 'beginner',
       xp_reward: 50,
+      ai_generated: false,
     },
     {
       id: '2',
       title: 'Hygiène et sécurité alimentaire',
-      description: 'Formation obligatoire sur les normes HACCP et la sécurité alimentaire',
+      description:
+        'Formation obligatoire sur les normes HACCP et la sécurité alimentaire',
       duration_minutes: 45,
       progress: 100,
       status: 'completed',
       difficulty: 'intermediate',
       xp_reward: 100,
+      ai_generated: false,
     },
     {
       id: '3',
       title: 'Gestion des stocks et inventaire',
-      description: 'Maîtrisez les techniques de gestion des stocks et d\'inventaire',
+      description:
+        "Maîtrisez les techniques de gestion des stocks et d'inventaire",
       duration_minutes: 35,
       progress: 0,
       status: 'not_started',
       difficulty: 'advanced',
       xp_reward: 75,
-    }
+      ai_generated: false,
+    },
   ]);
 
   const [achievements] = useState([
@@ -50,79 +71,118 @@ export default function TrainingScreen() {
   const [generatingCourse, setGeneratingCourse] = useState(false);
 
   // Stats calculées
-  const completedCourses = courses.filter(c => c.status === 'completed').length;
-  const totalStudyTime = courses.filter(c => c.status === 'completed')
+  const completedCourses = courses.filter(
+    (c) => c.status === 'completed',
+  ).length;
+  const totalStudyTime = courses
+    .filter((c) => c.status === 'completed')
     .reduce((total, course) => total + course.duration_minutes, 0);
   const avgScore = 87; // Pourrait être calculé depuis les vrais résultats
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#10B981';
-      case 'in_progress': return '#F59E0B';
-      case 'not_started': return '#6B7280';
-      default: return '#6B7280';
+      case 'completed':
+        return '#10B981';
+      case 'in_progress':
+        return '#F59E0B';
+      case 'not_started':
+        return '#6B7280';
+      default:
+        return '#6B7280';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'completed': return 'Terminé';
-      case 'in_progress': return 'En cours';
-      case 'not_started': return 'Pas commencé';
-      default: return 'Inconnu';
+      case 'completed':
+        return 'Terminé';
+      case 'in_progress':
+        return 'En cours';
+      case 'not_started':
+        return 'Pas commencé';
+      default:
+        return 'Inconnu';
     }
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return '#10B981';
-      case 'intermediate': return '#F59E0B';
-      case 'advanced': return '#EF4444';
-      default: return '#6B7280';
+      case 'beginner':
+        return '#10B981';
+      case 'intermediate':
+        return '#F59E0B';
+      case 'advanced':
+        return '#EF4444';
+      default:
+        return '#6B7280';
     }
   };
 
   const getDifficultyText = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'Débutant';
-      case 'intermediate': return 'Intermédiaire';
-      case 'advanced': return 'Avancé';
-      default: return 'Inconnu';
+      case 'beginner':
+        return 'Débutant';
+      case 'intermediate':
+        return 'Intermédiaire';
+      case 'advanced':
+        return 'Avancé';
+      default:
+        return 'Inconnu';
     }
   };
 
   const handleStartCourse = (courseId: string) => {
-    setCourses(courses.map(course => 
-      course.id === courseId 
-        ? { ...course, status: 'in_progress', progress: Math.max(1, course.progress) }
-        : course
-    ));
-    Alert.alert('Formation démarrée', 'Vous pouvez maintenant suivre cette formation !');
+    setCourses(
+      courses.map((course) =>
+        course.id === courseId
+          ? {
+              ...course,
+              status: 'in_progress',
+              progress: Math.max(1, course.progress),
+            }
+          : course,
+      ),
+    );
+    Alert.alert(
+      'Formation démarrée',
+      'Vous pouvez maintenant suivre cette formation !',
+    );
   };
 
   const handleContinueCourse = (courseId: string) => {
-    const course = courses.find(c => c.id === courseId);
+    const course = courses.find((c) => c.id === courseId);
     if (course && course.progress < 100) {
       const newProgress = Math.min(100, course.progress + 20);
       const newStatus = newProgress === 100 ? 'completed' : 'in_progress';
-      
-      setCourses(courses.map(c => 
-        c.id === courseId 
-          ? { ...c, progress: newProgress, status: newStatus }
-          : c
-      ));
-      
+
+      setCourses(
+        courses.map((c) =>
+          c.id === courseId
+            ? { ...c, progress: newProgress, status: newStatus }
+            : c,
+        ),
+      );
+
       if (newStatus === 'completed') {
-        Alert.alert('Félicitations !', `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`);
+        Alert.alert(
+          'Félicitations !',
+          `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`,
+        );
       } else {
-        Alert.alert('Progression', `Formation mise à jour : ${newProgress}% terminé`);
+        Alert.alert(
+          'Progression',
+          `Formation mise à jour : ${newProgress}% terminé`,
+        );
       }
     }
   };
 
   const generateAICourse = async () => {
     if (!process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-      Alert.alert('IA non disponible', 'Clé OpenAI manquante pour générer du contenu de formation.');
+      Alert.alert(
+        'IA non disponible',
+        'Clé OpenAI manquante pour générer du contenu de formation.',
+      );
       return;
     }
 
@@ -130,19 +190,23 @@ export default function TrainingScreen() {
       'Techniques de vente cross-selling',
       'Gestion des clients difficiles',
       'Optimisation de la présentation produits',
-      'Procédures d\'ouverture/fermeture de magasin',
-      'Sécurité au travail dans la grande distribution'
+      "Procédures d'ouverture/fermeture de magasin",
+      'Sécurité au travail dans la grande distribution',
     ];
 
-      const randomTopic = topics[Math.floor(Math.random() * topics.length)]!;
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)]!;
     const difficulties = ['beginner', 'intermediate', 'advanced'];
-    const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+    const randomDifficulty =
+      difficulties[Math.floor(Math.random() * difficulties.length)];
 
     setGeneratingCourse(true);
 
     try {
-      const content = await generateTrainingContent(randomTopic, randomDifficulty as any);
-      
+      const content = await generateTrainingContent(
+        randomTopic,
+        randomDifficulty as any,
+      );
+
       const newCourse = {
         id: Date.now().toString(),
         title: content.title,
@@ -151,16 +215,21 @@ export default function TrainingScreen() {
         progress: 0,
         status: 'not_started' as const,
         difficulty: randomDifficulty as any,
-        xp_reward: randomDifficulty === 'beginner' ? 50 : randomDifficulty === 'intermediate' ? 75 : 100,
+        xp_reward:
+          randomDifficulty === 'beginner'
+            ? 50
+            : randomDifficulty === 'intermediate'
+              ? 75
+              : 100,
         ai_generated: true,
-        full_content: content
+        full_content: content,
       };
 
       setCourses([newCourse, ...courses]);
-      
+
       Alert.alert(
         '🤖 Formation IA créée !',
-        `"${content.title}" a été généré et ajouté à vos formations disponibles.`
+        `"${content.title}" a été généré et ajouté à vos formations disponibles.`,
       );
     } catch (error) {
       Alert.alert('Erreur', 'Impossible de générer la formation IA.');
@@ -192,7 +261,9 @@ export default function TrainingScreen() {
             </View>
             <View style={styles.progressStatItem}>
               <Clock size={20} color="#F59E0B" />
-              <Text style={styles.progressStatNumber}>{Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m</Text>
+              <Text style={styles.progressStatNumber}>
+                {Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m
+              </Text>
               <Text style={styles.progressStatLabel}>Temps d'étude</Text>
             </View>
             <View style={styles.progressStatItem}>
@@ -206,17 +277,28 @@ export default function TrainingScreen() {
         {/* Achievements */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Vos badges</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.achievementsList}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.achievementsList}
+          >
             {achievements.map((achievement) => (
-              <View key={achievement.id} style={[
-                styles.achievementCard,
-                !achievement.unlocked && styles.achievementCardLocked
-              ]}>
+              <View
+                key={achievement.id}
+                style={[
+                  styles.achievementCard,
+                  !achievement.unlocked && styles.achievementCardLocked,
+                ]}
+              >
                 <Text style={styles.achievementIcon}>{achievement.icon}</Text>
-                <Text style={[
-                  styles.achievementTitle,
-                  !achievement.unlocked && styles.achievementTitleLocked
-                ]}>{achievement.title}</Text>
+                <Text
+                  style={[
+                    styles.achievementTitle,
+                    !achievement.unlocked && styles.achievementTitleLocked,
+                  ]}
+                >
+                  {achievement.title}
+                </Text>
               </View>
             ))}
           </ScrollView>
@@ -227,7 +309,7 @@ export default function TrainingScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Formations disponibles</Text>
             {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.aiGenerateButton}
                 onPress={generateAICourse}
                 disabled={generatingCourse}
@@ -239,17 +321,21 @@ export default function TrainingScreen() {
               </TouchableOpacity>
             )}
           </View>
-          
+
           {courses.map((course) => (
             <TouchableOpacity key={course.id} style={styles.courseCard}>
               <View style={styles.courseHeader}>
                 <View style={styles.courseTitleSection}>
                   <Text style={styles.courseTitle}>{course.title}</Text>
-                  <Text style={styles.courseDescription}>{course.description}</Text>
+                  <Text style={styles.courseDescription}>
+                    {course.description}
+                  </Text>
                 </View>
                 <View style={styles.coursePoints}>
                   <Star size={14} color="#F59E0B" />
-                  <Text style={styles.coursePointsText}>{course.xp_reward}</Text>
+                  <Text style={styles.coursePointsText}>
+                    {course.xp_reward}
+                  </Text>
                 </View>
                 {course.ai_generated && (
                   <View style={styles.aiGeneratedBadge}>
@@ -262,14 +348,28 @@ export default function TrainingScreen() {
               <View style={styles.courseMeta}>
                 <View style={styles.courseMetaItem}>
                   <Clock size={14} color="#6B7280" />
-                  <Text style={styles.courseMetaText}>{course.duration_minutes} min</Text>
+                  <Text style={styles.courseMetaText}>
+                    {course.duration_minutes} min
+                  </Text>
                 </View>
                 <View style={styles.courseMetaItem}>
                   <BookOpen size={14} color="#6B7280" />
                   <Text style={styles.courseMetaText}>Formation complète</Text>
                 </View>
-                <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(course.difficulty)}20` }]}>
-                  <Text style={[styles.difficultyText, { color: getDifficultyColor(course.difficulty) }]}>
+                <View
+                  style={[
+                    styles.difficultyBadge,
+                    {
+                      backgroundColor: `${getDifficultyColor(course.difficulty)}20`,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.difficultyText,
+                      { color: getDifficultyColor(course.difficulty) },
+                    ]}
+                  >
                     {getDifficultyText(course.difficulty)}
                   </Text>
                 </View>
@@ -278,27 +378,47 @@ export default function TrainingScreen() {
               {course.progress > 0 && (
                 <View style={styles.progressSection}>
                   <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: `${course.progress}%` }]} />
+                    <View
+                      style={[
+                        styles.progressFill,
+                        { width: `${course.progress}%` },
+                      ]}
+                    />
                   </View>
-                  <Text style={styles.progressText}>{course.progress}% terminé</Text>
+                  <Text style={styles.progressText}>
+                    {course.progress}% terminé
+                  </Text>
                 </View>
               )}
 
               <View style={styles.courseActions}>
-                <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(course.status)}20` }]}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    { backgroundColor: `${getStatusColor(course.status)}20` },
+                  ]}
+                >
                   {course.status === 'completed' ? (
-                    <CheckCircle size={12} color={getStatusColor(course.status)} />
+                    <CheckCircle
+                      size={12}
+                      color={getStatusColor(course.status)}
+                    />
                   ) : course.status === 'in_progress' ? (
                     <Play size={12} color={getStatusColor(course.status)} />
                   ) : (
                     <BookOpen size={12} color={getStatusColor(course.status)} />
                   )}
-                  <Text style={[styles.statusText, { color: getStatusColor(course.status) }]}>
+                  <Text
+                    style={[
+                      styles.statusText,
+                      { color: getStatusColor(course.status) },
+                    ]}
+                  >
                     {getStatusText(course.status)}
                   </Text>
                 </View>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={styles.actionButton}
                   onPress={() => {
                     if (course.status === 'not_started') {
@@ -310,8 +430,11 @@ export default function TrainingScreen() {
                 >
                   <Play size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>
-                    {course.status === 'not_started' ? 'Commencer' : 
-                     course.status === 'in_progress' ? 'Continuer' : 'Revoir'}
+                    {course.status === 'not_started'
+                      ? 'Commencer'
+                      : course.status === 'in_progress'
+                        ? 'Continuer'
+                        : 'Revoir'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -327,22 +450,30 @@ export default function TrainingScreen() {
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>1</Text>
               </View>
-              <Text style={styles.leaderboardName}>{profile?.full_name || 'Vous'}</Text>
-              <Text style={styles.leaderboardPoints}>{profile?.xp || 0} XP</Text>
+              <Text style={styles.leaderboardName}>
+                {profile?.full_name || 'Vous'}
+              </Text>
+              <Text style={styles.leaderboardPoints}>
+                {profile?.xp || 0} XP
+              </Text>
             </View>
             <View style={styles.leaderboardItem}>
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>2</Text>
               </View>
               <Text style={styles.leaderboardName}>Pierre Martin</Text>
-              <Text style={styles.leaderboardPoints}>{Math.max(0, (profile?.xp || 0) - 50)} XP</Text>
+              <Text style={styles.leaderboardPoints}>
+                {Math.max(0, (profile?.xp || 0) - 50)} XP
+              </Text>
             </View>
             <View style={styles.leaderboardItem}>
               <View style={styles.leaderboardRank}>
                 <Text style={styles.leaderboardRankText}>3</Text>
               </View>
               <Text style={styles.leaderboardName}>Jean Leroy</Text>
-              <Text style={styles.leaderboardPoints}>{Math.max(0, (profile?.xp || 0) - 100)} XP</Text>
+              <Text style={styles.leaderboardPoints}>
+                {Math.max(0, (profile?.xp || 0) - 100)} XP
+              </Text>
             </View>
           </View>
         </View>

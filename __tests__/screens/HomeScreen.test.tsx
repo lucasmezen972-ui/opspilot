@@ -1,18 +1,27 @@
-import React from 'react'
-import { render } from '@testing-library/react'
-import HomeScreen from '../../app/(tabs)/index'
-import { useAuth } from '../../hooks/useAuth'
-import { useAudits } from '../../hooks/useAudits'
-import { useTasks } from '../../hooks/useTasks'
+import { render } from '@testing-library/react';
+import React from 'react';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  type MockedFunction,
+} from 'vitest';
+
+import HomeScreen from '../../app/(tabs)/index';
+import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
+import { useTasks } from '../../hooks/useTasks';
 
 // Mock all hooks
-vi.mock('../../hooks/useAuth')
-vi.mock('../../hooks/useAudits')
-vi.mock('../../hooks/useTasks')
+vi.mock('../../hooks/useAuth');
+vi.mock('../../hooks/useAudits');
+vi.mock('../../hooks/useTasks');
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
-const mockUseAudits = useAudits as jest.MockedFunction<typeof useAudits>
-const mockUseTasks = useTasks as jest.MockedFunction<typeof useTasks>
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
+const mockUseAudits = useAudits as MockedFunction<typeof useAudits>;
+const mockUseTasks = useTasks as MockedFunction<typeof useTasks>;
 
 describe('HomeScreen', () => {
   const mockProfile = {
@@ -31,7 +40,7 @@ describe('HomeScreen', () => {
     last_active: '2024-01-15T10:00:00Z',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-15T10:00:00Z',
-  }
+  };
 
   const mockAudits = [
     {
@@ -54,8 +63,8 @@ describe('HomeScreen', () => {
       due_date: '2024-01-15T10:00:00Z',
       created_at: '2024-01-15T08:00:00Z',
       updated_at: '2024-01-15T09:30:00Z',
-    }
-  ]
+    },
+  ];
 
   const mockTasks = [
     {
@@ -74,21 +83,23 @@ describe('HomeScreen', () => {
       completed_at: '2024-01-15T13:45:00Z',
       created_at: '2024-01-15T08:00:00Z',
       updated_at: '2024-01-15T13:45:00Z',
-    }
-  ]
+    },
+  ];
 
   beforeEach(() => {
     mockUseAuth.mockReturnValue({
       user: { id: 'user-1' } as any,
       profile: mockProfile,
       session: null,
+      ready: true,
       loading: false,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
+      fetchProfile: vi.fn(),
+    });
 
     mockUseAudits.mockReturnValue({
       audits: mockAudits,
@@ -97,7 +108,7 @@ describe('HomeScreen', () => {
       updateAuditStatus: vi.fn(),
       addPhotoToAudit: vi.fn(),
       refetch: vi.fn(),
-    })
+    });
 
     mockUseTasks.mockReturnValue({
       tasks: mockTasks,
@@ -108,64 +119,64 @@ describe('HomeScreen', () => {
       getTasksByStatus: vi.fn(),
       getTasksByPriority: vi.fn(),
       refetch: vi.fn(),
-    })
-  })
+    });
+  });
 
   it('should render welcome message with user name', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Bonjour, Marie !')).toBeTruthy()
-    expect(getByText('Prêt pour une journée productive ?')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Bonjour, Marie !')).toBeTruthy();
+    expect(getByText('Prêt pour une journée productive ?')).toBeTruthy();
+  });
 
   it('should display user stats correctly', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('92%')).toBeTruthy() // avg_score
-    expect(getByText('Score du jour')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('92%')).toBeTruthy(); // avg_score
+    expect(getByText('Score du jour')).toBeTruthy();
+  });
 
   it('should show quick actions section', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Actions rapides')).toBeTruthy()
-    expect(getByText('Nouvel audit')).toBeTruthy()
-    expect(getByText('Scanner produit')).toBeTruthy()
-    expect(getByText('Mes badges')).toBeTruthy()
-    expect(getByText('Mes tâches')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Actions rapides')).toBeTruthy();
+    expect(getByText('Nouvel audit')).toBeTruthy();
+    expect(getByText('Scanner produit')).toBeTruthy();
+    expect(getByText('Mes badges')).toBeTruthy();
+    expect(getByText('Mes tâches')).toBeTruthy();
+  });
 
   it('should display recent activities', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Activités récentes')).toBeTruthy()
-    expect(getByText('Contrôle rayon frais')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Activités récentes')).toBeTruthy();
+    expect(getByText('Contrôle rayon frais')).toBeTruthy();
+  });
 
   it('should show gamification panel', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Votre progression')).toBeTruthy()
-    expect(getByText('Expert Magasin')).toBeTruthy()
-    expect(getByText('Niveau 4 • 850/1000 XP')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Votre progression')).toBeTruthy();
+    expect(getByText('Expert Magasin')).toBeTruthy();
+    expect(getByText('Niveau 4 • 850/1000 XP')).toBeTruthy();
+  });
 
   it('should display summary section', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Résumé du jour')).toBeTruthy()
-    expect(getByText('Audits')).toBeTruthy()
-    expect(getByText('Tâches')).toBeTruthy()
-    expect(getByText('Formations')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Résumé du jour')).toBeTruthy();
+    expect(getByText('Audits')).toBeTruthy();
+    expect(getByText('Tâches')).toBeTruthy();
+    expect(getByText('Formations')).toBeTruthy();
+  });
 
   it('should show user position section', () => {
-    const { getByText } = render(<HomeScreen />)
-    
-    expect(getByText('Votre position')).toBeTruthy()
-    expect(getByText('Marie Dupont')).toBeTruthy()
-    expect(getByText('850 XP • Niveau 4')).toBeTruthy()
-  })
+    const { getByText } = render(<HomeScreen />);
+
+    expect(getByText('Votre position')).toBeTruthy();
+    expect(getByText('Marie Dupont')).toBeTruthy();
+    expect(getByText('850 XP • Niveau 4')).toBeTruthy();
+  });
 
   it('should handle empty states when no data', () => {
     mockUseAudits.mockReturnValue({
@@ -175,7 +186,7 @@ describe('HomeScreen', () => {
       updateAuditStatus: vi.fn(),
       addPhotoToAudit: vi.fn(),
       refetch: vi.fn(),
-    })
+    });
 
     mockUseTasks.mockReturnValue({
       tasks: [],
@@ -186,12 +197,12 @@ describe('HomeScreen', () => {
       getTasksByStatus: vi.fn(),
       getTasksByPriority: vi.fn(),
       refetch: vi.fn(),
-    })
+    });
 
-    const { getByText } = render(<HomeScreen />)
-    
+    const { getByText } = render(<HomeScreen />);
+
     // Should show demo activities when no real data
-    expect(getByText('Audit rayon frais terminé')).toBeTruthy()
-    expect(getByText('3 produits en rupture détectés')).toBeTruthy()
-  })
-})
+    expect(getByText('Audit rayon frais terminé')).toBeTruthy();
+    expect(getByText('3 produits en rupture détectés')).toBeTruthy();
+  });
+});

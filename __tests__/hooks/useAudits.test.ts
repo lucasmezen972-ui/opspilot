@@ -1,13 +1,22 @@
-import { renderHook, act } from '@testing-library/react'
-import { useAudits } from '../../hooks/useAudits'
-import { useAuth } from '../../hooks/useAuth'
+import { renderHook, act } from '@testing-library/react';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  type MockedFunction,
+} from 'vitest';
+
+import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
 
 // Mock useAuth hook
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(),
-}))
+}));
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
+const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
 
 describe('useAudits Hook', () => {
   const mockProfile = {
@@ -26,61 +35,69 @@ describe('useAudits Hook', () => {
     last_active: '2024-01-15T10:00:00Z',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-15T10:00:00Z',
-  }
+  };
 
   beforeEach(() => {
     mockUseAuth.mockReturnValue({
       user: { id: 'user-1' } as any,
       profile: mockProfile,
       session: null,
+      ready: true,
       loading: false,
+      authError: null,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       updateProfile: vi.fn(),
-      refetchProfile: vi.fn(),
-    })
-  })
+      fetchProfile: vi.fn(),
+    });
+  });
 
   it('should initialize with empty audits and loading true', () => {
-    const { result } = renderHook(() => useAudits())
-    
-    expect(result.current.audits).toEqual([])
-    expect(result.current.loading).toBe(true)
-  })
+    const { result } = renderHook(() => useAudits());
+
+    expect(result.current.audits).toEqual([]);
+    expect(result.current.loading).toBe(true);
+  });
 
   it('should create audit with correct data structure', async () => {
-    const { result } = renderHook(() => useAudits())
+    const { result } = renderHook(() => useAudits());
 
     const auditData = {
       title: 'Test Audit',
       description: 'Test audit description',
       location: 'Test location',
       due_date: '2024-01-20T10:00:00Z',
-    }
+    };
 
     await act(async () => {
-      const response = await result.current.createAudit(auditData)
+      const response = await result.current.createAudit(auditData);
       // Since we're mocking Supabase, we expect it to work with the mock
-      expect(response).toBeDefined()
-    })
-  })
+      expect(response).toBeDefined();
+    });
+  });
 
   it('should handle audit status update', async () => {
-    const { result } = renderHook(() => useAudits())
+    const { result } = renderHook(() => useAudits());
 
     await act(async () => {
-      const response = await result.current.updateAuditStatus('audit-1', 'in_progress')
-      expect(response).toBeDefined()
-    })
-  })
+      const response = await result.current.updateAuditStatus(
+        'audit-1',
+        'in_progress',
+      );
+      expect(response).toBeDefined();
+    });
+  });
 
   it('should add photo to audit', async () => {
-    const { result } = renderHook(() => useAudits())
+    const { result } = renderHook(() => useAudits());
 
     await act(async () => {
-      const response = await result.current.addPhotoToAudit('audit-1', 'https://example.com/photo.jpg')
-      expect(response).toBeDefined()
-    })
-  })
-})
+      const response = await result.current.addPhotoToAudit(
+        'audit-1',
+        'https://example.com/photo.jpg',
+      );
+      expect(response).toBeDefined();
+    });
+  });
+});
