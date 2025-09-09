@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, type Product } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { mapSupabaseError } from '../utils/error'
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([])
@@ -25,13 +26,13 @@ export function useProducts() {
         .order('name')
 
       if (error) {
-        console.error('Erreur lors de la récupération des produits:', error)
+        mapSupabaseError('Erreur lors de la récupération des produits', error)
         return
       }
 
       setProducts(data || [])
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur fetchProducts', error)
     } finally {
       setLoading(false)
     }
@@ -49,13 +50,13 @@ export function useProducts() {
         .single()
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erreur lors du scan:', error)
+        mapSupabaseError('Erreur lors du scan', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Erreur:', error)
+      mapSupabaseError('Erreur scanProduct', error)
       return null
     }
   }
@@ -73,8 +74,7 @@ export function useProducts() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la mise à jour du stock:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors de la mise à jour du stock', error) }
       }
 
       // Mettre à jour la liste locale
@@ -82,8 +82,7 @@ export function useProducts() {
 
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur updateProductStock', error) }
     }
   }
 
@@ -102,15 +101,13 @@ export function useProducts() {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la création du produit:', error)
-        return { error }
+        return { error: mapSupabaseError('Erreur lors de la création du produit', error) }
       }
 
       setProducts([...products, data])
       return { data }
     } catch (error) {
-      console.error('Erreur:', error)
-      return { error }
+      return { error: mapSupabaseError('Erreur createProduct', error) }
     }
   }
 

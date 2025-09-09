@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { mapOpenAIError } from '../utils/error'
 
 const openai = new OpenAI({
   apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
@@ -74,18 +75,17 @@ export const analyzeAuditImage = async (imageUrl: string, auditType: string = 'g
     const analysis = JSON.parse(content) as AuditAnalysis
     return analysis
   } catch (error) {
-    console.error('Erreur analyse OpenAI:', error)
-    // Retour par défaut en cas d'erreur
+    const message = mapOpenAIError('Erreur analyse OpenAI', error)
     return {
       issues: [
         {
           severity: 'medium',
-          description: 'Analyse automatique indisponible',
+          description: message,
           recommendation: 'Effectuer une analyse manuelle',
         }
       ],
       overall_score: 75,
-      summary: 'Analyse manuelle requise',
+      summary: message,
       recommendations: ['Vérifier manuellement tous les points de contrôle']
     }
   }
@@ -135,12 +135,12 @@ export const generateTrainingContent = async (topic: string, difficulty: 'beginn
 
     return JSON.parse(content) as TrainingContent
   } catch (error) {
-    console.error('Erreur génération formation OpenAI:', error)
+    const message = mapOpenAIError('Erreur génération formation OpenAI', error)
     return {
       title: `Formation: ${topic}`,
-      content: 'Contenu de formation en cours de génération...',
+      content: message,
       quiz_questions: [],
-      practical_tips: ['Formation personnalisée bientôt disponible']
+      practical_tips: [message]
     }
   }
 }
@@ -175,8 +175,7 @@ export const getChatAssistantResponse = async (userMessage: string, context: str
 
     return response.choices[0]?.message?.content || 'Désolé, je ne peux pas répondre pour le moment.'
   } catch (error) {
-    console.error('Erreur assistant OpenAI:', error)
-    return 'Assistant temporairement indisponible. Contactez le support technique.'
+    return mapOpenAIError('Erreur assistant OpenAI', error)
   }
 }
 
@@ -216,8 +215,7 @@ export const generateAuditReport = async (auditData: any): Promise<string> => {
 
     return response.choices[0]?.message?.content || 'Rapport en cours de génération...'
   } catch (error) {
-    console.error('Erreur génération rapport OpenAI:', error)
-    return 'Génération automatique de rapport temporairement indisponible.'
+    return mapOpenAIError('Erreur génération rapport OpenAI', error)
   }
 }
 
