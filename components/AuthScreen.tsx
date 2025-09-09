@@ -227,9 +227,9 @@ export default function AuthScreen() {
         
         {displayError && !hasNetworkError && (
           <View style={styles.helpContainer}>
-            <Text style={styles.helpTitle}>💡 L'utilisateur démo n'existe pas ?</Text>
+            <Text style={styles.helpTitle}>💡 L'utilisateur démo n'existe pas</Text>
             <Text style={styles.helpText}>
-              Suivez les instructions dans INSTRUCTIONS_SUPABASE.md pour créer la base de données et l'utilisateur démo.
+              1. Ouvrez Supabase, SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication, Users{'\n'}5. Cliquez Add user, Create new user{'\n'}6. Email: demo@opspilot.com, Password: demo123
             </Text>
           </View>
         )}

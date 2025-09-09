@@ -25,7 +25,7 @@ export default function RootLayout() {
   if (loading) {
     console.log('⏳ Application en cours de chargement...', {
       hasUser: !!user,
-      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...',
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL?.substring(0, 30) + 'etc',
       hasKey: !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
     })
     return null; // Ou un écran de chargement
