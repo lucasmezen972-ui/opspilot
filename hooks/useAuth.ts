@@ -141,6 +141,13 @@ export function useAuth() {
     setError(null)
     setLoading(true)
 
+    // Vérification de la configuration avant tentative
+    if (!isConfigured) {
+      setError('Configuration Supabase incomplète. Cliquez "Connect to Supabase" en haut à droite.')
+      setLoading(false)
+      return { data: null, error: { message: 'Configuration Supabase manquante' } }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -148,7 +155,11 @@ export function useAuth() {
     
     if (error) {
       console.error('❌ Erreur connexion:', error)
-      setError(error.message)
+      if (error.message?.includes('Network request failed')) {
+        setError('Erreur de connexion. Vérifiez votre réseau et la configuration Supabase.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
       console.log('✅ Connexion réussie:', data.user?.email)
@@ -163,6 +174,13 @@ export function useAuth() {
     setError(null)
     setLoading(true)
 
+    // Vérification de la configuration avant tentative
+    if (!isConfigured) {
+      setError('Configuration Supabase incomplète. Cliquez "Connect to Supabase" en haut à droite.')
+      setLoading(false)
+      return { data: null, error: { message: 'Configuration Supabase manquante' } }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -175,7 +193,11 @@ export function useAuth() {
     
     if (error) {
       console.error('❌ Erreur inscription:', error)
-      setError(error.message)
+      if (error.message?.includes('Network request failed')) {
+        setError('Erreur de connexion. Vérifiez votre réseau et la configuration Supabase.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
       console.log('✅ Inscription réussie:', data.user?.email)

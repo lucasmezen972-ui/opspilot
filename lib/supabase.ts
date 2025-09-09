@@ -30,11 +30,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
   global: {
-    fetch: (url, options = {}) => {
-      return fetch(url, {
-        ...options,
-        timeout: 10000, // 10 secondes de timeout
-      })
+    fetch: async (url, options = {}) => {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
+        
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        return response
+      } catch (error) {
+        console.error('🌐 Erreur fetch Supabase:', error)
+        throw error
+      }
     }
   },
   db: {

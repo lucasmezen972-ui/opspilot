@@ -129,7 +129,15 @@ export default function AuthScreen() {
             <View style={styles.instructionContainer}>
               <Text style={styles.instructionTitle}>🔧 L'utilisateur démo n'existe pas encore !</Text>
               <Text style={styles.instructionText}>
-                1. Ouvrez Supabase → SQL Editor{'\n'}2. Copiez le script "create_demo_user_final.sql"{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication → Users{'\n'}5. Cliquez "Add user" → "Create new user"{'\n'}6. Email: demo@opspilot.com, Password: demo123
+                1. Ouvrez Supabase puis SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication Users{'\n'}5. Cliquez Add user puis Create new user{'\n'}6. Email: demo@opspilot.com Password: demo123
+              </Text>
+            </View>
+          )}
+          {displayError?.includes('Network request failed') && (
+            <View style={styles.networkErrorContainer}>
+              <Text style={styles.networkErrorTitle}>🌐 Erreur de réseau détectée</Text>
+              <Text style={styles.networkErrorText}>
+                1. Vérifiez votre connexion internet{'\n'}2. Cliquez "Connect to Supabase" en haut à droite{'\n'}3. Redémarrez l'application si le problème persiste
               </Text>
             </View>
           )}
@@ -229,7 +237,7 @@ export default function AuthScreen() {
           <View style={styles.helpContainer}>
             <Text style={styles.helpTitle}>💡 L'utilisateur démo n'existe pas</Text>
             <Text style={styles.helpText}>
-              1. Ouvrez Supabase, SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication, Users{'\n'}5. Cliquez Add user, Create new user{'\n'}6. Email: demo@opspilot.com, Password: demo123
+              1. Ouvrez Supabase puis SQL Editor{'\n'}2. Copiez le script create_demo_user_final.sql{'\n'}3. Exécutez-le pour créer l'utilisateur démo{'\n'}4. Puis allez dans Authentication Users{'\n'}5. Cliquez Add user Create new user{'\n'}6. Email: demo@opspilot.com Password: demo123
             </Text>
           </View>
         )}
@@ -463,6 +471,25 @@ const styles = StyleSheet.create({
   helpText: {
     fontSize: 12,
     color: '#92400E',
+    lineHeight: 16,
+  },
+  networkErrorContainer: {
+    backgroundColor: '#DBEAFE',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2563EB',
+  },
+  networkErrorTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E40AF',
+    marginBottom: 8,
+  },
+  networkErrorText: {
+    fontSize: 12,
+    color: '#1E40AF',
     lineHeight: 16,
   },
 })

@@ -37,15 +37,11 @@ export default function AdvancedDashboard() {
       {/* Header intelligente */}
       <View style={styles.intelligentHeader}>
         <Text style={styles.welcomeText}>
-          <Text>Bonjour </Text>
-          <Text>{profile?.full_name?.split(' ')[0] || 'Utilisateur'}</Text>
-          <Text> 👋</Text>
+          Bonjour {profile?.full_name?.split(' ')[0] || 'Utilisateur'} 👋
         </Text>
         <Text style={styles.roleText}>
-          <Text>{profile?.role === 'admin' ? 'Administrateur' : 
-           profile?.role === 'manager' ? 'Responsable' : 'Employé'}</Text>
-          <Text> • Niveau </Text>
-          <Text>{profile?.level || 1}</Text>
+          {profile?.role === 'admin' ? 'Administrateur' : 
+           profile?.role === 'manager' ? 'Responsable' : 'Employé'} - Niveau {profile?.level || 1}
         </Text>
         
         {insights.length > 0 && (
