@@ -239,3 +239,9 @@ export function useAuth() {
 
   return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
 }
+
+        )
+    }
+  }
+  )
+}
