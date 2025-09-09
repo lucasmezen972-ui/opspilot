@@ -36,6 +36,10 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
 
   app.get(`/${table}/export`, async (req, res) => {
     const format = (req.query.format as string) || 'csv';
+    if (!['csv', 'excel'].includes(format)) {
+      return res.status(400).json({ error: 'Unsupported export format' });
+    }
+
     const { data, error } = await supabase.from(table).select('*').limit(1000);
     if (error) {
       logger.error(`Failed to export ${table}`, error);
