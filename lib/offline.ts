@@ -17,7 +17,7 @@ try {
   // NetInfo n'est pas disponible
 }
 
-const db = SQLite && Platform.OS !== 'web' ? SQLite.openDatabase('opspilot.db') : null;
+let db = SQLite && Platform.OS !== 'web' ? SQLite.openDatabase('opspilot.db') : null;
 
 export const initOfflineDatabase = () => {
   if (!db || Platform.OS === 'web') return;
@@ -243,6 +243,11 @@ export const offlineHelpers = {
   queueAudit,
   queuePhoto,
   syncPendingData,
+};
+
+// Pour les tests : permet de remplacer la base SQLite
+export const __setDbForTests = (database: any) => {
+  db = database;
 };
 
 export type {};
