@@ -25,6 +25,7 @@ jest.mock('expo-router', () => ({
     }
   ),
   Tabs: ({ children }: { children: React.ReactNode }) => children,
+  Slot: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 jest.mock('expo-status-bar', () => ({
