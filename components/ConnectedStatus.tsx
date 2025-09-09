@@ -38,7 +38,7 @@ export default function ConnectedStatus({ isConnected, dataCount, databaseHealth
       )}
       <Text style={[styles.text, hasValidConfig ? styles.connectedText : styles.disconnectedText]}>
         {hasValidConfig ? 
-          `🟢 ${getHealthStatus()}${dataCount ? ` • ${dataCount} enregistrements` : ''}` :
+          `${getHealthStatus()}${dataCount ? ` • ${dataCount} enregistrements` : ''}` :
           '⚠️ Cliquez "Connect to Supabase" en haut à droite'
         }
       </Text>
