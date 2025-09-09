@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
@@ -20,7 +18,21 @@ export function usePushNotifications() {
 }
 
 async function registerForPushNotificationsAsync() {
-  if (!Device.isDevice) {
+  // Only load expo-device on native platforms
+  if (Platform.OS === 'web') {
+    console.log('Push notifications not supported on web');
+    return;
+  }
+
+  const Device = require('expo-device');
+  if (!Device?.isDevice) {
+  if (Platform.OS === 'web') {
+    console.log('Push notifications not supported on web');
+    return;
+  }
+
+  const Device = require('expo-device');
+  if (!Device?.isDevice) {
     console.log('Push notifications require a physical device');
     return;
   }
