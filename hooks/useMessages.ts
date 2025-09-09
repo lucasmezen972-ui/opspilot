@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase, type Message } from '../lib/supabase'
+import { supabase, type Message, type Conversation } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [conversations, setConversations] = useState<any[]>([])
+  const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
   const { profile } = useAuth()
 
@@ -61,7 +61,11 @@ export function useMessages() {
     }
   }
 
-  const sendMessage = async (conversationId: string, content: string, type: Message['type'] = 'text') => {
+  const sendMessage = async (
+    conversationId: string,
+    content: string,
+    messageType: Message['message_type'] = 'text'
+  ) => {
     if (!profile) return { error: 'Utilisateur non connecté' }
 
     try {
@@ -71,7 +75,7 @@ export function useMessages() {
           conversation_id: conversationId,
           sender_id: profile.id,
           content,
-          type,
+          message_type: messageType,
           attachments: [],
           read_by: [profile.id],
         })

@@ -1,33 +1,79 @@
-import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+interface NotificationsModule {
+  AndroidImportance: { MAX: number };
+  SchedulableTriggerInputTypes: { DATE: string };
+  getPermissionsAsync(): Promise<{ status: string }>;
+  requestPermissionsAsync(): Promise<{ status: string }>;
+  getExpoPushTokenAsync(): Promise<{ data: string }>;
+  setNotificationHandler(handler: {
+    handleNotification: () => Promise<{
+      shouldShowAlert: boolean;
+      shouldPlaySound: boolean;
+      shouldSetBadge: boolean;
+      shouldShowBanner: boolean;
+      shouldShowList: boolean;
+    }>;
+  }): void;
+  setNotificationChannelAsync(
+    id: string,
+    channel: { name: string; importance: number },
+  ): Promise<void>;
+  scheduleNotificationAsync(options: {
+    content: { title: string; body: string };
+    trigger: unknown;
+  }): Promise<void>;
+}
+
+function getNotifications(): NotificationsModule | undefined {
+  if (Platform.OS === 'web') {
+    console.log('Push notifications not supported on web');
+    return undefined;
+  }
+
+  let Notifications: NotificationsModule;
+  try {
+    const req = eval('require') as (name: string) => NotificationsModule;
+    Notifications = req('expo-notifications');
+  } catch {
+    console.log('expo-notifications package not available');
+    return undefined;
+  }
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+
+  return Notifications;
+}
 
 export function usePushNotifications() {
   useEffect(() => {
-    registerForPushNotificationsAsync();
+    const Notifications = getNotifications();
+    if (!Notifications) return;
+    registerForPushNotificationsAsync(Notifications);
   }, []);
 }
 
-async function registerForPushNotificationsAsync() {
-  // Only load expo-device on native platforms
-  if (Platform.OS === 'web') {
-    console.log('Push notifications not supported on web');
+async function registerForPushNotificationsAsync(
+  Notifications: NotificationsModule,
+): Promise<void> {
+  // expo-device cannot be imported on web, so require dynamically
+  let ExpoDevice: { isDevice: boolean } | undefined;
+  try {
+    const req = eval('require') as (name: string) => { isDevice: boolean };
+    ExpoDevice = req('expo-device');
+  } catch {
+    console.log('expo-device package not available');
     return;
   }
-
-  // expo-device cannot be imported on web, so require dynamically
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const ExpoDevice = require('expo-device');
   if (!ExpoDevice?.isDevice) {
     console.log('Push notifications require a physical device');
     return;
@@ -56,6 +102,8 @@ async function registerForPushNotificationsAsync() {
 }
 
 export async function scheduleAuditReminder(date: Date, body: string) {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Rappel d\u2019audit',
@@ -66,6 +114,8 @@ export async function scheduleAuditReminder(date: Date, body: string) {
 }
 
 export async function sendInternalAlert(message: string) {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Communication interne',
