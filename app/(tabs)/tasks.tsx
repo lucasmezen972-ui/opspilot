@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Plus, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, MapPin, Flag, User } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../hooks/useAuth';
 import { Alert } from 'react-native';
@@ -11,23 +11,32 @@ export default function TasksScreen() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'my' | 'pending' | 'in_progress'>('all');
 
   // Filtrer les tâches
-  let filteredTasks = tasks;
-  switch (selectedFilter) {
-    case 'my':
-      filteredTasks = tasks.filter(t => t.assigned_to === profile?.id);
-      break;
-    case 'pending':
-      filteredTasks = tasks.filter(t => t.status === 'pending');
-      break;
-    case 'in_progress':
-      filteredTasks = tasks.filter(t => t.status === 'in_progress');
-      break;
-  }
+  const filteredTasks = useMemo(() => {
+    switch (selectedFilter) {
+      case 'my':
+        return tasks.filter(t => t.assigned_to === profile?.id);
+      case 'pending':
+        return tasks.filter(t => t.status === 'pending');
+      case 'in_progress':
+        return tasks.filter(t => t.status === 'in_progress');
+      default:
+        return tasks;
+    }
+  }, [tasks, selectedFilter, profile?.id]);
 
   // Statistiques
-  const pendingCount = tasks.filter(t => t.status === 'pending').length;
-  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
-  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const pendingCount = useMemo(
+    () => tasks.filter(t => t.status === 'pending').length,
+    [tasks]
+  );
+  const inProgressCount = useMemo(
+    () => tasks.filter(t => t.status === 'in_progress').length,
+    [tasks]
+  );
+  const completedCount = useMemo(
+    () => tasks.filter(t => t.status === 'completed').length,
+    [tasks]
+  );
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -93,7 +102,11 @@ export default function TasksScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Tâches</Text>
-        <TouchableOpacity style={styles.headerButton}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          accessibilityRole="button"
+          accessibilityLabel="Ouvrir les filtres"
+        >
           <Filter size={20} color="#6B7280" />
         </TouchableOpacity>
       </View>
@@ -117,52 +130,81 @@ export default function TasksScreen() {
       {/* Filters */}
       <View style={styles.filtersContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
-          {[
-            { key: 'all', label: 'Toutes' },
-            { key: 'my', label: 'Mes tâches' },
-            { key: 'pending', label: 'À faire' },
-            { key: 'in_progress', label: 'En cours' }
-          ].map((filter) => (
-            <TouchableOpacity
-              key={filter.key}
-              style={[
-                styles.filterButton,
-                selectedFilter === filter.key && styles.filterButtonActive
-              ]}
-              onPress={() => setSelectedFilter(filter.key as any)}
-            >
-              <Text style={[
-                styles.filterButtonText,
-                selectedFilter === filter.key && styles.filterButtonTextActive
-              ]}>
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+            {[ 
+              { key: 'all', label: 'Toutes' },
+              { key: 'my', label: 'Mes tâches' },
+              { key: 'pending', label: 'À faire' },
+              { key: 'in_progress', label: 'En cours' }
+            ].map((filter) => (
+              <TouchableOpacity
+                key={filter.key}
+                style={[
+                  styles.filterButton,
+                  selectedFilter === filter.key && styles.filterButtonActive
+                ]}
+                onPress={() => setSelectedFilter(filter.key as any)}
+                accessibilityRole="button"
+                accessibilityLabel={`Filtrer par ${filter.label}`}
+              >
+                <Text style={[
+                  styles.filterButtonText,
+                  selectedFilter === filter.key && styles.filterButtonTextActive
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
         </ScrollView>
       </View>
 
       {/* Create New Task Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.createButton}
         onPress={() => Alert.alert('Bientôt disponible', 'La création de tâche sera bientôt disponible.')}
+        accessibilityRole="button"
+        accessibilityLabel="Créer une nouvelle tâche"
       >
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Nouvelle tâche</Text>
       </TouchableOpacity>
 
       {/* Tasks List */}
-      <ScrollView style={styles.tasksList}>
-        {loading && filteredTasks.length === 0 && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Chargement des tâches...</Text>
-          </View>
-        )}
-        
-        {filteredTasks.map((task) => {
+      <FlatList
+        data={filteredTasks}
+        keyExtractor={(task) => task.id}
+        style={styles.tasksList}
+        contentContainerStyle={styles.tasksListContent}
+        ListEmptyComponent={
+          loading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Chargement des tâches...</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <CheckCircle size={48} color="#9CA3AF" />
+              <Text style={styles.emptyStateTitle}>Aucune tâche</Text>
+              <Text style={styles.emptyStateText}>
+                {selectedFilter === 'all'
+                  ? 'Aucune tâche disponible.'
+                  : `Aucune tâche ${
+                      selectedFilter === 'my'
+                        ? 'qui vous est assignée'
+                        : selectedFilter === 'pending'
+                        ? 'en attente'
+                        : 'en cours'
+                    }.`}
+              </Text>
+            </View>
+          )
+        }
+        renderItem={({ item: task }) => {
           const StatusIcon = getStatusIcon(task.status);
           return (
-            <TouchableOpacity key={task.id} style={styles.taskCard}>
+            <TouchableOpacity
+              style={styles.taskCard}
+              accessibilityRole="button"
+              accessibilityLabel={`Voir les détails de la tâche ${task.title}`}
+            >
               <View style={styles.taskHeader}>
                 <View style={styles.taskTitleSection}>
                   <Text style={styles.taskTitle}>{task.title}</Text>
@@ -199,7 +241,7 @@ export default function TasksScreen() {
                 <View style={styles.taskDetailRow}>
                   <Calendar size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>
-                    {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Pas d\'échéance'}
+                    {task.due_date ? new Date(task.due_date).toLocaleDateString() : "Pas d'échéance"}
                   </Text>
                 </View>
                 <View style={styles.taskDetailRow}>
@@ -213,16 +255,20 @@ export default function TasksScreen() {
               {task.status !== 'completed' && (
                 <View style={styles.taskActions}>
                   {task.status === 'pending' ? (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.startButton}
                       onPress={() => handleStartTask(task.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Commencer la tâche"
                     >
                       <Text style={styles.startButtonText}>Commencer</Text>
                     </TouchableOpacity>
                   ) : (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.completeButton}
                       onPress={() => handleCompleteTask(task.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel="Terminer la tâche"
                     >
                       <CheckCircle size={16} color="#FFFFFF" />
                       <Text style={styles.completeButtonText}>Terminer</Text>
@@ -232,21 +278,15 @@ export default function TasksScreen() {
               )}
             </TouchableOpacity>
           );
-        })}
-        
-        {!loading && filteredTasks.length === 0 && (
-          <View style={styles.emptyState}>
-            <CheckCircle size={48} color="#9CA3AF" />
-            <Text style={styles.emptyStateTitle}>Aucune tâche</Text>
-            <Text style={styles.emptyStateText}>
-              {selectedFilter === 'all' ? 'Aucune tâche disponible.' : `Aucune tâche ${selectedFilter === 'my' ? 'qui vous est assignée' : selectedFilter === 'pending' ? 'en attente' : 'en cours'}.`}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        }}
+      />
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity
+        style={styles.fab}
+        accessibilityRole="button"
+        accessibilityLabel="Action rapide"
+      >
         <Plus size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
@@ -348,11 +388,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  tasksList: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 0,
-  },
+    tasksList: {
+      flex: 1,
+    },
+    tasksListContent: {
+      padding: 20,
+      paddingTop: 0,
+    },
   taskCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
