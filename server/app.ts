@@ -5,6 +5,7 @@ import { logger } from '../utils/logger'
 import { authenticate } from './middleware/auth'
 import { auditSchema, taskSchema, productSchema } from './schemas'
 import type { ZodSchema } from 'zod'
+import { dataToCSV, dataToExcelBuffer } from '../utils/export'
 
 export const app = express()
 app.use(cors())
@@ -24,6 +25,33 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
       return res.status(500).json({ error: error.message })
     }
     res.json(data)
+  })
+
+  app.get(`/${table}/export`, async (req, res) => {
+    const format = (req.query.format as string) || 'csv'
+    const { data, error } = await supabase.from(table).select('*').limit(1000)
+    if (error) {
+      logger.error(`Failed to export ${table}`, error)
+      return res.status(500).json({ error: error.message })
+    }
+
+    if (format === 'excel') {
+      const buffer = await dataToExcelBuffer(data)
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      )
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${table}.xlsx"`
+      )
+      return res.send(buffer)
+    }
+
+    const csv = dataToCSV(data)
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', `attachment; filename="${table}.csv"`)
+    res.send(csv)
   })
 
   app.post(`/${table}`, async (req, res) => {

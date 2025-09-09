@@ -6,7 +6,11 @@ vi.mock('../../server/supabase', () => ({
   supabase: {
     from: () => ({
       select: () => ({
-        limit: () => Promise.resolve({ data: [], error: null })
+        limit: () =>
+          Promise.resolve({
+            data: [{ id: '1', title: 'Test' }],
+            error: null
+          })
       }),
       insert: () => ({
         select: () => ({
@@ -48,5 +52,26 @@ describe('OpsPilot backend', () => {
       .send({ title: 'Test' })
     expect(res.status).toBe(201)
     expect(res.body).toEqual({ id: '1', title: 'Test' })
+  })
+
+  it('exports data in CSV format', async () => {
+    const res = await request(app)
+      .get('/audits/export?format=csv')
+      .set('Authorization', 'Bearer test-token')
+    expect(res.status).toBe(200)
+    expect(res.header['content-type']).toContain('text/csv')
+    expect(res.text).toContain('id,title')
+    expect(res.text).toContain('\"1\",\"Test\"')
+  })
+
+  it('exports data in Excel format', async () => {
+    const res = await request(app)
+      .get('/audits/export?format=excel')
+      .set('Authorization', 'Bearer test-token')
+    expect(res.status).toBe(200)
+    expect(res.header['content-type']).toContain(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    expect(Number(res.header['content-length'])).toBeGreaterThan(0)
   })
 })
