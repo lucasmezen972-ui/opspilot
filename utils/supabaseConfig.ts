@@ -15,3 +15,23 @@ export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
 
 export const isSupabaseConfigured = (): boolean =>
   getSupabaseConfigStatus().status === 'valid';
+
+// Test accounts pour développement
+export const getTestAccounts = () => [
+  {
+    email: 'demo@opspilot.com',
+    password: 'demo123',
+    name: 'Utilisateur Demo',
+    role: 'employee'
+  },
+  {
+    email: 'marie.dupont@opspilot.com', 
+    password: 'marie123',
+    name: 'Marie Dupont',
+    role: 'manager'
+  }
+];
+
+export const isTestAccount = (email: string): boolean => {
+  return getTestAccounts().some(account => account.email === email);
+};

@@ -41,8 +41,19 @@ export function useAuth() {
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
     setLoading(true);
+    
+    // Logs pour debugging
+    console.log('[Auth] Tentative de connexion pour:', email);
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setAuthError(mapSupabaseError('sign in error', error));
+    
+    if (error) {
+      console.error('[Auth] Erreur de connexion:', error.message);
+      setAuthError(mapSupabaseError('sign in error', error));
+    } else {
+      console.log('[Auth] Connexion réussie pour:', email);
+    }
+    
     setLoading(false);
     return { data, error };
   };

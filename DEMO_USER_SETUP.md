@@ -32,8 +32,6 @@ Si "Invalid login credentials":
 2. Vérifier que l'email/mot de passe sont corrects
 3. Vérifier que l'utilisateur est confirmé (email_confirmed_at doit être défini)
 
-## Alternative: Création par SQL (nécessite accès superuser)
-
 ```sql
 -- Seulement si vous avez accès direct à la DB
 INSERT INTO auth.users (
