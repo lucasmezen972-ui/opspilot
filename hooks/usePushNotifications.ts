@@ -27,8 +27,8 @@ async function registerForPushNotificationsAsync() {
 
   // expo-device cannot be imported on web, so require dynamically
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const Device = require('expo-device');
-  if (!Device?.isDevice) {
+  const ExpoDevice = require('expo-device');
+  if (!ExpoDevice?.isDevice) {
     console.log('Push notifications require a physical device');
     return;
   }
