@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, type Audit } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import { isOnline, loadOfflineAudits, setOfflineAudits, queueAudit, queuePhoto } from '../lib/offline'
 
 export function useAudits() {
   const [audits, setAudits] = useState<Audit[]>([])
@@ -18,22 +19,28 @@ export function useAudits() {
 
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('audits')
-        .select(`
-          *,
-          profiles(full_name),
-          stores(name)
-        `)
-        .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false })
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('audits')
+          .select(`
+            *,
+            profiles(full_name),
+            stores(name)
+          `)
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Erreur lors de la récupération des audits:', error)
-        return
+        if (error) {
+          console.error('Erreur lors de la récupération des audits:', error)
+          return
+        }
+
+        setAudits(data || [])
+        await setOfflineAudits(data || [])
+      } else {
+        const local = await loadOfflineAudits()
+        setAudits(local)
       }
-
-      setAudits(data || [])
     } catch (error) {
       console.error('Erreur:', error)
     } finally {
@@ -50,9 +57,33 @@ export function useAudits() {
     if (!profile?.organization_id || !profile?.store_id) return { error: 'Organisation ou magasin non défini' }
 
     try {
-      const { data, error } = await supabase
-        .from('audits')
-        .insert({
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('audits')
+          .insert({
+            ...auditData,
+            organization_id: profile.organization_id,
+            store_id: profile.store_id,
+            auditor_id: profile.id,
+            status: 'pending',
+            max_score: 100,
+            issues_count: 0,
+            photos: [],
+          })
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Erreur lors de la création de l\'audit:', error)
+          return { error }
+        }
+
+        setAudits([data, ...audits])
+        await setOfflineAudits([data, ...audits])
+        return { data }
+      } else {
+        const offlineId = `offline-${Date.now()}`
+        const localAudit: any = {
           ...auditData,
           organization_id: profile.organization_id,
           store_id: profile.store_id,
@@ -61,17 +92,14 @@ export function useAudits() {
           max_score: 100,
           issues_count: 0,
           photos: [],
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Erreur lors de la création de l\'audit:', error)
-        return { error }
+          created_at: new Date().toISOString(),
+          local_id: offlineId,
+          id: offlineId,
+        }
+        setAudits([localAudit, ...audits])
+        await queueAudit(localAudit)
+        return { data: localAudit }
       }
-
-      setAudits([data, ...audits])
-      return { data }
     } catch (error) {
       console.error('Erreur:', error)
       return { error }
@@ -94,27 +122,35 @@ export function useAudits() {
         updateData.completed_at = new Date().toISOString()
       }
 
-      const { data, error } = await supabase
-        .from('audits')
-        .update(updateData)
-        .eq('id', auditId)
-        .select()
-        .single()
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('audits')
+          .update(updateData)
+          .eq('id', auditId)
+          .select()
+          .single()
 
-      if (error) {
-        console.error('Erreur lors de la mise à jour de l\'audit:', error)
-        return { error }
+        if (error) {
+          console.error('Erreur lors de la mise à jour de l\'audit:', error)
+          return { error }
+        }
+
+        setAudits(audits.map(a => a.id === auditId ? data : a))
+
+        if (status === 'completed' && profile) {
+          await updateProfileStats()
+        }
+
+        await setOfflineAudits(audits.map(a => a.id === auditId ? data : a))
+        return { data }
+      } else {
+        const existing: any = audits.find(a => a.id === auditId)
+        if (!existing) return { error: 'Audit non trouvé' }
+        const localUpdated = { ...existing, ...updateData }
+        setAudits(audits.map(a => a.id === auditId ? localUpdated : a))
+        await queueAudit(localUpdated)
+        return { data: localUpdated }
       }
-
-      // Mettre à jour la liste locale
-      setAudits(audits.map(a => a.id === auditId ? data : a))
-      
-      // Mettre à jour les stats du profil si l'audit est terminé
-      if (status === 'completed' && profile) {
-        await updateProfileStats()
-      }
-
-      return { data }
     } catch (error) {
       console.error('Erreur:', error)
       return { error }
@@ -157,24 +193,38 @@ export function useAudits() {
 
     try {
       const updatedPhotos = [...audit.photos, photoUrl]
-      
-      const { data, error } = await supabase
-        .from('audits')
-        .update({ 
-          photos: updatedPhotos,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', auditId)
-        .select()
-        .single()
 
-      if (error) {
-        console.error('Erreur lors de l\'ajout de la photo:', error)
-        return { error }
+      if (await isOnline()) {
+        const { data, error } = await supabase
+          .from('audits')
+          .update({
+            photos: updatedPhotos,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', auditId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Erreur lors de l\'ajout de la photo:', error)
+          return { error }
+        }
+
+        setAudits(audits.map(a => a.id === auditId ? data : a))
+        await setOfflineAudits(audits.map(a => a.id === auditId ? data : a))
+        return { data }
+      } else {
+        await queuePhoto(auditId, photoUrl)
+        const localAudit = audits.find(a => a.id === auditId)
+        if (localAudit) {
+          const updated = { ...localAudit, photos: updatedPhotos }
+          const updatedList = audits.map(a => a.id === auditId ? updated : a)
+          setAudits(updatedList)
+          await setOfflineAudits(updatedList)
+          return { data: updated }
+        }
+        return { error: 'Audit non trouvé' }
       }
-
-      setAudits(audits.map(a => a.id === auditId ? data : a))
-      return { data }
     } catch (error) {
       console.error('Erreur:', error)
       return { error }

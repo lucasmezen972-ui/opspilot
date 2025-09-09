@@ -1,13 +1,14 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../hooks/useAuth';
 import AuthScreen from '../components/AuthScreen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { isSupabaseConfigured } from '../utils/supabaseConfig';
+import { useOfflineSync } from '../hooks/useOfflineSync';
 
 export default function RootLayout() {
   useFrameworkReady();
+  useOfflineSync();
   const { user, loading, error } = useAuth();
 
   // Vérification de la configuration Supabase
