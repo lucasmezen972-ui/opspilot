@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User } from 'lucide-react-native';
+import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User, Brain } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
 export default function TabLayout() {
@@ -63,6 +63,15 @@ export default function TabLayout() {
           title: 'Messages',
           tabBarIcon: ({ size, color }) => (
             <MessageCircle size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="advanced"
+        options={{
+          title: 'Avancé',
+          tabBarIcon: ({ size, color }) => (
+            <Brain size={size} color={color} />
           ),
         }}
       />
