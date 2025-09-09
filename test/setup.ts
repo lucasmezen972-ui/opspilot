@@ -41,6 +41,19 @@ jest.mock('expo-constants', () => ({
     },
   },
 }))
+jest.mock('expo-device', () => ({
+  isDevice: false,
+}), { virtual: true });
+
+jest.mock('expo-notifications', () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: 'test-token' }),
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn(),
+  scheduleNotificationAsync: jest.fn(),
+}), { virtual: true });
+
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
