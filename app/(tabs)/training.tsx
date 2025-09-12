@@ -19,47 +19,11 @@ import {
 
 import { useAuth } from '../../hooks/useAuth';
 import { generateTrainingContent } from '../../lib/openai';
+import { courses as defaultCourses } from '../../data/training';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
-  const [courses, setCourses] = useState([
-    {
-      id: '1',
-      title: 'Accueil client excellence',
-      description:
-        "Apprenez les meilleures techniques d'accueil et de service client",
-      duration_minutes: 25,
-      progress: 80,
-      status: 'in_progress',
-      difficulty: 'beginner',
-      xp_reward: 50,
-      ai_generated: false,
-    },
-    {
-      id: '2',
-      title: 'Hygiène et sécurité alimentaire',
-      description:
-        'Formation obligatoire sur les normes HACCP et la sécurité alimentaire',
-      duration_minutes: 45,
-      progress: 100,
-      status: 'completed',
-      difficulty: 'intermediate',
-      xp_reward: 100,
-      ai_generated: false,
-    },
-    {
-      id: '3',
-      title: 'Gestion des stocks et inventaire',
-      description:
-        "Maîtrisez les techniques de gestion des stocks et d'inventaire",
-      duration_minutes: 35,
-      progress: 0,
-      status: 'not_started',
-      difficulty: 'advanced',
-      xp_reward: 75,
-      ai_generated: false,
-    },
-  ]);
+  const [courses, setCourses] = useState(defaultCourses);
 
   const [achievements] = useState([
     { id: 1, title: 'Premier cours terminé', icon: '🎓', unlocked: true },

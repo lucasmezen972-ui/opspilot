@@ -2,38 +2,10 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native';
 import CameraModal from '../../components/CameraModal';
-
-const audits = [
-  {
-    id: 1,
-    title: 'Contrôle rayon frais',
-    status: 'completed',
-    date: '2024-01-15',
-    location: 'Rayon frais - Zone A',
-    score: 92,
-    issues: 2,
-  },
-  {
-    id: 2,
-    title: 'Audit sécurité',
-    status: 'in_progress',
-    date: '2024-01-15',
-    location: 'Magasin général',
-    score: null,
-    issues: 0,
-  },
-  {
-    id: 3,
-    title: 'Contrôle hygiène',
-    status: 'pending',
-    date: '2024-01-16',
-    location: 'Zone préparation',
-    score: null,
-    issues: 0,
-  },
-];
+import { audits as defaultAudits } from '../../data/audits';
 
 export default function AuditsScreen() {
+  const [audits] = useState(defaultAudits);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
