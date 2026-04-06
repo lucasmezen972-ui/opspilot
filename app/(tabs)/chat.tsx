@@ -1,109 +1,112 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video, Bot, Sparkles } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useMessages } from '../../hooks/useMessages';
 import { getChatAssistantResponse } from '../../lib/openai';
 
 export default function ChatScreen() {
   const { profile } = useAuth();
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(1);
+  const {
+    messages: dbMessages,
+    conversations: dbConversations,
+    loading,
+    fetchMessages,
+    sendMessage: sendDbMessage,
+    markAsRead,
+    getUnreadCount,
+  } = useMessages();
+
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: profile?.full_name || 'Vous',
-      content: 'Bonjour tout le monde ! J\'ai terminé l\'inventaire du rayon frais.',
-      timestamp: '10:30',
-      isMe: true,
-    },
-    {
-      id: 2,
-      sender: 'Pierre Martin',
-      content: 'Parfait ! Moi je m\'occupe du rayon boulangerie maintenant.',
-      timestamp: '10:32',
-      isMe: false,
-    },
-    {
-      id: 3,
-      sender: 'Jean Leroy',
-      content: 'Attention, il y a eu un problème avec la caisse 3. Elle est hors service temporairement.',
-      timestamp: '10:35',
-      isMe: false,
-    },
-    {
-      id: 4,
-      sender: profile?.full_name || 'Vous',
-      content: 'Merci pour l\'info Jean. J\'ai signalé le problème au support technique.',
-      timestamp: '10:36',
-      isMe: true,
-    },
-  ]);
+  const [localMessages, setLocalMessages] = useState<any[]>([]);
 
-  const [conversations] = useState([
-    {
-      id: 1,
-      name: 'Équipe Magasin',
-      lastMessage: 'Nouvelle livraison prévue à 14h',
-      timestamp: '10:30',
-      unread: 2,
-      type: 'group',
-      online: true,
-    },
-    {
-      id: 2,
-      name: 'Assistant IA OpsPilot',
-      lastMessage: 'Comment puis-je vous aider aujourd\'hui ?',
-      timestamp: '09:45',
-      unread: 0,
-      type: 'ai',
-      online: true,
-    },
-    {
-      id: 3,
-      name: 'Support Technique',
-      lastMessage: 'Votre ticket a été traité',
-      timestamp: 'Hier',
-      unread: 1,
-      type: 'support',
-      online: false,
-    },
-  ]);
+  // Utiliser les conversations de la DB, avec fallback démo
+  const conversations = dbConversations.length > 0
+    ? dbConversations.map((c) => ({
+        id: c.id,
+        name: c.name,
+        lastMessage: '',
+        timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        unread: getUnreadCount(c.id),
+        type: c.type,
+        online: true,
+      }))
+    : [
+        { id: 'demo-team', name: 'Équipe Magasin', lastMessage: 'Bienvenue dans OpsPilot !', timestamp: 'Maintenant', unread: 0, type: 'group', online: true },
+        { id: 'demo-ai', name: 'Assistant IA OpsPilot', lastMessage: 'Comment puis-je vous aider ?', timestamp: 'Maintenant', unread: 0, type: 'support', online: true },
+      ];
 
-  const sendMessage = async () => {
+  // Sélectionner la première conversation par défaut
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedConversation) {
+      setSelectedConversation(conversations[0]?.id ?? null);
+    }
+  }, [conversations.length]);
+
+  // Charger les messages quand on change de conversation
+  useEffect(() => {
+    if (selectedConversation && !selectedConversation.startsWith('demo-')) {
+      fetchMessages(selectedConversation);
+    }
+  }, [selectedConversation]);
+
+  // Convertir les messages DB en format d'affichage
+  const displayMessages = selectedConversation?.startsWith('demo-')
+    ? localMessages
+    : dbMessages.map((m) => ({
+        id: m.id,
+        sender: (m as any).profiles?.full_name || 'Utilisateur',
+        content: m.content,
+        timestamp: new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        isMe: m.sender_id === profile?.id,
+      }));
+
+  const isAIConversation = selectedConversation === 'demo-ai' ||
+    conversations.find(c => c.id === selectedConversation)?.type === 'support';
+
+  const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
-
-    const message = {
-      id: messages.length + 1,
-      sender: profile?.full_name || 'Vous',
-      content: newMessage.trim(),
-      timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      isMe: true,
-    };
-
-    setMessages([...messages, message]);
+    const content = newMessage.trim();
     setNewMessage('');
 
-    // Si c'est la conversation IA, obtenir une réponse
-    if (selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-      try {
-        const aiResponse = await getChatAssistantResponse(
-          message.content,
-          `Utilisateur: ${profile?.full_name}, Rôle: ${profile?.role}, Magasin: OpsPilot Demo`
-        );
+    if (selectedConversation?.startsWith('demo-')) {
+      // Mode démo local
+      const msg = {
+        id: `local-${Date.now()}`,
+        sender: profile?.full_name || 'Vous',
+        content,
+        timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        isMe: true,
+      };
+      setLocalMessages((prev) => [...prev, msg]);
 
-        setTimeout(() => {
-          const aiMessage = {
-            id: messages.length + 2,
-            sender: 'Assistant IA OpsPilot',
-            content: aiResponse,
-            timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-            isMe: false,
-            isAI: true,
-          };
-          setMessages(current => [...current, aiMessage]);
-        }, 1000);
-      } catch (error) {
-        console.error('Erreur assistant IA:', error);
+      // Réponse IA si conversation IA
+      if (isAIConversation && process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+        try {
+          const aiResponse = await getChatAssistantResponse(
+            content,
+            `Utilisateur: ${profile?.full_name}, Rôle: ${profile?.role}`,
+          );
+          setLocalMessages((prev) => [
+            ...prev,
+            {
+              id: `ai-${Date.now()}`,
+              sender: 'Assistant IA OpsPilot',
+              content: aiResponse,
+              timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+              isMe: false,
+            },
+          ]);
+        } catch (error) {
+          console.error('Erreur assistant IA:', error);
+        }
+      }
+    } else if (selectedConversation) {
+      // Envoi réel via Supabase
+      const result = await sendDbMessage(selectedConversation, content);
+      if (result.error) {
+        Alert.alert('Erreur', "Impossible d'envoyer le message.");
       }
     }
   };
@@ -111,11 +114,13 @@ export default function ChatScreen() {
   const getConversationIcon = (type: string) => {
     switch (type) {
       case 'group': return Users;
-      case 'ai': return Bot;
-      case 'support': return Bell;
+      case 'direct': return Users;
+      case 'support': return Bot;
       default: return Users;
     }
   };
+
+  const selectedConvName = conversations.find((c) => c.id === selectedConversation)?.name || 'Conversation';
 
   return (
     <View style={styles.container}>
@@ -138,11 +143,11 @@ export default function ChatScreen() {
         {conversations.map((conversation) => {
           const IconComponent = getConversationIcon(conversation.type);
           return (
-            <TouchableOpacity 
-              key={conversation.id} 
+            <TouchableOpacity
+              key={conversation.id}
               style={[
                 styles.conversationCard,
-                selectedConversation === conversation.id && styles.conversationCardActive
+                selectedConversation === conversation.id && styles.conversationCardActive,
               ]}
               onPress={() => setSelectedConversation(conversation.id)}
             >
@@ -151,10 +156,8 @@ export default function ChatScreen() {
                   <View style={styles.conversationTitleSection}>
                     <Text style={styles.conversationName}>{conversation.name}</Text>
                     <View style={styles.conversationMeta}>
-                      <IconComponent size={12} color={conversation.type === 'ai' ? '#8B5CF6' : '#6B7280'} />
-                      {conversation.online && (
-                        <View style={styles.onlineIndicator} />
-                      )}
+                      <IconComponent size={12} color={conversation.type === 'support' ? '#8B5CF6' : '#6B7280'} />
+                      {conversation.online && <View style={styles.onlineIndicator} />}
                     </View>
                   </View>
                   <Text style={styles.conversationTimestamp}>{conversation.timestamp}</Text>
@@ -174,11 +177,9 @@ export default function ChatScreen() {
         <View style={styles.currentConversation}>
           <View style={styles.conversationHeaderActive}>
             <View style={styles.conversationInfoActive}>
-              <Text style={styles.conversationNameActive}>
-                {conversations.find(c => c.id === selectedConversation)?.name || 'Conversation'}
-              </Text>
+              <Text style={styles.conversationNameActive}>{selectedConvName}</Text>
               <View style={styles.conversationStatusActive}>
-                {selectedConversation === 2 && process.env.EXPO_PUBLIC_OPENAI_API_KEY ? (
+                {isAIConversation ? (
                   <>
                     <Sparkles size={12} color="#8B5CF6" />
                     <Text style={styles.conversationStatusText}>Assistant IA disponible</Text>
@@ -186,7 +187,7 @@ export default function ChatScreen() {
                 ) : (
                   <>
                     <View style={styles.onlineIndicator} />
-                    <Text style={styles.conversationStatusText}>3 membres actifs</Text>
+                    <Text style={styles.conversationStatusText}>En ligne</Text>
                   </>
                 )}
               </View>
@@ -206,26 +207,24 @@ export default function ChatScreen() {
 
           {/* Messages */}
           <ScrollView style={styles.messagesList}>
-            {messages.map((message) => (
-              <View key={message.id} style={[
-                styles.messageContainer,
-                message.isMe ? styles.messageContainerMe : styles.messageContainerOther
-              ]}>
-                <View style={[
-                  styles.messageBubble,
-                  message.isMe ? styles.messageBubbleMe : styles.messageBubbleOther
-                ]}>
-                  {!message.isMe && (
-                    <Text style={styles.messageSender}>{message.sender}</Text>
-                  )}
-                  <Text style={[
-                    styles.messageContent,
-                    message.isMe ? styles.messageContentMe : styles.messageContentOther
-                  ]}>{message.content}</Text>
-                  <Text style={[
-                    styles.messageTimestamp,
-                    message.isMe ? styles.messageTimestampMe : styles.messageTimestampOther
-                  ]}>{message.timestamp}</Text>
+            {displayMessages.length === 0 && !loading && (
+              <View style={styles.emptyMessages}>
+                <Text style={styles.emptyMessagesText}>Aucun message. Commencez la conversation !</Text>
+              </View>
+            )}
+            {displayMessages.map((message) => (
+              <View
+                key={message.id}
+                style={[styles.messageContainer, message.isMe ? styles.messageContainerMe : styles.messageContainerOther]}
+              >
+                <View style={[styles.messageBubble, message.isMe ? styles.messageBubbleMe : styles.messageBubbleOther]}>
+                  {!message.isMe && <Text style={styles.messageSender}>{message.sender}</Text>}
+                  <Text style={[styles.messageContent, message.isMe ? styles.messageContentMe : styles.messageContentOther]}>
+                    {message.content}
+                  </Text>
+                  <Text style={[styles.messageTimestamp, message.isMe ? styles.messageTimestampMe : styles.messageTimestampOther]}>
+                    {message.timestamp}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -239,11 +238,11 @@ export default function ChatScreen() {
               onChangeText={setNewMessage}
               placeholder="Tapez votre message..."
               multiline
-              onSubmitEditing={sendMessage}
+              onSubmitEditing={handleSendMessage}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
-              onPress={sendMessage}
+              onPress={handleSendMessage}
               disabled={!newMessage.trim()}
             >
               <Send size={20} color="#FFFFFF" />
@@ -416,6 +415,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyMessages: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyMessagesText: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    textAlign: 'center',
   },
   messagesList: {
     maxHeight: 250,

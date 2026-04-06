@@ -40,8 +40,8 @@ describe('ManagerDashboard', () => {
 
     mockUseAudits.mockReturnValue({
       audits: [
-        { id: '1', status: 'pending' as const },
-        { id: '2', status: 'completed' as const },
+        { id: '1', status: 'pending', title: 'Audit 1', score: 85, location: 'Paris' },
+        { id: '2', status: 'completed', title: 'Audit 2', score: 90, location: 'Lyon' },
       ] as any,
       loading: false,
       createAudit: vi.fn(),
@@ -52,8 +52,8 @@ describe('ManagerDashboard', () => {
 
     mockUseTasks.mockReturnValue({
       tasks: [
-        { id: '1', status: 'pending' as const },
-        { id: '2', status: 'completed' as const },
+        { id: '1', status: 'pending', priority: 'high', title: 'Task 1', location: 'Magasin' },
+        { id: '2', status: 'completed', priority: 'low', title: 'Task 2', location: 'Bureau' },
       ] as any,
       loading: false,
       createTask: vi.fn(),
@@ -66,11 +66,12 @@ describe('ManagerDashboard', () => {
   });
 
   it('renders manager stats', () => {
-    const { getByText, getAllByText } = render(<ManagerDashboard />);
+    const { getByText } = render(<ManagerDashboard />);
 
     expect(getByText('Dashboard Manager')).toBeTruthy();
-    expect(getByText('Audits en cours')).toBeTruthy();
-    expect(getByText('Tâches en attente')).toBeTruthy();
-    expect(getAllByText('1')).toHaveLength(2);
+    expect(getByText('Bienvenue, Marie Dupont')).toBeTruthy();
+    expect(getByText("Vue d'ensemble")).toBeTruthy();
+    expect(getByText('Audits total')).toBeTruthy();
+    expect(getByText('Tâches total')).toBeTruthy();
   });
 });

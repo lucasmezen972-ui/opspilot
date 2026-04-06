@@ -1,21 +1,37 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { User, Settings, Award, ChartBar as BarChart3, Bell, CircleHelp as HelpCircle, LogOut, Shield, Smartphone, Globe, Star, Trophy, Target, Clock } from 'lucide-react-native';
+import { useAuth } from '../../hooks/useAuth';
+import { useMemo } from 'react';
 
-const achievements = [
-  { id: 1, title: 'Premier audit', description: 'Terminé votre premier audit', icon: '🎯', date: '15 Jan 2024' },
-  { id: 2, title: 'Semaine parfaite', description: '7 jours sans erreur', icon: '⭐', date: '10 Jan 2024' },
-  { id: 3, title: 'Formateur expert', description: '5 formations terminées', icon: '🎓', date: '05 Jan 2024' },
-  { id: 4, title: 'Scanner pro', description: '100 produits scannés', icon: '📱', date: '03 Jan 2024' },
-];
-
-const statistics = [
-  { label: 'Audits réalisés', value: '47', icon: BarChart3, color: '#2563EB' },
-  { label: 'Score moyen', value: '92%', icon: Target, color: '#10B981' },
-  { label: 'Formations', value: '12', icon: Award, color: '#F59E0B' },
-  { label: 'Temps actif', value: '156h', icon: Clock, color: '#8B5CF6' },
-];
+const roleLabels: Record<string, string> = {
+  admin: 'Administrateur',
+  manager: 'Responsable Magasin',
+  'employé': 'Employé',
+  employee: 'Employé',
+  stagiaire: 'Stagiaire',
+};
 
 export default function ProfileScreen() {
+  const { profile, signOut } = useAuth();
+
+  const displayName = profile?.full_name || 'Utilisateur';
+  const displayRole = profile?.role ? (roleLabels[profile.role] || profile.role) : 'Employé';
+  const level = profile?.level || 1;
+  const xp = profile?.xp || 0;
+  const xpForNextLevel = level * 100;
+  const xpProgress = xpForNextLevel > 0 ? Math.min((xp / xpForNextLevel) * 100, 100) : 0;
+
+  const statistics = useMemo(() => [
+    { label: 'Audits réalisés', value: String(profile?.total_audits || 0), icon: BarChart3, color: '#2563EB' },
+    { label: 'Score moyen', value: `${profile?.avg_score || 0}%`, icon: Target, color: '#10B981' },
+    { label: 'Formations', value: String(profile?.completed_trainings || 0), icon: Award, color: '#F59E0B' },
+    { label: 'Temps actif', value: `${profile?.active_time_hours || 0}h`, icon: Clock, color: '#8B5CF6' },
+  ], [profile]);
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -33,13 +49,13 @@ export default function ProfileScreen() {
             <User size={32} color="#2563EB" />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Marie Dupont</Text>
-            <Text style={styles.profileRole}>Responsable Magasin</Text>
-            <Text style={styles.profileLocation}>Supermarché Central - Paris 15ème</Text>
+            <Text style={styles.profileName}>{displayName}</Text>
+            <Text style={styles.profileRole}>{displayRole}</Text>
+            <Text style={styles.profileLocation}>{profile?.email || ''}</Text>
           </View>
           <View style={styles.levelBadge}>
             <Star size={16} color="#F59E0B" />
-            <Text style={styles.levelText}>Niveau 4</Text>
+            <Text style={styles.levelText}>Niveau {level}</Text>
           </View>
         </View>
 
@@ -47,12 +63,16 @@ export default function ProfileScreen() {
         <View style={styles.experienceSection}>
           <View style={styles.experienceHeader}>
             <Text style={styles.experienceTitle}>Progression</Text>
-            <Text style={styles.experiencePoints}>850/1000 XP</Text>
+            <Text style={styles.experiencePoints}>{xp}/{xpForNextLevel} XP</Text>
           </View>
           <View style={styles.experienceBar}>
-            <View style={[styles.experienceFill, { width: '85%' }]} />
+            <View style={[styles.experienceFill, { width: `${xpProgress}%` }]} />
           </View>
-          <Text style={styles.experienceSubtext}>Plus que 150 XP pour atteindre le niveau Expert !</Text>
+          <Text style={styles.experienceSubtext}>
+            {xpForNextLevel - xp > 0
+              ? `Plus que ${xpForNextLevel - xp} XP pour atteindre le niveau ${level + 1} !`
+              : 'Niveau maximum atteint !'}
+          </Text>
         </View>
 
         {/* Statistics */}
@@ -72,23 +92,6 @@ export default function ProfileScreen() {
               );
             })}
           </View>
-        </View>
-
-        {/* Recent Achievements */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Badges récents</Text>
-          {achievements.map((achievement) => (
-            <View key={achievement.id} style={styles.achievementItem}>
-              <View style={styles.achievementIcon}>
-                <Text style={styles.achievementEmoji}>{achievement.icon}</Text>
-              </View>
-              <View style={styles.achievementInfo}>
-                <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                <Text style={styles.achievementDescription}>{achievement.description}</Text>
-                <Text style={styles.achievementDate}>{achievement.date}</Text>
-              </View>
-            </View>
-          ))}
         </View>
 
         {/* Settings Menu */}
@@ -120,7 +123,7 @@ export default function ProfileScreen() {
 
         {/* Logout */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <LogOut size={20} color="#EF4444" />
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>
@@ -311,48 +314,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     textAlign: 'center',
-  },
-  achievementItem: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  achievementIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F8FAFC',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  achievementEmoji: {
-    fontSize: 20,
-  },
-  achievementInfo: {
-    flex: 1,
-  },
-  achievementTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  achievementDescription: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 4,
-  },
-  achievementDate: {
-    fontSize: 11,
-    color: '#9CA3AF',
   },
   settingsMenu: {
     backgroundColor: '#FFFFFF',

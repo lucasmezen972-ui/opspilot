@@ -36,6 +36,8 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
   app.get(`/${table}`, async (_, res) => {
     const { data, error } = await supabase.from(table).select('*').limit(100);
     if (error) {
+      logger.error({ error, table }, 'Error fetching data');
+      return res.status(500).json({ error: mapSupabaseError(`Error fetching ${table}`, error) });
     }
     res.json(data);
   });
@@ -48,6 +50,8 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
 
     const { data, error } = await supabase.from(table).select('*').limit(1000);
     if (error) {
+      logger.error({ error, table }, 'Error exporting data');
+      return res.status(500).json({ error: mapSupabaseError(`Error exporting ${table}`, error) });
     }
 
     if (format === 'excel') {
@@ -80,6 +84,8 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
       .select()
       .single();
     if (error) {
+      logger.error({ error, table }, 'Error creating record');
+      return res.status(500).json({ error: mapSupabaseError(`Error creating ${table}`, error) });
     }
     res.status(201).json(data);
   });
@@ -96,6 +102,8 @@ app.get('/trainings', async (_, res) => {
     .select('*')
     .limit(100);
   if (error) {
+    logger.error({ error }, 'Error fetching trainings');
+    return res.status(500).json({ error: mapSupabaseError('Error fetching trainings', error) });
   }
   res.json(data);
 });

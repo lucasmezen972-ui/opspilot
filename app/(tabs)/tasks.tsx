@@ -5,7 +5,7 @@ import { useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function TasksScreen() {
-  const { tasks, loading, updateTaskStatus } = useTasks();
+  const { tasks, loading, updateTaskStatus, createTask } = useTasks();
   const { profile } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'my' | 'pending' | 'in_progress'>('all');
 
@@ -96,6 +96,32 @@ export default function TasksScreen() {
     }
   };
 
+  const handleCreateTask = async () => {
+    Alert.alert(
+      'Nouvelle tâche',
+      'Créer une nouvelle tâche',
+      [
+        {
+          text: 'Créer',
+          onPress: async () => {
+            const result = await createTask({
+              title: `Tâche du ${new Date().toLocaleDateString('fr-FR')}`,
+              description: 'Nouvelle tâche à compléter',
+              priority: 'medium',
+              location: 'Magasin principal',
+            });
+            if (result.error) {
+              Alert.alert('Erreur', String(result.error));
+            } else {
+              Alert.alert('Succès', 'Tâche créée avec succès !');
+            }
+          },
+        },
+        { text: 'Annuler', style: 'cancel' },
+      ],
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -159,7 +185,7 @@ export default function TasksScreen() {
       {/* Create New Task Button */}
       <TouchableOpacity
         style={styles.createButton}
-        onPress={() => Alert.alert('Bientôt disponible', 'La création de tâche sera bientôt disponible.')}
+        onPress={handleCreateTask}
         accessibilityRole="button"
         accessibilityLabel="Créer une nouvelle tâche"
       >

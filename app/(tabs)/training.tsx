@@ -186,6 +186,7 @@ export default function TrainingScreen() {
               ? 75
               : 100,
         ai_generated: true,
+        modules: [] as { title: string; content: string }[],
         full_content: content,
       };
 

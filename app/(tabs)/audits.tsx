@@ -1,11 +1,37 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, Sparkles } from 'lucide-react-native';
+import { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText } from 'lucide-react-native';
 import CameraModal from '../../components/CameraModal';
+import { useAudits } from '../../hooks/useAudits';
 import { audits as defaultAudits } from '../../data/audits';
 
 export default function AuditsScreen() {
-  const [audits] = useState(defaultAudits);
+  const { audits: dbAudits, loading, createAudit, updateAuditStatus, addPhotoToAudit } = useAudits();
+  const [cameraVisible, setCameraVisible] = useState(false);
+  const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  // Utiliser les audits DB s'ils existent, sinon fallback sur les données démo
+  const audits = useMemo(() => {
+    if (dbAudits.length > 0) {
+      return dbAudits.map((a) => ({
+        id: a.id,
+        title: a.title,
+        location: a.location || '',
+        status: a.status,
+        date: a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '',
+        score: a.score,
+        issues: a.issues_count,
+      }));
+    }
+    return defaultAudits;
+  }, [dbAudits]);
+
+  // Stats dynamiques
+  const pendingCount = audits.filter((a) => a.status === 'pending').length;
+  const inProgressCount = audits.filter((a) => a.status === 'in_progress').length;
+  const completedCount = audits.filter((a) => a.status === 'completed').length;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return '#10B981';
@@ -33,10 +59,49 @@ export default function AuditsScreen() {
     }
   };
 
-  const [cameraVisible, setCameraVisible] = useState(false);
+  const handleCreateAudit = async () => {
+    Alert.prompt
+      ? Alert.prompt('Nouvel audit', 'Titre de l\'audit :', async (title) => {
+          if (!title?.trim()) return;
+          const result = await createAudit({ title: title.trim(), status: 'pending' });
+          if (result.error) {
+            Alert.alert('Erreur', String(result.error));
+          } else {
+            Alert.alert('Succès', 'Audit créé avec succès !');
+          }
+        })
+      : Alert.alert(
+          'Nouvel audit',
+          'Fonctionnalité de création d\'audit disponible.',
+          [
+            { text: 'Créer audit test', onPress: async () => {
+                const result = await createAudit({
+                  title: `Audit ${new Date().toLocaleDateString('fr-FR')}`,
+                  location: 'Magasin principal',
+                  status: 'pending',
+                });
+                if (result.error) {
+                  Alert.alert('Erreur', String(result.error));
+                } else {
+                  Alert.alert('Succès', 'Audit créé avec succès !');
+                }
+              },
+            },
+            { text: 'Annuler', style: 'cancel' },
+          ],
+        );
+  };
 
-  const handlePhotoTaken = (uri: string, analysis?: any, annotations?: string[]) => {
+  const handlePhotoTaken = async (uri: string, analysis?: any, annotations?: string[]) => {
+    if (cameraAuditId) {
+      await addPhotoToAudit(cameraAuditId, uri);
+    }
     console.log('Photo prise', uri, annotations);
+  };
+
+  const handleOpenCamera = (auditId?: string) => {
+    setCameraAuditId(auditId || null);
+    setCameraVisible(true);
   };
 
   return (
@@ -57,27 +122,32 @@ export default function AuditsScreen() {
       {/* Quick Stats */}
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>5</Text>
+          <Text style={styles.quickStatNumber}>{pendingCount}</Text>
           <Text style={styles.quickStatLabel}>À faire</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>2</Text>
+          <Text style={styles.quickStatNumber}>{inProgressCount}</Text>
           <Text style={styles.quickStatLabel}>En cours</Text>
         </View>
         <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>12</Text>
+          <Text style={styles.quickStatNumber}>{completedCount}</Text>
           <Text style={styles.quickStatLabel}>Terminés</Text>
         </View>
       </View>
 
       {/* Create New Audit Button */}
-      <TouchableOpacity style={styles.createButton}>
+      <TouchableOpacity style={styles.createButton} onPress={handleCreateAudit}>
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Créer un audit</Text>
       </TouchableOpacity>
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
+        {loading && audits.length === 0 && (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Chargement des audits...</Text>
+          </View>
+        )}
         {audits.map((audit) => {
           const StatusIcon = getStatusIcon(audit.status);
           return (
@@ -100,7 +170,7 @@ export default function AuditsScreen() {
 
               <View style={styles.auditDetails}>
                 <Text style={styles.auditDate}>{audit.date}</Text>
-                {audit.score && (
+                {audit.score != null && (
                   <View style={styles.auditScore}>
                     <Text style={styles.auditScoreText}>Score: {audit.score}%</Text>
                   </View>
@@ -114,7 +184,7 @@ export default function AuditsScreen() {
               </View>
 
               <View style={styles.auditActions}>
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity style={styles.actionButton} onPress={() => handleOpenCamera(audit.id)}>
                   <Camera size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>Photos</Text>
                 </TouchableOpacity>
@@ -129,7 +199,7 @@ export default function AuditsScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => setCameraVisible(true)}>
+      <TouchableOpacity style={styles.fab} onPress={() => handleOpenCamera()}>
         <Camera size={24} color="#FFFFFF" />
       </TouchableOpacity>
 
@@ -214,6 +284,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#6B7280',
+    fontSize: 16,
   },
   auditsList: {
     flex: 1,
@@ -318,7 +396,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90, // Ajuster pour éviter le chevauchement avec la barre d'onglets
+    bottom: 90,
     width: 56,
     height: 56,
     borderRadius: 28,
