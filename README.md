@@ -1,164 +1,190 @@
-# OpsPilot - Application de Gestion des Opérations Terrain
+# OpsPilot — Application de gestion des opérations terrain
 
-OpsPilot est une application mobile professionnelle inspirée de Yoobic, spécialisée dans la gestion des opérations terrain, les audits en magasin, le suivi des tâches, la formation du personnel et la communication interne.
+OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour piloter les opérations magasin : audits, tâches, formation, communication interne et suivi de performance.
 
-## 🎯 Fonctionnalités Principales
+## TL;DR (format lisible pour IA)
 
-### ✅ Fonctionnalités de base (inspirées de Yoobic)
-- **Création et gestion d'audits personnalisés** - Interface intuitive pour créer et suivre les audits
-- **Checklists dynamiques** - Listes de contrôle pour les opérations terrain
-- **Prise de photos justificatives** - Système de capture d'images intégré aux audits
-- **Notifications automatiques** - Rappels et alertes pour les tâches à venir
-- **Module de communication interne** - Chat d'équipe simplifié
-- **Dashboard analytique** - Suivi des performances et statistiques
+- **Produit** : application mobile terrain pour retail, restauration et points de vente.
+- **Stack** : Expo React Native + TypeScript + Expo Router + Supabase.
+- **Valeur clé** : exécution opérationnelle + traçabilité + reporting.
+- **Modules principaux** : Accueil, Audits, Produits, Tâches, Formation, Messages, Profil.
 
-### ✨ Améliorations par rapport à Yoobic
-- **📱 Scanner de code-barres** - Ajout/vérification rapide des produits lors des contrôles
-- **🖍️ Annotation des photos** - Possibilité d'annoter directement les photos (flèches, texte, etc.)
-- **📶 Mode hors-ligne** - Synchronisation automatique dès le retour de la connexion
-- **📄 Génération de rapports PDF** - Rapports d'audit automatiques avec en-tête personnalisé
-- **🎮 Gamification intégrée** - Système de badges, classements et scoring des employés
-- **📚 Formation interactive** - Espace formation avec micro-cours et quiz
-- **🔍 Filtres avancés** - Recherche facilitée par catégorie, date ou magasin
+---
 
-## 📱 Architecture de l'application
+## 1) Fonctionnalités
 
-### Navigation par onglets
-- **Accueil** - Dashboard principal avec statistiques et actions rapides
-- **Audits** - Gestion des audits et contrôles qualité
-- **Produits** - Scanner et gestion des produits
-- **Tâches** - Suivi des tâches individuelles et d'équipe
-- **Formation** - Modules de formation et quiz interactifs
-- **Messages** - Communication d'équipe en temps réel
-- **Profil** - Statistiques personnelles et paramètres
+### 1.1 Fonctionnalités cœur (inspirées de Yoobic)
+- Création et gestion d'audits personnalisés.
+- Checklists dynamiques pour les opérations terrain.
+- Prise de photos justificatives dans les audits.
+- Notifications automatiques (rappels/alertes).
+- Chat interne d’équipe.
+- Dashboard analytique de performance.
 
-### Design et UX
-- Interface moderne et fluide avec React Native
-- Design professionnel inspiré des applications d'entreprise
-- Système de couleurs cohérent (bleu principal #2563EB)
-- Micro-interactions et animations subtiles
-- Responsive design adapté à tous les écrans
+### 1.2 Différenciation OpsPilot (améliorations)
+- Scanner de code-barres (ajout/vérification produits).
+- Annotation des photos (flèches, texte, etc.).
+- Mode hors-ligne avec synchronisation au retour réseau.
+- Génération de rapports PDF.
+- Gamification (badges, score, classement).
+- Formation interactive (micro-cours + quiz).
+- Filtres avancés (catégorie, date, magasin).
 
-## 🛠 Technologies Utilisées
+---
 
-- **Framework** : Expo React Native 53.0.0
-- **Navigation** : Expo Router 5.0.2 avec navigation par onglets
-- **Langage** : TypeScript
-- **Icons** : Lucide React Native
-- **Styling** : StyleSheet React Native
-- **État** : React Hooks
-- **Images** : Expo Camera pour la capture
+## 2) Architecture produit
 
-## 🎨 Identité Visuelle
+### 2.1 Navigation par onglets
+| Onglet | Rôle |
+|---|---|
+| Accueil | Dashboard + actions rapides |
+| Audits | Contrôles qualité et suivi |
+| Produits | Scanner + gestion catalogue/stock |
+| Tâches | Exécution individuelle et équipe |
+| Formation | Cours + quiz + progression |
+| Messages | Communication temps réel |
+| Profil | Stats personnelles + paramètres |
 
-### Nom : OpsPilot
-Un nom professionnel qui évoque :
-- Le **pilotage** d'opérations
-- La **précision** et l'efficacité
-- Le **terrain** et les opérations
+### 2.2 UX / design
+- Interface moderne React Native.
+- Charte cohérente orientée entreprise.
+- Couleur principale : `#2563EB`.
+- Animations et micro-interactions discrètes.
+- Responsive sur différents formats d’écran.
 
-### Couleurs principales
-- **Primary Blue** : #2563EB (actions principales)
-- **Success Green** : #10B981 (validations, succès)
-- **Warning Orange** : #F59E0B (alertes, stock faible)
-- **Error Red** : #EF4444 (erreurs, ruptures)
-- **Neutral Gray** : #6B7280 (textes secondaires)
+---
 
-## 🚀 Fonctionnalités Détaillées
+## 3) Stack technique
 
-## ⚙️ Configuration Supabase
+| Domaine | Choix |
+|---|---|
+| Framework mobile | Expo React Native `53.0.0` |
+| Navigation | Expo Router `5.0.2` |
+| Langage | TypeScript |
+| Icônes | Lucide React Native |
+| Styling | StyleSheet React Native |
+| État | React Hooks |
+| Capture image | Expo Camera |
+| Backend / DB | Supabase |
 
-### Configuration automatique (Recommandé)
-1. **Cliquez sur "Connect to Supabase"** dans le coin supérieur droit de Bolt
+---
+
+## 4) Configuration Supabase
+
+### Option A — automatique (recommandée)
+1. Cliquer sur **“Connect to Supabase”** dans Bolt.
 2. Bolt va automatiquement :
-   - Créer un projet Supabase
-   - Configurer les variables d'environnement
-   - Exécuter les migrations de base de données
-   - Insérer les données d'exemple
+   - créer le projet Supabase,
+   - configurer les variables d’environnement,
+   - exécuter les migrations,
+   - injecter les données d’exemple.
 
-### Configuration manuelle
-Si vous préférez configurer manuellement :
-1. Créez un projet sur [supabase.com](https://supabase.com)
-2. Copiez l'URL et la clé anonyme
-3. Créez un fichier `.env` :
+### Option B — manuelle
+1. Créer un projet sur [supabase.com](https://supabase.com).
+2. Copier l’URL et la clé anonyme.
+3. Créer un fichier `.env` :
+
 ```bash
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
-4. Exécutez les migrations SQL dans l'éditeur Supabase
 
-### Système de Gamification
-- **Niveaux d'expérience** avec points XP
-- **Badges et récompenses** pour motiver les employés
-- **Classements d'équipe** pour encourager la compétition saine
-- **Suivi des performances** individuel et collectif
-
-### Gestion des Audits
-- **Création d'audits personnalisés** selon les besoins
-- **Checklists interactives** avec validation étape par étape
-- **Système de scoring** automatique
-- **Génération de rapports PDF** professionnels
-- **Suivi historique** des audits précédents
-
-### Scanner et Gestion Produits
-- **Scanner de codes-barres** intégré (simulation)
-- **Gestion des stocks** en temps réel
-- **Alertes automatiques** pour les ruptures et DLC
-- **Fiches produits complètes** avec photos et détails
-
-### Formation Interactive
-- **Modules de formation** par compétences
-- **Quiz interactifs** pour valider les acquis
-- **Suivi de progression** personnalisé
-- **Système de récompenses** lié à la formation
-
-## 🧪 Compte de test pour démonstrations
-
-Pour effectuer des démonstrations sans utiliser de comptes réels, utilisez un compte de test dédié. Les instructions de configuration se trouvent dans [DEMO_USER_SETUP.md](./DEMO_USER_SETUP.md). Ce compte est réservé aux environnements de développement ou de présentation.
-
-## 📊 Données d'Example
-
-L'application contient des données de démonstration réalistes :
-- Profils d'employés (Marie Dupont, Pierre Martin, Jean Leroy)
-- Audits types (rayon frais, sécurité, hygiène)
-- Produits de supermarché avec codes-barres
-- Tâches opérationnelles courantes
-- Formations sectorielles
-
-## 🔄 Évolutions Futures
-
-- **Intégration API** pour données temps réel
-- **Mode hors-ligne complet**
-  - Stockage local des audits, tâches et photos
-  - Synchronisation automatique dès le retour en ligne
-- **Push notifications** natives
-  - Rappels d'audits et de tâches
-  - Alertes en temps réel pour la communication interne
-- **Export avancé** (Excel, CSV)
-- **Intégration caméra** pour annotations
-- **Géolocalisation** pour audits multi-sites
-- **Dashboard manager** pour supervision
-
-## 💼 Cas d'Usage
-
-### Supermarché / Grande Distribution
-- Contrôles qualité rayons
-- Vérification DLC et stock
-- Formation personnel caisse
-- Communication équipes
-
-### Retail / Points de Vente
-- Audits merchandising
-- Contrôles sécurité
-- Formation produits
-- Suivi performances
-
-### Restauration
-- Contrôles hygiène HACCP
-- Gestion des stocks
-- Formation sécurité alimentaire
-- Communication brigade
+4. Exécuter les migrations SQL dans l’éditeur Supabase.
 
 ---
 
-**OpsPilot** - *Votre copilote pour des opérations terrain efficaces* 🎯
+## 5) Modules métier détaillés
+
+### Gamification
+- Niveaux d’expérience (XP).
+- Badges/récompenses.
+- Classements d’équipe.
+- Suivi de performance individuel/collectif.
+
+### Audits
+- Modèles personnalisés.
+- Checklists interactives.
+- Scoring automatique.
+- Rapports PDF.
+- Historique d’audits.
+
+### Produits / stock
+- Scan code-barres (simulation).
+- Suivi de stock temps réel.
+- Alertes ruptures et DLC.
+- Fiches produits enrichies.
+
+### Formation
+- Parcours par compétences.
+- Quiz de validation.
+- Progression personnalisée.
+- Récompenses liées à l’apprentissage.
+
+---
+
+## 6) Compte de démonstration
+
+Pour les démos sans comptes réels, utiliser le compte de test dédié documenté dans [DEMO_USER_SETUP.md](./DEMO_USER_SETUP.md).
+
+> Usage limité aux environnements de développement et de présentation.
+
+---
+
+## 7) Données d’exemple incluses
+
+- Employés : Marie Dupont, Pierre Martin, Jean Leroy.
+- Audits : rayon frais, sécurité, hygiène.
+- Produits : références supermarché + codes-barres.
+- Tâches : opérations courantes magasin.
+- Formation : modules sectoriels.
+
+---
+
+## 8) Évolutions futures
+
+- Intégrations API temps réel.
+- Mode hors-ligne complet (audits/tâches/photos).
+- Push notifications natives.
+- Export avancé (Excel, CSV).
+- Annotations caméra enrichies.
+- Géolocalisation multi-sites.
+- Dashboard manager renforcé.
+
+---
+
+## 9) Cas d’usage
+
+### Supermarché / grande distribution
+- Contrôles qualité rayon.
+- Vérification DLC/stock.
+- Formation personnel caisse.
+- Coordination d’équipe.
+
+### Retail / points de vente
+- Audits merchandising.
+- Contrôles sécurité.
+- Formation produit.
+- Pilotage des performances.
+
+### Restauration
+- Contrôles hygiène HACCP.
+- Gestion stock.
+- Formation sécurité alimentaire.
+- Communication brigade.
+
+---
+
+## 10) Identité de marque
+
+**Nom : OpsPilot** — évoque pilotage opérationnel, précision et efficacité terrain.
+
+Palette principale :
+- Primary Blue `#2563EB`
+- Success Green `#10B981`
+- Warning Orange `#F59E0B`
+- Error Red `#EF4444`
+- Neutral Gray `#6B7280`
+
+---
+
+**OpsPilot** — *Votre copilote pour des opérations terrain efficaces.*
