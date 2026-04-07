@@ -68,6 +68,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 // Mock Supabase
 jest.mock('../lib/supabase', () => ({
+  isDemoMode: false,
   supabase: {
     auth: {
       getSession: jest.fn(),

@@ -2,8 +2,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY)
-  throw new Error('Supabase env vars missing');
+
+export const isDemoMode = !SUPABASE_URL || !SUPABASE_ANON_KEY;
 
 export const customFetch = async (
   input: RequestInfo | URL,
@@ -18,14 +18,21 @@ export const customFetch = async (
   }
 };
 
+// En mode démo, on crée un client factice avec une URL placeholder
+// Les hooks vérifieront isDemoMode avant d'appeler Supabase
 export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
+  SUPABASE_URL || 'https://placeholder.supabase.co',
+  SUPABASE_ANON_KEY || 'placeholder-key',
   { global: { fetch: customFetch } },
 );
 
-if (typeof __DEV__ !== 'undefined' && __DEV__)
-  console.log('[Supabase] client initialisé');
+if (typeof __DEV__ !== 'undefined' && __DEV__) {
+  if (isDemoMode) {
+    console.log('[Supabase] Mode démo activé (pas de configuration Supabase)');
+  } else {
+    console.log('[Supabase] Client initialisé');
+  }
+}
 
 export type Audit = {
   id: string;

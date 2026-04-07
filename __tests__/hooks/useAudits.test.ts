@@ -18,6 +18,7 @@ vi.mock('../../hooks/useAuth', () => ({
 
 // Mock supabase
 vi.mock('../../lib/supabase', () => ({
+  isDemoMode: false,
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn(() => ({

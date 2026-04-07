@@ -71,17 +71,16 @@ export default function TabLayout() {
           ),
         }}
       />
-      {profile?.role === 'manager' && (
-        <Tabs.Screen
-          name="manager"
-          options={{
-            title: 'Manager',
-            tabBarIcon: ({ size, color }) => (
-              <LayoutDashboard size={size} color={color} />
-            ),
-          }}
-        />
-      )}
+      <Tabs.Screen
+        name="manager"
+        options={{
+          title: 'Manager',
+          tabBarIcon: ({ size, color }) => (
+            <LayoutDashboard size={size} color={color} />
+          ),
+          href: profile?.role === 'manager' || profile?.role === 'admin' ? '/manager' : null,
+        }}
+      />
       <Tabs.Screen
         name="profile"
         options={{

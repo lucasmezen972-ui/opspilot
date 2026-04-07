@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react'
-import { supabase, type Message, type Conversation } from '../lib/supabase'
+import { supabase, isDemoMode, type Message, type Conversation } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import { mapSupabaseError } from '../utils/error'
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([])
   const [conversations, setConversations] = useState<Conversation[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!isDemoMode)
   const { profile } = useAuth()
 
   useEffect(() => {
+    if (isDemoMode) {
+      setLoading(false)
+      return
+    }
     if (profile?.organization_id) {
       fetchConversations()
       setupRealtimeSubscription()
