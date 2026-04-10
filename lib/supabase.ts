@@ -1,9 +1,31 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY)
-  throw new Error('Supabase env vars missing');
+const SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL ??
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  'https://placeholder.supabase.co';
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  'placeholder-anon-key';
+
+if (
+  !process.env.EXPO_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL
+)
+  console.warn(
+    '[Supabase] URL manquante. Configure EXPO_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_URL.',
+  );
+
+if (
+  !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY &&
+  !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY &&
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+  console.warn(
+    '[Supabase] Clé manquante. Configure EXPO_PUBLIC_SUPABASE_ANON_KEY ou NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.',
+  );
 
 export const customFetch = async (
   input: RequestInfo | URL,
