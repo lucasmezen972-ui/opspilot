@@ -6,7 +6,9 @@ export interface SupabaseConfigResult {
 }
 
 export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
-  const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  const url =
+    process.env.EXPO_PUBLIC_SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!url) return { status: 'missing' };
   if (url === 'https://placeholder.supabase.co')
     return { status: 'placeholder' };
