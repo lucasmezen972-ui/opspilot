@@ -7,7 +7,7 @@ import {
   TrendingUp,
   Sparkles,
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -18,12 +18,51 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useTraining } from '../../hooks/useTraining';
 import { generateTrainingContent } from '../../lib/openai';
-import { courses as defaultCourses } from '../../data/training';
+import { courses as defaultCourses, type TrainingCourse } from '../../data/training';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
-  const [courses, setCourses] = useState(defaultCourses);
+  const {
+    courses: remoteCourses,
+    progress: remoteProgress,
+    loading: trainingLoading,
+    startCourse,
+    updateProgress,
+  } = useTraining();
+  const [localCourses, setLocalCourses] = useState<TrainingCourse[]>(defaultCourses);
+
+  // Merge remote courses (Supabase) with local user progression.
+  // Fall back to the curated demo courses when the DB is empty so that the
+  // screen always has something to show in a fresh environment.
+  const courses: TrainingCourse[] = useMemo(() => {
+    if (!remoteCourses || remoteCourses.length === 0) {
+      return localCourses;
+    }
+    return remoteCourses.map((c) => {
+      const p = remoteProgress.find((pr) => pr.training_id === c.id);
+      const status: TrainingCourse['status'] = p?.status === 'completed'
+        ? 'completed'
+        : p?.status === 'in_progress'
+          ? 'in_progress'
+          : 'not_started';
+      return {
+        id: c.id,
+        title: c.title,
+        description: (c.content || '').substring(0, 160) || 'Formation OpsPilot',
+        duration_minutes: c.duration_minutes || 30,
+        progress: p?.progress_percentage ?? 0,
+        status,
+        difficulty: c.difficulty,
+        xp_reward: c.xp_reward ?? 50,
+        ai_generated: c.ai_generated ?? false,
+        modules: [],
+      };
+    });
+  }, [remoteCourses, remoteProgress, localCourses]);
+
+  const isRemote = (remoteCourses?.length ?? 0) > 0;
 
   const [achievements] = useState([
     { id: 1, title: 'Premier cours terminé', icon: '🎓', unlocked: true },
@@ -95,49 +134,65 @@ export default function TrainingScreen() {
     }
   };
 
-  const handleStartCourse = (courseId: string) => {
-    setCourses(
-      courses.map((course) =>
-        course.id === courseId
-          ? {
-              ...course,
-              status: 'in_progress',
-              progress: Math.max(1, course.progress),
-            }
-          : course,
-      ),
-    );
+  const handleStartCourse = async (courseId: string) => {
+    if (isRemote) {
+      const res = await startCourse(courseId);
+      if (res && 'error' in res && res.error) {
+        Alert.alert('Erreur', String(res.error));
+        return;
+      }
+    } else {
+      setLocalCourses(
+        localCourses.map((course) =>
+          course.id === courseId
+            ? {
+                ...course,
+                status: 'in_progress',
+                progress: Math.max(1, course.progress),
+              }
+            : course,
+        ),
+      );
+    }
     Alert.alert(
       'Formation démarrée',
       'Vous pouvez maintenant suivre cette formation !',
     );
   };
 
-  const handleContinueCourse = (courseId: string) => {
+  const handleContinueCourse = async (courseId: string) => {
     const course = courses.find((c) => c.id === courseId);
-    if (course && course.progress < 100) {
-      const newProgress = Math.min(100, course.progress + 20);
-      const newStatus = newProgress === 100 ? 'completed' : 'in_progress';
+    if (!course || course.progress >= 100) return;
 
-      setCourses(
-        courses.map((c) =>
+    const newProgress = Math.min(100, course.progress + 20);
+    const newStatus = newProgress === 100 ? 'completed' : 'in_progress';
+
+    if (isRemote) {
+      const res = await updateProgress(courseId, newProgress);
+      if (res && 'error' in res && res.error) {
+        Alert.alert('Erreur', String(res.error));
+        return;
+      }
+    } else {
+      setLocalCourses(
+        localCourses.map((c) =>
           c.id === courseId
             ? { ...c, progress: newProgress, status: newStatus }
             : c,
         ),
       );
+    }
 
-      if (newStatus === 'completed') {
-        Alert.alert(
-          'Félicitations !',
-          `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`,
-        );
-      } else {
-        Alert.alert(
-          'Progression',
-          `Formation mise à jour : ${newProgress}% terminé`,
-        );
-      }
+    if (newStatus === 'completed') {
+      Alert.alert(
+        'Félicitations !',
+        `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`,
+      );
+    } else {
+      Alert.alert(
+        'Progression',
+        `Formation mise à jour : ${newProgress}% terminé`,
+      );
     }
   };
 
@@ -171,14 +226,14 @@ export default function TrainingScreen() {
         randomDifficulty as any,
       );
 
-      const newCourse = {
+      const newCourse: TrainingCourse = {
         id: Date.now().toString(),
         title: content.title,
         description: content.content.substring(0, 150) + '...',
         duration_minutes: 30,
         progress: 0,
-        status: 'not_started' as const,
-        difficulty: randomDifficulty as any,
+        status: 'not_started',
+        difficulty: randomDifficulty as TrainingCourse['difficulty'],
         xp_reward:
           randomDifficulty === 'beginner'
             ? 50
@@ -186,11 +241,10 @@ export default function TrainingScreen() {
               ? 75
               : 100,
         ai_generated: true,
-        modules: [] as { title: string; content: string }[],
-        full_content: content,
+        modules: [],
       };
 
-      setCourses([newCourse, ...courses]);
+      setLocalCourses([newCourse, ...localCourses]);
 
       Alert.alert(
         '🤖 Formation IA créée !',
