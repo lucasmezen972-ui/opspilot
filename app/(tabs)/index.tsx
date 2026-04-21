@@ -192,9 +192,6 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Bottom padding for scroll */}
-      <View style={styles.bottomPadding} />
-
       {/* Gamification Panel */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Votre progression</Text>
@@ -209,6 +206,9 @@ export default function HomeScreen() {
           <Text style={styles.progressText}>Plus que 150 XP pour le niveau suivant !</Text>
         </View>
       </View>
+
+      {/* Bottom padding for scroll */}
+      <View style={styles.bottomPadding} />
     </ScrollView>
   );
 }

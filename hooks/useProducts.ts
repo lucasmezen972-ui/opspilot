@@ -1,51 +1,62 @@
-import { useState } from 'react';
-
-type Product = {
-  id: string;
-  name: string;
-  barcode: string;
-  stock_quantity: number;
-  price?: number;
-  image_url?: string;
-  category?: string;
-  min_stock?: number;
-  dlc?: string;
-};
-
-const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Produit A',
-    barcode: '1234567890123',
-    stock_quantity: 25,
-    price: 2.99,
-    category: 'Divers',
-  },
-  {
-    id: '2',
-    name: 'Produit B',
-    barcode: '2345678901234',
-    stock_quantity: 5,
-    price: 4.99,
-    category: 'Divers',
-  },
-  {
-    id: '3',
-    name: 'Produit C',
-    barcode: '3456789012345',
-    stock_quantity: 0,
-    price: 1.5,
-    category: 'Divers',
-  },
-];
+import { useEffect, useState, useCallback } from 'react';
+import { supabase, type Product } from '../lib/supabase';
+import { useAuth } from './useAuth';
+import { mapSupabaseError } from '../utils/error';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [loading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { profile } = useAuth();
+
+  const fetchProducts = useCallback(async () => {
+    if (!profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('organization_id', profile.organization_id)
+        .order('name', { ascending: true });
+
+      if (error) {
+        mapSupabaseError('Erreur lors de la récupération des produits', error);
+        return;
+      }
+
+      setProducts(data || []);
+    } catch (error) {
+      mapSupabaseError('Erreur fetchProducts', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [profile?.organization_id]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const fetchProduct = async (barcode: string) => {
-    const product = products.find((p) => p.barcode === barcode) ?? null;
-    return { data: product, error: null };
+    const local = products.find((p) => p.barcode === barcode);
+    if (local) return { data: local, error: null };
+
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('barcode', barcode)
+        .maybeSingle();
+
+      if (error) {
+        return { data: null, error: mapSupabaseError('Erreur fetchProduct', error) };
+      }
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: mapSupabaseError('Erreur fetchProduct', error) };
+    }
   };
 
   const scanProduct = async (barcode: string) => {
@@ -54,13 +65,26 @@ export function useProducts() {
   };
 
   const updateProductStock = async (id: string, newStock: number) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, stock_quantity: newStock } : p)),
-    );
-    return { data: { id, stock_quantity: newStock }, error: null };
-  };
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update({ stock_quantity: newStock, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
 
-  const refetch = async () => {};
+      if (error) {
+        return { data: null, error: mapSupabaseError('Erreur mise à jour stock', error) };
+      }
+
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? data : p)),
+      );
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: mapSupabaseError('Erreur updateProductStock', error) };
+    }
+  };
 
   return {
     products,
@@ -68,6 +92,6 @@ export function useProducts() {
     fetchProduct,
     scanProduct,
     updateProductStock,
-    refetch,
+    refetch: fetchProducts,
   };
 }

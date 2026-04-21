@@ -12,9 +12,10 @@ export function useMessages() {
   useEffect(() => {
     if (profile?.organization_id) {
       fetchConversations()
-      setupRealtimeSubscription()
+      const cleanup = setupRealtimeSubscription()
+      return cleanup
     }
-  }, [profile])
+  }, [profile?.organization_id])
 
   const fetchConversations = async () => {
     if (!profile?.organization_id) return

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, X } from 'lucide-react-native';
 import CameraModal from '../../components/CameraModal';
 import { useAudits } from '../../hooks/useAudits';
 import { audits as defaultAudits } from '../../data/audits';
@@ -9,7 +9,8 @@ export default function AuditsScreen() {
   const { audits: dbAudits, loading, createAudit, updateAuditStatus, addPhotoToAudit } = useAudits();
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [newAuditTitle, setNewAuditTitle] = useState('');
 
   // Utiliser les audits DB s'ils existent, sinon fallback sur les données démo
   const audits = useMemo(() => {
@@ -59,37 +60,24 @@ export default function AuditsScreen() {
     }
   };
 
-  const handleCreateAudit = async () => {
-    Alert.prompt
-      ? Alert.prompt('Nouvel audit', 'Titre de l\'audit :', async (title) => {
-          if (!title?.trim()) return;
-          const result = await createAudit({ title: title.trim(), status: 'pending' });
-          if (result.error) {
-            Alert.alert('Erreur', String(result.error));
-          } else {
-            Alert.alert('Succès', 'Audit créé avec succès !');
-          }
-        })
-      : Alert.alert(
-          'Nouvel audit',
-          'Fonctionnalité de création d\'audit disponible.',
-          [
-            { text: 'Créer audit test', onPress: async () => {
-                const result = await createAudit({
-                  title: `Audit ${new Date().toLocaleDateString('fr-FR')}`,
-                  location: 'Magasin principal',
-                  status: 'pending',
-                });
-                if (result.error) {
-                  Alert.alert('Erreur', String(result.error));
-                } else {
-                  Alert.alert('Succès', 'Audit créé avec succès !');
-                }
-              },
-            },
-            { text: 'Annuler', style: 'cancel' },
-          ],
-        );
+  const handleCreateAudit = () => {
+    setNewAuditTitle('');
+    setCreateModalVisible(true);
+  };
+
+  const handleConfirmCreateAudit = async () => {
+    const title = newAuditTitle.trim() || `Audit ${new Date().toLocaleDateString('fr-FR')}`;
+    setCreateModalVisible(false);
+    const result = await createAudit({
+      title,
+      location: 'Magasin principal',
+      status: 'pending',
+    });
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
+      Alert.alert('Succès', 'Audit créé avec succès !');
+    }
   };
 
   const handlePhotoTaken = async (uri: string, analysis?: any, annotations?: string[]) => {
@@ -208,6 +196,41 @@ export default function AuditsScreen() {
         onClose={() => setCameraVisible(false)}
         onPhotoTaken={handlePhotoTaken}
       />
+
+      {/* Create Audit Modal */}
+      <Modal visible={createModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nouvel audit</Text>
+              <TouchableOpacity onPress={() => setCreateModalVisible(false)}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              value={newAuditTitle}
+              onChangeText={setNewAuditTitle}
+              placeholder="Titre de l'audit"
+              autoFocus
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setCreateModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmCreateAudit}
+              >
+                <Text style={styles.modalConfirmText}>Créer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -408,5 +431,63 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  modalCancelText: {
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  modalConfirmButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+  },
+  modalConfirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });

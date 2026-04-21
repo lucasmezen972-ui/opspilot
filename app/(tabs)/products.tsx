@@ -1,11 +1,14 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { Scan, Search, Filter, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Package, Calendar, DollarSign, TrendingDown, TrendingUp, Plus } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, Platform } from 'react-native';
+import { Scan, Search, Filter, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Package, Calendar, DollarSign, TrendingDown, TrendingUp, Plus, X } from 'lucide-react-native';
+import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 
 export default function ProductsScreen() {
   const { products, loading, scanProduct, updateProductStock } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
+  const [stockModalVisible, setStockModalVisible] = useState(false);
+  const [stockModalProduct, setStockModalProduct] = useState<any>(null);
+  const [stockModalValue, setStockModalValue] = useState('');
 
   // Statistiques calculées en temps réel
   const okProducts = products.filter(p => p.stock_quantity > 10).length;
@@ -77,24 +80,18 @@ export default function ProductsScreen() {
   };
 
   const promptStockUpdate = (product: any) => {
-    Alert.prompt(
-      'Modifier le stock',
-      `Stock actuel: ${product.stock_quantity}`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Valider', 
-          onPress: (text) => {
-            const newStock = parseInt(text || '0');
-            if (!isNaN(newStock) && newStock >= 0) {
-              updateProductStock(product.id, newStock);
-            }
-          }
-        }
-      ],
-      'plain-text',
-      product.stock_quantity.toString()
-    );
+    setStockModalProduct(product);
+    setStockModalValue(String(product.stock_quantity));
+    setStockModalVisible(true);
+  };
+
+  const handleStockConfirm = () => {
+    const newStock = parseInt(stockModalValue || '0');
+    if (!isNaN(newStock) && newStock >= 0 && stockModalProduct) {
+      updateProductStock(stockModalProduct.id, newStock);
+    }
+    setStockModalVisible(false);
+    setStockModalProduct(null);
   };
 
   return (
@@ -212,9 +209,48 @@ export default function ProductsScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity style={styles.fab} onPress={simulateBarcodeScan}>
         <Scan size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      {/* Stock Update Modal */}
+      <Modal visible={stockModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Modifier le stock</Text>
+              <TouchableOpacity onPress={() => setStockModalVisible(false)}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalSubtitle}>
+              Stock actuel: {stockModalProduct?.stock_quantity}
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={stockModalValue}
+              onChangeText={setStockModalValue}
+              keyboardType="numeric"
+              placeholder="Nouveau stock"
+              autoFocus
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setStockModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleStockConfirm}
+              >
+                <Text style={styles.modalConfirmText}>Valider</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -417,5 +453,68 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 16,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  modalCancelText: {
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  modalConfirmButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+  },
+  modalConfirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
