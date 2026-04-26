@@ -12,14 +12,16 @@ export default function HomeScreen() {
   const { tasks } = useTasks();
   const { price } = useBitcoinPrice();
 
-  const completedAuditsToday = audits.filter(a => 
-    a.status === 'completed' && 
-    new Date(a.completed_at!).toDateString() === new Date().toDateString()
+  const today = new Date().toDateString();
+
+  const completedAuditsToday = audits.filter(a =>
+    a.status === 'completed' &&
+    a.completed_at && new Date(a.completed_at).toDateString() === today
   ).length;
 
-  const completedTasksToday = tasks.filter(t => 
-    t.status === 'completed' && 
-    new Date(t.completed_at!).toDateString() === new Date().toDateString()
+  const completedTasksToday = tasks.filter(t =>
+    t.status === 'completed' &&
+    t.completed_at && new Date(t.completed_at).toDateString() === today
   ).length;
 
   const pendingTasks = tasks.filter(t => t.status === 'pending').length;
@@ -193,19 +195,23 @@ export default function HomeScreen() {
       )}
 
       {/* Gamification Panel */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Votre progression</Text>
-        <View style={styles.gamificationPanel}>
-          <View style={styles.levelInfo}>
-            <Text style={styles.levelTitle}>Expert Magasin</Text>
-            <Text style={styles.levelSubtitle}>Niveau 4 • 850/1000 XP</Text>
+      {profile && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Votre progression</Text>
+          <View style={styles.gamificationPanel}>
+            <View style={styles.levelInfo}>
+              <Text style={styles.levelTitle}>Niveau {profile.level || 1}</Text>
+              <Text style={styles.levelSubtitle}>{profile.xp || 0} / {(profile.level || 1) * 100} XP</Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${Math.min(100, ((profile.xp || 0) % 100))}%` }]} />
+            </View>
+            <Text style={styles.progressText}>
+              Plus que {Math.max(0, (profile.level || 1) * 100 - (profile.xp || 0))} XP pour le niveau suivant !
+            </Text>
           </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '85%' }]} />
-          </View>
-          <Text style={styles.progressText}>Plus que 150 XP pour le niveau suivant !</Text>
         </View>
-      </View>
+      )}
 
       {/* Bottom padding for scroll */}
       <View style={styles.bottomPadding} />

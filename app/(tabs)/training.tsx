@@ -18,12 +18,31 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useTraining } from '../../hooks/useTraining';
 import { generateTrainingContent } from '../../lib/openai';
-import { courses as defaultCourses } from '../../data/training';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
-  const [courses, setCourses] = useState(defaultCourses);
+  const {
+    courses: dbCourses,
+    progress,
+    loading: trainingLoading,
+    startCourse,
+    updateProgress,
+    getCourseProgress,
+    getCompletedCourses,
+  } = useTraining();
+
+  const courses = dbCourses.map((c) => {
+    const p = getCourseProgress(c.id);
+    return {
+      ...c,
+      progress: p?.progress_percentage ?? 0,
+      status: p?.status ?? 'not_started',
+      description: c.content ?? c.category ?? '',
+      modules: [] as { title: string; content: string }[],
+    };
+  });
 
   const [achievements] = useState([
     { id: 1, title: 'Premier cours terminé', icon: '🎓', unlocked: true },
@@ -35,13 +54,14 @@ export default function TrainingScreen() {
   const [generatingCourse, setGeneratingCourse] = useState(false);
 
   // Stats calculées
-  const completedCourses = courses.filter(
-    (c) => c.status === 'completed',
-  ).length;
+  const completedCoursesList = getCompletedCourses();
+  const completedCourses = completedCoursesList.length;
   const totalStudyTime = courses
     .filter((c) => c.status === 'completed')
     .reduce((total, course) => total + course.duration_minutes, 0);
-  const avgScore = 87; // Pourrait être calculé depuis les vrais résultats
+  const avgScore = completedCoursesList.length > 0
+    ? Math.round(completedCoursesList.reduce((sum, p) => sum + (p.score ?? 0), 0) / completedCoursesList.length)
+    : 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -95,39 +115,30 @@ export default function TrainingScreen() {
     }
   };
 
-  const handleStartCourse = (courseId: string) => {
-    setCourses(
-      courses.map((course) =>
-        course.id === courseId
-          ? {
-              ...course,
-              status: 'in_progress',
-              progress: Math.max(1, course.progress),
-            }
-          : course,
-      ),
-    );
-    Alert.alert(
-      'Formation démarrée',
-      'Vous pouvez maintenant suivre cette formation !',
-    );
+  const handleStartCourse = async (courseId: string) => {
+    const result = await startCourse(courseId);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
+      Alert.alert(
+        'Formation démarrée',
+        'Vous pouvez maintenant suivre cette formation !',
+      );
+    }
   };
 
-  const handleContinueCourse = (courseId: string) => {
+  const handleContinueCourse = async (courseId: string) => {
     const course = courses.find((c) => c.id === courseId);
     if (course && course.progress < 100) {
       const newProgress = Math.min(100, course.progress + 20);
-      const newStatus = newProgress === 100 ? 'completed' : 'in_progress';
+      const result = await updateProgress(courseId, newProgress);
 
-      setCourses(
-        courses.map((c) =>
-          c.id === courseId
-            ? { ...c, progress: newProgress, status: newStatus }
-            : c,
-        ),
-      );
+      if (result.error) {
+        Alert.alert('Erreur', String(result.error));
+        return;
+      }
 
-      if (newStatus === 'completed') {
+      if (newProgress >= 100) {
         Alert.alert(
           'Félicitations !',
           `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`,
@@ -171,30 +182,9 @@ export default function TrainingScreen() {
         randomDifficulty as any,
       );
 
-      const newCourse = {
-        id: Date.now().toString(),
-        title: content.title,
-        description: content.content.substring(0, 150) + '...',
-        duration_minutes: 30,
-        progress: 0,
-        status: 'not_started' as const,
-        difficulty: randomDifficulty as any,
-        xp_reward:
-          randomDifficulty === 'beginner'
-            ? 50
-            : randomDifficulty === 'intermediate'
-              ? 75
-              : 100,
-        ai_generated: true,
-        modules: [] as { title: string; content: string }[],
-        full_content: content,
-      };
-
-      setCourses([newCourse, ...courses]);
-
       Alert.alert(
-        '🤖 Formation IA créée !',
-        `"${content.title}" a été généré et ajouté à vos formations disponibles.`,
+        'Formation IA générée',
+        `"${content.title}" a été généré. Rechargez pour voir les formations.`,
       );
     } catch (error) {
       Alert.alert('Erreur', 'Impossible de générer la formation IA.');

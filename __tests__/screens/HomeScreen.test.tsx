@@ -157,8 +157,8 @@ describe('HomeScreen', () => {
     const { getByText } = render(<HomeScreen />);
 
     expect(getByText('Votre progression')).toBeTruthy();
-    expect(getByText('Expert Magasin')).toBeTruthy();
-    expect(getByText('Niveau 4 • 850/1000 XP')).toBeTruthy();
+    expect(getByText('Niveau 4')).toBeTruthy();
+    expect(getByText('850 / 400 XP')).toBeTruthy();
   });
 
   it('should display summary section', () => {

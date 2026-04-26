@@ -33,6 +33,11 @@ export function useAuth() {
       if (!cancelled) {
         setSession(s ?? null);
         setUser(s?.user ?? null);
+        if (s?.user?.id) {
+          fetchProfile(s.user.id);
+        } else {
+          setProfile(null);
+        }
       }
     });
     return () => { cancelled = true; sub?.subscription?.unsubscribe(); };
