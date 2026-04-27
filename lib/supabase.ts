@@ -105,13 +105,13 @@ export type Product = {
 export type Task = {
   id: string;
   organization_id: string;
-  store_id: string;
-  assigned_to: string;
-  created_by: string;
+  store_id?: string | null;
+  assigned_to?: string | null;
+  created_by?: string | null;
   title: string;
   description?: string | null;
   location?: string | null;
-  priority: 'low' | 'medium' | 'high';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   estimated_time_minutes?: number | null;
   due_date?: string | null;

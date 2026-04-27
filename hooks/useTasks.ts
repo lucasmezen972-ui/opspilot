@@ -50,7 +50,7 @@ export function useTasks() {
         .from('tasks')
         .insert({
           organization_id: profile.organization_id,
-          store_id: profile.store_id || profile.organization_id,
+          store_id: profile.store_id || null,
           assigned_to: taskData.assigned_to || user.id,
           created_by: user.id,
           title: taskData.title || '',

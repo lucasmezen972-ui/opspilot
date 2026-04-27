@@ -13,7 +13,7 @@ export function useTraining() {
     if (profile?.organization_id) {
       fetchTrainingData()
     }
-  }, [profile])
+  }, [profile?.organization_id, profile?.id])
 
   const fetchTrainingData = async () => {
     if (!profile?.organization_id) return
