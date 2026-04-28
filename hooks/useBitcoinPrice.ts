@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 
-interface BitcoinApiResponse {
-  bpi?: {
-    USD?: {
-      rate_float?: number
-    }
+interface CoinGeckoResponse {
+  bitcoin?: {
+    usd?: number
   }
 }
 
@@ -16,9 +14,9 @@ export function useBitcoinPrice() {
   const fetchPrice = async () => {
     try {
       setLoading(true)
-      const res = await fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
-      const data: BitcoinApiResponse = await res.json()
-      setPrice(data.bpi?.USD?.rate_float ?? null)
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+      const data: CoinGeckoResponse = await res.json()
+      setPrice(data.bitcoin?.usd ?? null)
       setError(null)
     } catch (err) {
       console.error('Erreur lors de la récupération du prix BTC:', err)

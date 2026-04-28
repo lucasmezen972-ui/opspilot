@@ -11,7 +11,7 @@ const translations: Record<Locale, Record<string, string>> = {
   },
 };
 
-let currentLocale: Locale = 'en';
+let currentLocale: Locale = 'fr';
 
 export function setLocale(locale: Locale) {
   currentLocale = locale;
