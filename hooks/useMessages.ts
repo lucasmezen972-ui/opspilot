@@ -13,7 +13,7 @@ export function useMessages() {
     if (profile?.organization_id) {
       fetchConversations()
       const cleanup = setupRealtimeSubscription()
-      return cleanup
+      return () => { cleanup?.() }
     }
   }, [profile?.organization_id])
 

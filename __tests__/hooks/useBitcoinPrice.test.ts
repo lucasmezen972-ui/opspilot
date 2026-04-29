@@ -10,6 +10,7 @@ afterEach(() => {
 describe('useBitcoinPrice hook', () => {
   it('fetches and returns BTC price', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
       json: async () => ({ bitcoin: { usd: 12345.67 } }),
     } as any);
 
