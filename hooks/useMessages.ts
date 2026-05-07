@@ -68,7 +68,7 @@ export function useMessages() {
     content: string,
     messageType: Message['message_type'] = 'text'
   ) => {
-    if (!profile) return { error: 'Utilisateur non connecté' }
+    if (!profile) return { data: null, error: 'Utilisateur non connecté' }
 
     try {
       const { data, error } = await supabase
@@ -158,7 +158,7 @@ export function useMessages() {
   }
 
   const createConversation = async (name: string, type: 'group' | 'direct', participants: string[]) => {
-    if (!profile?.organization_id) return { error: 'Organisation non définie' }
+    if (!profile?.organization_id) return { data: null, error: 'Organisation non définie' }
 
     try {
       const { data, error } = await supabase
@@ -168,6 +168,7 @@ export function useMessages() {
           name,
           type,
           participants,
+          created_by: profile.id,
         })
         .select()
         .single()

@@ -55,7 +55,7 @@ export default function ProductsScreen() {
       if (scannedProduct) {
         Alert.alert(
           'Produit scanné',
-          `${scannedProduct.name}\nStock: ${scannedProduct.stock_quantity}\nPrix: ${scannedProduct.price}€`,
+          `${scannedProduct.name}\nStock: ${scannedProduct.stock_quantity}\nPrix: ${scannedProduct.price != null ? `${scannedProduct.price}€` : 'N/A'}`,
           [
             { text: 'OK', style: 'default' },
             { 
@@ -174,12 +174,12 @@ export default function ProductsScreen() {
                 </View>
 
                 <Text style={styles.productCategory}>{product.category || 'Divers'}</Text>
-                <Text style={styles.productBarcode}>Code: {product.barcode}</Text>
+                <Text style={styles.productBarcode}>Code: {product.barcode || 'N/A'}</Text>
 
                 <View style={styles.productDetails}>
                   <View style={styles.productDetailItem}>
                     <DollarSign size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>{product.price}€</Text>
+                    <Text style={styles.productDetailText}>{product.price != null ? `${product.price}€` : 'N/A'}</Text>
                   </View>
                   <View style={styles.productDetailItem}>
                     <Package size={14} color="#6B7280" />
