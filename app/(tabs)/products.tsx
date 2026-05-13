@@ -4,11 +4,19 @@ import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 
 export default function ProductsScreen() {
-  const { products, loading, scanProduct, updateProductStock } = useProducts();
+  const { products: allProducts, loading, scanProduct, updateProductStock } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
   const [stockModalVisible, setStockModalVisible] = useState(false);
   const [stockModalProduct, setStockModalProduct] = useState<any>(null);
   const [stockModalValue, setStockModalValue] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+
+  const products = allProducts.filter((p) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return p.name.toLowerCase().includes(q) || (p.barcode || '').includes(q) || (p.category || '').toLowerCase().includes(q);
+  });
 
   // Statistiques calculées en temps réel
   const okProducts = products.filter(p => p.stock_quantity > 10).length;
@@ -100,14 +108,29 @@ export default function ProductsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Produits</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Search size={20} color="#6B7280" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Filter size={20} color="#6B7280" />
+          <TouchableOpacity style={styles.headerButton} onPress={() => setShowSearch(!showSearch)}>
+            <Search size={20} color={showSearch ? '#059669' : '#6B7280'} />
           </TouchableOpacity>
         </View>
       </View>
+
+      {showSearch && (
+        <View style={styles.searchBar}>
+          <Search size={16} color="#9CA3AF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher un produit..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <X size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       {/* Quick Stats */}
       <View style={styles.quickStats}>
@@ -286,6 +309,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    paddingVertical: 6,
+    color: '#111827',
   },
   quickStats: {
     flexDirection: 'row',

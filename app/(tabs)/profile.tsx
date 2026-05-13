@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { User, Settings, Award, ChartBar as BarChart3, Bell, CircleHelp as HelpCircle, LogOut, Shield, Smartphone, Globe, Star, Trophy, Target, Clock } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { User, Settings, Award, ChartBar as BarChart3, Bell, CircleHelp as HelpCircle, LogOut, Shield, Smartphone, Globe, Star, Trophy, Target, Clock, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { useMemo } from 'react';
 
@@ -28,8 +28,15 @@ export default function ProfileScreen() {
     { label: 'Temps actif', value: `${profile?.active_time_hours || 0}h`, icon: Clock, color: '#8B5CF6' },
   ], [profile]);
 
-  const handleLogout = async () => {
-    await signOut();
+  const handleLogout = () => {
+    Alert.alert(
+      'Déconnexion',
+      'Êtes-vous sûr de vouloir vous déconnecter ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Déconnexion', style: 'destructive', onPress: () => signOut() },
+      ],
+    );
   };
 
   return (
@@ -98,25 +105,30 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Paramètres</Text>
           <View style={styles.settingsMenu}>
-            <TouchableOpacity style={styles.settingsItem}>
+            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Notifications', 'Les notifications push seront disponibles prochainement.')}>
               <Bell size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Notifications</Text>
+              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem}>
+            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Confidentialité', 'Vos données sont chiffrées et stockées de manière sécurisée.')}>
               <Shield size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Confidentialité</Text>
+              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem}>
+            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Appareil', `Plateforme: Web\nVersion: OpsPilot 1.0.0`)}>
               <Smartphone size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Appareil</Text>
+              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem}>
+            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Langue', 'Français est la seule langue disponible actuellement.')}>
               <Globe size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Langue</Text>
+              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem}>
+            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Support', 'Pour toute question, contactez support@opspilot.com')}>
               <HelpCircle size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Support</Text>
+              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
             </TouchableOpacity>
           </View>
         </View>
@@ -335,6 +347,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     marginLeft: 12,
+    flex: 1,
+  },
+  settingsChevron: {
+    marginLeft: 'auto',
   },
   logoutButton: {
     flexDirection: 'row',

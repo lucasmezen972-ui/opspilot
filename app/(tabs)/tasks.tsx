@@ -309,8 +309,9 @@ export default function TasksScreen() {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
+        onPress={handleCreateTask}
         accessibilityRole="button"
-        accessibilityLabel="Action rapide"
+        accessibilityLabel="Créer une nouvelle tâche"
       >
         <Plus size={24} color="#FFFFFF" />
       </TouchableOpacity>

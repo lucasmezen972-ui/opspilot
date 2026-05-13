@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
-import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, X } from 'lucide-react-native';
+import { Search, Filter, Plus, MapPin, CircleCheck as CheckCircle, Clock, CircleAlert as AlertCircle, Camera, FileText, X, Play } from 'lucide-react-native';
 import CameraModal from '../../components/CameraModal';
 import { useAudits } from '../../hooks/useAudits';
 import { audits as defaultAudits } from '../../data/audits';
@@ -11,22 +11,29 @@ export default function AuditsScreen() {
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newAuditTitle, setNewAuditTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Utiliser les audits DB s'ils existent, sinon fallback sur les données démo
   const audits = useMemo(() => {
-    if (dbAudits.length > 0) {
-      return dbAudits.map((a) => ({
-        id: a.id,
-        title: a.title,
-        location: a.location || '',
-        status: a.status,
-        date: a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '',
-        score: a.score,
-        issues: a.issues_count,
-      }));
-    }
-    return defaultAudits;
-  }, [dbAudits]);
+    const source = dbAudits.length > 0
+      ? dbAudits.map((a) => ({
+          id: a.id,
+          title: a.title,
+          location: a.location || '',
+          status: a.status,
+          date: a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '',
+          score: a.score,
+          issues: a.issues_count,
+        }))
+      : defaultAudits;
+
+    return source.filter((a) => {
+      const matchesSearch = !searchQuery || a.title.toLowerCase().includes(searchQuery.toLowerCase()) || a.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [dbAudits, searchQuery, statusFilter]);
 
   // Stats dynamiques
   const pendingCount = audits.filter((a) => a.status === 'pending').length;
@@ -92,20 +99,65 @@ export default function AuditsScreen() {
     setCameraVisible(true);
   };
 
+  const handleStatusChange = async (auditId: string, currentStatus: string) => {
+    if (currentStatus === 'pending') {
+      const result = await updateAuditStatus(auditId, 'in_progress');
+      if (!result.error) Alert.alert('Audit démarré', "L'audit est maintenant en cours.");
+      else Alert.alert('Erreur', String(result.error));
+    } else if (currentStatus === 'in_progress') {
+      const result = await updateAuditStatus(auditId, 'completed');
+      if (!result.error) Alert.alert('Audit terminé', "L'audit a été complété avec succès !");
+      else Alert.alert('Erreur', String(result.error));
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Audits</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Search size={20} color="#6B7280" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Filter size={20} color="#6B7280" />
+          <TouchableOpacity style={styles.headerButton} onPress={() => setShowSearch(!showSearch)}>
+            <Search size={20} color={showSearch ? '#2563EB' : '#6B7280'} />
           </TouchableOpacity>
         </View>
       </View>
+
+      {showSearch && (
+        <View style={styles.searchBar}>
+          <Search size={16} color="#9CA3AF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher un audit..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <X size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {/* Status Filters */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow} contentContainerStyle={styles.filtersContent}>
+        {[
+          { key: 'all', label: 'Tous' },
+          { key: 'pending', label: 'À faire' },
+          { key: 'in_progress', label: 'En cours' },
+          { key: 'completed', label: 'Terminés' },
+        ].map((f) => (
+          <TouchableOpacity
+            key={f.key}
+            style={[styles.filterChip, statusFilter === f.key && styles.filterChipActive]}
+            onPress={() => setStatusFilter(f.key)}
+          >
+            <Text style={[styles.filterChipText, statusFilter === f.key && styles.filterChipTextActive]}>{f.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* Quick Stats */}
       <View style={styles.quickStats}>
@@ -176,10 +228,18 @@ export default function AuditsScreen() {
                   <Camera size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>Photos</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton}>
-                  <FileText size={16} color="#2563EB" />
-                  <Text style={styles.actionButtonText}>Rapport</Text>
-                </TouchableOpacity>
+                {audit.status === 'pending' && (
+                  <TouchableOpacity style={[styles.actionButton, styles.startActionButton]} onPress={() => handleStatusChange(audit.id, audit.status)}>
+                    <Play size={16} color="#F59E0B" />
+                    <Text style={[styles.actionButtonText, { color: '#F59E0B' }]}>Démarrer</Text>
+                  </TouchableOpacity>
+                )}
+                {audit.status === 'in_progress' && (
+                  <TouchableOpacity style={[styles.actionButton, styles.completeActionButton]} onPress={() => handleStatusChange(audit.id, audit.status)}>
+                    <CheckCircle size={16} color="#10B981" />
+                    <Text style={[styles.actionButtonText, { color: '#10B981' }]}>Terminer</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </TouchableOpacity>
           );
@@ -266,6 +326,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    paddingVertical: 6,
+    color: '#111827',
+  },
+  filtersRow: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    maxHeight: 52,
+  },
+  filtersContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+  },
+  filterChipActive: {
+    backgroundColor: '#2563EB',
+  },
+  filterChipText: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
   },
   quickStats: {
     flexDirection: 'row',
@@ -415,6 +519,12 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontWeight: '500',
     marginLeft: 4,
+  },
+  startActionButton: {
+    backgroundColor: '#FEF3C7',
+  },
+  completeActionButton: {
+    backgroundColor: '#DCFCE7',
   },
   fab: {
     position: 'absolute',
