@@ -1,6 +1,11 @@
+import {
+  CircleCheck as CheckCircle,
+  Wifi,
+  CircleAlert,
+} from 'lucide-react-native';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { CircleCheck as CheckCircle, Wifi, CircleAlert } from 'lucide-react-native';
+
 import { getSupabaseConfigStatus } from '../utils/supabaseConfig';
 
 interface ConnectedStatusProps {

@@ -17,7 +17,8 @@ export const audits: AuditPlan[] = [
   {
     id: 'network-coverage',
     title: 'Audit du réseau de magasins',
-    description: 'Cartographie de la couverture et identification des zones à potentiel.',
+    description:
+      'Cartographie de la couverture et identification des zones à potentiel.',
     location: 'Siège',
     status: 'pending',
     date: '2024-01-20',
@@ -25,7 +26,7 @@ export const audits: AuditPlan[] = [
     issues: 0,
     objectives: [
       'Cartographier la couverture de chaque enseigne',
-      "Analyser l\u2019\u00e9quilibre hypermarch\u00e9s/supermarch\u00e9s/proximit\u00e9",
+      'Analyser l\u2019\u00e9quilibre hypermarch\u00e9s/supermarch\u00e9s/proximit\u00e9',
       'Identifier les zones à potentiel',
     ],
     checklist: [
@@ -53,7 +54,7 @@ export const audits: AuditPlan[] = [
     checklist: [
       'Analyser les coûts transport et stockage',
       'Comparer les taux de rupture par canal',
-      "V\u00e9rifier la ma\u00eetrise des flux omnicanaux",
+      'V\u00e9rifier la ma\u00eetrise des flux omnicanaux',
     ],
     responsible: 'Direction Logistique',
     resources: ['ERP logistique', 'Historique des commandes'],
@@ -61,7 +62,8 @@ export const audits: AuditPlan[] = [
   {
     id: 'digital-omnichannel',
     title: 'Audit digital et omnicanal',
-    description: 'Examen des sites e-commerce et de lintégration des données clients.',
+    description:
+      'Examen des sites e-commerce et de lintégration des données clients.',
     location: 'Canaux digitaux',
     status: 'pending',
     date: '2024-01-22',

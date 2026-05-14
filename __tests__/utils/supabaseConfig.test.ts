@@ -1,5 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { getSupabaseConfigStatus, isSupabaseConfigured } from '../../utils/supabaseConfig';
+
+import {
+  getSupabaseConfigStatus,
+  isSupabaseConfigured,
+} from '../../utils/supabaseConfig';
 
 describe('supabaseConfig utility', () => {
   afterEach(() => {
@@ -20,7 +24,10 @@ describe('supabaseConfig utility', () => {
 
   it('detects valid url', () => {
     process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
-    expect(getSupabaseConfigStatus()).toEqual({ status: 'valid', url: 'https://example.supabase.co' });
+    expect(getSupabaseConfigStatus()).toEqual({
+      status: 'valid',
+      url: 'https://example.supabase.co',
+    });
     expect(isSupabaseConfigured()).toBe(true);
   });
 });

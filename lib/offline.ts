@@ -15,7 +15,7 @@ interface OfflineTask {
 const STORAGE_KEYS = {
   audits: '@opspilot:offline:audits',
   tasks: '@opspilot:offline:tasks',
-  queue: '@opspilot:offline:queue'
+  queue: '@opspilot:offline:queue',
 };
 
 // Offline sync utilities for the mobile app
@@ -40,7 +40,7 @@ export async function syncPendingData() {
     console.log('[Offline] Sync not needed on web platform');
     return { success: true, synced: 0 };
   }
-  
+
   try {
     console.log('[Offline] Syncing pending data...');
     // Sync logic would go here when Supabase is configured
@@ -55,7 +55,7 @@ export async function isOnline(): Promise<boolean> {
   if (Platform.OS === 'web') {
     return Promise.resolve(navigator.onLine);
   }
-  
+
   // For mobile platforms, assume online for now
   return Promise.resolve(true);
 }
@@ -67,7 +67,7 @@ export async function loadOfflineAudits(): Promise<OfflineAudit[]> {
       const stored = localStorage.getItem(STORAGE_KEYS.audits);
       return stored ? JSON.parse(stored) : [];
     }
-    
+
     // Mobile storage would use AsyncStorage
     return [];
   } catch (error) {
@@ -93,7 +93,7 @@ export async function loadOfflineTasks(): Promise<OfflineTask[]> {
       const stored = localStorage.getItem(STORAGE_KEYS.tasks);
       return stored ? JSON.parse(stored) : [];
     }
-    
+
     return [];
   } catch (error) {
     console.warn('[Offline] Failed to load tasks:', error);
@@ -129,7 +129,10 @@ export async function queueTask(task: OfflineTask): Promise<void> {
   }
 }
 
-export async function queuePhoto(auditId: string, photoUrl: string): Promise<void> {
+export async function queuePhoto(
+  auditId: string,
+  photoUrl: string,
+): Promise<void> {
   try {
     console.log('[Offline] Queuing photo for sync:', auditId, photoUrl);
     // Queue for later sync when online and Supabase configured

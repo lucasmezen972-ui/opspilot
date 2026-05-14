@@ -29,13 +29,20 @@ vi.mock('../../lib/supabase', () => ({
       })),
       insert: vi.fn(() => ({
         select: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: { id: 'new-audit' }, error: null })),
+          single: vi.fn(() =>
+            Promise.resolve({ data: { id: 'new-audit' }, error: null }),
+          ),
         })),
       })),
       update: vi.fn(() => ({
         eq: vi.fn(() => ({
           select: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: { id: 'audit-1', status: 'in_progress' }, error: null })),
+            single: vi.fn(() =>
+              Promise.resolve({
+                data: { id: 'audit-1', status: 'in_progress' },
+                error: null,
+              }),
+            ),
           })),
         })),
       })),

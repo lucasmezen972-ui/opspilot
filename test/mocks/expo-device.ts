@@ -1,2 +1,2 @@
-export const isDevice = false
-export default { isDevice }
+export const isDevice = false;
+export default { isDevice };

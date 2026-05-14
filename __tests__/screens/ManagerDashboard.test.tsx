@@ -40,8 +40,20 @@ describe('ManagerDashboard', () => {
 
     mockUseAudits.mockReturnValue({
       audits: [
-        { id: '1', status: 'pending', title: 'Audit 1', score: 85, location: 'Paris' },
-        { id: '2', status: 'completed', title: 'Audit 2', score: 90, location: 'Lyon' },
+        {
+          id: '1',
+          status: 'pending',
+          title: 'Audit 1',
+          score: 85,
+          location: 'Paris',
+        },
+        {
+          id: '2',
+          status: 'completed',
+          title: 'Audit 2',
+          score: 90,
+          location: 'Lyon',
+        },
       ] as any,
       loading: false,
       createAudit: vi.fn(),
@@ -52,8 +64,20 @@ describe('ManagerDashboard', () => {
 
     mockUseTasks.mockReturnValue({
       tasks: [
-        { id: '1', status: 'pending', priority: 'high', title: 'Task 1', location: 'Magasin' },
-        { id: '2', status: 'completed', priority: 'low', title: 'Task 2', location: 'Bureau' },
+        {
+          id: '1',
+          status: 'pending',
+          priority: 'high',
+          title: 'Task 1',
+          location: 'Magasin',
+        },
+        {
+          id: '2',
+          status: 'completed',
+          priority: 'low',
+          title: 'Task 2',
+          location: 'Bureau',
+        },
       ] as any,
       loading: false,
       createTask: vi.fn(),

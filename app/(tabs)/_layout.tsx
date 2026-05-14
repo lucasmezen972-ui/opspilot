@@ -1,7 +1,18 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ClipboardCheck, Package, SquareCheck as CheckSquare, GraduationCap, MessageCircle, User, LayoutDashboard } from 'lucide-react-native';
+import {
+  Chrome as Home,
+  ClipboardCheck,
+  Package,
+  SquareCheck as CheckSquare,
+  GraduationCap,
+  MessageCircle,
+  User,
+  LayoutDashboard,
+} from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
+
 import { useAuth } from '../../hooks/useAuth';
+import { isManagerOrAdmin } from '../../utils/roles';
 
 export default function TabLayout() {
   const { profile } = useAuth();
@@ -16,14 +27,13 @@ export default function TabLayout() {
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
         tabBarActiveBackgroundColor: '#EEF2FF',
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Accueil',
-          tabBarIcon: ({ size, color }) => (
-            <Home size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -78,16 +88,14 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <LayoutDashboard size={size} color={color} />
           ),
-          href: profile?.role === 'manager' || profile?.role === 'admin' ? '/manager' : null,
+          href: isManagerOrAdmin(profile?.role) ? '/manager' : null,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: ({ size, color }) => (
-            <User size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>

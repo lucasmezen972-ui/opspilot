@@ -1,23 +1,44 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { Plus, Filter, Clock, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Calendar, MapPin, Flag, User } from 'lucide-react-native';
+import {
+  Plus,
+  Filter,
+  Clock,
+  CircleCheck as CheckCircle,
+  TriangleAlert as AlertTriangle,
+  Calendar,
+  MapPin,
+  Flag,
+  User,
+} from 'lucide-react-native';
 import { useState, useMemo } from 'react';
-import { useTasks } from '../../hooks/useTasks';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from 'react-native';
+
 import { useAuth } from '../../hooks/useAuth';
+import { useTasks } from '../../hooks/useTasks';
 
 export default function TasksScreen() {
   const { tasks, loading, updateTaskStatus, createTask } = useTasks();
   const { profile } = useAuth();
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'my' | 'pending' | 'in_progress'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<
+    'all' | 'my' | 'pending' | 'in_progress'
+  >('all');
 
   // Filtrer les tâches
   const filteredTasks = useMemo(() => {
     switch (selectedFilter) {
       case 'my':
-        return tasks.filter(t => t.assigned_to === profile?.id);
+        return tasks.filter((t) => t.assigned_to === profile?.id);
       case 'pending':
-        return tasks.filter(t => t.status === 'pending');
+        return tasks.filter((t) => t.status === 'pending');
       case 'in_progress':
-        return tasks.filter(t => t.status === 'in_progress');
+        return tasks.filter((t) => t.status === 'in_progress');
       default:
         return tasks;
     }
@@ -25,67 +46,90 @@ export default function TasksScreen() {
 
   // Statistiques
   const pendingCount = useMemo(
-    () => tasks.filter(t => t.status === 'pending').length,
-    [tasks]
+    () => tasks.filter((t) => t.status === 'pending').length,
+    [tasks],
   );
   const inProgressCount = useMemo(
-    () => tasks.filter(t => t.status === 'in_progress').length,
-    [tasks]
+    () => tasks.filter((t) => t.status === 'in_progress').length,
+    [tasks],
   );
   const completedCount = useMemo(
-    () => tasks.filter(t => t.status === 'completed').length,
-    [tasks]
+    () => tasks.filter((t) => t.status === 'completed').length,
+    [tasks],
   );
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return '#EF4444';
-      case 'medium': return '#F59E0B';
-      case 'low': return '#10B981';
-      default: return '#6B7280';
+      case 'high':
+        return '#EF4444';
+      case 'medium':
+        return '#F59E0B';
+      case 'low':
+        return '#10B981';
+      default:
+        return '#6B7280';
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'high': return 'Haute';
-      case 'medium': return 'Moyenne';
-      case 'low': return 'Basse';
-      default: return 'Normale';
+      case 'high':
+        return 'Haute';
+      case 'medium':
+        return 'Moyenne';
+      case 'low':
+        return 'Basse';
+      default:
+        return 'Normale';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#10B981';
-      case 'in_progress': return '#F59E0B';
-      case 'pending': return '#6B7280';
-      default: return '#6B7280';
+      case 'completed':
+        return '#10B981';
+      case 'in_progress':
+        return '#F59E0B';
+      case 'pending':
+        return '#6B7280';
+      default:
+        return '#6B7280';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return CheckCircle;
-      case 'in_progress': return Clock;
-      case 'pending': return AlertTriangle;
-      default: return Clock;
+      case 'completed':
+        return CheckCircle;
+      case 'in_progress':
+        return Clock;
+      case 'pending':
+        return AlertTriangle;
+      default:
+        return Clock;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'completed': return 'Terminée';
-      case 'in_progress': return 'En cours';
-      case 'pending': return 'À faire';
-      default: return 'Inconnu';
+      case 'completed':
+        return 'Terminée';
+      case 'in_progress':
+        return 'En cours';
+      case 'pending':
+        return 'À faire';
+      default:
+        return 'Inconnu';
     }
   };
 
   const handleStartTask = async (taskId: string) => {
     const result = await updateTaskStatus(taskId, 'in_progress');
     if (!result.error) {
-      Alert.alert('Tâche démarrée', 'Vous pouvez maintenant travailler sur cette tâche.');
+      Alert.alert(
+        'Tâche démarrée',
+        'Vous pouvez maintenant travailler sur cette tâche.',
+      );
     }
   };
 
@@ -97,29 +141,25 @@ export default function TasksScreen() {
   };
 
   const handleCreateTask = async () => {
-    Alert.alert(
-      'Nouvelle tâche',
-      'Créer une nouvelle tâche',
-      [
-        {
-          text: 'Créer',
-          onPress: async () => {
-            const result = await createTask({
-              title: `Tâche du ${new Date().toLocaleDateString('fr-FR')}`,
-              description: 'Nouvelle tâche à compléter',
-              priority: 'medium',
-              location: 'Magasin principal',
-            });
-            if (result.error) {
-              Alert.alert('Erreur', String(result.error));
-            } else {
-              Alert.alert('Succès', 'Tâche créée avec succès !');
-            }
-          },
+    Alert.alert('Nouvelle tâche', 'Créer une nouvelle tâche', [
+      {
+        text: 'Créer',
+        onPress: async () => {
+          const result = await createTask({
+            title: `Tâche du ${new Date().toLocaleDateString('fr-FR')}`,
+            description: 'Nouvelle tâche à compléter',
+            priority: 'medium',
+            location: 'Magasin principal',
+          });
+          if (result.error) {
+            Alert.alert('Erreur', String(result.error));
+          } else {
+            Alert.alert('Succès', 'Tâche créée avec succès !');
+          }
         },
-        { text: 'Annuler', style: 'cancel' },
-      ],
-    );
+      },
+      { text: 'Annuler', style: 'cancel' },
+    ]);
   };
 
   return (
@@ -154,31 +194,38 @@ export default function TasksScreen() {
 
       {/* Filters */}
       <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
-            {[ 
-              { key: 'all', label: 'Toutes' },
-              { key: 'my', label: 'Mes tâches' },
-              { key: 'pending', label: 'À faire' },
-              { key: 'in_progress', label: 'En cours' }
-            ].map((filter) => (
-              <TouchableOpacity
-                key={filter.key}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filtersScroll}
+        >
+          {[
+            { key: 'all', label: 'Toutes' },
+            { key: 'my', label: 'Mes tâches' },
+            { key: 'pending', label: 'À faire' },
+            { key: 'in_progress', label: 'En cours' },
+          ].map((filter) => (
+            <TouchableOpacity
+              key={filter.key}
+              style={[
+                styles.filterButton,
+                selectedFilter === filter.key && styles.filterButtonActive,
+              ]}
+              onPress={() => setSelectedFilter(filter.key as any)}
+              accessibilityRole="button"
+              accessibilityLabel={`Filtrer par ${filter.label}`}
+            >
+              <Text
                 style={[
-                  styles.filterButton,
-                  selectedFilter === filter.key && styles.filterButtonActive
-                ]}
-                onPress={() => setSelectedFilter(filter.key as any)}
-                accessibilityRole="button"
-                accessibilityLabel={`Filtrer par ${filter.label}`}
-              >
-                <Text style={[
                   styles.filterButtonText,
-                  selectedFilter === filter.key && styles.filterButtonTextActive
-                ]}>
-                  {filter.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  selectedFilter === filter.key &&
+                    styles.filterButtonTextActive,
+                ]}
+              >
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
@@ -215,8 +262,8 @@ export default function TasksScreen() {
                       selectedFilter === 'my'
                         ? 'qui vous est assignée'
                         : selectedFilter === 'pending'
-                        ? 'en attente'
-                        : 'en cours'
+                          ? 'en attente'
+                          : 'en cours'
                     }.`}
               </Text>
             </View>
@@ -234,15 +281,40 @@ export default function TasksScreen() {
                 <View style={styles.taskTitleSection}>
                   <Text style={styles.taskTitle}>{task.title}</Text>
                   <View style={styles.taskMeta}>
-                    <View style={[styles.priority, { backgroundColor: `${getPriorityColor(task.priority)}20` }]}>
+                    <View
+                      style={[
+                        styles.priority,
+                        {
+                          backgroundColor: `${getPriorityColor(task.priority)}20`,
+                        },
+                      ]}
+                    >
                       <Flag size={12} color={getPriorityColor(task.priority)} />
-                      <Text style={[styles.priorityText, { color: getPriorityColor(task.priority) }]}>
+                      <Text
+                        style={[
+                          styles.priorityText,
+                          { color: getPriorityColor(task.priority) },
+                        ]}
+                      >
                         {getPriorityText(task.priority)}
                       </Text>
                     </View>
-                    <View style={[styles.taskStatus, { backgroundColor: `${getStatusColor(task.status)}20` }]}>
-                      <StatusIcon size={12} color={getStatusColor(task.status)} />
-                      <Text style={[styles.taskStatusText, { color: getStatusColor(task.status) }]}>
+                    <View
+                      style={[
+                        styles.taskStatus,
+                        { backgroundColor: `${getStatusColor(task.status)}20` },
+                      ]}
+                    >
+                      <StatusIcon
+                        size={12}
+                        color={getStatusColor(task.status)}
+                      />
+                      <Text
+                        style={[
+                          styles.taskStatusText,
+                          { color: getStatusColor(task.status) },
+                        ]}
+                      >
                         {getStatusText(task.status)}
                       </Text>
                     </View>
@@ -256,7 +328,9 @@ export default function TasksScreen() {
                 <View style={styles.taskDetailRow}>
                   <User size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>
-                    {task.assigned_to === profile?.id ? 'Vous' : 'Autre utilisateur'}
+                    {task.assigned_to === profile?.id
+                      ? 'Vous'
+                      : 'Autre utilisateur'}
                   </Text>
                 </View>
                 <View style={styles.taskDetailRow}>
@@ -266,13 +340,17 @@ export default function TasksScreen() {
                 <View style={styles.taskDetailRow}>
                   <Calendar size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>
-                    {task.due_date ? new Date(task.due_date).toLocaleDateString() : "Pas d'échéance"}
+                    {task.due_date
+                      ? new Date(task.due_date).toLocaleDateString()
+                      : "Pas d'échéance"}
                   </Text>
                 </View>
                 <View style={styles.taskDetailRow}>
                   <Clock size={14} color="#6B7280" />
                   <Text style={styles.taskDetailText}>
-                    {task.estimated_time_minutes ? `${task.estimated_time_minutes} min` : 'Non estimé'}
+                    {task.estimated_time_minutes
+                      ? `${task.estimated_time_minutes} min`
+                      : 'Non estimé'}
                   </Text>
                 </View>
               </View>
@@ -414,13 +492,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-    tasksList: {
-      flex: 1,
-    },
-    tasksListContent: {
-      padding: 20,
-      paddingTop: 0,
-    },
+  tasksList: {
+    flex: 1,
+  },
+  tasksListContent: {
+    padding: 20,
+    paddingTop: 0,
+  },
   taskCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,

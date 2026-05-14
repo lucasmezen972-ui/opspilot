@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, type Product } from '../lib/supabase';
+
 import { useAuth } from './useAuth';
+import { supabase, type Product } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useProducts() {
@@ -51,11 +52,17 @@ export function useProducts() {
         .maybeSingle();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur fetchProduct', error) };
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur fetchProduct', error),
+        };
       }
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur fetchProduct', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur fetchProduct', error),
+      };
     }
   };
 
@@ -68,21 +75,28 @@ export function useProducts() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .update({ stock_quantity: newStock, updated_at: new Date().toISOString() })
+        .update({
+          stock_quantity: newStock,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur mise à jour stock', error) };
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur mise à jour stock', error),
+        };
       }
 
-      setProducts((prev) =>
-        prev.map((p) => (p.id === id ? data : p)),
-      );
+      setProducts((prev) => prev.map((p) => (p.id === id ? data : p)));
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur updateProductStock', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateProductStock', error),
+      };
     }
   };
 

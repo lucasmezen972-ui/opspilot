@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
-import { Platform } from 'react-native'
-import { initOfflineDatabase, syncPendingData, isOnline } from '../lib/offline'
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
+
+import { initOfflineDatabase, syncPendingData, isOnline } from '../lib/offline';
 
 interface NetInfoState {
   isConnected: boolean;
@@ -17,7 +18,9 @@ function getNetInfo(): NetInfoModule | undefined {
   }
 
   try {
-    const NetInfo = require('@react-native-community/netinfo') as { default: NetInfoModule };
+    const NetInfo = require('@react-native-community/netinfo') as {
+      default: NetInfoModule;
+    };
     return NetInfo.default;
   } catch (error) {
     console.log('[OfflineSync] NetInfo not available:', error);
@@ -28,7 +31,9 @@ function getNetInfo(): NetInfoModule | undefined {
 export function useOfflineSync() {
   useEffect(() => {
     if (Platform.OS === 'web') {
-      console.log('[OfflineSync] Web platform detected - skipping offline features');
+      console.log(
+        '[OfflineSync] Web platform detected - skipping offline features',
+      );
       return;
     }
 
@@ -48,28 +53,30 @@ export function useOfflineSync() {
     }
 
     // Set up network listener for auto-sync
-    const unsubscribe = NetInfo.addEventListener(async (state: NetInfoState) => {
-      console.log('[OfflineSync] Network state changed:', state.isConnected);
-      
-      if (state.isConnected) {
-        try {
-          await syncPendingData();
-          console.log('[OfflineSync] Data synchronized successfully');
-        } catch (error) {
-          console.error('[OfflineSync] Sync failed:', error);
+    const unsubscribe = NetInfo.addEventListener(
+      async (state: NetInfoState) => {
+        console.log('[OfflineSync] Network state changed:', state.isConnected);
+
+        if (state.isConnected) {
+          try {
+            await syncPendingData();
+            console.log('[OfflineSync] Data synchronized successfully');
+          } catch (error) {
+            console.error('[OfflineSync] Sync failed:', error);
+          }
         }
-      }
-    });
+      },
+    );
 
     // Initial sync check
-    isOnline().then(online => {
+    isOnline().then((online) => {
       if (online) {
-        syncPendingData().catch(error => {
+        syncPendingData().catch((error) => {
           console.error('[OfflineSync] Initial sync failed:', error);
         });
       }
     });
 
     return unsubscribe;
-  }, [])
+  }, []);
 }

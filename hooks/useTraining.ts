@@ -1,68 +1,79 @@
-import { useEffect, useState } from 'react'
-import { supabase, type Training, type UserTrainingProgress } from '../lib/supabase'
-import { useAuth } from './useAuth'
-import { mapSupabaseError } from '../utils/error'
+import { useEffect, useState } from 'react';
+
+import { useAuth } from './useAuth';
+import {
+  supabase,
+  type Training,
+  type UserTrainingProgress,
+} from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 export function useTraining() {
-  const [courses, setCourses] = useState<Training[]>([])
-  const [progress, setProgress] = useState<UserTrainingProgress[]>([])
-  const [loading, setLoading] = useState(true)
-  const { profile } = useAuth()
+  const [courses, setCourses] = useState<Training[]>([]);
+  const [progress, setProgress] = useState<UserTrainingProgress[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { profile } = useAuth();
 
   useEffect(() => {
     if (profile?.organization_id) {
-      fetchTrainingData()
+      fetchTrainingData();
     }
-  }, [profile?.organization_id, profile?.id])
+  }, [profile?.organization_id, profile?.id]);
 
   const fetchTrainingData = async () => {
-    if (!profile?.organization_id) return
+    if (!profile?.organization_id) return;
 
     try {
-      setLoading(true)
-      
+      setLoading(true);
+
       // Récupérer les cours
       const { data: coursesData, error: coursesError } = await supabase
         .from('trainings')
         .select('*')
         .eq('organization_id', profile.organization_id)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (coursesError) {
-        mapSupabaseError('Erreur lors de la récupération des cours', coursesError)
-        return
+        mapSupabaseError(
+          'Erreur lors de la récupération des cours',
+          coursesError,
+        );
+        return;
       }
 
-      setCourses(coursesData || [])
+      setCourses(coursesData || []);
 
       // Récupérer la progression de l'utilisateur
       const { data: progressData, error: progressError } = await supabase
         .from('user_training_progress')
         .select('*')
-        .eq('user_id', profile.id)
+        .eq('user_id', profile.id);
 
       if (progressError) {
-        mapSupabaseError('Erreur lors de la récupération de la progression', progressError)
-        return
+        mapSupabaseError(
+          'Erreur lors de la récupération de la progression',
+          progressError,
+        );
+        return;
       }
 
-      setProgress(progressData || [])
+      setProgress(progressData || []);
     } catch (error) {
-      mapSupabaseError('Erreur fetchTrainingData', error)
+      mapSupabaseError('Erreur fetchTrainingData', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const startCourse = async (courseId: string) => {
-    if (!profile) return { error: 'Utilisateur non connecté' }
+    if (!profile) return { error: 'Utilisateur non connecté' };
 
     try {
       // Vérifier si la progression existe déjà
-      const existingProgress = progress.find(p => p.training_id === courseId)
-      
+      const existingProgress = progress.find((p) => p.training_id === courseId);
+
       if (existingProgress) {
-        return { data: existingProgress }
+        return { data: existingProgress };
       }
 
       // Créer une nouvelle progression
@@ -76,21 +87,26 @@ export function useTraining() {
           started_at: new Date().toISOString(),
         })
         .select()
-        .single()
+        .single();
 
       if (error) {
-        return { error: mapSupabaseError('Erreur lors du démarrage du cours', error) }
+        return {
+          error: mapSupabaseError('Erreur lors du démarrage du cours', error),
+        };
       }
 
-      setProgress([...progress, data])
-      return { data }
+      setProgress([...progress, data]);
+      return { data };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur startCourse', error) }
+      return { error: mapSupabaseError('Erreur startCourse', error) };
     }
-  }
+  };
 
-  const updateProgress = async (courseId: string, progressPercentage: number) => {
-    if (!profile) return { error: 'Utilisateur non connecté' }
+  const updateProgress = async (
+    courseId: string,
+    progressPercentage: number,
+  ) => {
+    if (!profile) return { error: 'Utilisateur non connecté' };
 
     try {
       const { data, error } = await supabase
@@ -98,42 +114,46 @@ export function useTraining() {
         .update({
           progress_percentage: progressPercentage,
           status: progressPercentage >= 100 ? 'completed' : 'in_progress',
-          completed_at: progressPercentage >= 100 ? new Date().toISOString() : null,
+          completed_at:
+            progressPercentage >= 100 ? new Date().toISOString() : null,
         })
         .eq('user_id', profile.id)
         .eq('training_id', courseId)
         .select()
-        .single()
+        .single();
 
       if (error) {
-        return { error: mapSupabaseError('Erreur lors de la mise à jour de la progression', error) }
+        return {
+          error: mapSupabaseError(
+            'Erreur lors de la mise à jour de la progression',
+            error,
+          ),
+        };
       }
 
       // Mettre à jour la liste locale
-      setProgress(progress.map(p => 
-        p.training_id === courseId ? data : p
-      ))
+      setProgress(progress.map((p) => (p.training_id === courseId ? data : p)));
 
       // Si le cours est terminé, mettre à jour les stats du profil
       if (progressPercentage >= 100) {
-        await updateProfileTrainingStats()
+        await updateProfileTrainingStats();
       }
 
-      return { data }
+      return { data };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur updateProgress', error) }
+      return { error: mapSupabaseError('Erreur updateProgress', error) };
     }
-  }
+  };
 
   const completeQuiz = async (courseId: string, score: number) => {
-    if (!profile) return { error: 'Utilisateur non connecté' }
+    if (!profile) return { error: 'Utilisateur non connecté' };
 
-    const course = courses.find(c => c.id === courseId)
-    if (!course) return { error: 'Cours non trouvé' }
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return { error: 'Cours non trouvé' };
 
     // Passing score is fixed at 70%
-    const passed = score >= 70
-    
+    const passed = score >= 70;
+
     try {
       const { data, error } = await supabase
         .from('user_training_progress')
@@ -146,76 +166,84 @@ export function useTraining() {
         .eq('user_id', profile.id)
         .eq('training_id', courseId)
         .select()
-        .single()
+        .single();
 
       if (error) {
-        return { error: mapSupabaseError('Erreur lors de la validation du quiz', error) }
+        return {
+          error: mapSupabaseError(
+            'Erreur lors de la validation du quiz',
+            error,
+          ),
+        };
       }
 
-      setProgress(progress.map(p => 
-        p.training_id === courseId ? data : p
-      ))
+      setProgress(progress.map((p) => (p.training_id === courseId ? data : p)));
 
       // Si réussi, ajouter les XP
       if (passed) {
-        await addXP(course.xp_reward)
+        await addXP(course.xp_reward);
       }
 
-      return { data, passed }
+      return { data, passed };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur completeQuiz', error) }
+      return { error: mapSupabaseError('Erreur completeQuiz', error) };
     }
-  }
+  };
 
   const updateProfileTrainingStats = async () => {
-    if (!profile) return
+    if (!profile) return;
 
     try {
-      const completedCount = progress.filter(p => p.status === 'completed').length
-      
+      const completedCount = progress.filter(
+        (p) => p.status === 'completed',
+      ).length;
+
       await supabase
         .from('profiles')
         .update({
           completed_trainings: completedCount,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', profile.id)
+        .eq('id', profile.id);
     } catch (error) {
-      mapSupabaseError('Erreur lors de la mise à jour des stats de formation', error)
+      mapSupabaseError(
+        'Erreur lors de la mise à jour des stats de formation',
+        error,
+      );
     }
-  }
+  };
 
   const addXP = async (xpAmount: number) => {
-    if (!profile) return
+    if (!profile) return;
 
     try {
-      const newXP = profile.xp + xpAmount
-      const newLevel = Math.floor(newXP / 100) + 1
+      const newXP = profile.xp + xpAmount;
+      const newLevel = Math.floor(newXP / 100) + 1;
 
       await supabase
         .from('profiles')
         .update({
           xp: newXP,
           level: newLevel,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', profile.id)
+        .eq('id', profile.id);
     } catch (error) {
-      mapSupabaseError("Erreur lors de l'ajout d'XP", error)
+      mapSupabaseError("Erreur lors de l'ajout d'XP", error);
     }
-  }
+  };
 
   const getCourseProgress = (courseId: string) => {
-    return progress.find(p => p.training_id === courseId)
-  }
+    return progress.find((p) => p.training_id === courseId);
+  };
 
   const getCompletedCourses = () => {
-    return progress.filter(p => p.status === 'completed')
-  }
+    return progress.filter((p) => p.status === 'completed');
+  };
 
   const getInProgressCourses = () => {
-    return progress.filter(p => p.status === 'in_progress')
-  }
+    return progress.filter((p) => p.status === 'in_progress');
+  };
 
   return {
     courses,
@@ -228,5 +256,5 @@ export function useTraining() {
     getCompletedCourses,
     getInProgressCourses,
     refetch: fetchTrainingData,
-  }
+  };
 }

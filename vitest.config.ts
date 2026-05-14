@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
-import babel from 'vite-plugin-babel'
+import { resolve } from 'path';
+import babel from 'vite-plugin-babel';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [
@@ -8,10 +8,10 @@ export default defineConfig({
       babelConfig: {
         presets: [
           ['@babel/preset-env', { targets: { node: 'current' } }],
-          '@babel/preset-typescript'
-        ]
-      }
-    })
+          '@babel/preset-typescript',
+        ],
+      },
+    }),
   ],
   test: {
     globals: true,
@@ -35,4 +35,4 @@ export default defineConfig({
       ),
     },
   },
-})
+});

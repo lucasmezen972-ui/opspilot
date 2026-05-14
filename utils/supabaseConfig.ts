@@ -24,16 +24,16 @@ export const getTestAccounts = () => [
     email: 'demo@opspilot.com',
     password: 'demo123',
     name: 'Utilisateur Demo',
-    role: 'employee'
+    role: 'employee',
   },
   {
-    email: 'marie.dupont@opspilot.com', 
+    email: 'marie.dupont@opspilot.com',
     password: 'marie123',
     name: 'Marie Dupont',
-    role: 'manager'
-  }
+    role: 'manager',
+  },
 ];
 
 export const isTestAccount = (email: string): boolean => {
-  return getTestAccounts().some(account => account.email === email);
+  return getTestAccounts().some((account) => account.email === email);
 };

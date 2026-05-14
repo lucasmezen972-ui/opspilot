@@ -1,6 +1,25 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { Send, Users, Bell, Search, MoveVertical as MoreVertical, Phone, Video, Bot, Sparkles } from 'lucide-react-native';
+import {
+  Send,
+  Users,
+  Bell,
+  Search,
+  MoveVertical as MoreVertical,
+  Phone,
+  Video,
+  Bot,
+  Sparkles,
+} from 'lucide-react-native';
 import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native';
+
 import { useAuth } from '../../hooks/useAuth';
 import { useMessages } from '../../hooks/useMessages';
 import { getChatAssistantResponse } from '../../lib/openai';
@@ -17,25 +36,47 @@ export default function ChatScreen() {
     getUnreadCount,
   } = useMessages();
 
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
   const [newMessage, setNewMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<any[]>([]);
 
   // Utiliser les conversations de la DB, avec fallback démo
-  const conversations = dbConversations.length > 0
-    ? dbConversations.map((c) => ({
-        id: c.id,
-        name: c.name,
-        lastMessage: '',
-        timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        unread: getUnreadCount(c.id),
-        type: c.type,
-        online: true,
-      }))
-    : [
-        { id: 'demo-team', name: 'Équipe Magasin', lastMessage: 'Bienvenue dans OpsPilot !', timestamp: 'Maintenant', unread: 0, type: 'group', online: true },
-        { id: 'demo-ai', name: 'Assistant IA OpsPilot', lastMessage: 'Comment puis-je vous aider ?', timestamp: 'Maintenant', unread: 0, type: 'support', online: true },
-      ];
+  const conversations =
+    dbConversations.length > 0
+      ? dbConversations.map((c) => ({
+          id: c.id,
+          name: c.name,
+          lastMessage: '',
+          timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          unread: getUnreadCount(c.id),
+          type: c.type,
+          online: true,
+        }))
+      : [
+          {
+            id: 'demo-team',
+            name: 'Équipe Magasin',
+            lastMessage: 'Bienvenue dans OpsPilot !',
+            timestamp: 'Maintenant',
+            unread: 0,
+            type: 'group',
+            online: true,
+          },
+          {
+            id: 'demo-ai',
+            name: 'Assistant IA OpsPilot',
+            lastMessage: 'Comment puis-je vous aider ?',
+            timestamp: 'Maintenant',
+            unread: 0,
+            type: 'support',
+            online: true,
+          },
+        ];
 
   // Sélectionner la première conversation par défaut
   useEffect(() => {
@@ -58,12 +99,17 @@ export default function ChatScreen() {
         id: m.id,
         sender: (m as any).profiles?.full_name || 'Utilisateur',
         content: m.content,
-        timestamp: new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date(m.created_at).toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         isMe: m.sender_id === profile?.id,
       }));
 
-  const isAIConversation = selectedConversation === 'demo-ai' ||
-    conversations.find(c => c.id === selectedConversation)?.type === 'support';
+  const isAIConversation =
+    selectedConversation === 'demo-ai' ||
+    conversations.find((c) => c.id === selectedConversation)?.type ===
+      'support';
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -76,7 +122,10 @@ export default function ChatScreen() {
         id: `local-${Date.now()}`,
         sender: profile?.full_name || 'Vous',
         content,
-        timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         isMe: true,
       };
       setLocalMessages((prev) => [...prev, msg]);
@@ -94,7 +143,10 @@ export default function ChatScreen() {
               id: `ai-${Date.now()}`,
               sender: 'Assistant IA OpsPilot',
               content: aiResponse,
-              timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+              timestamp: new Date().toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
               isMe: false,
             },
           ]);
@@ -113,14 +165,20 @@ export default function ChatScreen() {
 
   const getConversationIcon = (type: string) => {
     switch (type) {
-      case 'group': return Users;
-      case 'direct': return Users;
-      case 'support': return Bot;
-      default: return Users;
+      case 'group':
+        return Users;
+      case 'direct':
+        return Users;
+      case 'support':
+        return Bot;
+      default:
+        return Users;
     }
   };
 
-  const selectedConvName = conversations.find((c) => c.id === selectedConversation)?.name || 'Conversation';
+  const selectedConvName =
+    conversations.find((c) => c.id === selectedConversation)?.name ||
+    'Conversation';
 
   return (
     <View style={styles.container}>
@@ -147,22 +205,38 @@ export default function ChatScreen() {
               key={conversation.id}
               style={[
                 styles.conversationCard,
-                selectedConversation === conversation.id && styles.conversationCardActive,
+                selectedConversation === conversation.id &&
+                  styles.conversationCardActive,
               ]}
               onPress={() => setSelectedConversation(conversation.id)}
             >
               <View style={styles.conversationInfo}>
                 <View style={styles.conversationHeader}>
                   <View style={styles.conversationTitleSection}>
-                    <Text style={styles.conversationName}>{conversation.name}</Text>
+                    <Text style={styles.conversationName}>
+                      {conversation.name}
+                    </Text>
                     <View style={styles.conversationMeta}>
-                      <IconComponent size={12} color={conversation.type === 'support' ? '#8B5CF6' : '#6B7280'} />
-                      {conversation.online && <View style={styles.onlineIndicator} />}
+                      <IconComponent
+                        size={12}
+                        color={
+                          conversation.type === 'support'
+                            ? '#8B5CF6'
+                            : '#6B7280'
+                        }
+                      />
+                      {conversation.online && (
+                        <View style={styles.onlineIndicator} />
+                      )}
                     </View>
                   </View>
-                  <Text style={styles.conversationTimestamp}>{conversation.timestamp}</Text>
+                  <Text style={styles.conversationTimestamp}>
+                    {conversation.timestamp}
+                  </Text>
                 </View>
-                <Text style={styles.conversationLastMessage}>{conversation.lastMessage}</Text>
+                <Text style={styles.conversationLastMessage}>
+                  {conversation.lastMessage}
+                </Text>
               </View>
               {conversation.unread > 0 && (
                 <View style={styles.unreadBadge}>
@@ -177,12 +251,16 @@ export default function ChatScreen() {
         <View style={styles.currentConversation}>
           <View style={styles.conversationHeaderActive}>
             <View style={styles.conversationInfoActive}>
-              <Text style={styles.conversationNameActive}>{selectedConvName}</Text>
+              <Text style={styles.conversationNameActive}>
+                {selectedConvName}
+              </Text>
               <View style={styles.conversationStatusActive}>
                 {isAIConversation ? (
                   <>
                     <Sparkles size={12} color="#8B5CF6" />
-                    <Text style={styles.conversationStatusText}>Assistant IA disponible</Text>
+                    <Text style={styles.conversationStatusText}>
+                      Assistant IA disponible
+                    </Text>
                   </>
                 ) : (
                   <>
@@ -209,20 +287,50 @@ export default function ChatScreen() {
           <ScrollView style={styles.messagesList}>
             {displayMessages.length === 0 && !loading && (
               <View style={styles.emptyMessages}>
-                <Text style={styles.emptyMessagesText}>Aucun message. Commencez la conversation !</Text>
+                <Text style={styles.emptyMessagesText}>
+                  Aucun message. Commencez la conversation !
+                </Text>
               </View>
             )}
             {displayMessages.map((message) => (
               <View
                 key={message.id}
-                style={[styles.messageContainer, message.isMe ? styles.messageContainerMe : styles.messageContainerOther]}
+                style={[
+                  styles.messageContainer,
+                  message.isMe
+                    ? styles.messageContainerMe
+                    : styles.messageContainerOther,
+                ]}
               >
-                <View style={[styles.messageBubble, message.isMe ? styles.messageBubbleMe : styles.messageBubbleOther]}>
-                  {!message.isMe && <Text style={styles.messageSender}>{message.sender}</Text>}
-                  <Text style={[styles.messageContent, message.isMe ? styles.messageContentMe : styles.messageContentOther]}>
+                <View
+                  style={[
+                    styles.messageBubble,
+                    message.isMe
+                      ? styles.messageBubbleMe
+                      : styles.messageBubbleOther,
+                  ]}
+                >
+                  {!message.isMe && (
+                    <Text style={styles.messageSender}>{message.sender}</Text>
+                  )}
+                  <Text
+                    style={[
+                      styles.messageContent,
+                      message.isMe
+                        ? styles.messageContentMe
+                        : styles.messageContentOther,
+                    ]}
+                  >
                     {message.content}
                   </Text>
-                  <Text style={[styles.messageTimestamp, message.isMe ? styles.messageTimestampMe : styles.messageTimestampOther]}>
+                  <Text
+                    style={[
+                      styles.messageTimestamp,
+                      message.isMe
+                        ? styles.messageTimestampMe
+                        : styles.messageTimestampOther,
+                    ]}
+                  >
                     {message.timestamp}
                   </Text>
                 </View>
@@ -241,7 +349,10 @@ export default function ChatScreen() {
               onSubmitEditing={handleSendMessage}
             />
             <TouchableOpacity
-              style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+              style={[
+                styles.sendButton,
+                !newMessage.trim() && styles.sendButtonDisabled,
+              ]}
               onPress={handleSendMessage}
               disabled={!newMessage.trim()}
             >

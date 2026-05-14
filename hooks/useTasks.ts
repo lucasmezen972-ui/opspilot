@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, type Task } from '../lib/supabase';
+
 import { useAuth } from './useAuth';
+import { supabase, type Task } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTasks() {
@@ -64,19 +65,31 @@ export function useTasks() {
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur lors de la création de la tâche', error) };
+        return {
+          data: null,
+          error: mapSupabaseError(
+            'Erreur lors de la création de la tâche',
+            error,
+          ),
+        };
       }
 
       setTasks((prev) => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur createTask', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur createTask', error),
+      };
     }
   };
 
   const updateTaskStatus = async (id: string, status: string) => {
     try {
-      const updates: Record<string, any> = { status, updated_at: new Date().toISOString() };
+      const updates: Record<string, any> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
       if (status === 'completed') {
         updates.completed_at = new Date().toISOString();
       }
@@ -89,13 +102,22 @@ export function useTasks() {
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur lors de la mise à jour du statut', error) };
+        return {
+          data: null,
+          error: mapSupabaseError(
+            'Erreur lors de la mise à jour du statut',
+            error,
+          ),
+        };
       }
 
       setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur updateTaskStatus', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateTaskStatus', error),
+      };
     }
   };
 

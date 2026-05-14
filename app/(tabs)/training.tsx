@@ -59,9 +59,13 @@ export default function TrainingScreen() {
   const totalStudyTime = courses
     .filter((c) => c.status === 'completed')
     .reduce((total, course) => total + course.duration_minutes, 0);
-  const avgScore = completedCoursesList.length > 0
-    ? Math.round(completedCoursesList.reduce((sum, p) => sum + (p.score ?? 0), 0) / completedCoursesList.length)
-    : 0;
+  const avgScore =
+    completedCoursesList.length > 0
+      ? Math.round(
+          completedCoursesList.reduce((sum, p) => sum + (p.score ?? 0), 0) /
+            completedCoursesList.length,
+        )
+      : 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {

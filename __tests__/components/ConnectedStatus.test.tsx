@@ -1,6 +1,7 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, afterEach } from 'vitest';
+
 import ConnectedStatus from '../../components/ConnectedStatus';
 
 describe('ConnectedStatus Component', () => {

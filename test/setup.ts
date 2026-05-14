@@ -1,10 +1,9 @@
 // @ts-nocheck
-import { vi as jest } from 'vitest'
-import React from 'react'
+import React from 'react';
 
 // Provide a global jest variable for test files
-;(globalThis as any).jest = jest
-
+import { vi as jest } from 'vitest';
+(globalThis as any).jest = jest;
 
 // Mock Expo modules
 jest.mock('expo-router', () => ({
@@ -22,15 +21,15 @@ jest.mock('expo-router', () => ({
     ({ children }: { children: React.ReactNode }) => children,
     {
       Screen: ({ children }: { children: React.ReactNode }) => children,
-    }
+    },
   ),
   Tabs: ({ children }: { children: React.ReactNode }) => children,
   Slot: ({ children }: { children: React.ReactNode }) => children,
-}))
+}));
 
 jest.mock('expo-status-bar', () => ({
   StatusBar: () => null,
-}))
+}));
 
 jest.mock('expo-constants', () => ({
   default: {
@@ -41,8 +40,7 @@ jest.mock('expo-constants', () => ({
       },
     },
   },
-}))
-
+}));
 
 // Mock Lucide React Native icons
 jest.mock('lucide-react-native', () => {
@@ -51,12 +49,12 @@ jest.mock('lucide-react-native', () => {
     {
       get: (_target, prop) =>
         React.forwardRef((props: any, ref: any) =>
-          React.createElement('span', { ...props, ref }, prop.toString())
+          React.createElement('span', { ...props, ref }, prop.toString()),
         ),
       has: () => true,
-    }
-  )
-})
+    },
+  );
+});
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -64,7 +62,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}))
+}));
 
 // Mock Supabase
 jest.mock('../lib/supabase', () => ({
@@ -86,11 +84,11 @@ jest.mock('../lib/supabase', () => ({
       single: jest.fn(),
     })),
   },
-}))
+}));
 
 // Global test utilities
 global.console = {
   ...console,
   warn: jest.fn(),
   error: jest.fn(),
-}
+};

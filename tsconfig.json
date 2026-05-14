@@ -26,6 +26,8 @@
     "components",
     "hooks",
     "lib",
+    "data",
+    "utils",
     "test",
     "__tests__",
     "server",

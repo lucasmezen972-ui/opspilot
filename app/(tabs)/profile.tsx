@@ -1,12 +1,36 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { User, Settings, Award, ChartBar as BarChart3, Bell, CircleHelp as HelpCircle, LogOut, Shield, Smartphone, Globe, Star, Trophy, Target, Clock, ChevronRight } from 'lucide-react-native';
-import { useAuth } from '../../hooks/useAuth';
+import {
+  User,
+  Settings,
+  Award,
+  ChartBar as BarChart3,
+  Bell,
+  CircleHelp as HelpCircle,
+  LogOut,
+  Shield,
+  Smartphone,
+  Globe,
+  Star,
+  Trophy,
+  Target,
+  Clock,
+  ChevronRight,
+} from 'lucide-react-native';
 import { useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+
+import { useAuth } from '../../hooks/useAuth';
 
 const roleLabels: Record<string, string> = {
   admin: 'Administrateur',
   manager: 'Responsable Magasin',
-  'employé': 'Employé',
+  employé: 'Employé',
   employee: 'Employé',
   stagiaire: 'Stagiaire',
 };
@@ -15,28 +39,50 @@ export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
 
   const displayName = profile?.full_name || 'Utilisateur';
-  const displayRole = profile?.role ? (roleLabels[profile.role] || profile.role) : 'Employé';
+  const displayRole = profile?.role
+    ? roleLabels[profile.role] || profile.role
+    : 'Employé';
   const level = profile?.level || 1;
   const xp = profile?.xp || 0;
   const xpForNextLevel = level * 100;
-  const xpProgress = xpForNextLevel > 0 ? Math.min((xp / xpForNextLevel) * 100, 100) : 0;
+  const xpProgress =
+    xpForNextLevel > 0 ? Math.min((xp / xpForNextLevel) * 100, 100) : 0;
 
-  const statistics = useMemo(() => [
-    { label: 'Audits réalisés', value: String(profile?.total_audits || 0), icon: BarChart3, color: '#2563EB' },
-    { label: 'Score moyen', value: `${profile?.avg_score || 0}%`, icon: Target, color: '#10B981' },
-    { label: 'Formations', value: String(profile?.completed_trainings || 0), icon: Award, color: '#F59E0B' },
-    { label: 'Temps actif', value: `${profile?.active_time_hours || 0}h`, icon: Clock, color: '#8B5CF6' },
-  ], [profile]);
+  const statistics = useMemo(
+    () => [
+      {
+        label: 'Audits réalisés',
+        value: String(profile?.total_audits || 0),
+        icon: BarChart3,
+        color: '#2563EB',
+      },
+      {
+        label: 'Score moyen',
+        value: `${profile?.avg_score || 0}%`,
+        icon: Target,
+        color: '#10B981',
+      },
+      {
+        label: 'Formations',
+        value: String(profile?.completed_trainings || 0),
+        icon: Award,
+        color: '#F59E0B',
+      },
+      {
+        label: 'Temps actif',
+        value: `${profile?.active_time_hours || 0}h`,
+        icon: Clock,
+        color: '#8B5CF6',
+      },
+    ],
+    [profile],
+  );
 
   const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Déconnexion', style: 'destructive', onPress: () => signOut() },
-      ],
-    );
+    Alert.alert('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Déconnexion', style: 'destructive', onPress: () => signOut() },
+    ]);
   };
 
   return (
@@ -70,10 +116,14 @@ export default function ProfileScreen() {
         <View style={styles.experienceSection}>
           <View style={styles.experienceHeader}>
             <Text style={styles.experienceTitle}>Progression</Text>
-            <Text style={styles.experiencePoints}>{xp}/{xpForNextLevel} XP</Text>
+            <Text style={styles.experiencePoints}>
+              {xp}/{xpForNextLevel} XP
+            </Text>
           </View>
           <View style={styles.experienceBar}>
-            <View style={[styles.experienceFill, { width: `${xpProgress}%` }]} />
+            <View
+              style={[styles.experienceFill, { width: `${xpProgress}%` }]}
+            />
           </View>
           <Text style={styles.experienceSubtext}>
             {xpForNextLevel - xp > 0
@@ -90,7 +140,12 @@ export default function ProfileScreen() {
               const IconComponent = stat.icon;
               return (
                 <View key={index} style={styles.statisticCard}>
-                  <View style={[styles.statisticIcon, { backgroundColor: `${stat.color}20` }]}>
+                  <View
+                    style={[
+                      styles.statisticIcon,
+                      { backgroundColor: `${stat.color}20` },
+                    ]}
+                  >
                     <IconComponent size={20} color={stat.color} />
                   </View>
                   <Text style={styles.statisticValue}>{stat.value}</Text>
@@ -105,30 +160,90 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Paramètres</Text>
           <View style={styles.settingsMenu}>
-            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Notifications', 'Les notifications push seront disponibles prochainement.')}>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() =>
+                Alert.alert(
+                  'Notifications',
+                  'Les notifications push seront disponibles prochainement.',
+                )
+              }
+            >
               <Bell size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Notifications</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Confidentialité', 'Vos données sont chiffrées et stockées de manière sécurisée.')}>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() =>
+                Alert.alert(
+                  'Confidentialité',
+                  'Vos données sont chiffrées et stockées de manière sécurisée.',
+                )
+              }
+            >
               <Shield size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Confidentialité</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Appareil', `Plateforme: Web\nVersion: OpsPilot 1.0.0`)}>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() =>
+                Alert.alert(
+                  'Appareil',
+                  `Plateforme: Web\nVersion: OpsPilot 1.0.0`,
+                )
+              }
+            >
               <Smartphone size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Appareil</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Langue', 'Français est la seule langue disponible actuellement.')}>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() =>
+                Alert.alert(
+                  'Langue',
+                  'Français est la seule langue disponible actuellement.',
+                )
+              }
+            >
               <Globe size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Langue</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.settingsItem} onPress={() => Alert.alert('Support', 'Pour toute question, contactez support@opspilot.com')}>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() =>
+                Alert.alert(
+                  'Support',
+                  'Pour toute question, contactez support@opspilot.com',
+                )
+              }
+            >
               <HelpCircle size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Support</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.settingsChevron} />
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -144,7 +259,9 @@ export default function ProfileScreen() {
         {/* App Info */}
         <View style={styles.appInfo}>
           <Text style={styles.appInfoText}>OpsPilot v1.0.0</Text>
-          <Text style={styles.appInfoSubtext}>© 2024 OpsPilot. Tous droits réservés.</Text>
+          <Text style={styles.appInfoSubtext}>
+            © 2024 OpsPilot. Tous droits réservés.
+          </Text>
         </View>
       </ScrollView>
     </View>
