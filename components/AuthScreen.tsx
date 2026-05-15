@@ -137,13 +137,17 @@ export default function AuthScreen() {
         </Text>
       </TouchableOpacity>
     </View>
-    {typeof __DEV__ !== 'undefined' && __DEV__ && (
-      <View style={styles.demoContainer}>
-        <Text style={styles.demoTitle}>Compte de démonstration</Text>
-        <Text>Email: demo@opspilot.com</Text>
-        <Text>Mot de passe: demo123</Text>
-      </View>
-    )}
+    <View style={styles.demoContainer}>
+      <Text style={styles.demoTitle}>Compte de démonstration</Text>
+      <Text style={styles.demoText}>Email: demo@opspilot.com</Text>
+      <Text style={styles.demoText}>Mot de passe: demo123</Text>
+      <TouchableOpacity
+        style={styles.demoFillButton}
+        onPress={() => { setEmail('demo@opspilot.com'); setPassword('demo123'); setIsLogin(true); }}
+      >
+        <Text style={styles.demoFillButtonText}>Remplir automatiquement</Text>
+      </TouchableOpacity>
+    </View>
   </View>
 )
 }
@@ -267,6 +271,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
     color: '#111827',
+  },
+  demoText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  demoFillButton: {
+    marginTop: 8,
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  demoFillButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
   },
   errorContainer: {
     backgroundColor: '#FEE2E2',

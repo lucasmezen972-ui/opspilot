@@ -2,8 +2,8 @@ import OpenAI from 'openai'
 import { mapOpenAIError } from '../utils/error'
 
 const openai = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // Pour les apps React Native/Expo
+  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || 'sk-placeholder',
+  dangerouslyAllowBrowser: true,
 })
 
 export interface AuditAnalysis {
