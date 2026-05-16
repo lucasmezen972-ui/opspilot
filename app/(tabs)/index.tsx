@@ -1,10 +1,29 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useAuth } from '../../hooks/useAuth';
-import { useAudits } from '../../hooks/useAudits';
-import { useTasks } from '../../hooks/useTasks';
-import { useBitcoinPrice } from '../../hooks/useBitcoinPrice';
-import { TrendingUp, Users, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle, Award, Target, Calendar, ChartBar as BarChart3, Scan, MessageCircle, BookOpen } from 'lucide-react-native';
 import { router } from 'expo-router';
+import {
+  TrendingUp,
+  Users,
+  CircleCheck as CheckCircle,
+  TriangleAlert as AlertTriangle,
+  Award,
+  Target,
+  Calendar,
+  ChartBar as BarChart3,
+  Scan,
+  MessageCircle,
+  BookOpen,
+} from 'lucide-react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+
+import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
+import { useBitcoinPrice } from '../../hooks/useBitcoinPrice';
+import { useTasks } from '../../hooks/useTasks';
 
 export default function HomeScreen() {
   const { profile } = useAuth();
@@ -14,25 +33,33 @@ export default function HomeScreen() {
 
   const today = new Date().toDateString();
 
-  const completedAuditsToday = audits.filter(a =>
-    a.status === 'completed' &&
-    a.completed_at && new Date(a.completed_at).toDateString() === today
+  const completedAuditsToday = audits.filter(
+    (a) =>
+      a.status === 'completed' &&
+      a.completed_at &&
+      new Date(a.completed_at).toDateString() === today,
   ).length;
 
-  const completedTasksToday = tasks.filter(t =>
-    t.status === 'completed' &&
-    t.completed_at && new Date(t.completed_at).toDateString() === today
+  const completedTasksToday = tasks.filter(
+    (t) =>
+      t.status === 'completed' &&
+      t.completed_at &&
+      new Date(t.completed_at).toDateString() === today,
   ).length;
 
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+  const pendingTasks = tasks.filter((t) => t.status === 'pending').length;
 
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Bonjour, {profile?.full_name?.split(' ')[0] || 'Utilisateur'} !</Text>
-          <Text style={styles.subtitle}>Prêt pour une journée productive ?</Text>
+          <Text style={styles.greeting}>
+            Bonjour, {profile?.full_name?.split(' ')[0] || 'Utilisateur'} !
+          </Text>
+          <Text style={styles.subtitle}>
+            Prêt pour une journée productive ?
+          </Text>
         </View>
         <View style={styles.logo}>
           <Text style={styles.logoText}>OP</Text>
@@ -48,7 +75,9 @@ export default function HomeScreen() {
         </View>
         <View style={styles.statCard}>
           <CheckCircle size={24} color="#3B82F6" />
-          <Text style={styles.statNumber}>{completedTasksToday}/{completedTasksToday + pendingTasks}</Text>
+          <Text style={styles.statNumber}>
+            {completedTasksToday}/{completedTasksToday + pendingTasks}
+          </Text>
           <Text style={styles.statLabel}>Tâches terminées</Text>
         </View>
         <View style={styles.statCard}>
@@ -58,7 +87,9 @@ export default function HomeScreen() {
         </View>
         <View style={styles.statCard}>
           <TrendingUp size={24} color="#F472B6" />
-          <Text style={styles.statNumber}>{price ? price.toFixed(2) : '--'}</Text>
+          <Text style={styles.statNumber}>
+            {price ? price.toFixed(2) : '--'}
+          </Text>
           <Text style={styles.statLabel}>BTC/USD</Text>
         </View>
       </View>
@@ -67,22 +98,34 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Actions rapides</Text>
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/audits')}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push('/audits')}
+          >
             <BarChart3 size={32} color="#2563EB" />
             <Text style={styles.actionTitle}>Nouvel audit</Text>
             <Text style={styles.actionSubtitle}>Lancer un contrôle</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/products')}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push('/products')}
+          >
             <Scan size={32} color="#059669" />
             <Text style={styles.actionTitle}>Scanner produit</Text>
             <Text style={styles.actionSubtitle}>Vérification rapide</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/profile')}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push('/profile')}
+          >
             <Award size={32} color="#DC2626" />
             <Text style={styles.actionTitle}>Mes badges</Text>
             <Text style={styles.actionSubtitle}>Voir mes récompenses</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/tasks')}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push('/tasks')}
+          >
             <Target size={32} color="#7C3AED" />
             <Text style={styles.actionTitle}>Mes tâches</Text>
             <Text style={styles.actionSubtitle}>Voir le planning</Text>
@@ -95,8 +138,20 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Activités récentes</Text>
         <View style={styles.activityList}>
           {audits.slice(0, 3).map((audit, index) => (
-            <TouchableOpacity key={audit.id} style={styles.activityItem} onPress={() => router.push('/audits')}>
-              <View style={[styles.activityIcon, { backgroundColor: audit.status === 'completed' ? '#DCFCE7' : '#FEF3C7' }]}>
+            <TouchableOpacity
+              key={audit.id}
+              style={styles.activityItem}
+              onPress={() => router.push('/audits')}
+            >
+              <View
+                style={[
+                  styles.activityIcon,
+                  {
+                    backgroundColor:
+                      audit.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
+                  },
+                ]}
+              >
                 {audit.status === 'completed' ? (
                   <CheckCircle size={16} color="#16A34A" />
                 ) : (
@@ -106,38 +161,51 @@ export default function HomeScreen() {
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>{audit.title}</Text>
                 <Text style={styles.activityTime}>
-                  {audit.status === 'completed' ? 'Terminé' : 'En cours'} • {new Date(audit.created_at).toLocaleDateString()}
+                  {audit.status === 'completed' ? 'Terminé' : 'En cours'} •{' '}
+                  {new Date(audit.created_at).toLocaleDateString()}
                 </Text>
               </View>
             </TouchableOpacity>
           ))}
-          
+
           {audits.length === 0 && (
             <>
               <View style={styles.activityItem}>
-                <View style={[styles.activityIcon, { backgroundColor: '#DCFCE7' }]}>
+                <View
+                  style={[styles.activityIcon, { backgroundColor: '#DCFCE7' }]}
+                >
                   <CheckCircle size={16} color="#16A34A" />
                 </View>
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>Audit rayon frais terminé</Text>
+                  <Text style={styles.activityTitle}>
+                    Audit rayon frais terminé
+                  </Text>
                   <Text style={styles.activityTime}>Il y a 30 minutes</Text>
                 </View>
               </View>
               <View style={styles.activityItem}>
-                <View style={[styles.activityIcon, { backgroundColor: '#FEF3C7' }]}>
+                <View
+                  style={[styles.activityIcon, { backgroundColor: '#FEF3C7' }]}
+                >
                   <AlertTriangle size={16} color="#D97706" />
                 </View>
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>3 produits en rupture détectés</Text>
+                  <Text style={styles.activityTitle}>
+                    3 produits en rupture détectés
+                  </Text>
                   <Text style={styles.activityTime}>Il y a 1 heure</Text>
                 </View>
               </View>
               <View style={styles.activityItem}>
-                <View style={[styles.activityIcon, { backgroundColor: '#DBEAFE' }]}>
+                <View
+                  style={[styles.activityIcon, { backgroundColor: '#DBEAFE' }]}
+                >
                   <BookOpen size={16} color="#2563EB" />
                 </View>
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>Formation "Accueil client" complétée</Text>
+                  <Text style={styles.activityTitle}>
+                    Formation "Accueil client" complétée
+                  </Text>
                   <Text style={styles.activityTime}>Il y a 2 heures</Text>
                 </View>
               </View>
@@ -153,19 +221,25 @@ export default function HomeScreen() {
           <View style={styles.summaryItem}>
             <BarChart3 size={20} color="#2563EB" />
             <Text style={styles.summaryLabel}>Audits</Text>
-            <Text style={styles.summaryValue}>{audits.filter(a => a.status === 'completed').length}</Text>
+            <Text style={styles.summaryValue}>
+              {audits.filter((a) => a.status === 'completed').length}
+            </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <Target size={20} color="#10B981" />
             <Text style={styles.summaryLabel}>Tâches</Text>
-            <Text style={styles.summaryValue}>{tasks.filter(t => t.status === 'completed').length}</Text>
+            <Text style={styles.summaryValue}>
+              {tasks.filter((t) => t.status === 'completed').length}
+            </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
             <BookOpen size={20} color="#F59E0B" />
             <Text style={styles.summaryLabel}>Formations</Text>
-            <Text style={styles.summaryValue}>{profile?.completed_trainings || 0}</Text>
+            <Text style={styles.summaryValue}>
+              {profile?.completed_trainings || 0}
+            </Text>
           </View>
         </View>
       </View>
@@ -185,9 +259,14 @@ export default function HomeScreen() {
             </View>
             <View style={styles.activityContent}>
               <Text style={styles.activityTitle}>{profile.full_name}</Text>
-              <Text style={styles.activityTime}>{profile.xp || 0} XP • Niveau {profile.level || 1}</Text>
+              <Text style={styles.activityTime}>
+                {profile.xp || 0} XP • Niveau {profile.level || 1}
+              </Text>
             </View>
-            <TouchableOpacity style={styles.viewProfileButton} onPress={() => router.push('/profile')}>
+            <TouchableOpacity
+              style={styles.viewProfileButton}
+              onPress={() => router.push('/profile')}
+            >
               <Text style={styles.viewProfileText}>Voir profil</Text>
             </TouchableOpacity>
           </View>
@@ -201,13 +280,22 @@ export default function HomeScreen() {
           <View style={styles.gamificationPanel}>
             <View style={styles.levelInfo}>
               <Text style={styles.levelTitle}>Niveau {profile.level || 1}</Text>
-              <Text style={styles.levelSubtitle}>{profile.xp || 0} / {(profile.level || 1) * 100} XP</Text>
+              <Text style={styles.levelSubtitle}>
+                {profile.xp || 0} / {(profile.level || 1) * 100} XP
+              </Text>
             </View>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${Math.min(100, ((profile.xp || 0) % 100))}%` }]} />
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.min(100, (profile.xp || 0) % 100)}%` },
+                ]}
+              />
             </View>
             <Text style={styles.progressText}>
-              Plus que {Math.max(0, (profile.level || 1) * 100 - (profile.xp || 0))} XP pour le niveau suivant !
+              Plus que{' '}
+              {Math.max(0, (profile.level || 1) * 100 - (profile.xp || 0))} XP
+              pour le niveau suivant !
             </Text>
           </View>
         </View>

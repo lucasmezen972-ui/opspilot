@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, type Audit } from '../lib/supabase';
+
 import { useAuth } from './useAuth';
+import { supabase, type Audit } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
@@ -64,20 +65,35 @@ export function useAudits() {
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur lors de la création de l\'audit', error) };
+        return {
+          data: null,
+          error: mapSupabaseError(
+            "Erreur lors de la création de l'audit",
+            error,
+          ),
+        };
       }
 
       setAudits((prev) => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur createAudit', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur createAudit', error),
+      };
     }
   };
 
   const updateAuditStatus = async (id: string, status: string) => {
     try {
-      const updates: Record<string, any> = { status, updated_at: new Date().toISOString() };
-      if (status === 'in_progress' && !audits.find((a) => a.id === id)?.started_at) {
+      const updates: Record<string, any> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+      if (
+        status === 'in_progress' &&
+        !audits.find((a) => a.id === id)?.started_at
+      ) {
         updates.started_at = new Date().toISOString();
       }
       if (status === 'completed') {
@@ -92,13 +108,22 @@ export function useAudits() {
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur lors de la mise à jour du statut', error) };
+        return {
+          data: null,
+          error: mapSupabaseError(
+            'Erreur lors de la mise à jour du statut',
+            error,
+          ),
+        };
       }
 
       setAudits((prev) => prev.map((a) => (a.id === id ? data : a)));
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur updateAuditStatus', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateAuditStatus', error),
+      };
     }
   };
 
@@ -116,15 +141,28 @@ export function useAudits() {
         .single();
 
       if (error) {
-        return { data: null, error: mapSupabaseError('Erreur lors de l\'ajout de la photo', error) };
+        return {
+          data: null,
+          error: mapSupabaseError("Erreur lors de l'ajout de la photo", error),
+        };
       }
 
       setAudits((prev) => prev.map((a) => (a.id === id ? data : a)));
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur addPhotoToAudit', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur addPhotoToAudit', error),
+      };
     }
   };
 
-  return { audits, loading, createAudit, updateAuditStatus, addPhotoToAudit, refetch: fetchAudits };
+  return {
+    audits,
+    loading,
+    createAudit,
+    updateAuditStatus,
+    addPhotoToAudit,
+    refetch: fetchAudits,
+  };
 }

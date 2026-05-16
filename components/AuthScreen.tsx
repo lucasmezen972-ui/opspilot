@@ -1,56 +1,63 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
-import { LogIn, UserPlus } from 'lucide-react-native'
-import ConnectedStatus from './ConnectedStatus'
-import { useAuth } from '../hooks/useAuth'
-import { loginSchema } from '../utils/validation'
+import { LogIn, UserPlus } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+
+import ConnectedStatus from './ConnectedStatus';
+import { useAuth } from '../hooks/useAuth';
+import { loginSchema } from '../utils/validation';
 
 export default function AuthScreen() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [localError, setLocalError] = useState('')
-  const { signIn, signUp, authError } = useAuth()
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState('');
+  const { signIn, signUp, authError } = useAuth();
 
   useEffect(() => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       // runConnectionTest(); // garder uniquement en DEV si besoin
     }
-  }, [])
+  }, []);
 
   const handleAuth = async () => {
-    setLocalError('')
+    setLocalError('');
 
-    const parsed = loginSchema.safeParse({ email, password })
+    const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
-      setLocalError(parsed.error.issues[0]?.message ?? 'Champs invalides')
-      return
+      setLocalError(parsed.error.issues[0]?.message ?? 'Champs invalides');
+      return;
     }
 
     if (!isLogin && !fullName) {
-      setLocalError('Veuillez entrer votre nom complet')
-      return
+      setLocalError('Veuillez entrer votre nom complet');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      let result
+      let result;
       if (isLogin) {
-        result = await signIn(email, password)
+        result = await signIn(email, password);
       } else {
-        result = await signUp(email, password, fullName)
+        result = await signUp(email, password, fullName);
       }
-      if (result.error) throw result.error
+      if (result.error) throw result.error;
     } catch (e: any) {
-      setLocalError(e?.message ?? 'Erreur')
+      setLocalError(e?.message ?? 'Erreur');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const displayError = localError || authError
+  const displayError = localError || authError;
 
   return (
     <View style={styles.container}>
@@ -126,30 +133,34 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.switchButton}
-        onPress={() => setIsLogin(!isLogin)}
-      >
-        <Text style={styles.switchButtonText}>
-          {isLogin
-            ? "Pas encore de compte ? S'inscrire"
-            : 'Déjà un compte ? Se connecter'}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.switchButton}
+          onPress={() => setIsLogin(!isLogin)}
+        >
+          <Text style={styles.switchButtonText}>
+            {isLogin
+              ? "Pas encore de compte ? S'inscrire"
+              : 'Déjà un compte ? Se connecter'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.demoContainer}>
+        <Text style={styles.demoTitle}>Compte de démonstration</Text>
+        <Text style={styles.demoText}>Email: demo@opspilot.com</Text>
+        <Text style={styles.demoText}>Mot de passe: demo123</Text>
+        <TouchableOpacity
+          style={styles.demoFillButton}
+          onPress={() => {
+            setEmail('demo@opspilot.com');
+            setPassword('demo123');
+            setIsLogin(true);
+          }}
+        >
+          <Text style={styles.demoFillButtonText}>Remplir automatiquement</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-    <View style={styles.demoContainer}>
-      <Text style={styles.demoTitle}>Compte de démonstration</Text>
-      <Text style={styles.demoText}>Email: demo@opspilot.com</Text>
-      <Text style={styles.demoText}>Mot de passe: demo123</Text>
-      <TouchableOpacity
-        style={styles.demoFillButton}
-        onPress={() => { setEmail('demo@opspilot.com'); setPassword('demo123'); setIsLogin(true); }}
-      >
-        <Text style={styles.demoFillButtonText}>Remplir automatiquement</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-)
+  );
 }
 
 const styles = StyleSheet.create({
@@ -303,5 +314,4 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-})
-
+});

@@ -44,7 +44,7 @@ function getNotifications(): NotificationsModule | undefined {
   try {
     // Dynamic require to avoid bundling issues
     const Notifications = require('expo-notifications') as NotificationsModule;
-    
+
     // Set up notification handler
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
@@ -66,7 +66,7 @@ function getNotifications(): NotificationsModule | undefined {
 export function usePushNotifications() {
   useEffect(() => {
     if (Platform.OS === 'web') return;
-    
+
     const Notifications = getNotifications();
     if (!Notifications) return;
 

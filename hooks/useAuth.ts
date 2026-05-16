@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { supabase, type Profile } from '../lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+
+import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAuth() {
@@ -15,7 +16,9 @@ export function useAuth() {
     let cancelled = false;
     (async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!cancelled) {
           setSession(session ?? null);
           setUser(session?.user ?? null);
@@ -40,25 +43,31 @@ export function useAuth() {
         }
       }
     });
-    return () => { cancelled = true; sub?.subscription?.unsubscribe(); };
+    return () => {
+      cancelled = true;
+      sub?.subscription?.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
     setLoading(true);
-    
+
     // Logs pour debugging
     console.log('[Auth] Tentative de connexion pour:', email);
-    
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     if (error) {
       console.error('[Auth] Erreur de connexion:', error.message);
       setAuthError(mapSupabaseError('sign in error', error));
     } else {
       console.log('[Auth] Connexion réussie pour:', email);
     }
-    
+
     setLoading(false);
     return { data, error };
   };
@@ -104,5 +113,17 @@ export function useAuth() {
     return { data, error };
   };
 
-  return { session, user, profile, ready, loading, authError, signIn, signUp, signOut, updateProfile, fetchProfile };
+  return {
+    session,
+    user,
+    profile,
+    ready,
+    loading,
+    authError,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+    fetchProfile,
+  };
 }

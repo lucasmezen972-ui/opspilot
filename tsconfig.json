@@ -18,7 +18,7 @@
         "./*"
       ]
     },
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "5.0"
   },
   "include": [
     "app",
@@ -26,6 +26,8 @@
     "components",
     "hooks",
     "lib",
+    "data",
+    "utils",
     "test",
     "__tests__",
     "server",

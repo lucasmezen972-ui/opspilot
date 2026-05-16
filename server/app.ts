@@ -3,8 +3,8 @@ import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import type { ZodSchema } from 'zod';
 
-import { logger } from '../utils/logger';
 import { mapSupabaseError } from '../utils/error';
+import { logger } from '../utils/logger';
 import { authenticate } from './middleware/auth';
 import {
   auditSchema,
@@ -37,7 +37,9 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
     const { data, error } = await supabase.from(table).select('*').limit(100);
     if (error) {
       logger.error({ error, table }, 'Error fetching data');
-      return res.status(500).json({ error: mapSupabaseError(`Error fetching ${table}`, error) });
+      return res
+        .status(500)
+        .json({ error: mapSupabaseError(`Error fetching ${table}`, error) });
     }
     res.json(data);
   });
@@ -51,7 +53,9 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
     const { data, error } = await supabase.from(table).select('*').limit(1000);
     if (error) {
       logger.error({ error, table }, 'Error exporting data');
-      return res.status(500).json({ error: mapSupabaseError(`Error exporting ${table}`, error) });
+      return res
+        .status(500)
+        .json({ error: mapSupabaseError(`Error exporting ${table}`, error) });
     }
 
     if (format === 'excel') {
@@ -85,7 +89,9 @@ function registerResourceRoutes(table: string, schema: ZodSchema) {
       .single();
     if (error) {
       logger.error({ error, table }, 'Error creating record');
-      return res.status(500).json({ error: mapSupabaseError(`Error creating ${table}`, error) });
+      return res
+        .status(500)
+        .json({ error: mapSupabaseError(`Error creating ${table}`, error) });
     }
     res.status(201).json(data);
   });
@@ -103,7 +109,9 @@ app.get('/trainings', async (_, res) => {
     .limit(100);
   if (error) {
     logger.error({ error }, 'Error fetching trainings');
-    return res.status(500).json({ error: mapSupabaseError('Error fetching trainings', error) });
+    return res
+      .status(500)
+      .json({ error: mapSupabaseError('Error fetching trainings', error) });
   }
   res.json(data);
 });

@@ -1,8 +1,3 @@
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAuth } from '../../hooks/useAuth';
-import { useAudits } from '../../hooks/useAudits';
-import { useTasks } from '../../hooks/useTasks';
-import { useMemo } from 'react';
 import {
   ChartBar as BarChart3,
   Users,
@@ -13,6 +8,18 @@ import {
   TrendingUp,
   Target,
 } from 'lucide-react-native';
+import { useMemo } from 'react';
+import {
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+
+import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
+import { useTasks } from '../../hooks/useTasks';
 
 export default function ManagerDashboard() {
   const { profile } = useAuth();
@@ -21,19 +28,30 @@ export default function ManagerDashboard() {
 
   const stats = useMemo(() => {
     const pendingAudits = audits.filter((a) => a.status === 'pending').length;
-    const inProgressAudits = audits.filter((a) => a.status === 'in_progress').length;
-    const completedAudits = audits.filter((a) => a.status === 'completed').length;
-    const avgScore = audits.filter((a) => a.score != null).length > 0
-      ? Math.round(
-          audits.filter((a) => a.score != null).reduce((sum, a) => sum + (a.score || 0), 0) /
-          audits.filter((a) => a.score != null).length,
-        )
-      : 0;
+    const inProgressAudits = audits.filter(
+      (a) => a.status === 'in_progress',
+    ).length;
+    const completedAudits = audits.filter(
+      (a) => a.status === 'completed',
+    ).length;
+    const avgScore =
+      audits.filter((a) => a.score != null).length > 0
+        ? Math.round(
+            audits
+              .filter((a) => a.score != null)
+              .reduce((sum, a) => sum + (a.score || 0), 0) /
+              audits.filter((a) => a.score != null).length,
+          )
+        : 0;
 
     const pendingTasks = tasks.filter((t) => t.status === 'pending').length;
-    const inProgressTasks = tasks.filter((t) => t.status === 'in_progress').length;
+    const inProgressTasks = tasks.filter(
+      (t) => t.status === 'in_progress',
+    ).length;
     const completedTasks = tasks.filter((t) => t.status === 'completed').length;
-    const highPriorityTasks = tasks.filter((t) => t.priority === 'high' && t.status !== 'completed').length;
+    const highPriorityTasks = tasks.filter(
+      (t) => t.priority === 'high' && t.status !== 'completed',
+    ).length;
 
     return {
       pendingAudits,
@@ -51,7 +69,10 @@ export default function ManagerDashboard() {
 
   const recentAudits = useMemo(() => audits.slice(0, 5), [audits]);
   const urgentTasks = useMemo(
-    () => tasks.filter((t) => t.priority === 'high' && t.status !== 'completed').slice(0, 5),
+    () =>
+      tasks
+        .filter((t) => t.priority === 'high' && t.status !== 'completed')
+        .slice(0, 5),
     [tasks],
   );
 
@@ -59,7 +80,9 @@ export default function ManagerDashboard() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard Manager</Text>
-        <Text style={styles.subtitle}>Bienvenue, {profile?.full_name || 'Manager'}</Text>
+        <Text style={styles.subtitle}>
+          Bienvenue, {profile?.full_name || 'Manager'}
+        </Text>
       </View>
 
       {/* Vue d'ensemble */}
@@ -152,7 +175,8 @@ export default function ManagerDashboard() {
                 <View style={styles.listItemInfo}>
                   <Text style={styles.listItemTitle}>{task.title}</Text>
                   <Text style={styles.listItemSubtitle}>
-                    {task.location || 'Aucune localisation'} - {task.status === 'in_progress' ? 'En cours' : 'À faire'}
+                    {task.location || 'Aucune localisation'} -{' '}
+                    {task.status === 'in_progress' ? 'En cours' : 'À faire'}
                   </Text>
                 </View>
               </View>
@@ -170,12 +194,19 @@ export default function ManagerDashboard() {
               <View style={styles.listItemLeft}>
                 <ClipboardCheck
                   size={16}
-                  color={audit.status === 'completed' ? '#10B981' : audit.status === 'in_progress' ? '#F59E0B' : '#6B7280'}
+                  color={
+                    audit.status === 'completed'
+                      ? '#10B981'
+                      : audit.status === 'in_progress'
+                        ? '#F59E0B'
+                        : '#6B7280'
+                  }
                 />
                 <View style={styles.listItemInfo}>
                   <Text style={styles.listItemTitle}>{audit.title}</Text>
                   <Text style={styles.listItemSubtitle}>
-                    {audit.location || ''} {audit.score != null ? `- Score: ${audit.score}%` : ''}
+                    {audit.location || ''}{' '}
+                    {audit.score != null ? `- Score: ${audit.score}%` : ''}
                   </Text>
                 </View>
               </View>

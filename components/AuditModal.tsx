@@ -1,83 +1,100 @@
-import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Alert, ScrollView } from 'react-native'
-import { X, Camera, MapPin, Calendar, FileText, Sparkles } from 'lucide-react-native'
-import { useAudits } from '../hooks/useAudits'
+import {
+  X,
+  Camera,
+  MapPin,
+  Calendar,
+  FileText,
+  Sparkles,
+} from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Alert,
+  ScrollView,
+} from 'react-native';
+
+import { useAudits } from '../hooks/useAudits';
 
 interface AuditModalProps {
-  visible: boolean
-  onClose: () => void
-  onSuccess?: () => void
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AuditModal({ visible, onClose, onSuccess }: AuditModalProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [location, setLocation] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { createAudit } = useAudits()
+export default function AuditModal({
+  visible,
+  onClose,
+  onSuccess,
+}: AuditModalProps) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { createAudit } = useAudits();
 
   const resetForm = () => {
-    setTitle('')
-    setDescription('')
-    setLocation('')
-    setDueDate('')
-  }
+    setTitle('');
+    setDescription('');
+    setLocation('');
+    setDueDate('');
+  };
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Erreur', 'Veuillez saisir un titre d\'audit')
-      return
+      Alert.alert('Erreur', "Veuillez saisir un titre d'audit");
+      return;
     }
 
     if (!location.trim()) {
-      Alert.alert('Erreur', 'Veuillez saisir un lieu')
-      return
+      Alert.alert('Erreur', 'Veuillez saisir un lieu');
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const dueDateISO = dueDate ? new Date(dueDate).toISOString() : undefined
-      
+      const dueDateISO = dueDate ? new Date(dueDate).toISOString() : undefined;
+
       const result = await createAudit({
         title: title.trim(),
         description: description.trim() || undefined,
         location: location.trim(),
         due_date: dueDateISO,
-      })
+      });
 
       if (result.error) {
-        Alert.alert('Erreur', 'Impossible de créer l\'audit')
-        return
+        Alert.alert('Erreur', "Impossible de créer l'audit");
+        return;
       }
 
-      Alert.alert(
-        'Succès',
-        'Audit créé avec succès !',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm()
-              onClose()
-              onSuccess?.()
-            }
-          }
-        ]
-      )
+      Alert.alert('Succès', 'Audit créé avec succès !', [
+        {
+          text: 'OK',
+          onPress: () => {
+            resetForm();
+            onClose();
+            onSuccess?.();
+          },
+        },
+      ]);
     } catch (error) {
-      console.error('Erreur création audit:', error)
-      Alert.alert('Erreur', 'Une erreur inattendue s\'est produite')
+      console.error('Erreur création audit:', error);
+      Alert.alert('Erreur', "Une erreur inattendue s'est produite");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleClose = () => {
-    resetForm()
-    onClose()
-  }
+    resetForm();
+    onClose();
+  };
 
   // Templates d'audit prédéfinis
   const auditTemplates = [
@@ -85,36 +102,40 @@ export default function AuditModal({ visible, onClose, onSuccess }: AuditModalPr
       title: 'Contrôle rayon frais',
       description: 'Vérification des températures, DLC et présentation',
       location: 'Rayon frais',
-      icon: '❄️'
+      icon: '❄️',
     },
     {
       title: 'Audit hygiène HACCP',
-      description: 'Contrôle des protocoles d\'hygiène et sécurité alimentaire',
+      description: "Contrôle des protocoles d'hygiène et sécurité alimentaire",
       location: 'Zone préparation',
-      icon: '🧽'
+      icon: '🧽',
     },
     {
       title: 'Contrôle sécurité',
       description: 'Vérification des équipements et consignes de sécurité',
       location: 'Magasin général',
-      icon: '🛡️'
+      icon: '🛡️',
     },
     {
       title: 'Audit merchandising',
       description: 'Contrôle de la présentation produits et PLV',
       location: 'Surface de vente',
-      icon: '🏷️'
-    }
-  ]
+      icon: '🏷️',
+    },
+  ];
 
-  const applyTemplate = (template: typeof auditTemplates[0]) => {
-    setTitle(template.title)
-    setDescription(template.description)
-    setLocation(template.location)
-  }
+  const applyTemplate = (template: (typeof auditTemplates)[0]) => {
+    setTitle(template.title);
+    setDescription(template.description);
+    setLocation(template.location);
+  };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Nouvel Audit</Text>
@@ -127,7 +148,11 @@ export default function AuditModal({ visible, onClose, onSuccess }: AuditModalPr
           {/* Templates rapides */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Templates rapides</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templatesScroll}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.templatesScroll}
+            >
               {auditTemplates.map((template, index) => (
                 <TouchableOpacity
                   key={index}
@@ -144,7 +169,7 @@ export default function AuditModal({ visible, onClose, onSuccess }: AuditModalPr
           {/* Formulaire */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Détails de l'audit</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Titre de l'audit *</Text>
               <TextInput
@@ -201,13 +226,16 @@ export default function AuditModal({ visible, onClose, onSuccess }: AuditModalPr
           {/* Actions */}
           <View style={styles.section}>
             <TouchableOpacity
-              style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+              style={[
+                styles.submitButton,
+                loading && styles.submitButtonDisabled,
+              ]}
               onPress={handleSubmit}
               disabled={loading}
             >
               <FileText size={20} color="#FFFFFF" />
               <Text style={styles.submitButtonText}>
-                {loading ? 'Création...' : 'Créer l\'audit'}
+                {loading ? 'Création...' : "Créer l'audit"}
               </Text>
             </TouchableOpacity>
 
@@ -218,7 +246,7 @@ export default function AuditModal({ visible, onClose, onSuccess }: AuditModalPr
         </ScrollView>
       </View>
     </Modal>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -351,4 +379,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-})
+});

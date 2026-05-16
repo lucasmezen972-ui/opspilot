@@ -1,52 +1,73 @@
-import React, { useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, Image, PanResponder } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
-import { X, Camera, RotateCcw, Sparkles, CircleCheck as CheckCircle } from 'lucide-react-native'
-import { analyzeAuditImage } from '../lib/openai'
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import {
+  X,
+  Camera,
+  RotateCcw,
+  Sparkles,
+  CircleCheck as CheckCircle,
+} from 'lucide-react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Alert,
+  Image,
+  PanResponder,
+} from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+import { analyzeAuditImage } from '../lib/openai';
 
 interface CameraModalProps {
-  visible: boolean
-  onClose: () => void
-  onPhotoTaken: (uri: string, analysis?: any, annotations?: string[]) => void
-  auditType?: string
+  visible: boolean;
+  onClose: () => void;
+  onPhotoTaken: (uri: string, analysis?: any, annotations?: string[]) => void;
+  auditType?: string;
 }
 
-export default function CameraModal({ visible, onClose, onPhotoTaken, auditType = 'general' }: CameraModalProps) {
-  const [facing, setFacing] = useState<CameraType>('back')
-  const [permission, requestPermission] = useCameraPermissions()
-  const [photoUri, setPhotoUri] = useState<string | null>(null)
-  const [analyzing, setAnalyzing] = useState(false)
-  const [analysis, setAnalysis] = useState<any>(null)
-  const [paths, setPaths] = useState<string[]>([])
-  const [currentPath, setCurrentPath] = useState('')
-  const pathRef = useRef('')
+export default function CameraModal({
+  visible,
+  onClose,
+  onPhotoTaken,
+  auditType = 'general',
+}: CameraModalProps) {
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [paths, setPaths] = useState<string[]>([]);
+  const [currentPath, setCurrentPath] = useState('');
+  const pathRef = useRef('');
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: evt => {
-        const { locationX, locationY } = evt.nativeEvent
-        pathRef.current = `M ${locationX} ${locationY}`
-        setCurrentPath(pathRef.current)
+      onPanResponderGrant: (evt) => {
+        const { locationX, locationY } = evt.nativeEvent;
+        pathRef.current = `M ${locationX} ${locationY}`;
+        setCurrentPath(pathRef.current);
       },
-      onPanResponderMove: evt => {
-        const { locationX, locationY } = evt.nativeEvent
-        pathRef.current += ` L ${locationX} ${locationY}`
-        setCurrentPath(pathRef.current)
+      onPanResponderMove: (evt) => {
+        const { locationX, locationY } = evt.nativeEvent;
+        pathRef.current += ` L ${locationX} ${locationY}`;
+        setCurrentPath(pathRef.current);
       },
       onPanResponderRelease: () => {
         if (pathRef.current) {
-          setPaths(prev => [...prev, pathRef.current])
-          pathRef.current = ''
-          setCurrentPath('')
+          setPaths((prev) => [...prev, pathRef.current]);
+          pathRef.current = '';
+          setCurrentPath('');
         }
       },
-    })
-  ).current
-  const cameraRef = useRef<CameraView>(null)
+    }),
+  ).current;
+  const cameraRef = useRef<CameraView>(null);
 
   if (!permission) {
-    return <View />
+    return <View />;
   }
 
   if (!permission.granted) {
@@ -54,11 +75,17 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
       <Modal visible={visible} animationType="slide">
         <View style={styles.permissionContainer}>
           <Camera size={64} color="#6B7280" />
-          <Text style={styles.permissionTitle}>Autorisation caméra requise</Text>
-          <Text style={styles.permissionText}>
-            OpsPilot a besoin d'accéder à votre caméra pour prendre des photos d'audit.
+          <Text style={styles.permissionTitle}>
+            Autorisation caméra requise
           </Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <Text style={styles.permissionText}>
+            OpsPilot a besoin d'accéder à votre caméra pour prendre des photos
+            d'audit.
+          </Text>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+          >
             <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
@@ -66,78 +93,78 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
           </TouchableOpacity>
         </View>
       </Modal>
-    )
+    );
   }
 
   const takePicture = async () => {
-    if (!cameraRef.current) return
+    if (!cameraRef.current) return;
 
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
         base64: false,
-      })
+      });
 
       if (photo?.uri) {
-        setPhotoUri(photo.uri)
-        
+        setPhotoUri(photo.uri);
+
         // Analyser l'image avec OpenAI si disponible
         if (process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-          setAnalyzing(true)
+          setAnalyzing(true);
           try {
-            const aiAnalysis = await analyzeAuditImage(photo.uri, auditType)
-            setAnalysis(aiAnalysis)
+            const aiAnalysis = await analyzeAuditImage(photo.uri, auditType);
+            setAnalysis(aiAnalysis);
           } catch (error) {
-            console.warn('Analyse IA indisponible:', error)
+            console.warn('Analyse IA indisponible:', error);
           } finally {
-            setAnalyzing(false)
+            setAnalyzing(false);
           }
         }
       }
     } catch (error) {
-      console.error('Erreur prise de photo:', error)
-      Alert.alert('Erreur', 'Impossible de prendre la photo')
+      console.error('Erreur prise de photo:', error);
+      Alert.alert('Erreur', 'Impossible de prendre la photo');
     }
-  }
+  };
 
   const confirmPhoto = () => {
     if (photoUri) {
-      onPhotoTaken(photoUri, analysis, paths)
-      resetState()
-      onClose()
+      onPhotoTaken(photoUri, analysis, paths);
+      resetState();
+      onClose();
     }
-  }
+  };
 
   const retakePhoto = () => {
-    setPhotoUri(null)
-    setAnalysis(null)
-    setPaths([])
-    setCurrentPath('')
-  }
+    setPhotoUri(null);
+    setAnalysis(null);
+    setPaths([]);
+    setCurrentPath('');
+  };
 
   const resetState = () => {
-    setPhotoUri(null)
-    setAnalysis(null)
-    setAnalyzing(false)
-    setPaths([])
-    setCurrentPath('')
-    pathRef.current = ''
-  }
+    setPhotoUri(null);
+    setAnalysis(null);
+    setAnalyzing(false);
+    setPaths([]);
+    setCurrentPath('');
+    pathRef.current = '';
+  };
 
   const handleClose = () => {
-    resetState()
-    onClose()
-  }
+    resetState();
+    onClose();
+  };
 
   const toggleCameraFacing = () => {
-    setFacing(current => (current === 'back' ? 'front' : 'back'))
-  }
+    setFacing((current) => (current === 'back' ? 'front' : 'back'));
+  };
 
   const clearAnnotations = () => {
-    setPaths([])
-    setCurrentPath('')
-    pathRef.current = ''
-  }
+    setPaths([]);
+    setCurrentPath('');
+    pathRef.current = '';
+  };
 
   if (photoUri) {
     return (
@@ -154,13 +181,27 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
             <Image source={{ uri: photoUri }} style={styles.previewImage} />
             <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
               {paths.map((p, index) => (
-                <Path key={index} d={p} stroke="#F59E0B" strokeWidth={3} fill="none" />
+                <Path
+                  key={index}
+                  d={p}
+                  stroke="#F59E0B"
+                  strokeWidth={3}
+                  fill="none"
+                />
               ))}
               {currentPath !== '' && (
-                <Path d={currentPath} stroke="#F59E0B" strokeWidth={3} fill="none" />
+                <Path
+                  d={currentPath}
+                  stroke="#F59E0B"
+                  strokeWidth={3}
+                  fill="none"
+                />
               )}
             </Svg>
-            <View style={StyleSheet.absoluteFill} {...panResponder.panHandlers} />
+            <View
+              style={StyleSheet.absoluteFill}
+              {...panResponder.panHandlers}
+            />
 
             {analyzing && (
               <View style={styles.analysisOverlay}>
@@ -173,36 +214,46 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
           {analysis && !analyzing && (
             <View style={styles.analysisResults}>
               <Text style={styles.analysisTitle}>🤖 Analyse IA</Text>
-              <Text style={styles.analysisScore}>Score: {analysis.overall_score}/100</Text>
+              <Text style={styles.analysisScore}>
+                Score: {analysis.overall_score}/100
+              </Text>
               <Text style={styles.analysisSummary}>{analysis.summary}</Text>
               {analysis.issues.length > 0 && (
                 <View style={styles.issuesList}>
                   <Text style={styles.issuesTitle}>Problèmes détectés:</Text>
-                  {analysis.issues.slice(0, 2).map((issue: any, index: number) => (
-                    <Text key={index} style={styles.issueItem}>
-                      • {issue.description}
-                    </Text>
-                  ))}
+                  {analysis.issues
+                    .slice(0, 2)
+                    .map((issue: any, index: number) => (
+                      <Text key={index} style={styles.issueItem}>
+                        • {issue.description}
+                      </Text>
+                    ))}
                 </View>
               )}
             </View>
           )}
 
           <View style={styles.previewActions}>
-            <TouchableOpacity style={styles.clearButton} onPress={clearAnnotations}>
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={clearAnnotations}
+            >
               <Text style={styles.clearButtonText}>Effacer</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.retakeButton} onPress={retakePhoto}>
               <Text style={styles.retakeButtonText}>Reprendre</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton} onPress={confirmPhoto}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={confirmPhoto}
+            >
               <CheckCircle size={20} color="#FFFFFF" />
               <Text style={styles.confirmButtonText}>Confirmer</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-    )
+    );
   }
 
   return (
@@ -226,31 +277,39 @@ export default function CameraModal({ visible, onClose, onPhotoTaken, auditType 
 
         <View style={styles.cameraControls}>
           <View style={styles.controlsRow}>
-            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={toggleCameraFacing}
+            >
               <RotateCcw size={24} color="#FFFFFF" />
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+
+            <TouchableOpacity
+              style={styles.captureButton}
+              onPress={takePicture}
+            >
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
-            
+
             <View style={styles.placeholder} />
           </View>
-          
+
           <Text style={styles.cameraHint}>
             Centrez l'élément à auditer dans le cadre
           </Text>
-          
+
           {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
             <View style={styles.aiHint}>
               <Sparkles size={16} color="#F59E0B" />
-              <Text style={styles.aiHintText}>Analyse IA automatique activée</Text>
+              <Text style={styles.aiHintText}>
+                Analyse IA automatique activée
+              </Text>
             </View>
           )}
         </View>
       </View>
     </Modal>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -521,4 +580,4 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 16,
   },
-})
+});

@@ -1,74 +1,82 @@
-import { useEffect, useState } from 'react'
-import { supabase, type Message, type Conversation } from '../lib/supabase'
-import { useAuth } from './useAuth'
-import { mapSupabaseError } from '../utils/error'
+import { useEffect, useState } from 'react';
+
+import { useAuth } from './useAuth';
+import { supabase, type Message, type Conversation } from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 export function useMessages() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [loading, setLoading] = useState(true)
-  const { profile } = useAuth()
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { profile } = useAuth();
 
   useEffect(() => {
     if (profile?.organization_id) {
-      fetchConversations()
-      const cleanup = setupRealtimeSubscription()
-      return () => { cleanup?.() }
+      fetchConversations();
+      const cleanup = setupRealtimeSubscription();
+      return () => {
+        cleanup?.();
+      };
     }
-  }, [profile?.organization_id])
+  }, [profile?.organization_id]);
 
   const fetchConversations = async () => {
-    if (!profile?.organization_id) return
+    if (!profile?.organization_id) return;
 
     try {
-      setLoading(true)
+      setLoading(true);
       const { data, error } = await supabase
         .from('conversations')
         .select('*')
         .eq('organization_id', profile.organization_id)
-        .order('last_message_at', { ascending: false })
+        .order('last_message_at', { ascending: false });
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des conversations', error)
-        return
+        mapSupabaseError(
+          'Erreur lors de la récupération des conversations',
+          error,
+        );
+        return;
       }
 
-      setConversations(data || [])
+      setConversations(data || []);
     } catch (error) {
-      mapSupabaseError('Erreur fetchConversations', error)
+      mapSupabaseError('Erreur fetchConversations', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchMessages = async (conversationId: string) => {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select(`
+        .select(
+          `
           *,
           profiles(full_name, avatar_url)
-        `)
+        `,
+        )
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: true });
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des messages', error)
-        return
+        mapSupabaseError('Erreur lors de la récupération des messages', error);
+        return;
       }
 
-      setMessages(data || [])
+      setMessages(data || []);
     } catch (error) {
-      mapSupabaseError('Erreur fetchMessages', error)
+      mapSupabaseError('Erreur fetchMessages', error);
     }
-  }
+  };
 
   const sendMessage = async (
     conversationId: string,
     content: string,
-    messageType: Message['message_type'] = 'text'
+    messageType: Message['message_type'] = 'text',
   ) => {
-    if (!profile) return { data: null, error: 'Utilisateur non connecté' }
+    if (!profile) return { data: null, error: 'Utilisateur non connecté' };
 
     try {
       const { data, error } = await supabase
@@ -81,60 +89,64 @@ export function useMessages() {
           attachments: [],
           read_by: [profile.id],
         })
-        .select(`
+        .select(
+          `
           *,
           profiles(full_name, avatar_url)
-        `)
-        .single()
+        `,
+        )
+        .single();
 
       if (error) {
-        return { error: mapSupabaseError("Erreur lors de l'envoi du message", error) }
+        return {
+          error: mapSupabaseError("Erreur lors de l'envoi du message", error),
+        };
       }
 
       // Mettre à jour la dernière activité de la conversation
       await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
-        .eq('id', conversationId)
+        .eq('id', conversationId);
 
-      setMessages([...messages, data])
-      return { data }
+      setMessages([...messages, data]);
+      return { data };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur envoi message', error) }
+      return { error: mapSupabaseError('Erreur envoi message', error) };
     }
-  }
+  };
 
   const markAsRead = async (messageId: string) => {
-    if (!profile) return
+    if (!profile) return;
 
     try {
-      const message = messages.find(m => m.id === messageId)
-      if (!message || message.read_by.includes(profile.id)) return
+      const message = messages.find((m) => m.id === messageId);
+      if (!message || message.read_by.includes(profile.id)) return;
 
-      const updatedReadBy = [...message.read_by, profile.id]
+      const updatedReadBy = [...message.read_by, profile.id];
 
       const { error } = await supabase
         .from('messages')
         .update({ read_by: updatedReadBy })
-        .eq('id', messageId)
+        .eq('id', messageId);
 
       if (error) {
-        mapSupabaseError('Erreur lors du marquage comme lu', error)
-        return
+        mapSupabaseError('Erreur lors du marquage comme lu', error);
+        return;
       }
 
-      setMessages(messages.map(m => 
-        m.id === messageId 
-          ? { ...m, read_by: updatedReadBy }
-          : m
-      ))
+      setMessages(
+        messages.map((m) =>
+          m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
+        ),
+      );
     } catch (error) {
-      mapSupabaseError('Erreur markAsRead', error)
+      mapSupabaseError('Erreur markAsRead', error);
     }
-  }
+  };
 
   const setupRealtimeSubscription = () => {
-    if (!profile?.organization_id) return
+    if (!profile?.organization_id) return;
 
     const subscription = supabase
       .channel('messages')
@@ -146,19 +158,24 @@ export function useMessages() {
           table: 'messages',
         },
         (payload) => {
-          const newMessage = payload.new as Message
-          setMessages(current => [...current, newMessage])
-        }
+          const newMessage = payload.new as Message;
+          setMessages((current) => [...current, newMessage]);
+        },
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      subscription.unsubscribe()
-    }
-  }
+      subscription.unsubscribe();
+    };
+  };
 
-  const createConversation = async (name: string, type: 'group' | 'direct', participants: string[]) => {
-    if (!profile?.organization_id) return { data: null, error: 'Organisation non définie' }
+  const createConversation = async (
+    name: string,
+    type: 'group' | 'direct',
+    participants: string[],
+  ) => {
+    if (!profile?.organization_id)
+      return { data: null, error: 'Organisation non définie' };
 
     try {
       const { data, error } = await supabase
@@ -171,28 +188,34 @@ export function useMessages() {
           created_by: profile.id,
         })
         .select()
-        .single()
+        .single();
 
       if (error) {
-        return { error: mapSupabaseError('Erreur lors de la création de la conversation', error) }
+        return {
+          error: mapSupabaseError(
+            'Erreur lors de la création de la conversation',
+            error,
+          ),
+        };
       }
 
-      setConversations([data, ...conversations])
-      return { data }
+      setConversations([data, ...conversations]);
+      return { data };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur createConversation', error) }
+      return { error: mapSupabaseError('Erreur createConversation', error) };
     }
-  }
+  };
 
   const getUnreadCount = (conversationId: string) => {
-    if (!profile) return 0
-    
-    return messages.filter(m => 
-      m.conversation_id === conversationId && 
-      !m.read_by.includes(profile.id) &&
-      m.sender_id !== profile.id
-    ).length
-  }
+    if (!profile) return 0;
+
+    return messages.filter(
+      (m) =>
+        m.conversation_id === conversationId &&
+        !m.read_by.includes(profile.id) &&
+        m.sender_id !== profile.id,
+    ).length;
+  };
 
   return {
     messages,
@@ -204,5 +227,5 @@ export function useMessages() {
     createConversation,
     getUnreadCount,
     refetch: fetchConversations,
-  }
+  };
 }

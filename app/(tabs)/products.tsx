@@ -1,10 +1,40 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, Platform } from 'react-native';
-import { Scan, Search, Filter, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle, Package, Calendar, DollarSign, TrendingDown, TrendingUp, Plus, X } from 'lucide-react-native';
+import {
+  Scan,
+  Search,
+  Filter,
+  TriangleAlert as AlertTriangle,
+  CircleCheck as CheckCircle,
+  Package,
+  Calendar,
+  DollarSign,
+  TrendingDown,
+  TrendingUp,
+  Plus,
+  X,
+} from 'lucide-react-native';
 import { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+  TextInput,
+  Modal,
+  Platform,
+} from 'react-native';
+
 import { useProducts } from '../../hooks/useProducts';
 
 export default function ProductsScreen() {
-  const { products: allProducts, loading, scanProduct, updateProductStock } = useProducts();
+  const {
+    products: allProducts,
+    loading,
+    scanProduct,
+    updateProductStock,
+  } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
   const [stockModalVisible, setStockModalVisible] = useState(false);
   const [stockModalProduct, setStockModalProduct] = useState<any>(null);
@@ -15,74 +45,102 @@ export default function ProductsScreen() {
   const products = allProducts.filter((p) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return p.name.toLowerCase().includes(q) || (p.barcode || '').includes(q) || (p.category || '').toLowerCase().includes(q);
+    return (
+      p.name.toLowerCase().includes(q) ||
+      (p.barcode || '').includes(q) ||
+      (p.category || '').toLowerCase().includes(q)
+    );
   });
 
   // Statistiques calculées en temps réel
-  const okProducts = products.filter(p => p.stock_quantity > 10).length;
-  const lowStockProducts = products.filter(p => p.stock_quantity > 0 && p.stock_quantity <= 10).length;
-  const outOfStockProducts = products.filter(p => p.stock_quantity === 0).length;
+  const okProducts = products.filter((p) => p.stock_quantity > 10).length;
+  const lowStockProducts = products.filter(
+    (p) => p.stock_quantity > 0 && p.stock_quantity <= 10,
+  ).length;
+  const outOfStockProducts = products.filter(
+    (p) => p.stock_quantity === 0,
+  ).length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ok': return '#10B981';
-      case 'low_stock': return '#F59E0B';
-      case 'out_of_stock': return '#EF4444';
-      default: return '#6B7280';
+      case 'ok':
+        return '#10B981';
+      case 'low_stock':
+        return '#F59E0B';
+      case 'out_of_stock':
+        return '#EF4444';
+      default:
+        return '#6B7280';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ok': return CheckCircle;
-      case 'low_stock': return AlertTriangle;
-      case 'out_of_stock': return TrendingDown;
-      default: return Package;
+      case 'ok':
+        return CheckCircle;
+      case 'low_stock':
+        return AlertTriangle;
+      case 'out_of_stock':
+        return TrendingDown;
+      default:
+        return Package;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'ok': return 'En stock';
-      case 'low_stock': return 'Stock faible';
-      case 'out_of_stock': return 'Rupture';
-      default: return 'Inconnu';
+      case 'ok':
+        return 'En stock';
+      case 'low_stock':
+        return 'Stock faible';
+      case 'out_of_stock':
+        return 'Rupture';
+      default:
+        return 'Inconnu';
     }
   };
 
   const simulateBarcodeScan = async () => {
     setIsScanning(true);
-    
+
     // Simulation d'un scan de code-barres
     setTimeout(async () => {
       const testBarcodes = ['3456789012345', '2345678901234', '1234567890123'];
-      const randomBarcode = testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
+      const randomBarcode =
+        testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
 
       const scannedProduct = await scanProduct(randomBarcode);
-      
+
       if (scannedProduct) {
         Alert.alert(
           'Produit scanné',
           `${scannedProduct.name}\nStock: ${scannedProduct.stock_quantity}\nPrix: ${scannedProduct.price != null ? `${scannedProduct.price}€` : 'N/A'}`,
           [
             { text: 'OK', style: 'default' },
-            { 
-              text: 'Modifier stock', 
-              onPress: () => promptStockUpdate(scannedProduct) 
-            }
-          ]
+            {
+              text: 'Modifier stock',
+              onPress: () => promptStockUpdate(scannedProduct),
+            },
+          ],
         );
       } else {
         Alert.alert(
-          'Produit non trouvé', 
+          'Produit non trouvé',
           `Le code-barres ${randomBarcode} n'existe pas dans la base de données.`,
           [
             { text: 'OK', style: 'default' },
-            { text: 'Ajouter produit', onPress: () => Alert.alert('Info', 'Fonctionnalité d\'ajout de produit à venir') }
-          ]
+            {
+              text: 'Ajouter produit',
+              onPress: () =>
+                Alert.alert(
+                  'Info',
+                  "Fonctionnalité d'ajout de produit à venir",
+                ),
+            },
+          ],
         );
       }
-      
+
       setIsScanning(false);
     }, 1500);
   };
@@ -108,7 +166,10 @@ export default function ProductsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Produits</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => setShowSearch(!showSearch)}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => setShowSearch(!showSearch)}
+          >
             <Search size={20} color={showSearch ? '#059669' : '#6B7280'} />
           </TouchableOpacity>
         </View>
@@ -152,8 +213,11 @@ export default function ProductsScreen() {
       </View>
 
       {/* Scanner Button */}
-      <TouchableOpacity 
-        style={[styles.scannerButton, isScanning && styles.scannerButtonDisabled]}
+      <TouchableOpacity
+        style={[
+          styles.scannerButton,
+          isScanning && styles.scannerButtonDisabled,
+        ]}
         onPress={simulateBarcodeScan}
         disabled={isScanning}
       >
@@ -170,48 +234,80 @@ export default function ProductsScreen() {
             <Text style={styles.loadingText}>Chargement des produits...</Text>
           </View>
         )}
-        
+
         {products.map((product) => {
           // Calculer le statut en temps réel
-          const status = product.stock_quantity === 0 ? 'out_of_stock' : 
-                       product.stock_quantity <= (product.min_stock || 5) ? 'low_stock' : 'ok';
+          const status =
+            product.stock_quantity === 0
+              ? 'out_of_stock'
+              : product.stock_quantity <= (product.min_stock || 5)
+                ? 'low_stock'
+                : 'ok';
           const StatusIcon = getStatusIcon(status);
-          
+
           return (
-            <TouchableOpacity 
-              key={product.id} 
+            <TouchableOpacity
+              key={product.id}
               style={styles.productCard}
               onPress={() => promptStockUpdate(product)}
             >
-              <Image source={{ uri: product.image_url || 'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2' }} style={styles.productImage} />
-              
+              <Image
+                source={{
+                  uri:
+                    product.image_url ||
+                    'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
+                }}
+                style={styles.productImage}
+              />
+
               <View style={styles.productInfo}>
                 <View style={styles.productHeader}>
                   <Text style={styles.productName}>{product.name}</Text>
-                  <View style={[styles.productStatus, { backgroundColor: `${getStatusColor(status)}20` }]}>
+                  <View
+                    style={[
+                      styles.productStatus,
+                      { backgroundColor: `${getStatusColor(status)}20` },
+                    ]}
+                  >
                     <StatusIcon size={12} color={getStatusColor(status)} />
-                    <Text style={[styles.productStatusText, { color: getStatusColor(status) }]}>
+                    <Text
+                      style={[
+                        styles.productStatusText,
+                        { color: getStatusColor(status) },
+                      ]}
+                    >
                       {getStatusText(status)}
                     </Text>
                   </View>
                 </View>
 
-                <Text style={styles.productCategory}>{product.category || 'Divers'}</Text>
-                <Text style={styles.productBarcode}>Code: {product.barcode || 'N/A'}</Text>
+                <Text style={styles.productCategory}>
+                  {product.category || 'Divers'}
+                </Text>
+                <Text style={styles.productBarcode}>
+                  Code: {product.barcode || 'N/A'}
+                </Text>
 
                 <View style={styles.productDetails}>
                   <View style={styles.productDetailItem}>
                     <DollarSign size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>{product.price != null ? `${product.price}€` : 'N/A'}</Text>
+                    <Text style={styles.productDetailText}>
+                      {product.price != null ? `${product.price}€` : 'N/A'}
+                    </Text>
                   </View>
                   <View style={styles.productDetailItem}>
                     <Package size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>Stock: {product.stock_quantity}</Text>
+                    <Text style={styles.productDetailText}>
+                      Stock: {product.stock_quantity}
+                    </Text>
                   </View>
                   <View style={styles.productDetailItem}>
                     <Calendar size={14} color="#6B7280" />
                     <Text style={styles.productDetailText}>
-                      DLC: {product.dlc ? new Date(product.dlc).toLocaleDateString() : 'N/A'}
+                      DLC:{' '}
+                      {product.dlc
+                        ? new Date(product.dlc).toLocaleDateString()
+                        : 'N/A'}
                     </Text>
                   </View>
                 </View>
@@ -219,13 +315,14 @@ export default function ProductsScreen() {
             </TouchableOpacity>
           );
         })}
-        
+
         {!loading && products.length === 0 && (
           <View style={styles.emptyState}>
             <Package size={48} color="#9CA3AF" />
             <Text style={styles.emptyStateTitle}>Aucun produit</Text>
             <Text style={styles.emptyStateText}>
-              Scannez votre premier produit pour commencer la gestion des stocks.
+              Scannez votre premier produit pour commencer la gestion des
+              stocks.
             </Text>
           </View>
         )}
