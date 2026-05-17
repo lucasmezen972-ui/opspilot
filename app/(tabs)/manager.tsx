@@ -1,9 +1,6 @@
 import {
   ChartBar as BarChart3,
-  Users,
   ClipboardCheck,
-  CircleCheck as CheckCircle,
-  Clock,
   TriangleAlert as AlertTriangle,
   TrendingUp,
   Target,
@@ -14,7 +11,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 
 import { useAudits } from '../../hooks/useAudits';

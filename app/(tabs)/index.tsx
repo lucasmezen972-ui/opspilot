@@ -1,15 +1,12 @@
 import { router } from 'expo-router';
 import {
   TrendingUp,
-  Users,
   CircleCheck as CheckCircle,
   TriangleAlert as AlertTriangle,
   Award,
   Target,
-  Calendar,
   ChartBar as BarChart3,
   Scan,
-  MessageCircle,
   BookOpen,
 } from 'lucide-react-native';
 import {
@@ -32,13 +29,6 @@ export default function HomeScreen() {
   const { price } = useBitcoinPrice();
 
   const today = new Date().toDateString();
-
-  const completedAuditsToday = audits.filter(
-    (a) =>
-      a.status === 'completed' &&
-      a.completed_at &&
-      new Date(a.completed_at).toDateString() === today,
-  ).length;
 
   const completedTasksToday = tasks.filter(
     (t) =>
@@ -137,7 +127,7 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Activités récentes</Text>
         <View style={styles.activityList}>
-          {audits.slice(0, 3).map((audit, index) => (
+          {audits.slice(0, 3).map((audit, _index) => (
             <TouchableOpacity
               key={audit.id}
               style={styles.activityItem}

@@ -1,13 +1,11 @@
 import {
   Search,
-  Filter,
   Plus,
   MapPin,
   CircleCheck as CheckCircle,
   Clock,
   CircleAlert as AlertCircle,
   Camera,
-  FileText,
   X,
   Play,
 } from 'lucide-react-native';

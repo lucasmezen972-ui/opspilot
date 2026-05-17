@@ -1,7 +1,6 @@
 import {
   Scan,
   Search,
-  Filter,
   TriangleAlert as AlertTriangle,
   CircleCheck as CheckCircle,
   Package,
@@ -9,7 +8,6 @@ import {
   DollarSign,
   TrendingDown,
   TrendingUp,
-  Plus,
   X,
 } from 'lucide-react-native';
 import { useState } from 'react';
@@ -23,7 +21,6 @@ import {
   Alert,
   TextInput,
   Modal,
-  Platform,
 } from 'react-native';
 
 import { useProducts } from '../../hooks/useProducts';
@@ -105,7 +102,7 @@ export default function ProductsScreen() {
 
     // Simulation d'un scan de code-barres
     setTimeout(async () => {
-      const testBarcodes = ['3456789012345', '2345678901234', '1234567890123'];
+      const testBarcodes = ['3045320073034', '3564700456789', '3274080005003', '3229820787152', '3560070462235'];
       const randomBarcode =
         testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
 
@@ -152,7 +149,7 @@ export default function ProductsScreen() {
   };
 
   const handleStockConfirm = () => {
-    const newStock = parseInt(stockModalValue || '0');
+    const newStock = parseInt(stockModalValue || '0', 10);
     if (!isNaN(newStock) && newStock >= 0 && stockModalProduct) {
       updateProductStock(stockModalProduct.id, newStock);
     }

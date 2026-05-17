@@ -32,7 +32,6 @@ export default function ChatScreen() {
     loading,
     fetchMessages,
     sendMessage: sendDbMessage,
-    markAsRead,
     getUnreadCount,
   } = useMessages();
 
