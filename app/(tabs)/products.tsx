@@ -102,7 +102,13 @@ export default function ProductsScreen() {
 
     // Simulation d'un scan de code-barres
     setTimeout(async () => {
-      const testBarcodes = ['3045320073034', '3564700456789', '3274080005003', '3229820787152', '3560070462235'];
+      const testBarcodes = [
+        '3045320073034',
+        '3564700456789',
+        '3274080005003',
+        '3229820787152',
+        '3560070462235',
+      ];
       const randomBarcode =
         testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
 
