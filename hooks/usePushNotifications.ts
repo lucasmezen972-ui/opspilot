@@ -80,15 +80,11 @@ export function usePushNotifications() {
 async function registerForPushNotificationsAsync(
   Notifications: NotificationsModule,
 ): Promise<void> {
-  // expo-device cannot be imported on web, so require dynamically
   let ExpoDevice: { isDevice: boolean } | undefined;
   try {
-    const req = eval('require') as (name: string) => { isDevice: boolean };
-    const moduleName = 'expo-' + 'device';
-    ExpoDevice = req(moduleName);
+    ExpoDevice = require('expo-device') as { isDevice: boolean };
   } catch {
-    const moduleName = 'expo-' + 'device';
-    console.log(moduleName + ' package not available');
+    console.log('[Notifications] expo-device not available');
     return;
   }
   if (!ExpoDevice?.isDevice) {

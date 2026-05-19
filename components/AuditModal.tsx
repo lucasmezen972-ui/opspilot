@@ -1,10 +1,8 @@
 import {
   X,
-  Camera,
   MapPin,
   Calendar,
   FileText,
-  Sparkles,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
