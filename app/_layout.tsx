@@ -1,11 +1,11 @@
 import { Slot } from 'expo-router';
 
 import AuthScreen from '../components/AuthScreen';
-import { useAuth } from '../hooks/useAuth';
+import { AuthProvider, useAuth } from '../hooks/AuthContext';
 
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
-export default function RootLayout() {
+function AuthGate() {
   const { user, ready, loading } = useAuth();
   useFrameworkReady();
 
@@ -18,4 +18,12 @@ export default function RootLayout() {
   }
 
   return <Slot />;
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
+  );
 }

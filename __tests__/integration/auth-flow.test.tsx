@@ -3,14 +3,17 @@ import React from 'react';
 import { describe, it, expect, vi, type MockedFunction } from 'vitest';
 
 import RootLayout from '../../app/_layout';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/AuthContext';
 
-// Mock useAuth hook
-vi.mock('../../hooks/useAuth', () => ({
-  useAuth: vi.fn(),
-}));
+vi.mock('../../hooks/AuthContext', async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  return {
+    ...actual,
+    useAuth: vi.fn(),
+    AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
-// Mock useFrameworkReady
 vi.mock('@/hooks/useFrameworkReady', () => ({
   useFrameworkReady: vi.fn(),
 }));
@@ -72,7 +75,6 @@ describe('Authentication Flow Integration', () => {
 
     const { queryByText } = render(<RootLayout />);
 
-    // Should not show auth screen
     expect(queryByText('Connexion')).toBeFalsy();
   });
 
@@ -93,7 +95,6 @@ describe('Authentication Flow Integration', () => {
 
     const { container } = render(<RootLayout />);
 
-    // Should not render anything while loading
     expect(container.firstChild).toBeNull();
   });
 });

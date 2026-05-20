@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { useAuth } from '../../hooks/useAuth';
+import { AuthProvider, useAuth } from '../../hooks/AuthContext';
 import { supabase } from '../../lib/supabase';
 
-// Mock Supabase response
 const mockSession = {
   user: {
     id: 'test-user-id',
@@ -13,6 +13,9 @@ const mockSession = {
 };
 
 const mockSupabase = supabase as any;
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(AuthProvider, null, children);
 
 describe('useAuth Hook', () => {
   beforeEach(() => {
@@ -27,7 +30,7 @@ describe('useAuth Hook', () => {
   });
 
   it('should initialize with loading state', () => {
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.loading).toBe(false);
     expect(result.current.user).toBe(null);
@@ -43,7 +46,7 @@ describe('useAuth Hook', () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
       const response = await result.current.signIn(
@@ -69,7 +72,7 @@ describe('useAuth Hook', () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
       const response = await result.current.signUp(
@@ -94,7 +97,7 @@ describe('useAuth Hook', () => {
   it('should sign out successfully', async () => {
     mockSupabase.auth.signOut.mockResolvedValue({ error: null });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
       const response = await result.current.signOut();
@@ -111,7 +114,7 @@ describe('useAuth Hook', () => {
       error: mockError as any,
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
       const response = await result.current.signIn(
