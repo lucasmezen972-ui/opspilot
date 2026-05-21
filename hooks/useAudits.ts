@@ -1,15 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { DEMO_AUDITS } from '../lib/demo';
 import { supabase, type Audit } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
   const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemo } = useAuth();
 
   const fetchAudits = useCallback(async () => {
+    if (isDemo) {
+      setAudits(DEMO_AUDITS);
+      setLoading(false);
+      return;
+    }
+
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -25,7 +32,7 @@ export function useAudits() {
         .limit(100);
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des audits', error);
+        mapSupabaseError('Erreur lors de la recuperation des audits', error);
         return;
       }
 
@@ -35,22 +42,46 @@ export function useAudits() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isDemo]);
 
   useEffect(() => {
     fetchAudits();
   }, [fetchAudits]);
 
   const createAudit = async (auditData: Partial<Audit>) => {
-    if (!user || !profile?.organization_id) {
-      return { data: null, error: 'Utilisateur non connecté' };
+    if (!user || (!profile?.organization_id && !isDemo)) {
+      return { data: null, error: 'Utilisateur non connecte' };
+    }
+
+    if (isDemo) {
+      const newAudit: Audit = {
+        id: `demo-audit-${Date.now()}`,
+        organization_id: profile!.organization_id!,
+        auditor_id: user.id,
+        title: auditData.title || '',
+        description: auditData.description || null,
+        location: auditData.location || null,
+        status: auditData.status || 'pending',
+        score: null,
+        max_score: auditData.max_score || 100,
+        issues_count: 0,
+        photos: [],
+        notes: null,
+        started_at: null,
+        completed_at: null,
+        due_date: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setAudits((prev) => [newAudit, ...prev]);
+      return { data: newAudit, error: null };
     }
 
     try {
       const { data, error } = await supabase
         .from('audits')
         .insert({
-          organization_id: profile.organization_id,
+          organization_id: profile!.organization_id,
           auditor_id: user.id,
           title: auditData.title || '',
           description: auditData.description || null,
@@ -68,7 +99,7 @@ export function useAudits() {
         return {
           data: null,
           error: mapSupabaseError(
-            "Erreur lors de la création de l'audit",
+            "Erreur lors de la creation de l'audit",
             error,
           ),
         };
@@ -85,6 +116,27 @@ export function useAudits() {
   };
 
   const updateAuditStatus = async (id: string, status: string) => {
+    if (isDemo) {
+      setAudits((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: status as Audit['status'],
+                updated_at: new Date().toISOString(),
+                ...(status === 'in_progress' && !a.started_at
+                  ? { started_at: new Date().toISOString() }
+                  : {}),
+                ...(status === 'completed'
+                  ? { completed_at: new Date().toISOString(), score: Math.floor(Math.random() * 20) + 80 }
+                  : {}),
+              }
+            : a,
+        ),
+      );
+      return { data: true, error: null };
+    }
+
     try {
       const updates: Record<string, any> = {
         status,
@@ -111,7 +163,7 @@ export function useAudits() {
         return {
           data: null,
           error: mapSupabaseError(
-            'Erreur lors de la mise à jour du statut',
+            'Erreur lors de la mise a jour du statut',
             error,
           ),
         };
@@ -128,6 +180,17 @@ export function useAudits() {
   };
 
   const addPhotoToAudit = async (id: string, photoUrl: string) => {
+    if (isDemo) {
+      setAudits((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, photos: [...(a.photos || []), photoUrl] }
+            : a,
+        ),
+      );
+      return { data: true, error: null };
+    }
+
     try {
       const audit = audits.find((a) => a.id === id);
       if (!audit) return { data: null, error: 'Audit introuvable' };

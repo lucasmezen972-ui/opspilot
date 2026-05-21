@@ -94,6 +94,7 @@ describe('HomeScreen', () => {
       ready: true,
       loading: false,
       authError: null,
+      isDemo: false,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),

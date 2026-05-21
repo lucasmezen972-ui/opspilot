@@ -145,7 +145,7 @@ export default function AuthScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.demoContainer}>
-        <Text style={styles.demoTitle}>Compte de démonstration</Text>
+        <Text style={styles.demoTitle}>Compte de demonstration</Text>
         <Text style={styles.demoText}>Email: demo@opspilot.com</Text>
         <Text style={styles.demoText}>Mot de passe: demo123</Text>
         <TouchableOpacity
@@ -157,6 +157,25 @@ export default function AuthScreen() {
           }}
         >
           <Text style={styles.demoFillButtonText}>Remplir automatiquement</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.demoFillButton, { marginTop: 8, backgroundColor: '#10B981' }]}
+          onPress={async () => {
+            setEmail('demo@opspilot.com');
+            setPassword('demo123');
+            setIsLogin(true);
+            setLoading(true);
+            try {
+              const result = await signIn('demo@opspilot.com', 'demo123');
+              if (result.error) throw result.error;
+            } catch (e: any) {
+              setLocalError(e?.message ?? 'Erreur');
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Text style={styles.demoFillButtonText}>Connexion rapide (demo)</Text>
         </TouchableOpacity>
       </View>
     </View>

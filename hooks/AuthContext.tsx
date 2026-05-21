@@ -1,8 +1,10 @@
 import type { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { DEMO_PROFILE, DEMO_USER_ID } from '../lib/demo';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
+import { isSupabaseConfigured } from '../utils/supabaseConfig';
 
 interface AuthContextValue {
   session: Session | null;
@@ -11,6 +13,7 @@ interface AuthContextValue {
   ready: boolean;
   loading: boolean;
   authError: string | null;
+  isDemo: boolean;
   signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<{ error: any }>;
@@ -27,8 +30,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  const supabaseReady = isSupabaseConfigured();
 
   useEffect(() => {
+    if (!supabaseReady) {
+      setReady(true);
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       try {
@@ -63,11 +74,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
       sub?.subscription?.unsubscribe();
     };
-  }, []);
+  }, [supabaseReady]);
 
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
     setLoading(true);
+
+    if (!supabaseReady) {
+      const demoUser = { id: DEMO_USER_ID, email } as unknown as User;
+      setUser(demoUser);
+      setProfile({ ...DEMO_PROFILE, email, full_name: email.split('@')[0] || 'Demo' });
+      setIsDemo(true);
+      setLoading(false);
+      return { data: { user: demoUser }, error: null };
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -82,6 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     setAuthError(null);
     setLoading(true);
+
+    if (!supabaseReady) {
+      const demoUser = { id: DEMO_USER_ID, email } as unknown as User;
+      setUser(demoUser);
+      setProfile({ ...DEMO_PROFILE, email, full_name: fullName });
+      setIsDemo(true);
+      setLoading(false);
+      return { data: { user: demoUser }, error: null };
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -93,12 +124,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (isDemo) {
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      setIsDemo(false);
+      return { error: null };
+    }
     const { error } = await supabase.auth.signOut();
     if (error) setAuthError(mapSupabaseError('sign out error', error));
     return { error };
   };
 
   const fetchProfile = async (userId: string) => {
+    if (isDemo) return { data: profile, error: null };
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -109,7 +148,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return { data: null, error: 'Utilisateur non connecté' };
+    if (!user) return { data: null, error: 'Utilisateur non connecte' };
+    if (isDemo) {
+      const updated = { ...profile, ...updates } as Profile;
+      setProfile(updated);
+      return { data: updated, error: null };
+    }
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -129,6 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ready,
         loading,
         authError,
+        isDemo,
         signIn,
         signUp,
         signOut,

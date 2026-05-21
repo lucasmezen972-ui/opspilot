@@ -35,6 +35,7 @@ describe('AuthScreen Component', () => {
       ready: true,
       loading: false,
       authError: null,
+      isDemo: false,
       signIn: mockSignIn,
       signUp: mockSignUp,
       signOut: vi.fn(),
@@ -127,7 +128,7 @@ describe('AuthScreen Component', () => {
     (globalThis as any).__DEV__ = true;
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Compte de démonstration')).toBeTruthy();
+    expect(getByText('Compte de demonstration')).toBeTruthy();
     expect(getByText('Email: demo@opspilot.com')).toBeTruthy();
     expect(getByText('Mot de passe: demo123')).toBeTruthy();
   });
@@ -136,7 +137,7 @@ describe('AuthScreen Component', () => {
     (globalThis as any).__DEV__ = false;
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Compte de démonstration')).toBeTruthy();
+    expect(getByText('Compte de demonstration')).toBeTruthy();
     expect(getByText('Email: demo@opspilot.com')).toBeTruthy();
     expect(getByText('Mot de passe: demo123')).toBeTruthy();
   });
@@ -152,6 +153,7 @@ describe('AuthScreen Component', () => {
       ready: false,
       loading: true,
       authError: null,
+      isDemo: false,
       signIn: mockSignIn,
       signUp: mockSignUp,
       signOut: vi.fn(),

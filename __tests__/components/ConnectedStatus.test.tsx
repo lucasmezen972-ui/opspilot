@@ -12,24 +12,24 @@ describe('ConnectedStatus Component', () => {
   it('shows connected state when configuration is valid', () => {
     process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
     const { getByText } = render(<ConnectedStatus />);
-    expect(getByText('✅ Supabase connecté')).toBeTruthy();
+    expect(getByText(/Supabase connect/)).toBeTruthy();
   });
 
-  it('shows missing config message when url is absent', () => {
+  it('shows demo mode message when url is absent', () => {
     delete process.env.EXPO_PUBLIC_SUPABASE_URL;
     const { getByText } = render(<ConnectedStatus />);
-    expect(getByText('❌ URL Supabase manquante')).toBeTruthy();
+    expect(getByText(/Mode demo/)).toBeTruthy();
   });
 
-  it('shows placeholder config message when url is placeholder', () => {
+  it('shows demo mode message when url is placeholder', () => {
     process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://placeholder.supabase.co';
     const { getByText } = render(<ConnectedStatus />);
-    expect(getByText('❌ URL Supabase invalide')).toBeTruthy();
+    expect(getByText(/Mode demo/)).toBeTruthy();
   });
 
   it('shows data count when provided', () => {
     process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://example.supabase.co';
     const { getByText } = render(<ConnectedStatus dataCount={42} />);
-    expect(getByText('✅ Supabase connecté • 42 enregistrements')).toBeTruthy();
+    expect(getByText(/42 enregistrements/)).toBeTruthy();
   });
 });

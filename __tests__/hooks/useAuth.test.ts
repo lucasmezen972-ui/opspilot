@@ -2,6 +2,11 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+vi.mock('../../utils/supabaseConfig', () => ({
+  isSupabaseConfigured: () => true,
+  getSupabaseConfigStatus: () => ({ status: 'valid', url: 'https://test.supabase.co' }),
+}));
+
 import { AuthProvider, useAuth } from '../../hooks/AuthContext';
 import { supabase } from '../../lib/supabase';
 

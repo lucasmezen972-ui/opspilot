@@ -1,15 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { DEMO_TASKS } from '../lib/demo';
 import { supabase, type Task } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemo } = useAuth();
 
   const fetchTasks = useCallback(async () => {
+    if (isDemo) {
+      setTasks(DEMO_TASKS);
+      setLoading(false);
+      return;
+    }
+
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -25,7 +32,7 @@ export function useTasks() {
         .limit(100);
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des tâches', error);
+        mapSupabaseError('Erreur lors de la recuperation des taches', error);
         return;
       }
 
@@ -35,23 +42,45 @@ export function useTasks() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isDemo]);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
   const createTask = async (taskData: Partial<Task>) => {
-    if (!user || !profile?.organization_id) {
-      return { data: null, error: 'Utilisateur non connecté' };
+    if (!user || (!profile?.organization_id && !isDemo)) {
+      return { data: null, error: 'Utilisateur non connecte' };
+    }
+
+    if (isDemo) {
+      const newTask: Task = {
+        id: `demo-task-${Date.now()}`,
+        organization_id: profile!.organization_id!,
+        store_id: profile!.store_id || null,
+        assigned_to: taskData.assigned_to || user.id,
+        created_by: user.id,
+        title: taskData.title || '',
+        description: taskData.description || null,
+        location: taskData.location || null,
+        priority: taskData.priority || 'medium',
+        status: 'pending',
+        estimated_time_minutes: taskData.estimated_time_minutes || null,
+        due_date: taskData.due_date || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: null,
+      };
+      setTasks((prev) => [newTask, ...prev]);
+      return { data: newTask, error: null };
     }
 
     try {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          organization_id: profile.organization_id,
-          store_id: profile.store_id || null,
+          organization_id: profile!.organization_id,
+          store_id: profile!.store_id || null,
           assigned_to: taskData.assigned_to || user.id,
           created_by: user.id,
           title: taskData.title || '',
@@ -68,7 +97,7 @@ export function useTasks() {
         return {
           data: null,
           error: mapSupabaseError(
-            'Erreur lors de la création de la tâche',
+            'Erreur lors de la creation de la tache',
             error,
           ),
         };
@@ -85,6 +114,24 @@ export function useTasks() {
   };
 
   const updateTaskStatus = async (id: string, status: string) => {
+    if (isDemo) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                status: status as Task['status'],
+                updated_at: new Date().toISOString(),
+                ...(status === 'completed'
+                  ? { completed_at: new Date().toISOString() }
+                  : {}),
+              }
+            : t,
+        ),
+      );
+      return { data: true, error: null };
+    }
+
     try {
       const updates: Record<string, any> = {
         status,
@@ -105,7 +152,7 @@ export function useTasks() {
         return {
           data: null,
           error: mapSupabaseError(
-            'Erreur lors de la mise à jour du statut',
+            'Erreur lors de la mise a jour du statut',
             error,
           ),
         };

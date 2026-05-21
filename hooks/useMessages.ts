@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useAuth } from './useAuth';
+import { DEMO_CONVERSATIONS, DEMO_MESSAGES, DEMO_USER_ID } from '../lib/demo';
 import { supabase, type Message, type Conversation } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
@@ -8,9 +9,16 @@ export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemo } = useAuth();
 
   useEffect(() => {
+    if (isDemo) {
+      setConversations(DEMO_CONVERSATIONS);
+      setMessages(DEMO_MESSAGES);
+      setLoading(false);
+      return;
+    }
+
     if (profile?.organization_id) {
       fetchConversations();
       const cleanup = setupRealtimeSubscription();
@@ -18,7 +26,7 @@ export function useMessages() {
         cleanup?.();
       };
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isDemo]);
 
   const fetchConversations = async () => {
     if (!profile?.organization_id) return;
@@ -33,7 +41,7 @@ export function useMessages() {
 
       if (error) {
         mapSupabaseError(
-          'Erreur lors de la récupération des conversations',
+          'Erreur lors de la recuperation des conversations',
           error,
         );
         return;
@@ -48,6 +56,11 @@ export function useMessages() {
   };
 
   const fetchMessages = async (conversationId: string) => {
+    if (isDemo) {
+      setMessages(DEMO_MESSAGES.filter((m) => m.conversation_id === conversationId));
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -61,7 +74,7 @@ export function useMessages() {
         .order('created_at', { ascending: true });
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des messages', error);
+        mapSupabaseError('Erreur lors de la recuperation des messages', error);
         return;
       }
 
@@ -76,7 +89,22 @@ export function useMessages() {
     content: string,
     messageType: Message['message_type'] = 'text',
   ) => {
-    if (!profile) return { data: null, error: 'Utilisateur non connecté' };
+    if (!profile) return { data: null, error: 'Utilisateur non connecte' };
+
+    if (isDemo) {
+      const newMsg: Message = {
+        id: `demo-msg-${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: profile.id,
+        content,
+        message_type: messageType,
+        attachments: [],
+        read_by: [profile.id],
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      return { data: newMsg };
+    }
 
     try {
       const { data, error } = await supabase
@@ -103,7 +131,6 @@ export function useMessages() {
         };
       }
 
-      // Mettre à jour la dernière activité de la conversation
       await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -119,12 +146,21 @@ export function useMessages() {
   const markAsRead = async (messageId: string) => {
     if (!profile) return;
 
+    const message = messages.find((m) => m.id === messageId);
+    if (!message || message.read_by.includes(profile.id)) return;
+
+    const updatedReadBy = [...message.read_by, profile.id];
+
+    if (isDemo) {
+      setMessages(
+        messages.map((m) =>
+          m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
+        ),
+      );
+      return;
+    }
+
     try {
-      const message = messages.find((m) => m.id === messageId);
-      if (!message || message.read_by.includes(profile.id)) return;
-
-      const updatedReadBy = [...message.read_by, profile.id];
-
       const { error } = await supabase
         .from('messages')
         .update({ read_by: updatedReadBy })
@@ -175,7 +211,22 @@ export function useMessages() {
     participants: string[],
   ) => {
     if (!profile?.organization_id)
-      return { data: null, error: 'Organisation non définie' };
+      return { data: null, error: 'Organisation non definie' };
+
+    if (isDemo) {
+      const newConv: Conversation = {
+        id: `demo-conv-${Date.now()}`,
+        organization_id: profile.organization_id,
+        name,
+        type,
+        participants,
+        created_by: profile.id,
+        last_message_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      setConversations([newConv, ...conversations]);
+      return { data: newConv };
+    }
 
     try {
       const { data, error } = await supabase
@@ -193,7 +244,7 @@ export function useMessages() {
       if (error) {
         return {
           error: mapSupabaseError(
-            'Erreur lors de la création de la conversation',
+            'Erreur lors de la creation de la conversation',
             error,
           ),
         };

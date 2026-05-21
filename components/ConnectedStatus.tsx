@@ -21,18 +21,12 @@ export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
   let Icon = Wifi;
   let iconColor = '#6B7280';
 
-  if (status === 'missing') {
-    message = '❌ URL Supabase manquante';
-    containerStyle = styles.error;
-    textStyle = styles.errorText;
-    Icon = CircleAlert;
-    iconColor = '#DC2626';
-  } else if (status === 'placeholder') {
-    message = '❌ URL Supabase invalide';
-    containerStyle = styles.error;
-    textStyle = styles.errorText;
-    Icon = CircleAlert;
-    iconColor = '#DC2626';
+  if (status === 'missing' || status === 'placeholder') {
+    message = 'Mode demo actif - donnees locales';
+    containerStyle = styles.disconnected;
+    textStyle = styles.disconnectedText;
+    Icon = Wifi;
+    iconColor = '#F59E0B';
   } else if (status === 'valid') {
     message = `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}`;
     containerStyle = styles.connected;
