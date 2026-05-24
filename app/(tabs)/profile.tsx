@@ -260,7 +260,7 @@ export default function ProfileScreen() {
         <View style={styles.appInfo}>
           <Text style={styles.appInfoText}>OpsPilot v1.0.0</Text>
           <Text style={styles.appInfoSubtext}>
-            © 2024 OpsPilot. Tous droits réservés.
+            © 2025 OpsPilot. Tous droits réservés.
           </Text>
         </View>
       </ScrollView>

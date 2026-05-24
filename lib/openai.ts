@@ -2,8 +2,10 @@ import OpenAI from 'openai';
 
 import { mapOpenAIError } from '../utils/error';
 
+const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+
 const openai = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || 'sk-placeholder',
+  apiKey: apiKey || 'sk-placeholder',
   dangerouslyAllowBrowser: true,
 });
 
@@ -38,7 +40,7 @@ export const analyzeAuditImage = async (
 ): Promise<AuditAnalysis> => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-vision-preview',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'user',
@@ -102,7 +104,7 @@ export const generateTrainingContent = async (
 ): Promise<TrainingContent> => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -160,7 +162,7 @@ export const getChatAssistantResponse = async (
 ): Promise<string> => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -197,7 +199,7 @@ export const getChatAssistantResponse = async (
 export const generateAuditReport = async (auditData: any): Promise<string> => {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
