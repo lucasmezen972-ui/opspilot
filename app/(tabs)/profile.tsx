@@ -10,7 +10,6 @@ import {
   Smartphone,
   Globe,
   Star,
-  Trophy,
   Target,
   Clock,
   ChevronRight,

@@ -6,12 +6,7 @@ import {
   Target,
 } from 'lucide-react-native';
 import { useMemo } from 'react';
-import {
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
