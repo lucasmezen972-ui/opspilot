@@ -9,7 +9,7 @@ interface Logger {
 
 // Check if we're in a Node.js environment
 const isNodeEnvironment =
-  typeof process !== 'undefined' && process.versions && process.versions.node;
+  typeof process !== 'undefined' && process.versions?.node;
 
 let logger: Logger;
 

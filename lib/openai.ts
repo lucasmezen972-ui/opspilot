@@ -5,7 +5,7 @@ import { mapOpenAIError } from '../utils/error';
 const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 
 const openai = new OpenAI({
-  apiKey: apiKey || 'sk-placeholder',
+  apiKey: apiKey ?? 'sk-placeholder',
   dangerouslyAllowBrowser: true,
 });
 

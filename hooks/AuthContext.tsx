@@ -11,10 +11,19 @@ interface AuthContextValue {
   ready: boolean;
   loading: boolean;
   authError: string | null;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ data: any; error: any }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ data: any; error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<{ error: any }>;
-  updateProfile: (updates: Partial<Profile>) => Promise<{ data: any; error: any }>;
+  updateProfile: (
+    updates: Partial<Profile>,
+  ) => Promise<{ data: any; error: any }>;
   fetchProfile: (userId: string) => Promise<{ data: any; error: any }>;
 }
 
