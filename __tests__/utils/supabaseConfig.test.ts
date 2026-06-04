@@ -10,10 +10,12 @@ describe('supabaseConfig utility', () => {
     delete process.env.EXPO_PUBLIC_SUPABASE_URL;
   });
 
-  it('detects missing url', () => {
+  it('falls back to default URL when env var is missing', () => {
     delete process.env.EXPO_PUBLIC_SUPABASE_URL;
-    expect(getSupabaseConfigStatus()).toEqual({ status: 'missing' });
-    expect(isSupabaseConfigured()).toBe(false);
+    const result = getSupabaseConfigStatus();
+    expect(result.status).toBe('valid');
+    expect(result.url).toContain('supabase.co');
+    expect(isSupabaseConfigured()).toBe(true);
   });
 
   it('detects placeholder url', () => {

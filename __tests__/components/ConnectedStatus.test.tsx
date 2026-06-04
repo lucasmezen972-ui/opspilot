@@ -15,10 +15,10 @@ describe('ConnectedStatus Component', () => {
     expect(getByText('✅ Supabase connecté')).toBeTruthy();
   });
 
-  it('shows missing config message when url is absent', () => {
+  it('falls back to default URL when env var is absent', () => {
     delete process.env.EXPO_PUBLIC_SUPABASE_URL;
     const { getByText } = render(<ConnectedStatus />);
-    expect(getByText('❌ URL Supabase manquante')).toBeTruthy();
+    expect(getByText(/Supabase connecté/)).toBeTruthy();
   });
 
   it('shows placeholder config message when url is placeholder', () => {
