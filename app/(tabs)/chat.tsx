@@ -9,7 +9,7 @@ import {
   Bot,
   Sparkles,
 } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -40,6 +40,7 @@ export default function ChatScreen() {
   >(null);
   const [newMessage, setNewMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const messagesScrollRef = useRef<ScrollView>(null);
 
   // Utiliser les conversations de la DB, avec fallback démo
   const conversations =
@@ -283,7 +284,13 @@ export default function ChatScreen() {
           </View>
 
           {/* Messages */}
-          <ScrollView style={styles.messagesList}>
+          <ScrollView
+            ref={messagesScrollRef}
+            style={styles.messagesList}
+            onContentSizeChange={() =>
+              messagesScrollRef.current?.scrollToEnd({ animated: true })
+            }
+          >
             {displayMessages.length === 0 && !loading && (
               <View style={styles.emptyMessages}>
                 <Text style={styles.emptyMessagesText}>

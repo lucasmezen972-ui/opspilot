@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import { supabase, type Message, type Conversation } from '../lib/supabase';
@@ -9,6 +9,7 @@ export function useMessages() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const { profile } = useAuth();
+  const activeConversationRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (profile?.organization_id) {
@@ -48,6 +49,7 @@ export function useMessages() {
   };
 
   const fetchMessages = async (conversationId: string) => {
+    activeConversationRef.current = conversationId;
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -109,7 +111,10 @@ export function useMessages() {
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      setMessages([...messages, data]);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === data.id)) return prev;
+        return [...prev, data];
+      });
       return { data };
     } catch (error) {
       return { error: mapSupabaseError('Erreur envoi message', error) };
@@ -135,8 +140,8 @@ export function useMessages() {
         return;
       }
 
-      setMessages(
-        messages.map((m) =>
+      setMessages((prev) =>
+        prev.map((m) =>
           m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
         ),
       );
@@ -159,7 +164,16 @@ export function useMessages() {
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages((current) => [...current, newMessage]);
+          if (
+            activeConversationRef.current &&
+            newMessage.conversation_id !== activeConversationRef.current
+          ) {
+            return;
+          }
+          setMessages((current) => {
+            if (current.some((m) => m.id === newMessage.id)) return current;
+            return [...current, newMessage];
+          });
         },
       )
       .subscribe();
@@ -199,7 +213,7 @@ export function useMessages() {
         };
       }
 
-      setConversations([data, ...conversations]);
+      setConversations((prev) => [data, ...prev]);
       return { data };
     } catch (error) {
       return { error: mapSupabaseError('Erreur createConversation', error) };

@@ -58,7 +58,7 @@ export default function TrainingScreen() {
   const completedCourses = completedCoursesList.length;
   const totalStudyTime = courses
     .filter((c) => c.status === 'completed')
-    .reduce((total, course) => total + course.duration_minutes, 0);
+    .reduce((total, course) => total + (course.duration_minutes || 0), 0);
   const avgScore =
     completedCoursesList.length > 0
       ? Math.round(

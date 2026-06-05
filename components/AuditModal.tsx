@@ -59,7 +59,16 @@ export default function AuditModal({
     setLoading(true);
 
     try {
-      const dueDateISO = dueDate ? new Date(dueDate).toISOString() : undefined;
+      let dueDateISO: string | undefined;
+      if (dueDate) {
+        const parsed = new Date(dueDate);
+        if (isNaN(parsed.getTime())) {
+          Alert.alert('Erreur', 'Format de date invalide. Utilisez YYYY-MM-DD HH:MM');
+          setLoading(false);
+          return;
+        }
+        dueDateISO = parsed.toISOString();
+      }
 
       const result = await createAudit({
         title: title.trim(),

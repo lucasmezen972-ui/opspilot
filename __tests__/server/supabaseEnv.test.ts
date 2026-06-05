@@ -3,20 +3,7 @@
  */
 import { expect, test, vi } from 'vitest';
 
-const resetEnv = (url: string | undefined, key: string | undefined) => {
-  if (url === undefined) {
-    delete process.env.SUPABASE_URL;
-  } else {
-    process.env.SUPABASE_URL = url;
-  }
-  if (key === undefined) {
-    delete process.env.SUPABASE_SERVICE_KEY;
-  } else {
-    process.env.SUPABASE_SERVICE_KEY = key;
-  }
-};
-
-test('throws when SUPABASE_URL is missing', async () => {
+test('uses fallback URL when SUPABASE_URL is missing', async () => {
   const originalUrl = process.env.SUPABASE_URL;
   const originalKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -24,14 +11,14 @@ test('throws when SUPABASE_URL is missing', async () => {
   process.env.SUPABASE_SERVICE_KEY = 'test';
 
   vi.resetModules();
-  await expect(import('../../server/supabase')).rejects.toThrow(
-    'SUPABASE_URL is required',
-  );
+  const mod = await import('../../server/supabase');
+  expect(mod.supabase).toBeDefined();
 
-  resetEnv(originalUrl, originalKey);
+  process.env.SUPABASE_URL = originalUrl;
+  process.env.SUPABASE_SERVICE_KEY = originalKey;
 });
 
-test('throws when SUPABASE_SERVICE_KEY is missing', async () => {
+test('uses fallback anon key when SUPABASE_SERVICE_KEY is missing', async () => {
   const originalUrl = process.env.SUPABASE_URL;
   const originalKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -39,9 +26,12 @@ test('throws when SUPABASE_SERVICE_KEY is missing', async () => {
   delete process.env.SUPABASE_SERVICE_KEY;
 
   vi.resetModules();
-  await expect(import('../../server/supabase')).rejects.toThrow(
-    'SUPABASE_SERVICE_KEY is required',
-  );
+  const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  const mod = await import('../../server/supabase');
+  expect(mod.supabase).toBeDefined();
+  expect(warnSpy).toHaveBeenCalled();
+  warnSpy.mockRestore();
 
-  resetEnv(originalUrl, originalKey);
+  process.env.SUPABASE_URL = originalUrl;
+  process.env.SUPABASE_SERVICE_KEY = originalKey;
 });

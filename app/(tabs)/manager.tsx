@@ -25,13 +25,12 @@ export default function ManagerDashboard() {
     const completedAudits = audits.filter(
       (a) => a.status === 'completed',
     ).length;
+    const scoredAudits = audits.filter((a) => a.score != null);
     const avgScore =
-      audits.filter((a) => a.score != null).length > 0
+      scoredAudits.length > 0
         ? Math.round(
-            audits
-              .filter((a) => a.score != null)
-              .reduce((sum, a) => sum + (a.score || 0), 0) /
-              audits.filter((a) => a.score != null).length,
+            scoredAudits.reduce((sum, a) => sum + (a.score || 0), 0) /
+              scoredAudits.length,
           )
         : 0;
 

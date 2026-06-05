@@ -23,6 +23,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
@@ -199,7 +200,7 @@ export default function ProfileScreen() {
               onPress={() =>
                 Alert.alert(
                   'Appareil',
-                  `Plateforme: Web\nVersion: OpsPilot 1.0.0`,
+                  `Plateforme: ${Platform.OS}\nVersion: OpsPilot 1.0.0`,
                 )
               }
             >
