@@ -29,7 +29,7 @@ export default function ManagerDashboard() {
     const avgScore =
       scoredAudits.length > 0
         ? Math.round(
-            scoredAudits.reduce((sum, a) => sum + (a.score || 0), 0) /
+            scoredAudits.reduce((sum, a) => sum + (a.score ?? 0), 0) /
               scoredAudits.length,
           )
         : 0;
@@ -71,7 +71,7 @@ export default function ManagerDashboard() {
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard Manager</Text>
         <Text style={styles.subtitle}>
-          Bienvenue, {profile?.full_name || 'Manager'}
+          Bienvenue, {profile?.full_name ?? 'Manager'}
         </Text>
       </View>
 
@@ -165,7 +165,7 @@ export default function ManagerDashboard() {
                 <View style={styles.listItemInfo}>
                   <Text style={styles.listItemTitle}>{task.title}</Text>
                   <Text style={styles.listItemSubtitle}>
-                    {task.location || 'Aucune localisation'} -{' '}
+                    {task.location ?? 'Aucune localisation'} -{' '}
                     {task.status === 'in_progress' ? 'En cours' : 'À faire'}
                   </Text>
                 </View>
@@ -195,7 +195,7 @@ export default function ManagerDashboard() {
                 <View style={styles.listItemInfo}>
                   <Text style={styles.listItemTitle}>{audit.title}</Text>
                   <Text style={styles.listItemSubtitle}>
-                    {audit.location || ''}{' '}
+                    {audit.location ?? ''}{' '}
                     {audit.score != null ? `- Score: ${audit.score}%` : ''}
                   </Text>
                 </View>

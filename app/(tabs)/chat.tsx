@@ -120,7 +120,7 @@ export default function ChatScreen() {
       // Mode démo local
       const msg = {
         id: `local-${Date.now()}`,
-        sender: profile?.full_name || 'Vous',
+        sender: profile?.full_name ?? 'Vous',
         content,
         timestamp: new Date().toLocaleTimeString('fr-FR', {
           hour: '2-digit',
@@ -177,7 +177,7 @@ export default function ChatScreen() {
   };
 
   const selectedConvName =
-    conversations.find((c) => c.id === selectedConversation)?.name ||
+    conversations.find((c) => c.id === selectedConversation)?.name ??
     'Conversation';
 
   return (

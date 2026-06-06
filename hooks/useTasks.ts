@@ -51,13 +51,13 @@ export function useTasks() {
         .from('tasks')
         .insert({
           organization_id: profile.organization_id,
-          store_id: profile.store_id || null,
-          assigned_to: taskData.assigned_to || user.id,
+          store_id: profile.store_id ?? null,
+          assigned_to: taskData.assigned_to ?? user.id,
           created_by: user.id,
-          title: taskData.title || '',
-          description: taskData.description || null,
-          location: taskData.location || null,
-          priority: taskData.priority || 'medium',
+          title: taskData.title ?? '',
+          description: taskData.description ?? null,
+          location: taskData.location ?? null,
+          priority: taskData.priority ?? 'medium',
           status: 'pending',
           ...taskData,
         })

@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React from 'react';
-
 // Provide a global jest variable for test files
 import { vi as jest } from 'vitest';
 (globalThis as any).jest = jest;

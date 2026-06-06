@@ -47,7 +47,7 @@ export default function AuditsScreen() {
         ? dbAudits.map((a) => ({
             id: a.id,
             title: a.title,
-            location: a.location || '',
+            location: a.location ?? '',
             status: a.status,
             date: a.created_at
               ? new Date(a.created_at).toLocaleDateString('fr-FR')
@@ -146,7 +146,7 @@ export default function AuditsScreen() {
   };
 
   const handleOpenCamera = (auditId?: string) => {
-    setCameraAuditId(auditId || null);
+    setCameraAuditId(auditId ?? null);
     setCameraVisible(true);
   };
 
