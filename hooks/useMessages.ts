@@ -7,13 +7,14 @@ import { mapSupabaseError } from '../utils/error';
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const { profile } = useAuth();
   const activeConversationRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (profile?.organization_id) {
-      fetchConversations();
+      fetchConversations().then(() => fetchUnreadCounts());
       const cleanup = setupRealtimeSubscription();
       return () => {
         cleanup?.();
@@ -220,15 +221,42 @@ export function useMessages() {
     }
   };
 
+  const fetchUnreadCounts = async () => {
+    if (!profile) return;
+
+    try {
+      const counts: Record<string, number> = {};
+      for (const conv of conversations) {
+        const { count, error } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('conversation_id', conv.id)
+          .not('read_by', 'cs', `{${profile.id}}`)
+          .neq('sender_id', profile.id);
+
+        if (!error && count != null) {
+          counts[conv.id] = count;
+        }
+      }
+      setUnreadCounts(counts);
+    } catch (error) {
+      mapSupabaseError('Erreur fetchUnreadCounts', error);
+    }
+  };
+
   const getUnreadCount = (conversationId: string) => {
     if (!profile) return 0;
 
-    return messages.filter(
-      (m) =>
-        m.conversation_id === conversationId &&
-        !m.read_by.includes(profile.id) &&
-        m.sender_id !== profile.id,
-    ).length;
+    if (conversationId === activeConversationRef.current) {
+      return messages.filter(
+        (m) =>
+          m.conversation_id === conversationId &&
+          !m.read_by.includes(profile.id) &&
+          m.sender_id !== profile.id,
+      ).length;
+    }
+
+    return unreadCounts[conversationId] ?? 0;
   };
 
   return {

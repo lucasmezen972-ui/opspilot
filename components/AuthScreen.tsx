@@ -50,6 +50,11 @@ export default function AuthScreen() {
         result = await signUp(email, password, fullName);
       }
       if (result.error) throw result.error;
+      if (!isLogin && result.data?.user && !result.data?.session) {
+        setLocalError(
+          'Compte créé ! Vérifiez votre email pour confirmer votre inscription.',
+        );
+      }
     } catch (e: any) {
       setLocalError(e?.message ?? 'Erreur');
     } finally {
@@ -145,19 +150,39 @@ export default function AuthScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.demoContainer}>
-        <Text style={styles.demoTitle}>Compte de démonstration</Text>
-        <Text style={styles.demoText}>Email: demo@opspilot.com</Text>
-        <Text style={styles.demoText}>Mot de passe: demo123</Text>
-        <TouchableOpacity
-          style={styles.demoFillButton}
-          onPress={() => {
-            setEmail('demo@opspilot.com');
-            setPassword('demo123');
-            setIsLogin(true);
-          }}
-        >
-          <Text style={styles.demoFillButtonText}>Remplir automatiquement</Text>
-        </TouchableOpacity>
+        <Text style={styles.demoTitle}>Comptes de démonstration</Text>
+        <View style={styles.demoAccount}>
+          <Text style={styles.demoAccountLabel}>Employé</Text>
+          <Text style={styles.demoText}>demo@opspilot.com / demo123</Text>
+          <TouchableOpacity
+            style={styles.demoFillButton}
+            onPress={() => {
+              setEmail('demo@opspilot.com');
+              setPassword('demo123');
+              setIsLogin(true);
+              setLocalError('');
+            }}
+          >
+            <Text style={styles.demoFillButtonText}>Connexion employé</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.demoAccount}>
+          <Text style={styles.demoAccountLabel}>Manager</Text>
+          <Text style={styles.demoText}>
+            marie.dupont@opspilot.com / marie123
+          </Text>
+          <TouchableOpacity
+            style={styles.demoFillButton}
+            onPress={() => {
+              setEmail('marie.dupont@opspilot.com');
+              setPassword('marie123');
+              setIsLogin(true);
+              setLocalError('');
+            }}
+          >
+            <Text style={styles.demoFillButtonText}>Connexion manager</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -277,14 +302,27 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#F3F4F6',
     borderRadius: 8,
+    gap: 12,
   },
   demoTitle: {
     fontWeight: '600',
     marginBottom: 4,
     color: '#111827',
+    fontSize: 16,
+  },
+  demoAccount: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 12,
+  },
+  demoAccountLabel: {
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#2563EB',
+    marginBottom: 4,
   },
   demoText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#374151',
   },
   demoFillButton: {

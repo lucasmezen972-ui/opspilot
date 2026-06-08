@@ -60,6 +60,8 @@ export default function TasksScreen() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
+      case 'urgent':
+        return '#DC2626';
       case 'high':
         return '#EF4444';
       case 'medium':
@@ -73,6 +75,8 @@ export default function TasksScreen() {
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
+      case 'urgent':
+        return 'Urgente';
       case 'high':
         return 'Haute';
       case 'medium':

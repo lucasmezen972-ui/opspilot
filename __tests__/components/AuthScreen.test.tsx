@@ -127,18 +127,18 @@ describe('AuthScreen Component', () => {
     (globalThis as any).__DEV__ = true;
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Compte de démonstration')).toBeTruthy();
-    expect(getByText('Email: demo@opspilot.com')).toBeTruthy();
-    expect(getByText('Mot de passe: demo123')).toBeTruthy();
+    expect(getByText('Comptes de démonstration')).toBeTruthy();
+    expect(getByText('Connexion employé')).toBeTruthy();
+    expect(getByText('Connexion manager')).toBeTruthy();
   });
 
   it('should display demo account information in production mode', () => {
     (globalThis as any).__DEV__ = false;
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Compte de démonstration')).toBeTruthy();
-    expect(getByText('Email: demo@opspilot.com')).toBeTruthy();
-    expect(getByText('Mot de passe: demo123')).toBeTruthy();
+    expect(getByText('Comptes de démonstration')).toBeTruthy();
+    expect(getByText('Connexion employé')).toBeTruthy();
+    expect(getByText('Connexion manager')).toBeTruthy();
   });
 
   it('should show loading state when authenticating', () => {
