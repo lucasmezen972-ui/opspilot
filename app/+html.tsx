@@ -1,6 +1,9 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
+// Injected at build time from app.json experiments.baseUrl ("/opspilot" on GitHub Pages)
+const BASE = process.env.EXPO_BASE_URL ?? '';
+
 export default function Root({ children }: PropsWithChildren) {
   return (
     <html lang="fr">
@@ -17,20 +20,18 @@ export default function Root({ children }: PropsWithChildren) {
 
         {/* PWA */}
         <meta name="theme-color" content="#2563EB" />
-        <link rel="manifest" href="manifest.json" />
+        <link rel="manifest" href={`${BASE}/manifest.json`} />
 
         {/* iOS Safari — Add to Home Screen */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpsPilot" />
-        <link rel="apple-touch-icon" href="icon-192.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="icon-192.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="icon-192.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png" />
+        <link rel="apple-touch-icon" href={`${BASE}/icon-192.png`} />
+        <link rel="apple-touch-icon" sizes="180x180" href={`${BASE}/icon-192.png`} />
 
         {/* Favicon */}
-        <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
-        <link rel="shortcut icon" href="favicon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href={`${BASE}/favicon.png`} />
+        <link rel="shortcut icon" href={`${BASE}/favicon.png`} />
 
         {/* Disable tap highlight on mobile */}
         <style
@@ -41,15 +42,13 @@ export default function Root({ children }: PropsWithChildren) {
 
         <ScrollViewStyleReset />
 
-        {/* Service Worker — path relative to base URL */}
+        {/* Service Worker registration */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  var base = document.querySelector('base');
-                  var swPath = (base ? base.href : '') + 'sw.js';
-                  navigator.serviceWorker.register(swPath).catch(function() {});
+                  navigator.serviceWorker.register('${BASE}/sw.js').catch(function() {});
                 });
               }
             `,
