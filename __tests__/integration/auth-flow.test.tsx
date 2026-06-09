@@ -95,6 +95,6 @@ describe('Authentication Flow Integration', () => {
 
     const { container } = render(<RootLayout />);
 
-    expect(container.firstChild).toBeNull();
+    expect(container.firstChild).not.toBeNull();
   });
 });

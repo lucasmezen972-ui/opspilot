@@ -12,7 +12,7 @@ export function useTraining() {
   const [courses, setCourses] = useState<Training[]>([]);
   const [progress, setProgress] = useState<UserTrainingProgress[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, fetchProfile } = useAuth();
 
   useEffect(() => {
     if (profile?.organization_id) {
@@ -196,7 +196,7 @@ export function useTraining() {
     try {
       const completedCount = progress.filter(
         (p) => p.status === 'completed',
-      ).length;
+      ).length + 1;
 
       await supabase
         .from('profiles')
@@ -205,6 +205,10 @@ export function useTraining() {
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
+
+      if (profile?.id) {
+        await fetchProfile(profile.id);
+      }
     } catch (error) {
       mapSupabaseError(
         'Erreur lors de la mise à jour des stats de formation',
@@ -228,6 +232,10 @@ export function useTraining() {
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
+
+      if (profile?.id) {
+        await fetchProfile(profile.id);
+      }
     } catch (error) {
       mapSupabaseError("Erreur lors de l'ajout d'XP", error);
     }

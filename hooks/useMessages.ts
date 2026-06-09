@@ -14,7 +14,7 @@ export function useMessages() {
 
   useEffect(() => {
     if (profile?.organization_id) {
-      fetchConversations().then(() => fetchUnreadCounts());
+      fetchConversations().then((convs) => { if (convs) fetchUnreadCounts(convs); });
       const cleanup = setupRealtimeSubscription();
       return () => {
         cleanup?.();
@@ -29,7 +29,7 @@ export function useMessages() {
       setLoading(true);
       const { data, error } = await supabase
         .from('conversations')
-        .select('*')
+        .select('*, messages(content, created_at)')
         .eq('organization_id', profile.organization_id)
         .order('last_message_at', { ascending: false });
 
@@ -42,6 +42,7 @@ export function useMessages() {
       }
 
       setConversations(data || []);
+      return data || [];
     } catch (error) {
       mapSupabaseError('Erreur fetchConversations', error);
     } finally {
@@ -221,12 +222,12 @@ export function useMessages() {
     }
   };
 
-  const fetchUnreadCounts = async () => {
+  const fetchUnreadCounts = async (convs?: Conversation[]) => {
     if (!profile) return;
 
     try {
       const counts: Record<string, number> = {};
-      for (const conv of conversations) {
+      for (const conv of (convs ?? conversations)) {
         const { count, error } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })

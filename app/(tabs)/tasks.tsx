@@ -8,6 +8,7 @@ import {
   MapPin,
   Flag,
   User,
+  X,
 } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
@@ -18,6 +19,8 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
@@ -29,6 +32,10 @@ export default function TasksScreen() {
   const [selectedFilter, setSelectedFilter] = useState<
     'all' | 'my' | 'pending' | 'in_progress'
   >('all');
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
 
   // Filtrer les tâches
   const filteredTasks = useMemo(() => {
@@ -144,26 +151,27 @@ export default function TasksScreen() {
     }
   };
 
-  const handleCreateTask = async () => {
-    Alert.alert('Nouvelle tâche', 'Créer une nouvelle tâche', [
-      {
-        text: 'Créer',
-        onPress: async () => {
-          const result = await createTask({
-            title: `Tâche du ${new Date().toLocaleDateString('fr-FR')}`,
-            description: 'Nouvelle tâche à compléter',
-            priority: 'medium',
-            location: 'Magasin principal',
-          });
-          if (result.error) {
-            Alert.alert('Erreur', String(result.error));
-          } else {
-            Alert.alert('Succès', 'Tâche créée avec succès !');
-          }
-        },
-      },
-      { text: 'Annuler', style: 'cancel' },
-    ]);
+  const handleCreateTask = () => {
+    setNewTaskTitle('');
+    setNewTaskDescription('');
+    setNewTaskPriority('medium');
+    setCreateModalVisible(true);
+  };
+
+  const handleConfirmCreateTask = async () => {
+    const title = newTaskTitle.trim() || `Tâche du ${new Date().toLocaleDateString('fr-FR')}`;
+    setCreateModalVisible(false);
+    const result = await createTask({
+      title,
+      description: newTaskDescription.trim() || undefined,
+      priority: newTaskPriority,
+      location: 'Magasin principal',
+    });
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
+      Alert.alert('Succès', 'Tâche créée avec succès !');
+    }
   };
 
   return (
@@ -397,6 +405,57 @@ export default function TasksScreen() {
       >
         <Plus size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      <Modal visible={createModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nouvelle tâche</Text>
+              <TouchableOpacity onPress={() => setCreateModalVisible(false)}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              value={newTaskTitle}
+              onChangeText={setNewTaskTitle}
+              placeholder="Titre de la tâche"
+              autoFocus
+            />
+            <TextInput
+              style={[styles.modalInput, { height: 80, textAlignVertical: 'top' }]}
+              value={newTaskDescription}
+              onChangeText={setNewTaskDescription}
+              placeholder="Description (optionnel)"
+              multiline
+            />
+            <View style={styles.prioritySelector}>
+              {(['low', 'medium', 'high', 'urgent'] as const).map((p) => (
+                <TouchableOpacity
+                  key={p}
+                  style={[
+                    styles.priorityOption,
+                    newTaskPriority === p && { backgroundColor: getPriorityColor(p), borderColor: getPriorityColor(p) },
+                  ]}
+                  onPress={() => setNewTaskPriority(p)}
+                >
+                  <Text style={[styles.priorityOptionText, newTaskPriority === p && { color: '#FFFFFF' }]}>
+                    {getPriorityText(p)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancelButton} onPress={() => setCreateModalVisible(false)}>
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirmButton} onPress={handleConfirmCreateTask}>
+                <Text style={styles.modalConfirmText}>Créer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -644,5 +703,82 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 4,
+  },
+  modalCancelButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  modalCancelText: {
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  modalConfirmButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#2563EB',
+  },
+  modalConfirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  prioritySelector: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  priorityOption: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+  },
+  priorityOptionText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
   },
 });
