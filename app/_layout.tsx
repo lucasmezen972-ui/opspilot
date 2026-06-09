@@ -2,12 +2,13 @@ import { Slot } from 'expo-router';
 import { ActivityIndicator, View, Text } from 'react-native';
 
 import AuthScreen from '../components/AuthScreen';
+import OnboardingScreen from '../components/OnboardingScreen';
 import { AuthProvider, useAuth } from '../hooks/AuthContext';
 
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 function AuthGate() {
-  const { user, ready, loading } = useAuth();
+  const { user, profile, ready, loading } = useAuth();
   useFrameworkReady();
 
   if (!ready || loading) {
@@ -24,6 +25,11 @@ function AuthGate() {
 
   if (!user) {
     return <AuthScreen />;
+  }
+
+  // Connecté mais sans profil : créer son organisation ou accepter une invitation
+  if (!profile?.organization_id) {
+    return <OnboardingScreen />;
   }
 
   return <Slot />;
