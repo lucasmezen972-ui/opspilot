@@ -14,7 +14,9 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "themeColor": "#2563EB",
+      "backgroundColor": "#F8FAFC"
     },
     "plugins": ["expo-router", "expo-font", "expo-web-browser"],
     "experiments": {
