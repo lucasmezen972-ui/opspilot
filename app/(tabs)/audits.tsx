@@ -11,6 +11,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronRight,
+  Download,
 } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
@@ -27,6 +28,7 @@ import {
 import CameraModal from '../../components/CameraModal';
 import { audits as defaultAudits } from '../../data/audits';
 import { useAudits } from '../../hooks/useAudits';
+import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
 const AUDIT_TEMPLATES = [
   { id: 't1', name: 'HACCP alimentaire', icon: '🧫', category: 'haccp', color: '#EFF6FF', accent: '#2563EB' },
@@ -186,6 +188,12 @@ export default function AuditsScreen() {
             onPress={() => setShowSearch(!showSearch)}
           >
             <Search size={20} color={showSearch ? '#2563EB' : '#6B7280'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => exportAuditsAsCSV(dbAudits)}
+          >
+            <Download size={20} color="#6B7280" />
           </TouchableOpacity>
         </View>
       </View>
