@@ -1,7 +1,16 @@
 const STATIC_CACHE = 'opspilot-static-v1';
 const API_CACHE = 'opspilot-api-v1';
 
-const APP_SHELL = ['/', '/manifest.json', '/favicon.png', '/icon-192.png', '/icon-512.png'];
+// Base path derived from the SW's own location (works on / or /opspilot/)
+const BASE = self.location.pathname.replace(/\/sw\.js$/, '');
+
+const APP_SHELL = [
+  BASE + '/',
+  BASE + '/manifest.json',
+  BASE + '/favicon.png',
+  BASE + '/icon-192.png',
+  BASE + '/icon-512.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
