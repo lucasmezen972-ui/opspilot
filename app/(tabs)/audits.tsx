@@ -8,6 +8,9 @@ import {
   Camera,
   X,
   Play,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
@@ -25,6 +28,13 @@ import CameraModal from '../../components/CameraModal';
 import { audits as defaultAudits } from '../../data/audits';
 import { useAudits } from '../../hooks/useAudits';
 
+const AUDIT_TEMPLATES = [
+  { id: 't1', name: 'HACCP alimentaire', icon: '🧫', category: 'haccp', color: '#EFF6FF', accent: '#2563EB' },
+  { id: 't2', name: 'Hygiène générale', icon: '🧹', category: 'hygiene', color: '#F0FDF4', accent: '#16A34A' },
+  { id: 't3', name: 'Sécurité incendie', icon: '🔥', category: 'securite', color: '#FFF7ED', accent: '#EA580C' },
+  { id: 't4', name: 'Contrôle DLC & qualité', icon: '📦', category: 'qualite', color: '#FEFCE8', accent: '#CA8A04' },
+] as const;
+
 export default function AuditsScreen() {
   const {
     audits: dbAudits,
@@ -37,6 +47,7 @@ export default function AuditsScreen() {
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newAuditTitle, setNewAuditTitle] = useState('');
+  const [showTemplates, setShowTemplates] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -113,8 +124,8 @@ export default function AuditsScreen() {
     }
   };
 
-  const handleCreateAudit = () => {
-    setNewAuditTitle('');
+  const handleCreateAudit = (prefillTitle?: string) => {
+    setNewAuditTitle(prefillTitle ?? '');
     setCreateModalVisible(true);
   };
 
@@ -247,13 +258,45 @@ export default function AuditsScreen() {
       </View>
 
       {/* Create New Audit Button */}
-      <TouchableOpacity style={styles.createButton} onPress={handleCreateAudit}>
+      <TouchableOpacity style={styles.createButton} onPress={() => handleCreateAudit()}>
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Créer un audit</Text>
       </TouchableOpacity>
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
+        {/* Template library */}
+        <TouchableOpacity
+          style={styles.templateHeader}
+          onPress={() => setShowTemplates(!showTemplates)}
+        >
+          <View style={styles.templateHeaderLeft}>
+            <BookOpen size={16} color="#2563EB" />
+            <Text style={styles.templateHeaderText}>Bibliothèque de modèles</Text>
+          </View>
+          {showTemplates ? (
+            <ChevronDown size={16} color="#6B7280" />
+          ) : (
+            <ChevronRight size={16} color="#6B7280" />
+          )}
+        </TouchableOpacity>
+        {showTemplates && (
+          <View style={styles.templateGrid}>
+            {AUDIT_TEMPLATES.map((tpl) => (
+              <TouchableOpacity
+                key={tpl.id}
+                style={[styles.templateCard, { backgroundColor: tpl.color }]}
+                onPress={() => handleCreateAudit(tpl.name)}
+              >
+                <Text style={styles.templateEmoji}>{tpl.icon}</Text>
+                <Text style={[styles.templateName, { color: tpl.accent }]}>
+                  {tpl.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         {loading && audits.length === 0 && (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Chargement des audits...</Text>
@@ -703,5 +746,42 @@ const styles = StyleSheet.create({
   modalConfirmText: {
     color: '#FFFFFF',
     fontWeight: '500',
+  },
+  templateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  templateHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  templateHeaderText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  templateGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  templateCard: {
+    width: '48%',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    gap: 8,
+  },
+  templateEmoji: {
+    fontSize: 28,
+  },
+  templateName: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
