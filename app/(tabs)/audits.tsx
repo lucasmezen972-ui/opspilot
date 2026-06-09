@@ -28,6 +28,7 @@ import {
 import CameraModal from '../../components/CameraModal';
 import { audits as defaultAudits } from '../../data/audits';
 import { useAudits } from '../../hooks/useAudits';
+import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
 const AUDIT_TEMPLATES = [

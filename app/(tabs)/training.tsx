@@ -6,6 +6,8 @@ import {
   Star,
   TrendingUp,
   Sparkles,
+  Trophy,
+  Crown,
 } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -18,11 +20,13 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useLeaderboard } from '../../hooks/useLeaderboard';
 import { useTraining } from '../../hooks/useTraining';
 import { generateTrainingContent } from '../../lib/openai';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
+  const { entries: leaderboard } = useLeaderboard();
   const {
     courses: dbCourses,
     progress,
@@ -401,39 +405,34 @@ export default function TrainingScreen() {
           ))}
         </View>
 
-        {/* Leaderboard Preview */}
+        {/* Leaderboard */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Classement de l'équipe</Text>
+          <View style={styles.leaderboardHeader}>
+            <Trophy size={18} color="#F59E0B" />
+            <Text style={styles.sectionTitle}>Classement de l'équipe</Text>
+          </View>
           <View style={styles.leaderboard}>
-            <View style={styles.leaderboardItem}>
-              <View style={styles.leaderboardRank}>
-                <Text style={styles.leaderboardRankText}>1</Text>
-              </View>
-              <Text style={styles.leaderboardName}>
-                {profile?.full_name || 'Vous'}
-              </Text>
-              <Text style={styles.leaderboardPoints}>
-                {profile?.xp || 0} XP
-              </Text>
-            </View>
-            <View style={styles.leaderboardItem}>
-              <View style={styles.leaderboardRank}>
-                <Text style={styles.leaderboardRankText}>2</Text>
-              </View>
-              <Text style={styles.leaderboardName}>Pierre Martin</Text>
-              <Text style={styles.leaderboardPoints}>
-                {Math.max(0, (profile?.xp || 0) - 50)} XP
-              </Text>
-            </View>
-            <View style={styles.leaderboardItem}>
-              <View style={styles.leaderboardRank}>
-                <Text style={styles.leaderboardRankText}>3</Text>
-              </View>
-              <Text style={styles.leaderboardName}>Jean Leroy</Text>
-              <Text style={styles.leaderboardPoints}>
-                {Math.max(0, (profile?.xp || 0) - 100)} XP
-              </Text>
-            </View>
+            {(leaderboard.length > 0 ? leaderboard : [{ id: profile?.id ?? '', full_name: profile?.full_name ?? 'Vous', email: '', role: profile?.role ?? 'employé', xp: profile?.xp ?? 0, level: profile?.level ?? 1, completed_trainings: profile?.completed_trainings ?? 0, total_audits: profile?.total_audits ?? 0, avg_score: profile?.avg_score ?? 0 }]).map((entry, idx) => {
+              const isMe = entry.id === profile?.id;
+              const rankColors = ['#F59E0B', '#9CA3AF', '#CD7F32'];
+              const rankColor = rankColors[idx] ?? '#6B7280';
+              return (
+                <View key={entry.id} style={[styles.leaderboardItem, isMe && styles.leaderboardItemMe]}>
+                  <View style={[styles.leaderboardRank, { backgroundColor: idx < 3 ? `${rankColor}20` : '#F3F4F6' }]}>
+                    {idx === 0 ? <Crown size={14} color={rankColor} /> : <Text style={[styles.leaderboardRankText, { color: rankColor }]}>{idx + 1}</Text>}
+                  </View>
+                  <View style={styles.leaderboardInfo}>
+                    <Text style={[styles.leaderboardName, isMe && { fontWeight: '700' }]}>
+                      {entry.full_name || entry.email || 'Anonyme'}{isMe ? ' (moi)' : ''}
+                    </Text>
+                    <Text style={styles.leaderboardSub}>Niv. {entry.level ?? 1} · {entry.completed_trainings ?? 0} formations</Text>
+                  </View>
+                  <Text style={[styles.leaderboardPoints, idx === 0 && { color: '#F59E0B' }]}>
+                    {entry.xp ?? 0} XP
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
       </ScrollView>
@@ -716,36 +715,54 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  leaderboardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 14,
+  },
   leaderboardItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
+    gap: 10,
+  },
+  leaderboardItemMe: {
+    backgroundColor: '#EFF6FF',
+    marginHorizontal: -8,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderBottomWidth: 0,
   },
   leaderboardRank: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#2563EB',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
   leaderboardRankText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  leaderboardInfo: {
+    flex: 1,
+  },
+  leaderboardSub: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 2,
   },
   leaderboardName: {
-    flex: 1,
     fontSize: 14,
     color: '#111827',
     fontWeight: '500',
   },
   leaderboardPoints: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
+    fontSize: 13,
+    color: '#374151',
+    fontWeight: '700',
   },
 });
