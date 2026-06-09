@@ -9,6 +9,7 @@ import {
   User,
   LayoutDashboard,
   Wrench,
+  Users,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
@@ -88,6 +89,17 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <MessageCircle size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="team"
+        options={{
+          title: 'Équipe',
+          tabBarIcon: ({ size, color }) => <Users size={size} color={color} />,
+          href:
+            profile?.role === 'manager' || profile?.role === 'admin'
+              ? '/team'
+              : null,
         }}
       />
       <Tabs.Screen

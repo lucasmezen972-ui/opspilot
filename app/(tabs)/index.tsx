@@ -8,7 +8,10 @@ import {
   ChartBar as BarChart3,
   Scan,
   BookOpen,
+  Package,
+  Calendar,
 } from 'lucide-react-native';
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,6 +23,7 @@ import {
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useBitcoinPrice } from '../../hooks/useBitcoinPrice';
+import { useProducts } from '../../hooks/useProducts';
 import { useTasks } from '../../hooks/useTasks';
 
 export default function HomeScreen() {
@@ -27,8 +31,18 @@ export default function HomeScreen() {
   const { audits } = useAudits();
   const { tasks } = useTasks();
   const { price } = useBitcoinPrice();
+  const { products } = useProducts();
 
   const today = new Date().toDateString();
+
+  const dlcAlerts = useMemo(() => {
+    const now = new Date();
+    const in7Days = new Date(now.getTime() + 7 * 86400000);
+    return products
+      .filter((p) => p.dlc && new Date(p.dlc) <= in7Days)
+      .sort((a, b) => new Date(a.dlc!).getTime() - new Date(b.dlc!).getTime())
+      .slice(0, 5);
+  }, [products]);
 
   const completedTasksToday = tasks.filter(
     (t) =>
@@ -83,6 +97,48 @@ export default function HomeScreen() {
           <Text style={styles.statLabel}>BTC/USD</Text>
         </View>
       </View>
+
+      {/* DLC Alerts */}
+      {dlcAlerts.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Alertes DLC</Text>
+            <TouchableOpacity onPress={() => router.push('/products')}>
+              <Text style={styles.sectionLink}>Voir tout</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.dlcCard}>
+            {dlcAlerts.map((product, idx) => {
+              const dlcDate = new Date(product.dlc!);
+              const diffDays = Math.ceil((dlcDate.getTime() - Date.now()) / 86400000);
+              const isExpired = diffDays < 0;
+              const isToday = diffDays === 0;
+              const color = isExpired ? '#EF4444' : isToday ? '#F59E0B' : diffDays <= 2 ? '#F97316' : '#6B7280';
+              return (
+                <TouchableOpacity
+                  key={product.id}
+                  style={[
+                    styles.dlcItem,
+                    idx < dlcAlerts.length - 1 && styles.dlcItemBorder,
+                  ]}
+                  onPress={() => router.push('/products')}
+                >
+                  <View style={[styles.dlcIcon, { backgroundColor: isExpired ? '#FEE2E2' : isToday ? '#FEF3C7' : '#F3F4F6' }]}>
+                    <Package size={14} color={color} />
+                  </View>
+                  <Text style={styles.dlcName} numberOfLines={1}>{product.name}</Text>
+                  <View style={[styles.dlcBadge, { backgroundColor: isExpired ? '#FEE2E2' : isToday ? '#FEF3C7' : '#FFF7ED' }]}>
+                    <Calendar size={11} color={color} />
+                    <Text style={[styles.dlcBadgeText, { color }]}>
+                      {isExpired ? 'Expiré' : isToday ? "Aujourd'hui" : `J−${diffDays}`}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      )}
 
       {/* Quick Actions */}
       <View style={styles.section}>
@@ -566,5 +622,51 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 20,
+  },
+  dlcCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  dlcItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  dlcItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  dlcIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dlcName: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#111827',
+  },
+  dlcBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  dlcBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
