@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Wrench,
   Users,
+  CreditCard,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
@@ -113,6 +114,14 @@ export default function TabLayout() {
             profile?.role === 'manager' || profile?.role === 'admin'
               ? '/manager'
               : null,
+        }}
+      />
+      <Tabs.Screen
+        name="billing"
+        options={{
+          title: 'Abonnement',
+          tabBarIcon: ({ size, color }) => <CreditCard size={size} color={color} />,
+          href: profile?.role === 'admin' ? '/billing' : null,
         }}
       />
       <Tabs.Screen

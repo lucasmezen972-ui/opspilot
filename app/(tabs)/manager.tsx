@@ -4,18 +4,21 @@ import {
   TriangleAlert as AlertTriangle,
   TrendingUp,
   Target,
+  Store,
 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
+import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
 
 export default function ManagerDashboard() {
   const { profile } = useAuth();
   const { audits } = useAudits();
   const { tasks } = useTasks();
+  const { stores } = useStores();
 
   const stats = useMemo(() => {
     const pendingAudits = audits.filter((a) => a.status === 'pending').length;
@@ -56,6 +59,18 @@ export default function ManagerDashboard() {
       totalTasks: tasks.length,
     };
   }, [audits, tasks]);
+
+  const storeStats = useMemo(() => {
+    return stores.map((store) => {
+      const storeAudits = audits.filter((a) => a.store_id === store.id);
+      const completed = storeAudits.filter((a) => a.status === 'completed');
+      const scored = completed.filter((a) => a.score != null);
+      const avg = scored.length > 0
+        ? Math.round(scored.reduce((s, a) => s + (a.score ?? 0), 0) / scored.length)
+        : null;
+      return { store, total: storeAudits.length, completed: completed.length, avg };
+    });
+  }, [stores, audits]);
 
   const recentAudits = useMemo(() => audits.slice(0, 5), [audits]);
   const urgentTasks = useMemo(
@@ -153,6 +168,43 @@ export default function ManagerDashboard() {
           </View>
         </View>
       </View>
+
+      {/* Multi-sites */}
+      {storeStats.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Par magasin</Text>
+          {storeStats.map(({ store, total, completed, avg }) => (
+            <View key={store.id} style={styles.storeRow}>
+              <View style={styles.storeIconWrapper}>
+                <Store size={16} color="#2563EB" />
+              </View>
+              <View style={styles.storeInfo}>
+                <Text style={styles.storeName}>{store.name}</Text>
+                <Text style={styles.storeSubtitle}>
+                  {completed}/{total} audits terminés
+                </Text>
+              </View>
+              <View style={[
+                styles.scoreChip,
+                avg === null ? styles.scoreChipGray
+                  : avg >= 80 ? styles.scoreChipGreen
+                  : avg >= 60 ? styles.scoreChipOrange
+                  : styles.scoreChipRed,
+              ]}>
+                <Text style={[
+                  styles.scoreChipText,
+                  avg === null ? { color: '#9CA3AF' }
+                    : avg >= 80 ? { color: '#16A34A' }
+                    : avg >= 60 ? { color: '#D97706' }
+                    : { color: '#DC2626' },
+                ]}>
+                  {avg !== null ? `${avg}%` : '—'}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Tâches urgentes */}
       {urgentTasks.length > 0 && (
@@ -366,4 +418,39 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
   },
+  storeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  storeIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  storeInfo: { flex: 1 },
+  storeName: { fontSize: 14, fontWeight: '600', color: '#111827' },
+  storeSubtitle: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  scoreChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  scoreChipGray:   { backgroundColor: '#F3F4F6' },
+  scoreChipGreen:  { backgroundColor: '#DCFCE7' },
+  scoreChipOrange: { backgroundColor: '#FEF3C7' },
+  scoreChipRed:    { backgroundColor: '#FEE2E2' },
+  scoreChipText: { fontSize: 14, fontWeight: '700' },
 });
