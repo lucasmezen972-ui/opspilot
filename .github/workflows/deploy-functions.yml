@@ -1,0 +1,43 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "::notice::Secret SUPABASE_ACCESS_TOKEN absent — fonctions à déployer manuellement."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: supabase/setup-cli@v1
+        if: steps.check.outputs.skip == 'false'
+        with:
+          version: latest
+
+      - name: Deploy Edge Functions
+        if: steps.check.outputs.skip == 'false'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          for dir in supabase/functions/*/; do
+            func=$(basename "$dir")
+            echo "→ Déploiement de $func"
+            supabase functions deploy "$func" \
+              --project-ref hpqfmuzkkxrqoqoabjmb \
+              --no-verify-jwt
+            echo "✓ $func déployé"
+          done
