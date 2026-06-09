@@ -122,6 +122,50 @@ export type Task = {
   completed_at?: string | null;
 };
 
+export type CorrectiveAction = {
+  id: string;
+  organization_id: string;
+  store_id?: string | null;
+  audit_id?: string | null;
+  audit_response_id?: string | null;
+  title: string;
+  description?: string | null;
+  assignee_id?: string | null;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'done' | 'cancelled';
+  due_date?: string | null;
+  resolved_at?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type Invitation = {
+  id: string;
+  organization_id: string;
+  email: string;
+  role: 'admin' | 'manager' | 'employé' | 'stagiaire';
+  store_id?: string | null;
+  token: string;
+  invited_by?: string | null;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  expires_at: string;
+  created_at?: string;
+};
+
+export type Subscription = {
+  id: string;
+  organization_id: string;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  plan: 'trial' | 'essential' | 'business' | 'enterprise';
+  status: 'trialing' | 'active' | 'past_due' | 'canceled';
+  trial_ends_at?: string | null;
+  current_period_end?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Training = {
   id: string;
   organization_id: string;

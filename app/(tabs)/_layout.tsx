@@ -8,6 +8,7 @@ import {
   MessageCircle,
   User,
   LayoutDashboard,
+  Wrench,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
@@ -59,6 +60,15 @@ export default function TabLayout() {
           title: 'Tâches',
           tabBarIcon: ({ size, color }) => (
             <CheckSquare size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="actions"
+        options={{
+          title: 'Actions',
+          tabBarIcon: ({ size, color }) => (
+            <Wrench size={size} color={color} />
           ),
         }}
       />
