@@ -1,16 +1,24 @@
-// Supabase Edge Function — Stripe Checkout Session
+// Supabase Edge Function — Stripe Checkout Session (prix inline, sans Price IDs)
 // Déploiement : supabase functions deploy create-checkout-session
-// Variables d'environnement requises (Supabase dashboard → Settings → Edge Functions) :
+// Un seul secret requis dans Supabase Dashboard → Settings → Edge Functions :
 //   STRIPE_SECRET_KEY   — clé secrète Stripe (sk_live_... ou sk_test_...)
-//   APP_URL             — URL de l'app (ex: https://lucasmezen972-ui.github.io/opspilot)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Stripe from 'https://esm.sh/stripe@14';
 
-const STRIPE_PRICES: Record<string, string> = {
-  // Remplacez par vos vrais price IDs depuis le dashboard Stripe
-  essential: Deno.env.get('STRIPE_PRICE_ESSENTIAL') ?? '',
-  business:  Deno.env.get('STRIPE_PRICE_BUSINESS')  ?? '',
+type Plan = 'essential' | 'business';
+
+const PLAN_CONFIG: Record<Plan, { name: string; description: string; amount: number }> = {
+  essential: {
+    name: 'OpsPilot Essential',
+    description: '1 magasin · 15 utilisateurs · Audits illimités · Export CSV',
+    amount: 29900, // 299,00 € en centimes
+  },
+  business: {
+    name: 'OpsPilot Business',
+    description: '5 magasins · 75 utilisateurs · Multi-sites · Support prioritaire',
+    amount: 79900, // 799,00 €
+  },
 };
 
 Deno.serve(async (req: Request) => {
@@ -67,8 +75,8 @@ Deno.serve(async (req: Request) => {
   }
 
   const { plan } = await req.json() as { plan: string };
-  const priceId = STRIPE_PRICES[plan];
-  if (!priceId) {
+  const planConfig = PLAN_CONFIG[plan as Plan];
+  if (!planConfig) {
     return new Response(JSON.stringify({ error: `Plan invalide : ${plan}` }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
@@ -96,11 +104,23 @@ Deno.serve(async (req: Request) => {
 
   const appUrl = Deno.env.get('APP_URL') ?? 'https://lucasmezen972-ui.github.io/opspilot';
 
+  // Utilise price_data inline — aucun Price ID Stripe à préconfigurer
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     payment_method_types: ['card'],
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [{
+      quantity: 1,
+      price_data: {
+        currency: 'eur',
+        unit_amount: planConfig.amount,
+        recurring: { interval: 'month' },
+        product_data: {
+          name: planConfig.name,
+          description: planConfig.description,
+        },
+      },
+    }],
     success_url: `${appUrl}/billing?success=1`,
     cancel_url:  `${appUrl}/billing?canceled=1`,
     metadata: { organization_id: profile.organization_id, plan },
