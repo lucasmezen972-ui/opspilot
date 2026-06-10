@@ -1,15 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoAudits, demoId } from '../lib/demoData';
 import { supabase, type Audit } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
   const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemoMode, session } = useAuth();
+
+  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchAudits = useCallback(async () => {
+    if (isLocalDemo) {
+      setAudits(getDemoAudits());
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -35,7 +44,7 @@ export function useAudits() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchAudits();
@@ -44,6 +53,33 @@ export function useAudits() {
   const createAudit = async (auditData: Partial<Audit>) => {
     if (!user || !profile?.organization_id) {
       return { data: null, error: 'Utilisateur non connecté' };
+    }
+
+    if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const data: Audit = {
+        id: demoId('demo-audit'),
+        organization_id: profile.organization_id,
+        store_id: profile.store_id ?? null,
+        template_id: null,
+        auditor_id: user.id,
+        title: auditData.title || '',
+        description: auditData.description ?? null,
+        location: auditData.location ?? null,
+        status: auditData.status || 'pending',
+        score: auditData.score ?? null,
+        max_score: auditData.max_score || 100,
+        issues_count: 0,
+        photos: [],
+        notes: auditData.notes ?? null,
+        started_at: null,
+        completed_at: null,
+        due_date: auditData.due_date ?? null,
+        created_at: now,
+        updated_at: now,
+      };
+      setAudits((prev) => [data, ...prev]);
+      return { data, error: null };
     }
 
     try {
@@ -100,6 +136,18 @@ export function useAudits() {
         updates.completed_at = new Date().toISOString();
       }
 
+      if (isLocalDemo) {
+        let updated: Audit | null = null;
+        setAudits((prev) =>
+          prev.map((a) => {
+            if (a.id !== id) return a;
+            updated = { ...a, ...updates } as Audit;
+            return updated;
+          }),
+        );
+        return { data: updated, error: null };
+      }
+
       const { data, error } = await supabase
         .from('audits')
         .update(updates)
@@ -133,6 +181,17 @@ export function useAudits() {
       if (!audit) return { data: null, error: 'Audit introuvable' };
 
       const updatedPhotos = [...(audit.photos || []), photoUrl];
+
+      if (isLocalDemo) {
+        const updated: Audit = {
+          ...audit,
+          photos: updatedPhotos,
+          updated_at: new Date().toISOString(),
+        };
+        setAudits((prev) => prev.map((a) => (a.id === id ? updated : a)));
+        return { data: updated, error: null };
+      }
+
       const { data, error } = await supabase
         .from('audits')
         .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
