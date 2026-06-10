@@ -23,6 +23,7 @@ const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
 describe('AuthScreen Component', () => {
   const mockSignIn = vi.fn();
   const mockSignUp = vi.fn();
+  const mockSignInDemo = vi.fn();
   const originalDev = (globalThis as any).__DEV__;
 
   beforeEach(() => {
@@ -36,7 +37,9 @@ describe('AuthScreen Component', () => {
       loading: false,
       authError: null,
       isOffline: false,
+      isDemoMode: false,
       signIn: mockSignIn,
+      signInDemo: mockSignInDemo,
       signUp: mockSignUp,
       signOut: vi.fn(),
       updateProfile: vi.fn(),
@@ -128,17 +131,19 @@ describe('AuthScreen Component', () => {
     const { getByText } = render(<AuthScreen />);
 
     expect(getByText('Accès démo instantané')).toBeTruthy();
-    expect(getByText('Employé')).toBeTruthy();
-    expect(getByText('Manager')).toBeTruthy();
+    expect(getByText('⚡ Connexion Démo')).toBeTruthy();
   });
 
-  it('should display demo buttons in all modes', () => {
-    (globalThis as any).__DEV__ = false;
+  it('should call signInDemo when demo button is pressed', async () => {
+    mockSignInDemo.mockResolvedValue({ data: {}, error: null });
+
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Accès démo instantané')).toBeTruthy();
-    expect(getByText('Employé')).toBeTruthy();
-    expect(getByText('Manager')).toBeTruthy();
+    fireEvent.click(getByText('⚡ Connexion Démo'));
+
+    await waitFor(() => {
+      expect(mockSignInDemo).toHaveBeenCalled();
+    });
   });
 
   it('should show loading state when authenticating', () => {
@@ -153,7 +158,9 @@ describe('AuthScreen Component', () => {
       loading: true,
       authError: null,
       isOffline: false,
+      isDemoMode: false,
       signIn: mockSignIn,
+      signInDemo: mockSignInDemo,
       signUp: mockSignUp,
       signOut: vi.fn(),
       updateProfile: vi.fn(),
