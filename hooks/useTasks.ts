@@ -1,15 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoTasks, demoId } from '../lib/demoData';
 import { supabase, type Task } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemoMode, session } = useAuth();
+
+  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchTasks = useCallback(async () => {
+    if (isLocalDemo) {
+      setTasks(getDemoTasks());
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -35,7 +44,7 @@ export function useTasks() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchTasks();
@@ -44,6 +53,29 @@ export function useTasks() {
   const createTask = async (taskData: Partial<Task>) => {
     if (!user || !profile?.organization_id) {
       return { data: null, error: 'Utilisateur non connecté' };
+    }
+
+    if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const data: Task = {
+        id: demoId('demo-task'),
+        organization_id: profile.organization_id,
+        store_id: profile.store_id ?? null,
+        assigned_to: taskData.assigned_to || user.id,
+        created_by: user.id,
+        title: taskData.title || '',
+        description: taskData.description ?? null,
+        location: taskData.location ?? null,
+        priority: taskData.priority || 'medium',
+        status: 'pending',
+        estimated_time_minutes: taskData.estimated_time_minutes ?? null,
+        due_date: taskData.due_date ?? null,
+        created_at: now,
+        updated_at: now,
+        completed_at: null,
+      };
+      setTasks((prev) => [data, ...prev]);
+      return { data, error: null };
     }
 
     try {
@@ -92,6 +124,18 @@ export function useTasks() {
       };
       if (status === 'completed') {
         updates.completed_at = new Date().toISOString();
+      }
+
+      if (isLocalDemo) {
+        let updated: Task | null = null;
+        setTasks((prev) =>
+          prev.map((t) => {
+            if (t.id !== id) return t;
+            updated = { ...t, ...updates } as Task;
+            return updated;
+          }),
+        );
+        return { data: updated, error: null };
       }
 
       const { data, error } = await supabase
