@@ -1,15 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoProducts } from '../lib/demoData';
 import { supabase, type Product } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+
+  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchProducts = useCallback(async () => {
+    if (isLocalDemo) {
+      setProducts(getDemoProducts());
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -34,7 +43,7 @@ export function useProducts() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchProducts();
@@ -43,6 +52,10 @@ export function useProducts() {
   const fetchProduct = async (barcode: string) => {
     const local = products.find((p) => p.barcode === barcode);
     if (local) return { data: local, error: null };
+
+    if (isLocalDemo) {
+      return { data: null, error: null };
+    }
 
     try {
       const { data, error } = await supabase
@@ -72,6 +85,22 @@ export function useProducts() {
   };
 
   const updateProductStock = async (id: string, newStock: number) => {
+    if (isLocalDemo) {
+      let updated: Product | null = null;
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id !== id) return p;
+          updated = {
+            ...p,
+            stock_quantity: newStock,
+            updated_at: new Date().toISOString(),
+          };
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
     try {
       const { data, error } = await supabase
         .from('products')
