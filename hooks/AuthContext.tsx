@@ -1,5 +1,11 @@
 import type { Session, User } from '@supabase/supabase-js';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
@@ -38,6 +44,29 @@ const DEMO_PROFILE: Profile = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
+
+// Persistance du mode démo local : survit au reload / deep-link (B3).
+const DEMO_FLAG_KEY = 'opspilot_demo_mode';
+function persistDemoFlag(on: boolean) {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (on) window.localStorage.setItem(DEMO_FLAG_KEY, '1');
+      else window.localStorage.removeItem(DEMO_FLAG_KEY);
+    }
+  } catch {
+    /* no-op (SSR / natif sans localStorage) */
+  }
+}
+function hasDemoFlag(): boolean {
+  try {
+    return (
+      typeof window !== 'undefined' &&
+      window.localStorage?.getItem(DEMO_FLAG_KEY) === '1'
+    );
+  } catch {
+    return false;
+  }
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -78,6 +107,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  // Miroir de isDemoMode lisible dans les closures (listener onAuthStateChange).
+  const demoModeRef = useRef(false);
+
+  const enterDemo = () => {
+    setUser(DEMO_USER as User);
+    setProfile(DEMO_PROFILE);
+    setSession(null); // ← session null en démo locale (sinon isLocalDemo casse, B2)
+    setIsOffline(false);
+    setIsDemoMode(true);
+    demoModeRef.current = true;
+    persistDemoFlag(true);
+  };
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -105,12 +146,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         const s = result?.data?.session ?? null;
         if (!cancelled) {
-          setSession(s);
-          setUser(s?.user ?? null);
-          setIsOffline(false);
-        }
-        if (s?.user?.id && !cancelled) {
-          await fetchProfile(s.user.id);
+          if (!s && hasDemoFlag()) {
+            // Réhydrate la démo locale (survit au reload / deep-link, B3).
+            enterDemo();
+          } else {
+            setSession(s);
+            setUser(s?.user ?? null);
+            setIsOffline(false);
+            if (s?.user?.id) {
+              await fetchProfile(s.user.id);
+            }
+          }
         }
       } catch (error) {
         if (!cancelled) {
@@ -128,8 +174,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = supabase.auth.onAuthStateChange((_e, s) => {
         if (!cancelled) {
-          if (!s && user && !isDemoMode) {
+          // En démo locale, ignorer les events sans session (ex: INITIAL_SESSION
+          // null) pour ne pas écraser l'état démo réhydraté (B3).
+          if (!s && demoModeRef.current) {
+            return;
+          }
+          if (!s && user && !demoModeRef.current) {
             setAuthError('Votre session a expiré. Reconnectez-vous.');
+          }
+          if (s) {
+            demoModeRef.current = false;
           }
           setSession(s ?? null);
           setUser(s?.user ?? null);
@@ -138,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             fetchProfile(s.user.id).catch((error) => {
               mapSupabaseError('Profile fetch error', error);
             });
-          } else if (!isDemoMode) {
+          } else if (!demoModeRef.current) {
             setProfile(null);
           }
         }
@@ -178,6 +232,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setIsOffline(false);
       setIsDemoMode(false);
+      demoModeRef.current = false;
+      persistDemoFlag(false);
       return { data, error: null };
     } catch {
       setAuthError(OFFLINE_MSG);
@@ -206,6 +262,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(result.data.session.user);
         setIsOffline(false);
         setIsDemoMode(false);
+        demoModeRef.current = false;
+        persistDemoFlag(false);
         await fetchProfile(result.data.session.user.id);
         return { data: result.data, error: null };
       }
@@ -215,12 +273,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
 
-    // Fallback local garanti
-    setUser(DEMO_USER as User);
-    setProfile(DEMO_PROFILE);
-    setSession({ user: DEMO_USER, access_token: 'demo-token' } as any as Session);
-    setIsOffline(false);
-    setIsDemoMode(true);
+    // Fallback local garanti (Supabase injoignable) : démo 100 % locale.
+    enterDemo();
     return { data: { user: DEMO_USER, profile: DEMO_PROFILE }, error: null };
   };
 
@@ -257,6 +311,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       setUser(null);
       setIsDemoMode(false);
+      demoModeRef.current = false;
+      persistDemoFlag(false);
       setAuthError(null);
       return { error: null };
     } catch (e: any) {
