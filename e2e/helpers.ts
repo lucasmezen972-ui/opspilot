@@ -10,16 +10,32 @@ export const DEMO_MANAGER = {
   password: 'marie123',
 };
 
-export async function loginAsDemo(page: Page, role: 'employee' | 'manager' = 'employee') {
+/**
+ * Connexion via le bouton « ⚡ Connexion Démo » (testID demo-login-button).
+ * Le paramètre `role` est conservé pour compatibilité ; le mode démo
+ * utilise toujours le compte employé (fallback local garanti hors-ligne).
+ */
+export async function loginAsDemo(
+  page: Page,
+  _role: 'employee' | 'manager' = 'employee',
+) {
   await page.goto('/');
 
-  const btnText = role === 'manager' ? 'Manager' : 'Employé';
-  const demoBtn = page.getByRole('button', { name: btnText, exact: true });
+  const demoBtn = page
+    .getByTestId('demo-login-button')
+    .or(page.getByText('⚡ Connexion Démo'))
+    .first();
   await demoBtn.waitFor({ timeout: 15_000 });
   await demoBtn.click();
 
-  // Wait for dashboard to load
-  await page.waitForURL(/\/(opspilot\/)?$/, { timeout: 20_000 }).catch(() => {});
+  // Attendre que le dashboard soit visible (réseau ou fallback local)
+  await page
+    .getByText('Bonjour')
+    .or(page.getByText('Tableau de bord'))
+    .or(page.getByText('Demo Employé'))
+    .first()
+    .waitFor({ timeout: 20_000 })
+    .catch(() => {});
 }
 
 export async function waitForApp(page: Page) {
