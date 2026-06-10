@@ -17,6 +17,15 @@ jest.mock('expo-router', () => ({
     back: jest.fn(),
     replace: jest.fn(),
   }),
+  useSegments: () => [],
+  Link: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => React.createElement('a', { ...props, href }, children),
   Stack: Object.assign(
     ({ children }: { children: React.ReactNode }) => children,
     {

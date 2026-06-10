@@ -1,4 +1,4 @@
-import { Slot } from 'expo-router';
+import { Slot, useSegments } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, View, Text } from 'react-native';
 
@@ -14,7 +14,13 @@ console.log('ROUTER START');
 
 function AuthGate() {
   const { user, profile, ready, loading } = useAuth();
+  const segments = useSegments();
+  const isPublicLegalRoute = segments[0] === 'legal';
   useFrameworkReady();
+
+  if (isPublicLegalRoute) {
+    return <Slot />;
+  }
 
   if (!ready || loading) {
     return (

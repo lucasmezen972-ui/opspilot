@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { LogIn, UserPlus, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -101,7 +102,8 @@ export default function AuthScreen() {
       {isOffline && (
         <View style={styles.offlineBanner}>
           <Text style={styles.offlineText}>
-            ⚠️ Connexion temporairement indisponible — le mode démo reste accessible
+            ⚠️ Connexion temporairement indisponible — le mode démo reste
+            accessible
           </Text>
         </View>
       )}
@@ -207,39 +209,171 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.legalLinks}>
+        <Link href="/legal/mentions-legales" style={styles.legalLink}>
+          Mentions légales
+        </Link>
+        <Text style={styles.legalSeparator}>•</Text>
+        <Link href="/legal/confidentialite" style={styles.legalLink}>
+          Confidentialité
+        </Link>
+        <Text style={styles.legalSeparator}>•</Text>
+        <Link href="/legal/cgu" style={styles.legalLink}>
+          CGU
+        </Link>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: '#F8FAFC' },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 20, paddingTop: 60, paddingBottom: 40 },
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
   header: { alignItems: 'center', marginBottom: 24 },
-  logo: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#2563EB', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  logo: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#2563EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   logoText: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
   title: { fontSize: 28, fontWeight: '700', color: '#111827', marginBottom: 6 },
-  subtitle: { fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 20 },
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
   statusContainer: { marginBottom: 12 },
-  offlineBanner: { backgroundColor: '#FEF3C7', borderRadius: 8, padding: 10, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#F59E0B' },
-  offlineText: { color: '#92400E', fontSize: 13, fontWeight: '500', textAlign: 'center' },
-  errorContainer: { backgroundColor: '#FEE2E2', borderRadius: 8, padding: 10, marginBottom: 12, borderLeftWidth: 4, borderLeftColor: '#EF4444' },
-  errorText: { color: '#DC2626', fontSize: 13, fontWeight: '500', textAlign: 'center' },
-  demoContainer: { backgroundColor: '#FFFBEB', borderRadius: 12, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#FDE68A' },
-  demoHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+  offlineBanner: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#F59E0B',
+  },
+  offlineText: {
+    color: '#92400E',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  errorContainer: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#EF4444',
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  demoContainer: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  demoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
   demoTitle: { fontWeight: '600', fontSize: 14, color: '#92400E' },
   demoSubtitle: { fontSize: 12, color: '#B45309', fontStyle: 'italic' },
-  demoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#F59E0B', paddingVertical: 12, borderRadius: 10 },
+  demoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#F59E0B',
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
   demoButtonLoading: { opacity: 0.8 },
   demoButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-  divider: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
   dividerText: { color: '#9CA3AF', fontSize: 12 },
-  form: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 8 },
-  formTitle: { fontSize: 20, fontWeight: '600', color: '#111827', marginBottom: 20, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 11, fontSize: 15, marginBottom: 12, backgroundColor: '#FFFFFF' },
-  button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#2563EB', borderRadius: 10, paddingVertical: 14, marginBottom: 12 },
+  form: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  formTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    fontSize: 15,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#2563EB',
+    borderRadius: 10,
+    paddingVertical: 14,
+    marginBottom: 12,
+  },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
   switchButton: { alignItems: 'center', paddingVertical: 6 },
   switchButtonText: { color: '#2563EB', fontSize: 14, fontWeight: '500' },
+  legalLinks: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  legalLink: {
+    color: '#4B5563',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    color: '#9CA3AF',
+    fontSize: 12,
+  },
 });

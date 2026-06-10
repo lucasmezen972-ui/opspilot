@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import {
   User,
   Settings,
@@ -37,6 +38,7 @@ const roleLabels: Record<string, string> = {
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
+  const router = useRouter();
 
   const displayName = profile?.full_name || 'Utilisateur';
   const displayRole = profile?.role
@@ -179,15 +181,36 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.settingsItem}
-              onPress={() =>
-                Alert.alert(
-                  'Confidentialité',
-                  'Vos données sont chiffrées et stockées de manière sécurisée.',
-                )
-              }
+              onPress={() => router.push('/legal/confidentialite')}
             >
               <Shield size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Confidentialité</Text>
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() => router.push('/legal/mentions-legales')}
+            >
+              <Shield size={20} color="#6B7280" />
+              <Text style={styles.settingsItemText}>Mentions légales</Text>
+              <ChevronRight
+                size={16}
+                color="#D1D5DB"
+                style={styles.settingsChevron}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingsItem}
+              onPress={() => router.push('/legal/cgu')}
+            >
+              <Shield size={20} color="#6B7280" />
+              <Text style={styles.settingsItemText}>
+                Conditions d’utilisation
+              </Text>
               <ChevronRight
                 size={16}
                 color="#D1D5DB"
