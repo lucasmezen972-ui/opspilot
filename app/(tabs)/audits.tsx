@@ -32,10 +32,38 @@ import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
 const AUDIT_TEMPLATES = [
-  { id: 't1', name: 'HACCP alimentaire', icon: '🧫', category: 'haccp', color: '#EFF6FF', accent: '#2563EB' },
-  { id: 't2', name: 'Hygiène générale', icon: '🧹', category: 'hygiene', color: '#F0FDF4', accent: '#16A34A' },
-  { id: 't3', name: 'Sécurité incendie', icon: '🔥', category: 'securite', color: '#FFF7ED', accent: '#EA580C' },
-  { id: 't4', name: 'Contrôle DLC & qualité', icon: '📦', category: 'qualite', color: '#FEFCE8', accent: '#CA8A04' },
+  {
+    id: 't1',
+    name: 'HACCP alimentaire',
+    icon: '🧫',
+    category: 'haccp',
+    color: '#EFF6FF',
+    accent: '#2563EB',
+  },
+  {
+    id: 't2',
+    name: 'Hygiène générale',
+    icon: '🧹',
+    category: 'hygiene',
+    color: '#F0FDF4',
+    accent: '#16A34A',
+  },
+  {
+    id: 't3',
+    name: 'Sécurité incendie',
+    icon: '🔥',
+    category: 'securite',
+    color: '#FFF7ED',
+    accent: '#EA580C',
+  },
+  {
+    id: 't4',
+    name: 'Contrôle DLC & qualité',
+    icon: '📦',
+    category: 'qualite',
+    color: '#FEFCE8',
+    accent: '#CA8A04',
+  },
 ] as const;
 
 export default function AuditsScreen() {
@@ -267,7 +295,10 @@ export default function AuditsScreen() {
       </View>
 
       {/* Create New Audit Button */}
-      <TouchableOpacity style={styles.createButton} onPress={() => handleCreateAudit()}>
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => handleCreateAudit()}
+      >
         <Plus size={24} color="#FFFFFF" />
         <Text style={styles.createButtonText}>Créer un audit</Text>
       </TouchableOpacity>
@@ -281,7 +312,9 @@ export default function AuditsScreen() {
         >
           <View style={styles.templateHeaderLeft}>
             <BookOpen size={16} color="#2563EB" />
-            <Text style={styles.templateHeaderText}>Bibliothèque de modèles</Text>
+            <Text style={styles.templateHeaderText}>
+              Bibliothèque de modèles
+            </Text>
           </View>
           {showTemplates ? (
             <ChevronDown size={16} color="#6B7280" />
@@ -370,6 +403,20 @@ export default function AuditsScreen() {
                   <Camera size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>Photos</Text>
                 </TouchableOpacity>
+                {audit.status === 'completed' && (
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.reportActionButton]}
+                    onPress={() => {
+                      const fullAudit = dbAudits.find((a) => a.id === audit.id);
+                      if (fullAudit) exportAuditReport(fullAudit);
+                    }}
+                  >
+                    <Download size={16} color="#7C3AED" />
+                    <Text style={[styles.actionButtonText, { color: '#7C3AED' }]}>
+                      Rapport
+                    </Text>
+                  </TouchableOpacity>
+                )}
                 {audit.status === 'pending' && (
                   <TouchableOpacity
                     style={[styles.actionButton, styles.startActionButton]}
@@ -681,6 +728,9 @@ const styles = StyleSheet.create({
   },
   completeActionButton: {
     backgroundColor: '#DCFCE7',
+  },
+  reportActionButton: {
+    backgroundColor: '#EDE9FE',
   },
   fab: {
     position: 'absolute',

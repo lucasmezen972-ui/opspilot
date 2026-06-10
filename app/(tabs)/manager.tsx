@@ -65,10 +65,18 @@ export default function ManagerDashboard() {
       const storeAudits = audits.filter((a) => a.store_id === store.id);
       const completed = storeAudits.filter((a) => a.status === 'completed');
       const scored = completed.filter((a) => a.score != null);
-      const avg = scored.length > 0
-        ? Math.round(scored.reduce((s, a) => s + (a.score ?? 0), 0) / scored.length)
-        : null;
-      return { store, total: storeAudits.length, completed: completed.length, avg };
+      const avg =
+        scored.length > 0
+          ? Math.round(
+              scored.reduce((s, a) => s + (a.score ?? 0), 0) / scored.length,
+            )
+          : null;
+      return {
+        store,
+        total: storeAudits.length,
+        completed: completed.length,
+        avg,
+      };
     });
   }, [stores, audits]);
 
@@ -184,20 +192,30 @@ export default function ManagerDashboard() {
                   {completed}/{total} audits terminés
                 </Text>
               </View>
-              <View style={[
-                styles.scoreChip,
-                avg === null ? styles.scoreChipGray
-                  : avg >= 80 ? styles.scoreChipGreen
-                  : avg >= 60 ? styles.scoreChipOrange
-                  : styles.scoreChipRed,
-              ]}>
-                <Text style={[
-                  styles.scoreChipText,
-                  avg === null ? { color: '#9CA3AF' }
-                    : avg >= 80 ? { color: '#16A34A' }
-                    : avg >= 60 ? { color: '#D97706' }
-                    : { color: '#DC2626' },
-                ]}>
+              <View
+                style={[
+                  styles.scoreChip,
+                  avg === null
+                    ? styles.scoreChipGray
+                    : avg >= 80
+                      ? styles.scoreChipGreen
+                      : avg >= 60
+                        ? styles.scoreChipOrange
+                        : styles.scoreChipRed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.scoreChipText,
+                    avg === null
+                      ? { color: '#9CA3AF' }
+                      : avg >= 80
+                        ? { color: '#16A34A' }
+                        : avg >= 60
+                          ? { color: '#D97706' }
+                          : { color: '#DC2626' },
+                  ]}
+                >
                   {avg !== null ? `${avg}%` : '—'}
                 </Text>
               </View>
@@ -448,9 +466,9 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 8,
   },
-  scoreChipGray:   { backgroundColor: '#F3F4F6' },
-  scoreChipGreen:  { backgroundColor: '#DCFCE7' },
+  scoreChipGray: { backgroundColor: '#F3F4F6' },
+  scoreChipGreen: { backgroundColor: '#DCFCE7' },
   scoreChipOrange: { backgroundColor: '#FEF3C7' },
-  scoreChipRed:    { backgroundColor: '#FEE2E2' },
+  scoreChipRed: { backgroundColor: '#FEE2E2' },
   scoreChipText: { fontSize: 14, fontWeight: '700' },
 });

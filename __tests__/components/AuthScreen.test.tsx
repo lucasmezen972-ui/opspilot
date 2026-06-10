@@ -35,6 +35,7 @@ describe('AuthScreen Component', () => {
       ready: true,
       loading: false,
       authError: null,
+      isOffline: false,
       signIn: mockSignIn,
       signUp: mockSignUp,
       signOut: vi.fn(),
@@ -123,22 +124,21 @@ describe('AuthScreen Component', () => {
     });
   });
 
-  it('should display demo account information in development mode', () => {
-    (globalThis as any).__DEV__ = true;
+  it('should display demo access section', () => {
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Comptes de démonstration')).toBeTruthy();
-    expect(getByText('Connexion employé')).toBeTruthy();
-    expect(getByText('Connexion manager')).toBeTruthy();
+    expect(getByText('Accès démo instantané')).toBeTruthy();
+    expect(getByText('Employé')).toBeTruthy();
+    expect(getByText('Manager')).toBeTruthy();
   });
 
-  it('should display demo account information in production mode', () => {
+  it('should display demo buttons in all modes', () => {
     (globalThis as any).__DEV__ = false;
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Comptes de démonstration')).toBeTruthy();
-    expect(getByText('Connexion employé')).toBeTruthy();
-    expect(getByText('Connexion manager')).toBeTruthy();
+    expect(getByText('Accès démo instantané')).toBeTruthy();
+    expect(getByText('Employé')).toBeTruthy();
+    expect(getByText('Manager')).toBeTruthy();
   });
 
   it('should show loading state when authenticating', () => {
@@ -152,6 +152,7 @@ describe('AuthScreen Component', () => {
       ready: false,
       loading: true,
       authError: null,
+      isOffline: false,
       signIn: mockSignIn,
       signUp: mockSignUp,
       signOut: vi.fn(),

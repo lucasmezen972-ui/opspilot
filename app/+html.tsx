@@ -28,10 +28,19 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpsPilot" />
         <link rel="apple-touch-icon" href={`${BASE}/icon-192.png`} />
-        <link rel="apple-touch-icon" sizes="180x180" href={`${BASE}/icon-192.png`} />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href={`${BASE}/icon-192.png`}
+        />
 
         {/* Favicon */}
-        <link rel="icon" type="image/png" sizes="32x32" href={`${BASE}/favicon.png`} />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href={`${BASE}/favicon.png`}
+        />
         <link rel="shortcut icon" href={`${BASE}/favicon.png`} />
 
         {/* Disable tap highlight on mobile */}

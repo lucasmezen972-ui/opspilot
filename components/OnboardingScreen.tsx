@@ -57,7 +57,9 @@ export default function OnboardingScreen() {
   };
 
   const canSubmit =
-    mode === 'create' ? orgName.trim().length > 1 : inviteCode.trim().length > 10;
+    mode === 'create'
+      ? orgName.trim().length > 1
+      : inviteCode.trim().length > 10;
 
   return (
     <KeyboardAvoidingView
@@ -75,23 +77,38 @@ export default function OnboardingScreen() {
 
         <View style={styles.modeToggle}>
           <TouchableOpacity
-            style={[styles.modeButton, mode === 'create' && styles.modeButtonActive]}
+            style={[
+              styles.modeButton,
+              mode === 'create' && styles.modeButtonActive,
+            ]}
             onPress={() => setMode('create')}
           >
-            <Building2 size={18} color={mode === 'create' ? '#2563EB' : '#6B7280'} />
+            <Building2
+              size={18}
+              color={mode === 'create' ? '#2563EB' : '#6B7280'}
+            />
             <Text
-              style={[styles.modeText, mode === 'create' && styles.modeTextActive]}
+              style={[
+                styles.modeText,
+                mode === 'create' && styles.modeTextActive,
+              ]}
             >
               Créer mon organisation
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.modeButton, mode === 'join' && styles.modeButtonActive]}
+            style={[
+              styles.modeButton,
+              mode === 'join' && styles.modeButtonActive,
+            ]}
             onPress={() => setMode('join')}
           >
             <Ticket size={18} color={mode === 'join' ? '#2563EB' : '#6B7280'} />
             <Text
-              style={[styles.modeText, mode === 'join' && styles.modeTextActive]}
+              style={[
+                styles.modeText,
+                mode === 'join' && styles.modeTextActive,
+              ]}
             >
               J'ai une invitation
             </Text>
@@ -141,7 +158,10 @@ export default function OnboardingScreen() {
         {!!error && <Text style={styles.error}>{error}</Text>}
 
         <TouchableOpacity
-          style={[styles.submitButton, (!canSubmit || submitting) && styles.submitDisabled]}
+          style={[
+            styles.submitButton,
+            (!canSubmit || submitting) && styles.submitDisabled,
+          ]}
           onPress={handleSubmit}
           disabled={!canSubmit || submitting}
         >

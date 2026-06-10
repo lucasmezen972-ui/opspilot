@@ -14,7 +14,9 @@ export function useMessages() {
 
   useEffect(() => {
     if (profile?.organization_id) {
-      fetchConversations().then((convs) => { if (convs) fetchUnreadCounts(convs); });
+      fetchConversations().then((convs) => {
+        if (convs) fetchUnreadCounts(convs);
+      });
       const cleanup = setupRealtimeSubscription();
       return () => {
         cleanup?.();
@@ -227,7 +229,7 @@ export function useMessages() {
 
     try {
       const counts: Record<string, number> = {};
-      for (const conv of (convs ?? conversations)) {
+      for (const conv of convs ?? conversations) {
         const { count, error } = await supabase
           .from('messages')
           .select('*', { count: 'exact', head: true })

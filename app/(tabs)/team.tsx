@@ -37,11 +37,11 @@ const ROLE_LABELS: Record<string, string> = {
 
 const DEFAULT_ROLE_COLOR = { bg: '#DBEAFE', text: '#2563EB' };
 const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-  admin:    { bg: '#FEE2E2', text: '#DC2626' },
-  manager:  { bg: '#EDE9FE', text: '#7C3AED' },
-  employé:  { bg: '#DBEAFE', text: '#2563EB' },
+  admin: { bg: '#FEE2E2', text: '#DC2626' },
+  manager: { bg: '#EDE9FE', text: '#7C3AED' },
+  employé: { bg: '#DBEAFE', text: '#2563EB' },
   employee: { bg: '#DBEAFE', text: '#2563EB' },
-  stagiaire:{ bg: '#FEF3C7', text: '#D97706' },
+  stagiaire: { bg: '#FEF3C7', text: '#D97706' },
 };
 
 const INVITE_ROLES: Invitation['role'][] = ['manager', 'employé', 'stagiaire'];
@@ -79,7 +79,9 @@ export default function TeamScreen() {
     const { error } = await createInvitation(inviteEmail, inviteRole);
     setSubmitting(false);
     if (error) {
-      setInviteError(typeof error === 'string' ? error : 'Erreur lors de l\'invitation');
+      setInviteError(
+        typeof error === 'string' ? error : "Erreur lors de l'invitation",
+      );
       return;
     }
     setModalVisible(false);
@@ -89,7 +91,7 @@ export default function TeamScreen() {
 
   const handleRevoke = (id: string, email: string) => {
     Alert.alert(
-      'Révoquer l\'invitation',
+      "Révoquer l'invitation",
       `Annuler l'invitation envoyée à ${email} ?`,
       [
         { text: 'Annuler', style: 'cancel' },
@@ -107,7 +109,7 @@ export default function TeamScreen() {
     const d = new Date(date);
     const diff = Date.now() - d.getTime();
     const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Aujourd\'hui';
+    if (days === 0) return "Aujourd'hui";
     if (days === 1) return 'Hier';
     return `Il y a ${days} jours`;
   };
@@ -151,7 +153,9 @@ export default function TeamScreen() {
               <View key={member.id} style={styles.memberCard}>
                 <View style={styles.avatar}>
                   <Text style={styles.avatarText}>
-                    {(member.full_name || member.email || '?').charAt(0).toUpperCase()}
+                    {(member.full_name || member.email || '?')
+                      .charAt(0)
+                      .toUpperCase()}
                   </Text>
                 </View>
                 <View style={styles.memberInfo}>
@@ -163,9 +167,16 @@ export default function TeamScreen() {
                   </View>
                   <Text style={styles.memberEmail}>{member.email}</Text>
                   <View style={styles.memberMeta}>
-                    <View style={[styles.roleBadge, { backgroundColor: roleColor.bg }]}>
+                    <View
+                      style={[
+                        styles.roleBadge,
+                        { backgroundColor: roleColor.bg },
+                      ]}
+                    >
                       <RoleIcon role={member.role} />
-                      <Text style={[styles.roleText, { color: roleColor.text }]}>
+                      <Text
+                        style={[styles.roleText, { color: roleColor.text }]}
+                      >
                         {ROLE_LABELS[member.role] ?? member.role}
                       </Text>
                     </View>
@@ -205,7 +216,8 @@ export default function TeamScreen() {
           ) : (
             pendingInvitations.map((inv) => {
               const roleColor = ROLE_COLORS[inv.role] ?? DEFAULT_ROLE_COLOR;
-              const expired = inv.expires_at && new Date(inv.expires_at) < new Date();
+              const expired =
+                inv.expires_at && new Date(inv.expires_at) < new Date();
               return (
                 <View key={inv.id} style={styles.invitationCard}>
                   <View style={styles.invitationLeft}>
@@ -213,8 +225,15 @@ export default function TeamScreen() {
                     <View style={styles.invitationInfo}>
                       <Text style={styles.invitationEmail}>{inv.email}</Text>
                       <View style={styles.memberMeta}>
-                        <View style={[styles.roleBadge, { backgroundColor: roleColor.bg }]}>
-                          <Text style={[styles.roleText, { color: roleColor.text }]}>
+                        <View
+                          style={[
+                            styles.roleBadge,
+                            { backgroundColor: roleColor.bg },
+                          ]}
+                        >
+                          <Text
+                            style={[styles.roleText, { color: roleColor.text }]}
+                          >
                             {ROLE_LABELS[inv.role] ?? inv.role}
                           </Text>
                         </View>
@@ -389,7 +408,12 @@ const styles = StyleSheet.create({
   memberInfo: { flex: 1 },
   memberNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   memberName: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  memberEmail: { fontSize: 12, color: '#9CA3AF', marginTop: 1, marginBottom: 6 },
+  memberEmail: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 1,
+    marginBottom: 6,
+  },
   memberMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   roleBadge: {
     flexDirection: 'row',
@@ -423,9 +447,19 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  invitationLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  invitationLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
   invitationInfo: { flex: 1 },
-  invitationEmail: { fontSize: 14, fontWeight: '500', color: '#111827', marginBottom: 6 },
+  invitationEmail: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 6,
+  },
   expiredBadge: {
     fontSize: 11,
     color: '#EF4444',
@@ -502,7 +536,12 @@ const styles = StyleSheet.create({
   roleOptionActive: { backgroundColor: '#EFF6FF' },
   roleOptionText: { fontSize: 15, color: '#374151' },
   roleOptionTextActive: { color: '#2563EB', fontWeight: '600' },
-  errorText: { fontSize: 13, color: '#DC2626', marginBottom: 12, textAlign: 'center' },
+  errorText: {
+    fontSize: 13,
+    color: '#DC2626',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
   submitButton: {
     backgroundColor: '#2563EB',
     borderRadius: 12,

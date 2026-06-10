@@ -6,8 +6,8 @@ import {
   Star,
   TrendingUp,
   Sparkles,
-  Trophy,
   Crown,
+  Trophy,
 } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -29,8 +29,8 @@ export default function TrainingScreen() {
   const { entries: leaderboard } = useLeaderboard();
   const {
     courses: dbCourses,
-    progress,
-    loading: trainingLoading,
+    progress: _progress,
+    loading: _trainingLoading,
     startCourse,
     updateProgress,
     getCourseProgress,
@@ -412,22 +412,75 @@ export default function TrainingScreen() {
             <Text style={styles.sectionTitle}>Classement de l'équipe</Text>
           </View>
           <View style={styles.leaderboard}>
-            {(leaderboard.length > 0 ? leaderboard : [{ id: profile?.id ?? '', full_name: profile?.full_name ?? 'Vous', email: '', role: profile?.role ?? 'employé', xp: profile?.xp ?? 0, level: profile?.level ?? 1, completed_trainings: profile?.completed_trainings ?? 0, total_audits: profile?.total_audits ?? 0, avg_score: profile?.avg_score ?? 0 }]).map((entry, idx) => {
+            {(leaderboard.length > 0
+              ? leaderboard
+              : [
+                  {
+                    id: profile?.id ?? '',
+                    full_name: profile?.full_name ?? 'Vous',
+                    email: '',
+                    role: profile?.role ?? 'employé',
+                    xp: profile?.xp ?? 0,
+                    level: profile?.level ?? 1,
+                    completed_trainings: profile?.completed_trainings ?? 0,
+                    total_audits: profile?.total_audits ?? 0,
+                    avg_score: profile?.avg_score ?? 0,
+                  },
+                ]
+            ).map((entry, idx) => {
               const isMe = entry.id === profile?.id;
               const rankColors = ['#F59E0B', '#9CA3AF', '#CD7F32'];
               const rankColor = rankColors[idx] ?? '#6B7280';
               return (
-                <View key={entry.id} style={[styles.leaderboardItem, isMe && styles.leaderboardItemMe]}>
-                  <View style={[styles.leaderboardRank, { backgroundColor: idx < 3 ? `${rankColor}20` : '#F3F4F6' }]}>
-                    {idx === 0 ? <Crown size={14} color={rankColor} /> : <Text style={[styles.leaderboardRankText, { color: rankColor }]}>{idx + 1}</Text>}
+                <View
+                  key={entry.id}
+                  style={[
+                    styles.leaderboardItem,
+                    isMe && styles.leaderboardItemMe,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.leaderboardRank,
+                      {
+                        backgroundColor: idx < 3 ? `${rankColor}20` : '#F3F4F6',
+                      },
+                    ]}
+                  >
+                    {idx === 0 ? (
+                      <Crown size={14} color={rankColor} />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.leaderboardRankText,
+                          { color: rankColor },
+                        ]}
+                      >
+                        {idx + 1}
+                      </Text>
+                    )}
                   </View>
                   <View style={styles.leaderboardInfo}>
-                    <Text style={[styles.leaderboardName, isMe && { fontWeight: '700' }]}>
-                      {entry.full_name || entry.email || 'Anonyme'}{isMe ? ' (moi)' : ''}
+                    <Text
+                      style={[
+                        styles.leaderboardName,
+                        isMe && { fontWeight: '700' },
+                      ]}
+                    >
+                      {entry.full_name || entry.email || 'Anonyme'}
+                      {isMe ? ' (moi)' : ''}
                     </Text>
-                    <Text style={styles.leaderboardSub}>Niv. {entry.level ?? 1} · {entry.completed_trainings ?? 0} formations</Text>
+                    <Text style={styles.leaderboardSub}>
+                      Niv. {entry.level ?? 1} · {entry.completed_trainings ?? 0}{' '}
+                      formations
+                    </Text>
                   </View>
-                  <Text style={[styles.leaderboardPoints, idx === 0 && { color: '#F59E0B' }]}>
+                  <Text
+                    style={[
+                      styles.leaderboardPoints,
+                      idx === 0 && { color: '#F59E0B' },
+                    ]}
+                  >
                     {entry.xp ?? 0} XP
                   </Text>
                 </View>

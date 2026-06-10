@@ -116,7 +116,13 @@ export async function queueAudit(audit: OfflineAudit): Promise<void> {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];
-    queue.push({ id: audit.id, table: 'audits', action: 'insert', data: audit, timestamp: Date.now() });
+    queue.push({
+      id: audit.id,
+      table: 'audits',
+      action: 'insert',
+      data: audit,
+      timestamp: Date.now(),
+    });
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
     console.warn('[Offline] Failed to queue audit:', error);
@@ -127,14 +133,23 @@ export async function queueTask(task: OfflineTask): Promise<void> {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];
-    queue.push({ id: task.id, table: 'tasks', action: 'insert', data: task, timestamp: Date.now() });
+    queue.push({
+      id: task.id,
+      table: 'tasks',
+      action: 'insert',
+      data: task,
+      timestamp: Date.now(),
+    });
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
     console.warn('[Offline] Failed to queue task:', error);
   }
 }
 
-export async function queuePhoto(auditId: string, photoUrl: string): Promise<void> {
+export async function queuePhoto(
+  auditId: string,
+  photoUrl: string,
+): Promise<void> {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];

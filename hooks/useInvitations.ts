@@ -9,8 +9,7 @@ export function useInvitations() {
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
 
-  const canManage =
-    profile?.role === 'admin' || profile?.role === 'manager';
+  const canManage = profile?.role === 'admin' || profile?.role === 'manager';
 
   const fetchInvitations = useCallback(async () => {
     if (!profile?.organization_id || !canManage) {
@@ -27,7 +26,10 @@ export function useInvitations() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des invitations', error);
+        mapSupabaseError(
+          'Erreur lors de la récupération des invitations',
+          error,
+        );
         return;
       }
 

@@ -79,6 +79,7 @@ describe('useAudits Hook', () => {
       ready: true,
       loading: false,
       authError: null,
+      isOffline: false,
       signIn: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),

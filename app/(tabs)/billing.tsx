@@ -1,4 +1,3 @@
-import React from 'react';
 import type { LucideIcon } from 'lucide-react-native';
 import {
   Crown,
@@ -9,6 +8,7 @@ import {
   TriangleAlert as AlertTriangle,
   ExternalLink,
 } from 'lucide-react-native';
+import React from 'react';
 import {
   View,
   Text,
@@ -97,7 +97,7 @@ const PLANS: Plan[] = [
 const DEFAULT_STATUS = { label: 'Essai gratuit', color: '#2563EB' };
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   trialing: { label: 'Essai gratuit', color: '#2563EB' },
-  active:   { label: 'Actif', color: '#16A34A' },
+  active: { label: 'Actif', color: '#16A34A' },
   past_due: { label: 'Paiement en retard', color: '#DC2626' },
   canceled: { label: 'Annulé', color: '#6B7280' },
 };
@@ -135,14 +135,18 @@ export default function BillingScreen() {
   };
 
   const handleEnterprise = async () => {
-    await Linking.openURL('mailto:contact@opspilot.fr?subject=Devis Enterprise OpsPilot');
+    await Linking.openURL(
+      'mailto:contact@opspilot.fr?subject=Devis Enterprise OpsPilot',
+    );
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Abonnement</Text>
-        <Text style={styles.subtitle}>{profile?.full_name || 'Mon compte'}</Text>
+        <Text style={styles.subtitle}>
+          {profile?.full_name || 'Mon compte'}
+        </Text>
       </View>
 
       {/* Current plan banner */}
@@ -152,8 +156,15 @@ export default function BillingScreen() {
           <Text style={styles.currentPlanName}>
             {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
           </Text>
-          <View style={[styles.statusBadge, { backgroundColor: `${statusInfo.color}20` }]}>
-            <View style={[styles.statusDot, { backgroundColor: statusInfo.color }]} />
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: `${statusInfo.color}20` },
+            ]}
+          >
+            <View
+              style={[styles.statusDot, { backgroundColor: statusInfo.color }]}
+            />
             <Text style={[styles.statusText, { color: statusInfo.color }]}>
               {statusInfo.label}
             </Text>
@@ -170,7 +181,9 @@ export default function BillingScreen() {
             ) : (
               <>
                 <AlertTriangle size={20} color="#EF4444" />
-                <Text style={[styles.trialDays, { color: '#EF4444' }]}>Expiré</Text>
+                <Text style={[styles.trialDays, { color: '#EF4444' }]}>
+                  Expiré
+                </Text>
               </>
             )}
           </View>
@@ -180,7 +193,9 @@ export default function BillingScreen() {
             <CheckCircle size={18} color="#16A34A" />
             <Text style={styles.renewDate}>
               Renouvelle le{'\n'}
-              {new Date(subscription.current_period_end).toLocaleDateString('fr-FR')}
+              {new Date(subscription.current_period_end).toLocaleDateString(
+                'fr-FR',
+              )}
             </Text>
           </View>
         )}
@@ -202,19 +217,20 @@ export default function BillingScreen() {
           return (
             <View
               key={plan.id}
-              style={[
-                styles.planCard,
-                isCurrent && styles.planCardCurrent,
-              ]}
+              style={[styles.planCard, isCurrent && styles.planCardCurrent]}
             >
               {plan.badge && (
-                <View style={[styles.popularBadge, { backgroundColor: plan.color }]}>
+                <View
+                  style={[styles.popularBadge, { backgroundColor: plan.color }]}
+                >
                   <Text style={styles.popularBadgeText}>{plan.badge}</Text>
                 </View>
               )}
 
               <View style={styles.planHeader}>
-                <View style={[styles.planIconWrapper, { backgroundColor: plan.bg }]}>
+                <View
+                  style={[styles.planIconWrapper, { backgroundColor: plan.bg }]}
+                >
                   <Icon size={22} color={plan.color} />
                 </View>
                 <View style={styles.planTitleBlock}>
@@ -242,11 +258,16 @@ export default function BillingScreen() {
 
               {plan.id === 'enterprise' ? (
                 <TouchableOpacity
-                  style={[styles.upgradeButton, { backgroundColor: plan.bg, borderColor: plan.color }]}
+                  style={[
+                    styles.upgradeButton,
+                    { backgroundColor: plan.bg, borderColor: plan.color },
+                  ]}
                   onPress={handleEnterprise}
                 >
                   <ExternalLink size={15} color={plan.color} />
-                  <Text style={[styles.upgradeButtonText, { color: plan.color }]}>
+                  <Text
+                    style={[styles.upgradeButtonText, { color: plan.color }]}
+                  >
                     Nous contacter
                   </Text>
                 </TouchableOpacity>
@@ -282,7 +303,8 @@ export default function BillingScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Les paiements sont sécurisés via Stripe. Annulation possible à tout moment.
+          Les paiements sont sécurisés via Stripe. Annulation possible à tout
+          moment.
         </Text>
       </View>
     </ScrollView>
@@ -316,7 +338,12 @@ const styles = StyleSheet.create({
   },
   currentPlanLeft: { flex: 1 },
   currentPlanLabel: { fontSize: 12, color: '#6B7280', marginBottom: 4 },
-  currentPlanName: { fontSize: 22, fontWeight: '700', color: '#111827', marginBottom: 8 },
+  currentPlanName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -331,9 +358,19 @@ const styles = StyleSheet.create({
   trialCountdown: { alignItems: 'center', gap: 4, marginLeft: 16 },
   trialDays: { fontSize: 28, fontWeight: '700', color: '#F59E0B' },
   trialDaysLabel: { fontSize: 11, color: '#6B7280' },
-  renewDate: { fontSize: 11, color: '#6B7280', textAlign: 'center', marginTop: 4 },
+  renewDate: {
+    fontSize: 11,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+  },
   section: { paddingHorizontal: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#111827', marginBottom: 16 },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 16,
+  },
   planCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
