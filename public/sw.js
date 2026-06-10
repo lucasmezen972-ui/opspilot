@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'opspilot-static-v3';
-const API_CACHE = 'opspilot-api-v3';
+const STATIC_CACHE = 'opspilot-static-v4';
+const API_CACHE = 'opspilot-api-v4';
 
 // Base path derived from the SW's own location (works on / or /opspilot/)
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '');
@@ -56,7 +56,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else — cache first, then network
+  // Navigation/HTML — network first, then cached app shell.
+  // This prevents GitHub Pages from serving an old cached blank shell forever.
+  if (
+    request.mode === 'navigate' ||
+    request.headers.get('accept')?.includes('text/html')
+  ) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match(BASE + '/')))
+    );
+    return;
+  }
+
+  // Static assets — cache first, then network.
   event.respondWith(
     caches.match(request).then(
       (cached) =>
