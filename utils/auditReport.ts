@@ -11,8 +11,12 @@ function scoreColor(score: number | null | undefined): string {
 
 function buildHTML(audit: Audit): string {
   const date = audit.completed_at
-    ? new Date(audit.completed_at).toLocaleDateString('fr-FR', { dateStyle: 'long' })
-    : new Date(audit.created_at).toLocaleDateString('fr-FR', { dateStyle: 'long' });
+    ? new Date(audit.completed_at).toLocaleDateString('fr-FR', {
+        dateStyle: 'long',
+      })
+    : new Date(audit.created_at).toLocaleDateString('fr-FR', {
+        dateStyle: 'long',
+      });
 
   const score = audit.score != null ? `${audit.score}%` : 'Non noté';
   const color = scoreColor(audit.score);
@@ -88,11 +92,15 @@ function buildHTML(audit: Audit): string {
   ${audit.notes ? `<div class="row"><span>Notes</span><span style="max-width:60%;text-align:right">${audit.notes}</span></div>` : ''}
 </div>
 
-${audit.photos?.length > 0 ? `
+${
+  audit.photos?.length > 0
+    ? `
 <div class="section">
   <h2>Photos (${audit.photos.length})</h2>
   <p style="font-size:13px;color:#6B7280">${audit.photos.length} photo(s) jointe(s) à cet audit.</p>
-</div>` : ''}
+</div>`
+    : ''
+}
 
 <div class="footer">
   Rapport généré par <strong>OpsPilot</strong> · ${new Date().toLocaleDateString('fr-FR')}
@@ -139,7 +147,9 @@ export async function exportAuditReport(audit: Audit) {
       audit.notes ? `Notes : ${audit.notes}` : '',
       '',
       'Généré par OpsPilot',
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     await Share.share({ title: `Rapport ${audit.title}`, message: summary });
   }

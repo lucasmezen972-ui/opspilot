@@ -224,10 +224,7 @@ export default function ActionsScreen() {
           ]}
           onPress={() => setViewMode('list')}
         >
-          <List
-            size={16}
-            color={viewMode === 'list' ? '#2563EB' : '#6B7280'}
-          />
+          <List size={16} color={viewMode === 'list' ? '#2563EB' : '#6B7280'} />
           <Text
             style={[
               styles.toggleText,
@@ -260,7 +257,10 @@ export default function ActionsScreen() {
       </View>
 
       {viewMode === 'list' ? (
-        <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+        <ScrollView
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+        >
           {actions.length === 0 && !loading && (
             <View style={styles.empty}>
               <CheckCircle size={40} color="#10B981" />
@@ -272,7 +272,11 @@ export default function ActionsScreen() {
           {actions.map((a) => renderCard(a))}
         </ScrollView>
       ) : (
-        <ScrollView horizontal style={styles.kanban} contentContainerStyle={styles.kanbanContent}>
+        <ScrollView
+          horizontal
+          style={styles.kanban}
+          contentContainerStyle={styles.kanbanContent}
+        >
           {STATUS_FLOW.map((status) => (
             <View key={status} style={styles.kanbanColumn}>
               <View style={styles.kanbanHeader}>
@@ -324,9 +328,7 @@ export default function ActionsScreen() {
 
             <Text style={styles.fieldLabel}>Priorité</Text>
             <View style={styles.priorityRow}>
-              {(
-                ['low', 'medium', 'high', 'critical'] as const
-              ).map((p) => (
+              {(['low', 'medium', 'high', 'critical'] as const).map((p) => (
                 <TouchableOpacity
                   key={p}
                   style={[

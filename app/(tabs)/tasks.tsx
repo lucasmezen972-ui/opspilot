@@ -35,7 +35,9 @@ export default function TasksScreen() {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [newTaskPriority, setNewTaskPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
+  const [newTaskPriority, setNewTaskPriority] = useState<
+    'low' | 'medium' | 'high' | 'urgent'
+  >('medium');
 
   // Filtrer les tâches
   const filteredTasks = useMemo(() => {
@@ -159,7 +161,9 @@ export default function TasksScreen() {
   };
 
   const handleConfirmCreateTask = async () => {
-    const title = newTaskTitle.trim() || `Tâche du ${new Date().toLocaleDateString('fr-FR')}`;
+    const title =
+      newTaskTitle.trim() ||
+      `Tâche du ${new Date().toLocaleDateString('fr-FR')}`;
     setCreateModalVisible(false);
     const result = await createTask({
       title,
@@ -423,7 +427,10 @@ export default function TasksScreen() {
               autoFocus
             />
             <TextInput
-              style={[styles.modalInput, { height: 80, textAlignVertical: 'top' }]}
+              style={[
+                styles.modalInput,
+                { height: 80, textAlignVertical: 'top' },
+              ]}
               value={newTaskDescription}
               onChangeText={setNewTaskDescription}
               placeholder="Description (optionnel)"
@@ -435,21 +442,35 @@ export default function TasksScreen() {
                   key={p}
                   style={[
                     styles.priorityOption,
-                    newTaskPriority === p && { backgroundColor: getPriorityColor(p), borderColor: getPriorityColor(p) },
+                    newTaskPriority === p && {
+                      backgroundColor: getPriorityColor(p),
+                      borderColor: getPriorityColor(p),
+                    },
                   ]}
                   onPress={() => setNewTaskPriority(p)}
                 >
-                  <Text style={[styles.priorityOptionText, newTaskPriority === p && { color: '#FFFFFF' }]}>
+                  <Text
+                    style={[
+                      styles.priorityOptionText,
+                      newTaskPriority === p && { color: '#FFFFFF' },
+                    ]}
+                  >
                     {getPriorityText(p)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancelButton} onPress={() => setCreateModalVisible(false)}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setCreateModalVisible(false)}
+              >
                 <Text style={styles.modalCancelText}>Annuler</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirmButton} onPress={handleConfirmCreateTask}>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmCreateTask}
+              >
                 <Text style={styles.modalConfirmText}>Créer</Text>
               </TouchableOpacity>
             </View>

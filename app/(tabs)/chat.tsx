@@ -48,9 +48,14 @@ export default function ChatScreen() {
       ? dbConversations.map((c) => ({
           id: c.id,
           name: c.name,
-          lastMessage: ((c as any).messages && (c as any).messages.length > 0)
-            ? (c as any).messages.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0].content
-            : 'Aucun message',
+          lastMessage:
+            (c as any).messages && (c as any).messages.length > 0
+              ? (c as any).messages.sort(
+                  (a: any, b: any) =>
+                    new Date(b.created_at).getTime() -
+                    new Date(a.created_at).getTime(),
+                )[0].content
+              : 'Aucun message',
           timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', {
             hour: '2-digit',
             minute: '2-digit',

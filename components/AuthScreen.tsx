@@ -1,16 +1,22 @@
-import { LogIn, UserPlus } from 'lucide-react-native';
-import React, { useState, useEffect } from 'react';
+import { LogIn, UserPlus, Zap } from 'lucide-react-native';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 
 import ConnectedStatus from './ConnectedStatus';
 import { useAuth } from '../hooks/useAuth';
 import { loginSchema } from '../utils/validation';
+
+const DEMO_ACCOUNTS = [
+  { label: 'Employé', email: 'demo@opspilot.com', password: 'demo123' },
+  { label: 'Manager', email: 'marie.dupont@opspilot.com', password: 'marie123' },
+] as const;
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,14 +24,9 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [localError, setLocalError] = useState('');
-  const { signIn, signUp, authError } = useAuth();
-
-  useEffect(() => {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      // runConnectionTest(); // garder uniquement en DEV si besoin
-    }
-  }, []);
+  const { signIn, signUp, authError, isOffline } = useAuth();
 
   const handleAuth = async () => {
     setLocalError('');
@@ -56,9 +57,26 @@ export default function AuthScreen() {
         );
       }
     } catch (e: any) {
-      setLocalError(e?.message ?? 'Erreur');
+      setLocalError(e?.message ?? 'Erreur de connexion');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string) => {
+    setLocalError('');
+    setDemoLoading(demoEmail);
+    try {
+      const result = await signIn(demoEmail, demoPassword);
+      if (result.error) {
+        throw result.error;
+      }
+    } catch (e: any) {
+      setLocalError(
+        e?.message ?? 'Compte démo indisponible. Vérifiez votre connexion.',
+      );
+    } finally {
+      setDemoLoading(null);
     }
   };
 
@@ -80,11 +98,55 @@ export default function AuthScreen() {
         <ConnectedStatus />
       </View>
 
-      {displayError && (
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <Text style={styles.offlineText}>
+            ⚠️ Connexion temporairement indisponible
+          </Text>
+        </View>
+      )}
+
+      {displayError && !isOffline && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>❌ {displayError}</Text>
         </View>
       )}
+
+      {/* Demo accounts — quick access at top */}
+      <View style={styles.demoContainer}>
+        <View style={styles.demoHeader}>
+          <Zap size={16} color="#F59E0B" />
+          <Text style={styles.demoTitle}>Accès démo instantané</Text>
+        </View>
+        <View style={styles.demoRow}>
+          {DEMO_ACCOUNTS.map((account) => {
+            const isLoading = demoLoading === account.email;
+            return (
+              <TouchableOpacity
+                key={account.email}
+                style={[styles.demoButton, isLoading && styles.demoButtonLoading]}
+                onPress={() => handleDemoLogin(account.email, account.password)}
+                disabled={!!demoLoading || loading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Zap size={14} color="#FFFFFF" />
+                )}
+                <Text style={styles.demoButtonText}>
+                  {isLoading ? 'Connexion...' : account.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>ou connectez-vous</Text>
+        <View style={styles.dividerLine} />
+      </View>
 
       <View style={styles.form}>
         <Text style={styles.formTitle}>
@@ -122,19 +184,17 @@ export default function AuthScreen() {
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleAuth}
-          disabled={loading}
+          disabled={loading || !!demoLoading}
         >
-          {isLogin ? (
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : isLogin ? (
             <LogIn size={20} color="#FFFFFF" />
           ) : (
             <UserPlus size={20} color="#FFFFFF" />
           )}
           <Text style={styles.buttonText}>
-            {loading
-              ? 'Chargement...'
-              : isLogin
-                ? 'Se connecter'
-                : "S'inscrire"}
+            {loading ? 'Connexion...' : isLogin ? 'Se connecter' : "S'inscrire"}
           </Text>
         </TouchableOpacity>
 
@@ -149,41 +209,6 @@ export default function AuthScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.demoContainer}>
-        <Text style={styles.demoTitle}>Comptes de démonstration</Text>
-        <View style={styles.demoAccount}>
-          <Text style={styles.demoAccountLabel}>Employé</Text>
-          <Text style={styles.demoText}>demo@opspilot.com / demo123</Text>
-          <TouchableOpacity
-            style={styles.demoFillButton}
-            onPress={() => {
-              setEmail('demo@opspilot.com');
-              setPassword('demo123');
-              setIsLogin(true);
-              setLocalError('');
-            }}
-          >
-            <Text style={styles.demoFillButtonText}>Connexion employé</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.demoAccount}>
-          <Text style={styles.demoAccountLabel}>Manager</Text>
-          <Text style={styles.demoText}>
-            marie.dupont@opspilot.com / marie123
-          </Text>
-          <TouchableOpacity
-            style={styles.demoFillButton}
-            onPress={() => {
-              setEmail('marie.dupont@opspilot.com');
-              setPassword('marie123');
-              setIsLogin(true);
-              setLocalError('');
-            }}
-          >
-            <Text style={styles.demoFillButtonText}>Connexion manager</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
     </View>
   );
 }
@@ -197,159 +222,173 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 24,
   },
   logo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   logoText: {
     color: '#FFFFFF',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   statusContainer: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
-  statusIndicator: {
-    backgroundColor: '#F3F4F6',
+  offlineBanner: {
+    backgroundColor: '#FEF3C7',
     borderRadius: 8,
-    padding: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#F59E0B',
   },
-  statusText: {
-    fontSize: 12,
+  offlineText: {
+    color: '#92400E',
+    fontSize: 13,
+    fontWeight: '500',
     textAlign: 'center',
-    color: '#6B7280',
+  },
+  errorContainer: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#EF4444',
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  demoContainer: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  demoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
+  demoTitle: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#92400E',
+  },
+  demoRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  demoButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#F59E0B',
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  demoButtonLoading: {
+    opacity: 0.8,
+  },
+  demoButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    color: '#9CA3AF',
+    fontSize: 12,
   },
   form: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 10,
+    elevation: 8,
   },
   formTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 24,
+    marginBottom: 20,
     textAlign: 'center',
   },
   input: {
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 16,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    fontSize: 15,
+    marginBottom: 12,
     backgroundColor: '#FFFFFF',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
     backgroundColor: '#2563EB',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginBottom: 16,
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderRadius: 10,
+    paddingVertical: 14,
+    marginBottom: 12,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginLeft: 8,
   },
   switchButton: {
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   switchButtonText: {
     color: '#2563EB',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  demoContainer: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    gap: 12,
-  },
-  demoTitle: {
-    fontWeight: '600',
-    marginBottom: 4,
-    color: '#111827',
-    fontSize: 16,
-  },
-  demoAccount: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 12,
-  },
-  demoAccountLabel: {
-    fontWeight: '600',
-    fontSize: 13,
-    color: '#2563EB',
-    marginBottom: 4,
-  },
-  demoText: {
-    fontSize: 13,
-    color: '#374151',
-  },
-  demoFillButton: {
-    marginTop: 8,
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  demoFillButtonText: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
-  },
-  errorContainer: {
-    backgroundColor: '#FEE2E2',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'center',
   },
 });

@@ -4,8 +4,17 @@ import { useAuth } from './useAuth';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
-export type LeaderboardEntry = Pick<Profile,
-  'id' | 'full_name' | 'email' | 'role' | 'xp' | 'level' | 'completed_trainings' | 'total_audits' | 'avg_score'
+export type LeaderboardEntry = Pick<
+  Profile,
+  | 'id'
+  | 'full_name'
+  | 'email'
+  | 'role'
+  | 'xp'
+  | 'level'
+  | 'completed_trainings'
+  | 'total_audits'
+  | 'avg_score'
 >;
 
 export function useLeaderboard() {
@@ -22,12 +31,17 @@ export function useLeaderboard() {
       setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, email, role, xp, level, completed_trainings, total_audits, avg_score')
+        .select(
+          'id, full_name, email, role, xp, level, completed_trainings, total_audits, avg_score',
+        )
         .eq('organization_id', profile.organization_id)
         .order('xp', { ascending: false })
         .limit(20);
 
-      if (error) { mapSupabaseError('Erreur leaderboard', error); return; }
+      if (error) {
+        mapSupabaseError('Erreur leaderboard', error);
+        return;
+      }
       setEntries((data as LeaderboardEntry[]) || []);
     } catch (e) {
       mapSupabaseError('Erreur useLeaderboard', e);
@@ -36,7 +50,9 @@ export function useLeaderboard() {
     }
   }, [profile?.organization_id]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   return { entries, loading, refetch: fetch };
 }

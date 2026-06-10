@@ -69,9 +69,7 @@ export default function TabLayout() {
         name="actions"
         options={{
           title: 'Actions',
-          tabBarIcon: ({ size, color }) => (
-            <Wrench size={size} color={color} />
-          ),
+          tabBarIcon: ({ size, color }) => <Wrench size={size} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -120,7 +118,9 @@ export default function TabLayout() {
         name="billing"
         options={{
           title: 'Abonnement',
-          tabBarIcon: ({ size, color }) => <CreditCard size={size} color={color} />,
+          tabBarIcon: ({ size, color }) => (
+            <CreditCard size={size} color={color} />
+          ),
           href: profile?.role === 'admin' ? '/billing' : null,
         }}
       />

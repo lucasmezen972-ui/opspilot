@@ -59,7 +59,10 @@ export function useTeam() {
       setMembers((prev) => prev.map((m) => (m.id === memberId ? data : m)));
       return { data, error: null };
     } catch (error) {
-      return { data: null, error: mapSupabaseError('Erreur updateMemberRole', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateMemberRole', error),
+      };
     }
   };
 

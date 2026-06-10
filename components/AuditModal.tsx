@@ -1,11 +1,4 @@
-import {
-  X,
-  Camera,
-  MapPin,
-  Calendar,
-  FileText,
-  Sparkles,
-} from 'lucide-react-native';
+import { X, MapPin, Calendar, FileText } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   View,
@@ -63,7 +56,10 @@ export default function AuditModal({
       if (dueDate) {
         const parsed = new Date(dueDate);
         if (isNaN(parsed.getTime())) {
-          Alert.alert('Erreur', 'Format de date invalide. Utilisez YYYY-MM-DD HH:MM');
+          Alert.alert(
+            'Erreur',
+            'Format de date invalide. Utilisez YYYY-MM-DD HH:MM',
+          );
           setLoading(false);
           return;
         }

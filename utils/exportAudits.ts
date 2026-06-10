@@ -1,7 +1,7 @@
 import { Platform, Share } from 'react-native';
 
-import type { Audit } from '../lib/supabase';
 import { dataToCSV } from './export';
+import type { Audit } from '../lib/supabase';
 
 function auditToRow(a: Audit) {
   return {
@@ -11,8 +11,12 @@ function auditToRow(a: Audit) {
     'Score max': a.max_score,
     Problèmes: a.issues_count,
     Localisation: a.location ?? '',
-    'Créé le': a.created_at ? new Date(a.created_at).toLocaleDateString('fr-FR') : '',
-    'Terminé le': a.completed_at ? new Date(a.completed_at).toLocaleDateString('fr-FR') : '',
+    'Créé le': a.created_at
+      ? new Date(a.created_at).toLocaleDateString('fr-FR')
+      : '',
+    'Terminé le': a.completed_at
+      ? new Date(a.completed_at).toLocaleDateString('fr-FR')
+      : '',
   };
 }
 

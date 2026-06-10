@@ -194,9 +194,8 @@ export function useTraining() {
     if (!profile) return;
 
     try {
-      const completedCount = progress.filter(
-        (p) => p.status === 'completed',
-      ).length + 1;
+      const completedCount =
+        progress.filter((p) => p.status === 'completed').length + 1;
 
       await supabase
         .from('profiles')

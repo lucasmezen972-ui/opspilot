@@ -18,12 +18,33 @@ function AuthGate() {
 
   if (!ready || loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
-        <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#2563EB', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 32, fontWeight: '700' }}>OP</Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#F8FAFC',
+        }}
+      >
+        <View
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: '#2563EB',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ color: '#FFFFFF', fontSize: 32, fontWeight: '700' }}>
+            OP
+          </Text>
         </View>
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={{ color: '#6B7280', marginTop: 12, fontSize: 16 }}>Chargement...</Text>
+        <Text style={{ color: '#6B7280', marginTop: 12, fontSize: 16 }}>
+          Chargement...
+        </Text>
       </View>
     );
   }
