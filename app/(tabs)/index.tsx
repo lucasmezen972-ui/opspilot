@@ -276,7 +276,7 @@ export default function HomeScreen() {
               color: '#0891B2',
               title: 'Rapports',
               sub: 'Exporter PDF',
-              route: '/audits' as const,
+              route: '/reports' as const,
             },
             {
               icon: BookOpen,
@@ -291,6 +291,7 @@ export default function HomeScreen() {
               title: 'Facturation',
               sub: 'Abonnement',
               route: '/billing' as const,
+              roles: ['admin'],
             },
             {
               icon: Settings,
@@ -299,7 +300,12 @@ export default function HomeScreen() {
               sub: 'Profil & équipe',
               route: '/profile' as const,
             },
-          ].map((item) => {
+          ]
+            .filter(
+              (item: any) =>
+                !item.roles || item.roles.includes(profile?.role ?? ''),
+            )
+            .map((item) => {
             const Icon = item.icon;
             return (
               <TouchableOpacity

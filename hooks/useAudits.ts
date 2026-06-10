@@ -175,6 +175,55 @@ export function useAudits() {
     }
   };
 
+  // Clôture d'audit avec résultat du questionnaire (score + non-conformités).
+  const completeAudit = async (
+    id: string,
+    score: number,
+    issuesCount: number,
+  ) => {
+    const updates: Record<string, any> = {
+      status: 'completed',
+      score,
+      issues_count: issuesCount,
+      completed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (isLocalDemo) {
+      let updated: Audit | null = null;
+      setAudits((prev) =>
+        prev.map((a) => {
+          if (a.id !== id) return a;
+          updated = { ...a, ...updates } as Audit;
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('audits')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError("Erreur lors de la clôture de l'audit", error),
+        };
+      }
+      setAudits((prev) => prev.map((a) => (a.id === id ? data : a)));
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur completeAudit', error),
+      };
+    }
+  };
+
   const addPhotoToAudit = async (id: string, photoUrl: string) => {
     try {
       const audit = audits.find((a) => a.id === id);
@@ -221,6 +270,7 @@ export function useAudits() {
     loading,
     createAudit,
     updateAuditStatus,
+    completeAudit,
     addPhotoToAudit,
     refetch: fetchAudits,
   };

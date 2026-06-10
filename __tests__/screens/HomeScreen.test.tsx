@@ -89,6 +89,7 @@ describe('HomeScreen', () => {
       loading: false,
       createAudit: vi.fn(),
       updateAuditStatus: vi.fn(),
+      completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
       refetch: vi.fn(),
     });
@@ -156,6 +157,7 @@ describe('HomeScreen', () => {
       loading: false,
       createAudit: vi.fn(),
       updateAuditStatus: vi.fn(),
+      completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
       refetch: vi.fn(),
     });

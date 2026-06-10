@@ -11,6 +11,7 @@ import {
   Wrench,
   Users,
   CreditCard,
+  FileText,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
@@ -70,6 +71,15 @@ export default function TabLayout() {
         options={{
           title: 'Actions',
           tabBarIcon: ({ size, color }) => <Wrench size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Rapports',
+          tabBarIcon: ({ size, color }) => (
+            <FileText size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen

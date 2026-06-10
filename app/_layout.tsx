@@ -1,3 +1,5 @@
+import '../utils/alertPolyfill';
+
 import { Slot, useSegments } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, View, Text } from 'react-native';

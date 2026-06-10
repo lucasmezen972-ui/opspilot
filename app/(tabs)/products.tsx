@@ -1,4 +1,5 @@
 import {
+  Plus,
   Scan,
   Search,
   TriangleAlert as AlertTriangle,
@@ -30,6 +31,7 @@ export default function ProductsScreen() {
     products: allProducts,
     loading,
     scanProduct,
+    createProduct,
     updateProductStock,
   } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
@@ -38,6 +40,45 @@ export default function ProductsScreen() {
   const [stockModalValue, setStockModalValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newCategory, setNewCategory] = useState('');
+  const [newStock, setNewStock] = useState('0');
+  const [newPrice, setNewPrice] = useState('');
+  const [newDlcDays, setNewDlcDays] = useState('');
+  const [newBarcode, setNewBarcode] = useState('');
+
+  const openAddModal = (prefillBarcode?: string) => {
+    setNewName('');
+    setNewCategory('');
+    setNewStock('0');
+    setNewPrice('');
+    setNewDlcDays('');
+    setNewBarcode(prefillBarcode ?? '');
+    setAddModalVisible(true);
+  };
+
+  const handleAddProduct = async () => {
+    if (!newName.trim()) return;
+    const dlcDays = parseInt(newDlcDays, 10);
+    const price = parseFloat(newPrice.replace(',', '.'));
+    const result = await createProduct({
+      name: newName.trim(),
+      category: newCategory.trim() || null,
+      stock_quantity: parseInt(newStock, 10) || 0,
+      price: Number.isFinite(price) ? price : null,
+      dlc: Number.isFinite(dlcDays)
+        ? new Date(Date.now() + dlcDays * 86400000).toISOString()
+        : null,
+      barcode: newBarcode.trim() || null,
+    });
+    setAddModalVisible(false);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
+      Alert.alert('Produit ajouté', `${newName.trim()} a été ajouté au stock.`);
+    }
+  };
 
   const products = allProducts.filter((p) => {
     if (!searchQuery) return true;
@@ -134,11 +175,7 @@ export default function ProductsScreen() {
             { text: 'OK', style: 'default' },
             {
               text: 'Ajouter produit',
-              onPress: () =>
-                Alert.alert(
-                  'Info',
-                  "Fonctionnalité d'ajout de produit à venir",
-                ),
+              onPress: () => openAddModal(randomBarcode),
             },
           ],
         );
@@ -174,6 +211,13 @@ export default function ProductsScreen() {
             onPress={() => setShowSearch(!showSearch)}
           >
             <Search size={20} color={showSearch ? '#059669' : '#6B7280'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            testID="product-add-button"
+            style={[styles.headerButton, styles.headerButtonPrimary]}
+            onPress={() => openAddModal()}
+          >
+            <Plus size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
@@ -374,6 +418,77 @@ export default function ProductsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Add product modal */}
+      <Modal visible={addModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent} testID="product-add-modal">
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Ajouter un produit</Text>
+              <TouchableOpacity onPress={() => setAddModalVisible(false)}>
+                <X size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              testID="product-add-name"
+              style={styles.modalInput}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Nom du produit *"
+              autoFocus
+            />
+            <TextInput
+              style={styles.modalInput}
+              value={newCategory}
+              onChangeText={setNewCategory}
+              placeholder="Catégorie (ex : Crèmerie)"
+            />
+            <TextInput
+              style={styles.modalInput}
+              value={newStock}
+              onChangeText={setNewStock}
+              keyboardType="numeric"
+              placeholder="Stock initial"
+            />
+            <TextInput
+              style={styles.modalInput}
+              value={newPrice}
+              onChangeText={setNewPrice}
+              keyboardType="numeric"
+              placeholder="Prix (€)"
+            />
+            <TextInput
+              style={styles.modalInput}
+              value={newDlcDays}
+              onChangeText={setNewDlcDays}
+              keyboardType="numeric"
+              placeholder="DLC dans X jours (vide = sans DLC)"
+            />
+            <TextInput
+              style={styles.modalInput}
+              value={newBarcode}
+              onChangeText={setNewBarcode}
+              keyboardType="numeric"
+              placeholder="Code-barres (optionnel)"
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setAddModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID="product-add-submit"
+                style={styles.modalConfirmButton}
+                onPress={handleAddProduct}
+              >
+                <Text style={styles.modalConfirmText}>Ajouter</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -401,6 +516,9 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     gap: 8,
+  },
+  headerButtonPrimary: {
+    backgroundColor: '#059669',
   },
   headerButton: {
     width: 40,

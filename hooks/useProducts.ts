@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoProducts } from '../lib/demoData';
+import { getDemoProducts, demoId } from '../lib/demoData';
 import { supabase, type Product } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
@@ -129,11 +129,72 @@ export function useProducts() {
     }
   };
 
+  const createProduct = async (productData: Partial<Product>) => {
+    if (!profile?.organization_id) {
+      return { data: null, error: 'Utilisateur non connecté' };
+    }
+
+    if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const data: Product = {
+        id: demoId('demo-prod'),
+        organization_id: profile.organization_id,
+        name: productData.name || '',
+        barcode: productData.barcode ?? null,
+        category: productData.category ?? null,
+        price: productData.price ?? null,
+        stock_quantity: productData.stock_quantity ?? 0,
+        min_stock: productData.min_stock ?? null,
+        dlc: productData.dlc ?? null,
+        image_url: null,
+        added_by: profile.id,
+        created_at: now,
+        updated_at: now,
+      };
+      setProducts((prev) => [data, ...prev]);
+      return { data, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
+          organization_id: profile.organization_id,
+          name: productData.name || '',
+          barcode: productData.barcode ?? null,
+          category: productData.category ?? null,
+          price: productData.price ?? null,
+          stock_quantity: productData.stock_quantity ?? 0,
+          dlc: productData.dlc ?? null,
+          added_by: profile.id,
+        })
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError(
+            'Erreur lors de la création du produit',
+            error,
+          ),
+        };
+      }
+      setProducts((prev) => [data, ...prev]);
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur createProduct', error),
+      };
+    }
+  };
+
   return {
     products,
     loading,
     fetchProduct,
     scanProduct,
+    createProduct,
     updateProductStock,
     refetch: fetchProducts,
   };

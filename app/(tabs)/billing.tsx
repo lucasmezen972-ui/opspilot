@@ -19,6 +19,7 @@ import {
   Alert,
 } from 'react-native';
 
+import RequireRole from '../../components/RequireRole';
 import { useAuth } from '../../hooks/useAuth';
 import { useSubscription } from '../../hooks/useSubscription';
 import { supabase } from '../../lib/supabase';
@@ -105,6 +106,14 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 const PLAN_ORDER = { trial: 0, essential: 1, business: 2, enterprise: 3 };
 
 export default function BillingScreen() {
+  return (
+    <RequireRole roles={['admin']}>
+      <BillingScreenContent />
+    </RequireRole>
+  );
+}
+
+function BillingScreenContent() {
   const { profile } = useAuth();
   const { subscription, trialDaysLeft } = useSubscription();
 
@@ -138,6 +147,29 @@ export default function BillingScreen() {
     await Linking.openURL(
       'mailto:contact@opspilot.fr?subject=Devis Enterprise OpsPilot',
     );
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'create-customer-portal',
+        { body: { returnUrl: 'https://lucasmezen972-ui.github.io/opspilot/billing' } },
+      );
+      if (error || !data?.url) {
+        const msg =
+          (error as any)?.message ??
+          data?.error ??
+          "Portail de facturation indisponible. Souscrivez d'abord à un plan.";
+        Alert.alert('Gestion abonnement', msg);
+        return;
+      }
+      await Linking.openURL(data.url);
+    } catch {
+      Alert.alert(
+        'Gestion abonnement',
+        'Portail de facturation indisponible pour le moment.',
+      );
+    }
   };
 
   return (
@@ -200,6 +232,16 @@ export default function BillingScreen() {
           </View>
         )}
       </View>
+
+      {/* Manage subscription (Stripe Billing Portal) */}
+      <TouchableOpacity
+        testID="manage-subscription-button"
+        style={styles.manageButton}
+        onPress={handleManageSubscription}
+      >
+        <ExternalLink size={16} color="#2563EB" />
+        <Text style={styles.manageButtonText}>Gérer mon abonnement</Text>
+      </TouchableOpacity>
 
       {/* Plan cards */}
       <View style={styles.section}>
@@ -335,6 +377,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
+  },
+  manageButton: {
+    marginHorizontal: 20,
+    marginTop: -8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 12,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  manageButtonText: {
+    color: '#2563EB',
+    fontSize: 14,
+    fontWeight: '600',
   },
   currentPlanLeft: { flex: 1 },
   currentPlanLabel: { fontSize: 12, color: '#6B7280', marginBottom: 4 },

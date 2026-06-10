@@ -163,6 +163,7 @@ export default function ActionsScreen() {
           {action.status !== 'done' && action.status !== 'cancelled' && (
             <TouchableOpacity
               style={styles.advanceButton}
+              testID={`action-advance-${action.id}`}
               onPress={() => advanceStatus(action)}
             >
               <Text style={styles.advanceButtonText}>
@@ -189,6 +190,7 @@ export default function ActionsScreen() {
           </Text>
         </View>
         <TouchableOpacity
+          testID="action-create-button"
           style={styles.addButton}
           onPress={() => setCreateModalVisible(true)}
         >
@@ -196,7 +198,7 @@ export default function ActionsScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.statsRow}>
+      <View style={styles.statsRow} testID="actions-counters">
         <View style={styles.statCard}>
           <Clock size={18} color="#F59E0B" />
           <Text style={styles.statValue}>{openCount}</Text>
@@ -223,6 +225,7 @@ export default function ActionsScreen() {
             viewMode === 'list' && styles.toggleButtonActive,
           ]}
           onPress={() => setViewMode('list')}
+          testID="actions-view-list"
         >
           <List size={16} color={viewMode === 'list' ? '#2563EB' : '#6B7280'} />
           <Text
@@ -240,6 +243,7 @@ export default function ActionsScreen() {
             viewMode === 'kanban' && styles.toggleButtonActive,
           ]}
           onPress={() => setViewMode('kanban')}
+          testID="actions-view-kanban"
         >
           <Columns
             size={16}
@@ -367,6 +371,7 @@ export default function ActionsScreen() {
                 styles.submitButton,
                 !newTitle.trim() && styles.submitButtonDisabled,
               ]}
+              testID="action-create-submit"
               onPress={handleCreate}
               disabled={!newTitle.trim()}
             >
