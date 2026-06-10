@@ -19,7 +19,7 @@ jobs:
         id: check
         run: |
           if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
-            echo "::notice::Secret SUPABASE_ACCESS_TOKEN absent — skipping migrations."
+            echo "::notice::Secret SUPABASE_ACCESS_TOKEN absent - skipping migrations."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -34,35 +34,22 @@ jobs:
           echo "=== Application des migrations SQL ==="
           for f in supabase/migrations/2026*.sql; do
             [ -f "$f" ] || continue
-            name=$(basename "$f")
-            echo "→ $name"
-            python3 - "$f" <<'PYEOF'
-import sys, json, urllib.request, os
-
-sql_file = sys.argv[1]
-token = os.environ["SUPABASE_ACCESS_TOKEN"]
-ref = os.environ["PROJECT_REF"]
-sql = open(sql_file).read()
-
-data = json.dumps({"query": sql}).encode()
-req = urllib.request.Request(
-    f"https://api.supabase.com/v1/projects/{ref}/database/query",
-    data=data,
-    headers={
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    },
-)
-try:
-    resp = urllib.request.urlopen(req)
-    print(f"✅ OK: {resp.read().decode()[:200]}")
-except urllib.error.HTTPError as e:
-    body = e.read().decode()
-    if "already exists" in body or "duplicate" in body.lower():
-        print(f"⏭  Already applied (skipped): {body[:200]}")
-    else:
-        print(f"❌ Error: {body[:500]}", file=sys.stderr)
-        sys.exit(1)
-PYEOF
+            echo "-> $(basename "$f")"
+            payload=$(jq -Rs '{query: .}' < "$f")
+            out=$(curl -sS -w '\n%{http_code}' -X POST \
+              "https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query" \
+              -H "Authorization: Bearer ${SUPABASE_ACCESS_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data "$payload")
+            code=${out##*$'\n'}
+            resp=${out%$'\n'*}
+            if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
+              echo "OK"
+            elif echo "$resp" | grep -qiE 'already exists|duplicate'; then
+              echo "Deja appliquee (ignoree)"
+            else
+              echo "Erreur ($code): ${resp:0:500}" >&2
+              exit 1
+            fi
           done
-          echo "=== Migrations terminées ==="
+          echo "=== Migrations terminees ==="
