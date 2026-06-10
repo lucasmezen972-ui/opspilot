@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test('la politique de confidentialité est publique', async ({ page }) => {
-  await page.goto('legal/confidentialite');
+  await page.goto('/');
+  await page.getByText('Confidentialité', { exact: true }).click();
 
   await expect(
     page.getByText('Politique de confidentialité', { exact: true }),
