@@ -1,39 +1,53 @@
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-type GlobalErrorBoundaryState = {
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
   error: Error | null;
-};
+}
 
-export default class GlobalErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  GlobalErrorBoundaryState
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { error: null };
+export default class GlobalErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  static getDerivedStateFromError(error: Error): GlobalErrorBoundaryState {
-    return { error };
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('[GlobalErrorBoundary] Uncaught error:', error, info);
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[GlobalErrorBoundary]', error, info.componentStack);
-  }
+  handleReset = () => {
+    this.setState({ hasError: false, error: null });
+  };
 
   render() {
-    if (this.state.error) {
+    if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <View style={styles.container}>
-          <View style={styles.mark}>
-            <Text style={styles.markText}>!</Text>
-          </View>
-          <Text style={styles.title}>Application failed to load</Text>
-          <Text style={styles.message}>{this.state.error.message}</Text>
+        <View testID="error-boundary-screen" style={styles.container}>
+          <Text style={styles.icon}>⚠️</Text>
+          <Text style={styles.title}>Une erreur est survenue</Text>
+          <Text style={styles.subtitle}>
+            Si le problème persiste, relancez l'application.
+          </Text>
+          {__DEV__ && this.state.error && (
+            <Text style={styles.devError} testID="error-boundary-details">
+              {this.state.error.message}
+            </Text>
+          )}
           <TouchableOpacity
-            onPress={() => this.setState({ error: null })}
+            testID="error-boundary-retry"
             style={styles.button}
+            onPress={this.handleReset}
           >
             <Text style={styles.buttonText}>Réessayer</Text>
           </TouchableOpacity>
@@ -50,44 +64,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
     padding: 24,
+    backgroundColor: '#F8FAFC',
   },
-  mark: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#DC2626',
-    justifyContent: 'center',
-    alignItems: 'center',
+  icon: {
+    fontSize: 48,
     marginBottom: 16,
   },
-  markText: {
-    color: '#FFFFFF',
-    fontSize: 32,
-    fontWeight: '700',
-  },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 8,
     textAlign: 'center',
   },
-  message: {
+  subtitle: {
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
+    lineHeight: 20,
     marginBottom: 24,
+  },
+  devError: {
+    fontSize: 11,
+    color: '#EF4444',
+    fontFamily: 'monospace',
+    backgroundColor: '#FEE2E2',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 20,
+    maxWidth: '100%',
   },
   button: {
     backgroundColor: '#2563EB',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: 28,
+    paddingVertical: 13,
+    borderRadius: 10,
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '600',
+    fontSize: 15,
   },
 });
