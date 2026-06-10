@@ -21,7 +21,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx serve dist -l 3000 --single',
+    command:
+      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && npx serve .playwright-site -l 3000 --single',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
