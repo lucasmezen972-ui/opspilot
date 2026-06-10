@@ -19,14 +19,14 @@ test.describe('Gestion des audits', () => {
 
   test('bouton créer un audit visible', async ({ page }) => {
     await expect(
-      page.getByRole('button', { name: /créer un audit/i }).first(),
+      page.getByText('Créer un audit', { exact: true }),
     ).toBeVisible({ timeout: 8_000 });
   });
 
   test('ouvrir modal de création', async ({ page }) => {
     await page
-      .getByRole('button', { name: /créer un audit/i })
-      .first()
+      .getByText('Créer un audit', { exact: true })
+      .locator('..')
       .click({ timeout: 8_000 });
     await page.waitForTimeout(800);
     const bodyText = await page.locator('body').innerText();
