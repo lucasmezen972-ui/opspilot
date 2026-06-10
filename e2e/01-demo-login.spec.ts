@@ -1,14 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Test 1 — Authentification démo
  * Le bouton démo doit toujours fonctionner, même sans Supabase.
  */
 
-test.describe('Authentification démo', () => {
-  const demoButton = (page: Parameters<typeof test>[0]['page']) =>
-    page.getByRole('button', { name: /connexion démo/i });
+const demoButton = (page: Page) =>
+  page.getByRole('button', { name: /connexion démo/i });
 
+test.describe('Authentification démo', () => {
   test("l'écran de connexion s'affiche sans crash", async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('OpsPilot')).toBeVisible({ timeout: 10_000 });
