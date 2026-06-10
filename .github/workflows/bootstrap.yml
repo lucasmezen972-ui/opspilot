@@ -1,0 +1,103 @@
+name: Bootstrap OpsPilot (1-click setup)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: hpqfmuzkkxrqoqoabjmb
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── 1. Supabase CLI ──────────────────────────────────────────────────
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # ── 2. Migrations SQL (via Management API — aucun mot de passe DB requis) ─
+      - name: Apply SQL migrations
+        run: |
+          echo "=== Application des migrations SQL ==="
+          for f in supabase/migrations/2026*.sql; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            echo "→ $name"
+            HTTP=$(python3 - "$f" <<'PYEOF'
+import sys, json, urllib.request, os
+
+sql_file = sys.argv[1]
+token = os.environ["SUPABASE_ACCESS_TOKEN"]
+ref = os.environ["PROJECT_REF"]
+sql = open(sql_file).read()
+
+data = json.dumps({"query": sql}).encode()
+req = urllib.request.Request(
+    f"https://api.supabase.com/v1/projects/{ref}/database/query",
+    data=data,
+    headers={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    },
+)
+try:
+    resp = urllib.request.urlopen(req)
+    body = resp.read().decode()
+    print(f"✅ OK: {body[:200]}")
+except urllib.error.HTTPError as e:
+    body = e.read().decode()
+    # Ignore "already exists" errors (idempotent)
+    if "already exists" in body or "duplicate" in body.lower():
+        print(f"⏭  Déjà appliquée (ignoré): {body[:200]}")
+    else:
+        print(f"❌ Erreur: {body[:500]}", file=sys.stderr)
+        sys.exit(1)
+PYEOF
+            )
+            echo "$HTTP"
+          done
+          echo "=== Migrations terminées ==="
+
+      # ── 3. Secrets Edge Functions ────────────────────────────────────────
+      - name: Set Edge Function secrets
+        run: |
+          echo "=== Configuration des secrets Edge Functions ==="
+          supabase secrets set \
+            --project-ref "$PROJECT_REF" \
+            STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
+            SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            APP_URL="https://lucasmezen972-ui.github.io/opspilot"
+          echo "✅ Secrets Edge Functions configurés"
+
+      # ── 4. Déploiement Edge Functions ────────────────────────────────────
+      - name: Deploy Edge Functions
+        run: |
+          echo "=== Déploiement des Edge Functions ==="
+          for dir in supabase/functions/*/; do
+            func=$(basename "$dir")
+            echo "→ Déploiement : $func"
+            supabase functions deploy "$func" \
+              --project-ref "$PROJECT_REF" \
+              --no-verify-jwt
+            echo "✅ $func déployé"
+          done
+          echo "=== Déploiement terminé ==="
+
+      # ── 5. Résumé ────────────────────────────────────────────────────────
+      - name: Summary
+        run: |
+          echo "======================================"
+          echo "✅ Bootstrap OpsPilot terminé !"
+          echo "======================================"
+          echo "• Migrations SQL appliquées"
+          echo "• Secrets Edge Functions configurés"
+          echo "• Edge Functions déployées"
+          echo ""
+          echo "🌐 App : https://lucasmezen972-ui.github.io/opspilot"
+          echo "📋 Supabase : https://supabase.com/dashboard/project/$PROJECT_REF"

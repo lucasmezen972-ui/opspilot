@@ -3,47 +3,66 @@ name: Apply Supabase migrations
 on:
   push:
     branches: [main]
-    paths:
-      - 'supabase/migrations/**'
+    paths: ['supabase/migrations/**']
   workflow_dispatch:
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_REF: hpqfmuzkkxrqoqoabjmb
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Check secret
         id: check
         run: |
-          if [ -z "${{ secrets.SUPABASE_DB_URL }}" ]; then
-            echo "::notice::Secret SUPABASE_DB_URL absent — migrations à appliquer via MCP ou dashboard."
+          if [ -z "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "::notice::Secret SUPABASE_ACCESS_TOKEN absent — skipping migrations."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Applique uniquement les migrations V2 (2026*) non encore exécutées,
-      # suivies dans une table dédiée. Les migrations historiques (2025*)
-      # ont déjà été appliquées via le dashboard.
       - name: Apply pending migrations
         if: steps.check.outputs.skip == 'false'
         env:
-          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           set -euo pipefail
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -c \
-            "CREATE TABLE IF NOT EXISTS _applied_migrations(name text PRIMARY KEY, applied_at timestamptz DEFAULT now());"
+          echo "=== Application des migrations SQL ==="
           for f in supabase/migrations/2026*.sql; do
+            [ -f "$f" ] || continue
             name=$(basename "$f")
-            applied=$(psql "$DB_URL" -tA -c "SELECT 1 FROM _applied_migrations WHERE name='$name'")
-            if [ "$applied" = "1" ]; then
-              echo "✓ $name déjà appliquée"
-            else
-              echo "→ Application de $name"
-              psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$f"
-              psql "$DB_URL" -v ON_ERROR_STOP=1 -c \
-                "INSERT INTO _applied_migrations(name) VALUES ('$name');"
-              echo "✓ $name appliquée"
-            fi
+            echo "→ $name"
+            python3 - "$f" <<'PYEOF'
+import sys, json, urllib.request, os
+
+sql_file = sys.argv[1]
+token = os.environ["SUPABASE_ACCESS_TOKEN"]
+ref = os.environ["PROJECT_REF"]
+sql = open(sql_file).read()
+
+data = json.dumps({"query": sql}).encode()
+req = urllib.request.Request(
+    f"https://api.supabase.com/v1/projects/{ref}/database/query",
+    data=data,
+    headers={
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    },
+)
+try:
+    resp = urllib.request.urlopen(req)
+    print(f"✅ OK: {resp.read().decode()[:200]}")
+except urllib.error.HTTPError as e:
+    body = e.read().decode()
+    if "already exists" in body or "duplicate" in body.lower():
+        print(f"⏭  Already applied (skipped): {body[:200]}")
+    else:
+        print(f"❌ Error: {body[:500]}", file=sys.stderr)
+        sys.exit(1)
+PYEOF
           done
+          echo "=== Migrations terminées ==="
