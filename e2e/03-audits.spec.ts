@@ -5,13 +5,11 @@ import { loginAsDemo } from './helpers';
 test.describe('Gestion des audits', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsDemo(page, 'employee');
-    // Navigate to Audits tab
-    await page
-      .getByRole('button', { name: 'Audits' })
-      .or(page.locator('text=Audits').first())
-      .click({ timeout: 10_000 })
-      .catch(() => {});
-    await page.waitForTimeout(1_000);
+    await page.getByRole('tab', { name: 'Audits' }).click({ timeout: 10_000 });
+    await expect(page.getByRole('tab', { name: 'Audits' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
   });
 
   test('liste des audits affichée', async ({ page }) => {
@@ -31,16 +29,15 @@ test.describe('Gestion des audits', () => {
       .getByRole('button', { name: /créer un audit/i })
       .or(page.locator('text=Créer un audit'))
       .first()
-      .click({ timeout: 8_000 })
-      .catch(() => {});
+      .click({ timeout: 8_000 });
     await page.waitForTimeout(800);
     const bodyText = await page.locator('body').innerText();
-    // Modal or form opened
     expect(bodyText.length).toBeGreaterThan(50);
   });
 
   test('bibliothèque de modèles visible', async ({ page }) => {
-    const templates = page.locator('text=Bibliothèque de modèles');
-    await expect(templates.first()).toBeVisible({ timeout: 8_000 });
+    await expect(
+      page.getByText('Bibliothèque de modèles', { exact: true }),
+    ).toBeVisible({ timeout: 8_000 });
   });
 });
