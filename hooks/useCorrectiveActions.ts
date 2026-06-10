@@ -1,15 +1,24 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoActions, demoId } from '../lib/demoData';
 import { supabase, type CorrectiveAction } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useCorrectiveActions() {
   const [actions, setActions] = useState<CorrectiveAction[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemoMode, session } = useAuth();
+
+  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchActions = useCallback(async () => {
+    if (isLocalDemo) {
+      setActions(getDemoActions());
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -35,7 +44,7 @@ export function useCorrectiveActions() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchActions();
@@ -44,6 +53,29 @@ export function useCorrectiveActions() {
   const createAction = async (actionData: Partial<CorrectiveAction>) => {
     if (!user || !profile?.organization_id) {
       return { data: null, error: 'Utilisateur non connecté' };
+    }
+
+    if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const data: CorrectiveAction = {
+        id: demoId('demo-action'),
+        organization_id: profile.organization_id,
+        store_id: profile.store_id ?? null,
+        audit_id: actionData.audit_id ?? null,
+        audit_response_id: null,
+        title: actionData.title || '',
+        description: actionData.description ?? null,
+        assignee_id: actionData.assignee_id || user.id,
+        priority: actionData.priority || 'medium',
+        status: 'open',
+        due_date: actionData.due_date ?? null,
+        resolved_at: null,
+        created_by: user.id,
+        created_at: now,
+        updated_at: now,
+      };
+      setActions((prev) => [data, ...prev]);
+      return { data, error: null };
     }
 
     try {
@@ -94,6 +126,18 @@ export function useCorrectiveActions() {
       };
       if (status === 'done') {
         updates.resolved_at = new Date().toISOString();
+      }
+
+      if (isLocalDemo) {
+        let updated: CorrectiveAction | null = null;
+        setActions((prev) =>
+          prev.map((a) => {
+            if (a.id !== id) return a;
+            updated = { ...a, ...updates } as CorrectiveAction;
+            return updated;
+          }),
+        );
+        return { data: updated, error: null };
       }
 
       const { data, error } = await supabase
