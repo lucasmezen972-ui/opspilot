@@ -8,9 +8,10 @@ export interface SupabaseConfigResult {
 const DEFAULT_SUPABASE_URL = 'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
 
 export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
+  // `||` keeps GitHub Actions empty secrets from disabling the public fallback.
   const url =
-    process.env.EXPO_PUBLIC_SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    process.env.EXPO_PUBLIC_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
     DEFAULT_SUPABASE_URL;
   if (!url || url === '') return { status: 'missing' };
   if (url === 'https://placeholder.supabase.co')

@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
+console.log('AUTH START');
+
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    console.log('AUTH START');
     (async () => {
       try {
         const {
@@ -53,21 +56,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (!cancelled) setReady(true);
       } catch (error) {
-        mapSupabaseError('Auth initialization error', error);
-        if (!cancelled) setReady(true);
-      }
-    })();
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (!cancelled) {
-        setSession(s ?? null);
-        setUser(s?.user ?? null);
-        if (s?.user?.id) {
-          fetchProfile(s.user.id);
-        } else {
+        const message = mapSupabaseError('Auth initialization error', error);
+        if (!cancelled) {
+          setAuthError(message);
+          setSession(null);
+          setUser(null);
           setProfile(null);
+          setReady(true);
         }
       }
-    });
+    })();
+    let sub:
+      | ReturnType<typeof supabase.auth.onAuthStateChange>['data']
+      | undefined;
+    try {
+      const result = supabase.auth.onAuthStateChange((_e, s) => {
+        if (!cancelled) {
+          setSession(s ?? null);
+          setUser(s?.user ?? null);
+          if (s?.user?.id) {
+            fetchProfile(s.user.id).catch((error) => {
+              const message = mapSupabaseError('Profile fetch error', error);
+              if (!cancelled) setAuthError(message);
+            });
+          } else {
+            setProfile(null);
+          }
+        }
+      });
+      sub = result.data;
+    } catch (error) {
+      const message = mapSupabaseError('Auth listener error', error);
+      if (!cancelled) setAuthError(message);
+    }
     return () => {
       cancelled = true;
       sub?.subscription?.unsubscribe();
@@ -77,56 +98,90 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      setAuthError(mapSupabaseError('sign in error', error));
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setAuthError(mapSupabaseError('sign in error', error));
+      }
+      return { data, error };
+    } catch (error) {
+      const message = mapSupabaseError('sign in error', error);
+      setAuthError(message);
+      return { data: null, error };
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    return { data, error };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
     setAuthError(null);
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    if (error) setAuthError(mapSupabaseError('sign up error', error));
-    setLoading(false);
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+      if (error) setAuthError(mapSupabaseError('sign up error', error));
+      return { data, error };
+    } catch (error) {
+      const message = mapSupabaseError('sign up error', error);
+      setAuthError(message);
+      return { data: null, error };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) setAuthError(mapSupabaseError('sign out error', error));
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) setAuthError(mapSupabaseError('sign out error', error));
+      return { error };
+    } catch (error) {
+      const message = mapSupabaseError('sign out error', error);
+      setAuthError(message);
+      return { error };
+    }
   };
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (!error) setProfile(data);
-    return { data, error };
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (!error) setProfile(data);
+      if (error) setAuthError(mapSupabaseError('fetch profile error', error));
+      return { data, error };
+    } catch (error) {
+      const message = mapSupabaseError('fetch profile error', error);
+      setAuthError(message);
+      return { data: null, error };
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { data: null, error: 'Utilisateur non connecté' };
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-      .select()
-      .single();
-    if (!error && data) setProfile(data);
-    return { data, error };
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+      if (!error && data) setProfile(data);
+      if (error) setAuthError(mapSupabaseError('update profile error', error));
+      return { data, error };
+    } catch (error) {
+      const message = mapSupabaseError('update profile error', error);
+      setAuthError(message);
+      return { data: null, error };
+    }
   };
 
   return (

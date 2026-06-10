@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
+console.log('SUPABASE START');
+
 // `||` plutôt que `??` : en CI, un secret GitHub absent est injecté comme
 // chaîne vide, qui doit retomber sur le fallback.
 const SUPABASE_URL =
@@ -16,8 +18,8 @@ if (
   !process.env.EXPO_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL
 )
-  console.warn(
-    '[Supabase] URL manquante. Configure EXPO_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_URL.',
+  console.info(
+    '[Supabase] URL publique absente, utilisation du fallback OpsPilot.',
   );
 
 if (
@@ -25,8 +27,8 @@ if (
   !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY &&
   !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
-  console.warn(
-    '[Supabase] Clé manquante. Configure EXPO_PUBLIC_SUPABASE_ANON_KEY ou NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.',
+  console.info(
+    '[Supabase] Clé publique absente, utilisation du fallback OpsPilot.',
   );
 
 export const customFetch = async (
@@ -35,10 +37,15 @@ export const customFetch = async (
 ) => {
   let attempt = 0;
   while (true) {
-    const res = await fetch(input, init);
-    if (res.status !== 502) return res;
-    if (attempt++ >= 2) return res; // 3 tentatives max
-    await new Promise((r) => setTimeout(r, 300 * attempt));
+    try {
+      const res = await fetch(input, init);
+      if (res.status !== 502) return res;
+      if (attempt++ >= 2) return res; // 3 tentatives max
+      await new Promise((r) => setTimeout(r, 300 * attempt));
+    } catch (error) {
+      if (attempt++ >= 2) throw error;
+      await new Promise((r) => setTimeout(r, 300 * attempt));
+    }
   }
 };
 

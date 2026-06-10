@@ -23,6 +23,7 @@ export default function Root({ children }: PropsWithChildren) {
         <link rel="manifest" href={`${BASE}/manifest.json`} />
 
         {/* iOS Safari — Add to Home Screen */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpsPilot" />
@@ -46,6 +47,14 @@ export default function Root({ children }: PropsWithChildren) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              console.log('APP START');
+              window.onerror = function(message, source, lineno, colno, error) {
+                console.error('[window.onerror]', message, source, lineno, colno, error && (error.stack || error.message || error));
+              };
+              window.onunhandledrejection = function(event) {
+                var reason = event && event.reason;
+                console.error('[window.onunhandledrejection]', reason && (reason.stack || reason.message || reason));
+              };
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('${BASE}/sw.js').catch(function() {});
