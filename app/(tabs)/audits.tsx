@@ -31,6 +31,7 @@ import {
   AUDIT_QUESTIONS,
 } from '../../features/audits/constants';
 import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
+import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { exportAuditReport } from '../../utils/auditReport';
@@ -46,6 +47,8 @@ export default function AuditsScreen() {
     addPhotoToAudit,
   } = useAudits();
   const { createAction } = useCorrectiveActions();
+  // Réglage back-office : création auto d'actions sur non-conformité.
+  const { isEnabled } = useAppSettings();
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -195,9 +198,11 @@ export default function AuditsScreen() {
       return;
     }
 
-    // Une action corrective par non-conformité, liée à l'audit.
+    // Une action corrective par non-conformité, liée à l'audit
+    // (désactivable depuis le back-office : audits.auto_actions).
     let created = 0;
-    for (let i = 0; i < AUDIT_QUESTIONS.length; i++) {
+    const autoActions = isEnabled('audits.auto_actions');
+    for (let i = 0; autoActions && i < AUDIT_QUESTIONS.length; i++) {
       if (!answers[i]) {
         const res = await createAction({
           title: `Non-conformité : ${AUDIT_QUESTIONS[i]}`,

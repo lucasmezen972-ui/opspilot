@@ -102,6 +102,60 @@ Deno.serve(async (req) => {
         });
       }
 
+      case 'GET /dashboard': {
+        const now = Date.now();
+        const d7 = new Date(now - 7 * 86400000).toISOString();
+        const d30 = new Date(now - 30 * 86400000).toISOString();
+        const in7d = new Date(now + 7 * 86400000).toISOString();
+        const [
+          expiring,
+          recentUsers,
+          recentAudits,
+          audits7,
+          audits30,
+          users30,
+        ] = await Promise.all([
+          admin
+            .from('subscriptions')
+            .select('organization_id, trial_ends_at, organizations(name)')
+            .eq('status', 'trialing')
+            .lte('trial_ends_at', in7d)
+            .order('trial_ends_at'),
+          admin
+            .from('profiles')
+            .select('email, full_name, created_at, organizations(name)')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          admin
+            .from('audits')
+            .select('title, status, created_at, organizations(name)')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          admin
+            .from('audits')
+            .select('id', { count: 'exact', head: true })
+            .gte('created_at', d7),
+          admin
+            .from('audits')
+            .select('id', { count: 'exact', head: true })
+            .gte('created_at', d30),
+          admin
+            .from('profiles')
+            .select('id', { count: 'exact', head: true })
+            .gte('created_at', d30),
+        ]);
+        return json({
+          expiring_trials: expiring.data ?? [],
+          recent_users: recentUsers.data ?? [],
+          recent_audits: recentAudits.data ?? [],
+          trends: {
+            audits_7d: audits7.count ?? 0,
+            audits_30d: audits30.count ?? 0,
+            new_users_30d: users30.count ?? 0,
+          },
+        });
+      }
+
       case 'GET /organizations': {
         const { data, error } = await admin
           .from('organizations')

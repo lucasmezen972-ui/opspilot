@@ -119,19 +119,66 @@ function navigate() {
 async function renderDashboard() {
   content.innerHTML =
     '<h2>Tableau de bord</h2><p class="subtitle">Chargement…</p>';
-  const s = await api('/stats');
+  const [s, d] = await Promise.all([api('/stats'), api('/dashboard')]);
   const subs = s.subscriptions ?? {};
+
+  const alertHtml = d.expiring_trials.length
+    ? `<div class="alert-box">⚠️ <strong>${d.expiring_trials.length} essai(s)</strong> expirent dans les 7 jours :
+        ${d.expiring_trials
+          .map(
+            (t) =>
+              `<span class="badge amber" style="margin:2px">${esc(t.organizations?.name ?? t.organization_id)} — ${new Date(t.trial_ends_at).toLocaleDateString('fr-FR')}</span>`,
+          )
+          .join(' ')}
+        <a href="#/orgs" style="margin-left:6px">Gérer →</a></div>`
+    : '';
+
   content.innerHTML = `
     <h2>Tableau de bord</h2>
     <p class="subtitle">Vue d'ensemble de la plateforme</p>
+    ${alertHtml}
     <div class="cards">
       <div class="card"><div class="num">${s.organizations}</div><div class="label">Organisations</div></div>
       <div class="card"><div class="num">${s.users}</div><div class="label">Utilisateurs</div></div>
-      <div class="card"><div class="num">${s.audits}</div><div class="label">Audits créés</div></div>
       <div class="card"><div class="num">${subs.active ?? 0}</div><div class="label">Abonnements actifs</div></div>
-      <div class="card"><div class="num">${subs.trialing ?? 0}</div><div class="label">En période d'essai</div></div>
+      <div class="card"><div class="num">${subs.trialing ?? 0}</div><div class="label">En essai</div></div>
+      <div class="card"><div class="num">${d.trends.audits_7d}</div><div class="label">Audits — 7 jours</div></div>
+      <div class="card"><div class="num">${d.trends.audits_30d}</div><div class="label">Audits — 30 jours</div></div>
+      <div class="card"><div class="num">${d.trends.new_users_30d}</div><div class="label">Nouveaux comptes — 30 j</div></div>
+      <div class="card"><div class="num">${s.audits}</div><div class="label">Audits au total</div></div>
     </div>
-    <p class="subtitle">Utilise le menu à gauche pour gérer les utilisateurs, les organisations et les réglages.</p>`;
+    <div class="two-cols">
+      <div>
+        <h3 class="col-title">Dernières inscriptions</h3>
+        <table><tbody>
+          ${
+            d.recent_users
+              .map(
+                (u) => `<tr>
+            <td><strong>${esc(u.full_name ?? u.email)}</strong><br /><span style="color:#6b7280">${esc(u.organizations?.name ?? '—')}</span></td>
+            <td style="text-align:right;color:#6b7280">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+          </tr>`,
+              )
+              .join('') || '<tr><td><em>Aucune inscription.</em></td></tr>'
+          }
+        </tbody></table>
+      </div>
+      <div>
+        <h3 class="col-title">Derniers audits</h3>
+        <table><tbody>
+          ${
+            d.recent_audits
+              .map(
+                (a) => `<tr>
+            <td><strong>${esc(a.title)}</strong><br /><span style="color:#6b7280">${esc(a.organizations?.name ?? '—')}</span></td>
+            <td style="text-align:right"><span class="badge ${a.status === 'completed' ? 'green' : 'gray'}">${esc(a.status)}</span></td>
+          </tr>`,
+              )
+              .join('') || '<tr><td><em>Aucun audit.</em></td></tr>'
+          }
+        </tbody></table>
+      </div>
+    </div>`;
 }
 
 const ROLE_LABELS = {
