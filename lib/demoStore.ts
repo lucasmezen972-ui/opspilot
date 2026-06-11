@@ -5,8 +5,17 @@ import {
   getDemoActions,
   getDemoProducts,
   getDemoTasks,
+  getDemoTrainings,
+  getDemoTrainingProgress,
 } from './demoData';
-import type { Audit, CorrectiveAction, Product, Task } from './supabase';
+import type {
+  Audit,
+  CorrectiveAction,
+  Product,
+  Task,
+  Training,
+  UserTrainingProgress,
+} from './supabase';
 
 /**
  * Store démo partagé entre tous les écrans (mode démo local uniquement).
@@ -24,6 +33,8 @@ export interface DemoState {
   actions: CorrectiveAction[];
   products: Product[];
   tasks: Task[];
+  trainings: Training[];
+  trainingProgress: UserTrainingProgress[];
 }
 
 function seed(): DemoState {
@@ -32,6 +43,8 @@ function seed(): DemoState {
     actions: getDemoActions(),
     products: getDemoProducts(),
     tasks: getDemoTasks(),
+    trainings: getDemoTrainings(),
+    trainingProgress: getDemoTrainingProgress(),
   };
 }
 

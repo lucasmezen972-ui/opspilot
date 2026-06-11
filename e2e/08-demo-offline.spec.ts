@@ -35,6 +35,16 @@ test.describe('Démo offline (B2/B3)', () => {
     await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
   });
 
+  test('B2 — écran Formation alimenté en démo locale', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Formation' }).click();
+    await expect(
+      page.getByText('Hygiène et sécurité alimentaire (HACCP)').first(),
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText('Gestion des DLC et rotation des stocks').first(),
+    ).toBeVisible();
+  });
+
   test('B2 — écran Audits cohérent avec le dashboard (store partagé)', async ({
     page,
   }) => {
