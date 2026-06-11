@@ -38,8 +38,20 @@ async function requireSuperadmin(req: Request) {
     .select('role')
     .eq('id', data.user.id)
     .single();
-  if (profile?.role !== 'superadmin') {
-    return { error: json({ error: 'Accès réservé au superadmin' }, 403) };
+  const role = profile?.role ?? '';
+  if (role !== 'superadmin' && role !== 'support') {
+    return {
+      error: json({ error: 'Accès réservé à l’équipe plateforme' }, 403),
+    };
+  }
+  // Le rôle « support » est en lecture seule : toute mutation est refusée.
+  if (role === 'support' && req.method !== 'GET' && req.method !== 'OPTIONS') {
+    return {
+      error: json(
+        { error: 'Lecture seule : action réservée au superadmin' },
+        403,
+      ),
+    };
   }
 
   // 2FA : si un facteur TOTP vérifié existe, exiger une session aal2
@@ -191,7 +203,7 @@ Deno.serve(async (req) => {
         const { data, error } = await admin
           .from('profiles')
           .select(
-            'id, email, full_name, role, is_active, created_at, organization_id, organizations(name)',
+            'id, email, full_name, role, is_active, last_active, created_at, organization_id, organizations(name)',
           )
           .order('created_at', { ascending: false });
         if (error) throw error;
@@ -205,6 +217,7 @@ Deno.serve(async (req) => {
           return json({ error: 'email et mot de passe requis' }, 400);
         }
         const allowed = [
+          'support',
           'admin',
           'manager',
           'employé',
@@ -325,12 +338,20 @@ Deno.serve(async (req) => {
             .from('stores')
             .insert({ organization_id: org.id, name: store_name.trim() });
         }
+        const { data: trialSetting } = await admin
+          .from('platform_settings')
+          .select('value')
+          .eq('key', 'defaults')
+          .maybeSingle();
+        const trialDays = Number(trialSetting?.value?.trial_days) || 14;
         await admin.from('subscriptions').upsert(
           {
             organization_id: org.id,
             plan: 'trial',
             status: 'trialing',
-            trial_ends_at: new Date(Date.now() + 14 * 86400000).toISOString(),
+            trial_ends_at: new Date(
+              Date.now() + trialDays * 86400000,
+            ).toISOString(),
           },
           { onConflict: 'organization_id' },
         );
@@ -472,6 +493,241 @@ Deno.serve(async (req) => {
           .eq('id', id);
         if (error) return json({ error: error.message }, 400);
         await logAction(actor, 'store.update', { id, ...updates });
+        return json({ ok: true });
+      }
+
+      case 'GET /announcements': {
+        const { data, error } = await admin
+          .from('announcements')
+          .select(
+            'id, title, body, level, organization_id, organizations(name), starts_at, ends_at, is_active, created_at',
+          )
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (error) throw error;
+        return json({ announcements: data });
+      }
+
+      case 'POST /announcements': {
+        const { title, body, level, organization_id, ends_at } =
+          await req.json();
+        if (!title?.trim()) return json({ error: 'titre requis' }, 400);
+        const { error } = await admin.from('announcements').insert({
+          title: title.trim(),
+          body: body?.trim() || null,
+          level: ['info', 'warning', 'success'].includes(level)
+            ? level
+            : 'info',
+          organization_id: organization_id || null,
+          ends_at: ends_at || null,
+          created_by: actor.id,
+        });
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'announcement.create', {
+          title: title.trim(),
+          organization_id: organization_id || 'toutes',
+        });
+        return json({ ok: true });
+      }
+
+      case 'PATCH /announcements': {
+        const id = parts[1];
+        const { is_active } = await req.json();
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const { error } = await admin
+          .from('announcements')
+          .update({ is_active: !!is_active })
+          .eq('id', id);
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'announcement.toggle', { id, is_active });
+        return json({ ok: true });
+      }
+
+      case 'GET /export-organization': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const tables = [
+          'profiles',
+          'stores',
+          'audits',
+          'corrective_actions',
+          'products',
+          'tasks',
+          'trainings',
+          'subscriptions',
+          'app_settings',
+        ];
+        const dump: Record<string, unknown> = {};
+        const { data: org } = await admin
+          .from('organizations')
+          .select('*')
+          .eq('id', id)
+          .single();
+        dump.organization = org;
+        for (const t of tables) {
+          const { data } = await admin
+            .from(t)
+            .select('*')
+            .eq('organization_id', id);
+          dump[t] = data ?? [];
+        }
+        await logAction(actor, 'organization.export', { id });
+        return json({ export: dump, exported_at: new Date().toISOString() });
+      }
+
+      case 'DELETE /organizations': {
+        const id = parts[1];
+        const confirm = url.searchParams.get('confirm') ?? '';
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const { data: org } = await admin
+          .from('organizations')
+          .select('name')
+          .eq('id', id)
+          .single();
+        if (!org) return json({ error: 'organisation introuvable' }, 404);
+        if (confirm !== org.name) {
+          return json(
+            { error: 'confirmation invalide : saisis le nom exact' },
+            400,
+          );
+        }
+        // Supprime les comptes auth des membres puis l'organisation
+        // (les tables liées partent en cascade).
+        const { data: members } = await admin
+          .from('profiles')
+          .select('id, role')
+          .eq('organization_id', id);
+        for (const m of members ?? []) {
+          if (m.role === 'superadmin') continue;
+          await admin.auth.admin.deleteUser(m.id).catch(() => {});
+        }
+        const { error } = await admin
+          .from('organizations')
+          .delete()
+          .eq('id', id);
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'organization.delete', {
+          id,
+          name: org.name,
+          members: (members ?? []).length,
+        });
+        return json({ ok: true });
+      }
+
+      case 'GET /organization-activity': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const since = new Date(Date.now() - 30 * 86400000).toISOString();
+        const { data, error } = await admin
+          .from('audits')
+          .select('created_at')
+          .eq('organization_id', id)
+          .gte('created_at', since);
+        if (error) throw error;
+        const perDay: Record<string, number> = {};
+        for (let i = 29; i >= 0; i--) {
+          perDay[
+            new Date(Date.now() - i * 86400000).toISOString().slice(0, 10)
+          ] = 0;
+        }
+        for (const a of data ?? []) {
+          const day = (a.created_at ?? '').slice(0, 10);
+          if (day in perDay) perDay[day]++;
+        }
+        return json({ activity: perDay });
+      }
+
+      case 'GET /billing-overview': {
+        const stripeKey = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
+        if (!stripeKey) {
+          return json({ configured: false });
+        }
+        const auth = { Authorization: `Bearer ${stripeKey}` };
+        const [subsRes, invRes] = await Promise.all([
+          fetch(
+            'https://api.stripe.com/v1/subscriptions?status=active&limit=100&expand[]=data.items',
+            { headers: auth },
+          ),
+          fetch('https://api.stripe.com/v1/invoices?limit=10', {
+            headers: auth,
+          }),
+        ]);
+        const subs = await subsRes.json();
+        const invoices = await invRes.json();
+        let mrrCents = 0;
+        for (const sub of subs.data ?? []) {
+          for (const item of sub.items?.data ?? []) {
+            const price = item.price;
+            if (!price?.unit_amount) continue;
+            const qty = item.quantity ?? 1;
+            const interval = price.recurring?.interval;
+            const count = price.recurring?.interval_count ?? 1;
+            if (interval === 'month') {
+              mrrCents += (price.unit_amount * qty) / count;
+            } else if (interval === 'year') {
+              mrrCents += (price.unit_amount * qty) / (12 * count);
+            }
+          }
+        }
+        return json({
+          configured: true,
+          mrr: Math.round(mrrCents) / 100,
+          active_subscriptions: (subs.data ?? []).length,
+          invoices: (invoices.data ?? []).map((i: Record<string, unknown>) => ({
+            number: i.number,
+            amount: ((i.total as number) ?? 0) / 100,
+            currency: i.currency,
+            status: i.status,
+            created: i.created,
+            customer_email: i.customer_email,
+          })),
+        });
+      }
+
+      case 'GET /health': {
+        const [cron, emails, dbSize, logCount] = await Promise.all([
+          admin.rpc('admin_cron_status'),
+          admin
+            .from('email_log')
+            .select('recipient, template, status, error, created_at')
+            .order('created_at', { ascending: false })
+            .limit(20),
+          admin.rpc('admin_db_size'),
+          admin
+            .from('admin_audit_log')
+            .select('id', { count: 'exact', head: true }),
+        ]);
+        return json({
+          cron: cron.data ?? [],
+          emails: emails.data ?? [],
+          db_size: dbSize.data ?? null,
+          audit_log_count: logCount.count ?? 0,
+        });
+      }
+
+      case 'GET /platform-settings': {
+        const { data, error } = await admin
+          .from('platform_settings')
+          .select('key, value, updated_at')
+          .neq('key', 'email_worker_token')
+          .order('key');
+        if (error) throw error;
+        return json({ settings: data });
+      }
+
+      case 'PUT /platform-settings': {
+        const { key, value } = await req.json();
+        if (!key || key === 'email_worker_token') {
+          return json({ error: 'clé invalide' }, 400);
+        }
+        const { error } = await admin
+          .from('platform_settings')
+          .upsert(
+            { key, value: value ?? {}, updated_at: new Date().toISOString() },
+            { onConflict: 'key' },
+          );
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'platform.update', { key, value });
         return json({ ok: true });
       }
 

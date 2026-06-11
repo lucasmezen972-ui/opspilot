@@ -352,3 +352,52 @@ td {
     grid-template-columns: 1fr;
   }
 }
+/* ── Mode sombre ── */
+body.dark {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+body.dark main h2,
+body.dark .col-title {
+  color: #e2e8f0;
+}
+body.dark .card,
+body.dark table {
+  background: #111a2e;
+  border-color: #1e293b;
+}
+body.dark .card .label,
+body.dark .subtitle,
+body.dark td {
+  color: #94a3b8;
+}
+body.dark td {
+  border-top-color: #1e293b;
+}
+body.dark th {
+  background: #0f172a;
+  color: #64748b;
+}
+body.dark input,
+body.dark select {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+body.dark .modal {
+  background: #111a2e;
+  color: #e2e8f0;
+}
+body.dark .modal h3,
+body.dark label {
+  color: inherit;
+}
+body.dark .alert-box {
+  background: #1f1a0b;
+  border-color: #92702a;
+  color: #fde68a;
+}
+body.dark .login-card {
+  background: #111a2e;
+  color: #e2e8f0;
+}
