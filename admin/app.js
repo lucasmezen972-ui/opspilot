@@ -1084,6 +1084,21 @@ async function renderJournal() {
     </table>`;
 }
 
+// Notifications email configurables par organisation (clé app_settings,
+// désactivées par défaut, avec liste de destinataires).
+const NOTIFY_SETTINGS = [
+  {
+    key: 'notify.audit_completed',
+    label: 'Audit terminé',
+    hint: "Email envoyé à chaque clôture d'audit",
+  },
+  {
+    key: 'notify.training_completed',
+    label: 'Formation terminée',
+    hint: 'Email envoyé à chaque formation validée',
+  },
+];
+
 // Réglages proposés par défaut pour chaque organisation.
 const KNOWN_SETTINGS = [
   { key: 'features.reports', label: 'Module Rapports activé' },
@@ -1113,6 +1128,20 @@ async function renderSettings() {
     list.innerHTML = '<p class="subtitle">Chargement…</p>';
     const { settings } = await api(`/settings/${orgId}`);
     const current = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+    const notifyRows = NOTIFY_SETTINGS.map((n) => {
+      const val = current[n.key] ?? {};
+      const enabled = val.enabled === true;
+      const recipients = Array.isArray(val.recipients)
+        ? val.recipients.join(', ')
+        : '';
+      return `<tr>
+        <td>${n.label}<br /><span style="color:#9ca3af;font-size:12px">${n.hint}</span></td>
+        <td><input data-notify-emails="${n.key}" value="${esc(recipients)}" placeholder="manager@magasin.fr, directeur@..." style="min-width:240px" /></td>
+        <td>${enabled ? '<span class="badge green">Actif</span>' : '<span class="badge gray">Inactif</span>'}</td>
+        <td><button class="small" data-notify-save="${n.key}">Enregistrer</button>
+            <button class="small" data-notify-toggle="${n.key}" data-enabled="${enabled}">${enabled ? 'Désactiver' : 'Activer'}</button></td>
+      </tr>`;
+    }).join('');
     list.innerHTML = `<table><thead><tr><th>Réglage</th><th>État</th><th></th></tr></thead><tbody>${KNOWN_SETTINGS.map(
       (k) => {
         const enabled = current[k.key]?.enabled !== false; // activé par défaut
@@ -1120,7 +1149,65 @@ async function renderSettings() {
         <td>${enabled ? '<span class="badge green">Activé</span>' : '<span class="badge red">Désactivé</span>'}</td>
         <td><button class="small" data-toggle="${k.key}" data-enabled="${enabled}">${enabled ? 'Désactiver' : 'Activer'}</button></td></tr>`;
       },
-    ).join('')}</tbody></table>`;
+    ).join('')}</tbody></table>
+    <h3 class="col-title" style="margin-top:22px">📧 Notifications par email</h3>
+    <p class="subtitle">Prévenez le manager ou le directeur commercial à chaque audit ou formation terminé. Saisissez un ou plusieurs emails (séparés par des virgules) puis activez.</p>
+    <table><thead><tr><th>Événement</th><th>Destinataires</th><th>État</th><th></th></tr></thead><tbody>${notifyRows}</tbody></table>`;
+
+    const parseEmails = (raw) =>
+      raw
+        .split(/[,;\s]+/)
+        .map((e) => e.trim())
+        .filter((e) => /.+@.+\..+/.test(e));
+
+    list.querySelectorAll('[data-notify-save]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const key = btn.dataset.notifySave;
+        const emails = parseEmails(
+          list.querySelector(`[data-notify-emails="${key}"]`).value,
+        );
+        const wasEnabled = current[key]?.enabled === true;
+        try {
+          await api(`/settings/${orgId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              key,
+              value: { enabled: wasEnabled, recipients: emails },
+            }),
+          });
+          toast(`Destinataires enregistrés (${emails.length}) ✅`);
+          loadFor(orgId);
+        } catch (e) {
+          toast(`Erreur : ${e.message}`, 5000);
+        }
+      });
+    });
+    list.querySelectorAll('[data-notify-toggle]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const key = btn.dataset.notifyToggle;
+        const emails = parseEmails(
+          list.querySelector(`[data-notify-emails="${key}"]`).value,
+        );
+        const enable = btn.dataset.enabled !== 'true';
+        if (enable && emails.length === 0) {
+          toast("Ajoutez au moins un email valide avant d'activer.", 4000);
+          return;
+        }
+        try {
+          await api(`/settings/${orgId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              key,
+              value: { enabled: enable, recipients: emails },
+            }),
+          });
+          toast(enable ? 'Notification activée ✅' : 'Notification désactivée');
+          loadFor(orgId);
+        } catch (e) {
+          toast(`Erreur : ${e.message}`, 5000);
+        }
+      });
+    });
     list.querySelectorAll('[data-toggle]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         try {
