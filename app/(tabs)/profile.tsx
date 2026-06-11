@@ -91,7 +91,9 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Profil</Text>
+        <Text style={styles.title} testID="page-profile-title">
+          Profil
+        </Text>
         <TouchableOpacity style={styles.headerButton}>
           <Settings size={20} color="#6B7280" />
         </TouchableOpacity>

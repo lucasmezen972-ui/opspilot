@@ -1,21 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoTasks, demoId } from '../lib/demoData';
+import { demoId } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Task } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTasks() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [remoteTasks, setRemoteTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile, isDemoMode, session } = useAuth();
 
-  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
+  const demoTasks = useDemoCollection('tasks');
+  const tasks = isLocalDemo ? demoTasks : remoteTasks;
+  const setTasks = isLocalDemo
+    ? (updater: (prev: Task[]) => Task[]) =>
+        updateDemoCollection('tasks', updater)
+    : setRemoteTasks;
 
   const fetchTasks = useCallback(async () => {
     if (isLocalDemo) {
-      setTasks(getDemoTasks());
+      // Le store démo est déjà alimenté (et partagé) : rien à charger.
       setLoading(false);
       return;
     }
@@ -38,7 +45,7 @@ export function useTasks() {
         return;
       }
 
-      setTasks(data || []);
+      setRemoteTasks(data || []);
     } catch (error) {
       mapSupabaseError('Erreur fetchTasks', error);
     } finally {

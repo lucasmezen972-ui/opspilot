@@ -1,21 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoAudits, demoId } from '../lib/demoData';
+import { demoId } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Audit } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
-  const [audits, setAudits] = useState<Audit[]>([]);
+  const [remoteAudits, setRemoteAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile, isDemoMode, session } = useAuth();
 
-  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
+  const demoAudits = useDemoCollection('audits');
+  const audits = isLocalDemo ? demoAudits : remoteAudits;
+  const setAudits = isLocalDemo
+    ? (updater: (prev: Audit[]) => Audit[]) =>
+        updateDemoCollection('audits', updater)
+    : setRemoteAudits;
 
   const fetchAudits = useCallback(async () => {
     if (isLocalDemo) {
-      setAudits(getDemoAudits());
+      // Le store démo est déjà alimenté (et partagé) : rien à charger.
       setLoading(false);
       return;
     }
@@ -38,7 +45,7 @@ export function useAudits() {
         return;
       }
 
-      setAudits(data || []);
+      setRemoteAudits(data || []);
     } catch (error) {
       mapSupabaseError('Erreur fetchAudits', error);
     } finally {
@@ -211,7 +218,10 @@ export function useAudits() {
       if (error) {
         return {
           data: null,
-          error: mapSupabaseError("Erreur lors de la clôture de l'audit", error),
+          error: mapSupabaseError(
+            "Erreur lors de la clôture de l'audit",
+            error,
+          ),
         };
       }
       setAudits((prev) => prev.map((a) => (a.id === id ? data : a)));

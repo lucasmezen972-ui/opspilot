@@ -1,21 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoActions, demoId } from '../lib/demoData';
+import { demoId } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type CorrectiveAction } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useCorrectiveActions() {
-  const [actions, setActions] = useState<CorrectiveAction[]>([]);
+  const [remoteActions, setRemoteActions] = useState<CorrectiveAction[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile, isDemoMode, session } = useAuth();
 
-  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
+  const demoActions = useDemoCollection('actions');
+  const actions = isLocalDemo ? demoActions : remoteActions;
+  const setActions = isLocalDemo
+    ? (updater: (prev: CorrectiveAction[]) => CorrectiveAction[]) =>
+        updateDemoCollection('actions', updater)
+    : setRemoteActions;
 
   const fetchActions = useCallback(async () => {
     if (isLocalDemo) {
-      setActions(getDemoActions());
+      // Le store démo est déjà alimenté (et partagé) : rien à charger.
       setLoading(false);
       return;
     }
@@ -38,7 +45,7 @@ export function useCorrectiveActions() {
         return;
       }
 
-      setActions(data || []);
+      setRemoteActions(data || []);
     } catch (error) {
       mapSupabaseError('Erreur fetchActions', error);
     } finally {

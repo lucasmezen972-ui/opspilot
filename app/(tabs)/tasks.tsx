@@ -182,7 +182,9 @@ export default function TasksScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Tâches</Text>
+        <Text style={styles.title} testID="page-tasks-title">
+          Tâches
+        </Text>
         <TouchableOpacity
           style={styles.headerButton}
           accessibilityRole="button"

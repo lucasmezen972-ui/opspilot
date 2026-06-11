@@ -41,6 +41,7 @@ export default function ProductsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [addSubmitting, setAddSubmitting] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [newStock, setNewStock] = useState('0');
@@ -59,24 +60,32 @@ export default function ProductsScreen() {
   };
 
   const handleAddProduct = async () => {
-    if (!newName.trim()) return;
-    const dlcDays = parseInt(newDlcDays, 10);
-    const price = parseFloat(newPrice.replace(',', '.'));
-    const result = await createProduct({
-      name: newName.trim(),
-      category: newCategory.trim() || null,
-      stock_quantity: parseInt(newStock, 10) || 0,
-      price: Number.isFinite(price) ? price : null,
-      dlc: Number.isFinite(dlcDays)
-        ? new Date(Date.now() + dlcDays * 86400000).toISOString()
-        : null,
-      barcode: newBarcode.trim() || null,
-    });
-    setAddModalVisible(false);
-    if (result.error) {
-      Alert.alert('Erreur', String(result.error));
-    } else {
-      Alert.alert('Produit ajouté', `${newName.trim()} a été ajouté au stock.`);
+    if (!newName.trim() || addSubmitting) return;
+    setAddSubmitting(true);
+    try {
+      const dlcDays = parseInt(newDlcDays, 10);
+      const price = parseFloat(newPrice.replace(',', '.'));
+      const result = await createProduct({
+        name: newName.trim(),
+        category: newCategory.trim() || null,
+        stock_quantity: parseInt(newStock, 10) || 0,
+        price: Number.isFinite(price) ? price : null,
+        dlc: Number.isFinite(dlcDays)
+          ? new Date(Date.now() + dlcDays * 86400000).toISOString()
+          : null,
+        barcode: newBarcode.trim() || null,
+      });
+      setAddModalVisible(false);
+      if (result.error) {
+        Alert.alert('Erreur', String(result.error));
+      } else {
+        Alert.alert(
+          'Produit ajouté',
+          `${newName.trim()} a été ajouté au stock.`,
+        );
+      }
+    } finally {
+      setAddSubmitting(false);
     }
   };
 
@@ -191,20 +200,28 @@ export default function ProductsScreen() {
     setStockModalVisible(true);
   };
 
-  const handleStockConfirm = () => {
-    const newStock = parseInt(stockModalValue || '0', 10);
-    if (!isNaN(newStock) && newStock >= 0 && stockModalProduct) {
-      updateProductStock(stockModalProduct.id, newStock);
+  const handleStockConfirm = async () => {
+    const parsed = parseInt(stockModalValue || '0', 10);
+    if (Number.isNaN(parsed) || parsed < 0 || !stockModalProduct) {
+      setStockModalVisible(false);
+      setStockModalProduct(null);
+      return;
     }
+    const { error } = await updateProductStock(stockModalProduct.id, parsed);
     setStockModalVisible(false);
     setStockModalProduct(null);
+    if (error) {
+      Alert.alert('Erreur', String(error));
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Produits</Text>
+        <Text style={styles.title} testID="page-products-title">
+          Produits
+        </Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -244,23 +261,30 @@ export default function ProductsScreen() {
       <View style={styles.quickStats}>
         <View style={styles.quickStatItem}>
           <TrendingUp size={20} color="#10B981" />
-          <Text style={styles.quickStatNumber}>{okProducts}</Text>
+          <Text style={styles.quickStatNumber} testID="products-count-ok">
+            {okProducts}
+          </Text>
           <Text style={styles.quickStatLabel}>En stock</Text>
         </View>
         <View style={styles.quickStatItem}>
           <AlertTriangle size={20} color="#F59E0B" />
-          <Text style={styles.quickStatNumber}>{lowStockProducts}</Text>
+          <Text style={styles.quickStatNumber} testID="products-count-low">
+            {lowStockProducts}
+          </Text>
           <Text style={styles.quickStatLabel}>Stock faible</Text>
         </View>
         <View style={styles.quickStatItem}>
           <TrendingDown size={20} color="#EF4444" />
-          <Text style={styles.quickStatNumber}>{outOfStockProducts}</Text>
+          <Text style={styles.quickStatNumber} testID="products-count-out">
+            {outOfStockProducts}
+          </Text>
           <Text style={styles.quickStatLabel}>Ruptures</Text>
         </View>
       </View>
 
       {/* Scanner Button */}
       <TouchableOpacity
+        testID="product-scan-button"
         style={[
           styles.scannerButton,
           isScanning && styles.scannerButtonDisabled,
@@ -295,6 +319,7 @@ export default function ProductsScreen() {
           return (
             <TouchableOpacity
               key={product.id}
+              testID={`product-card-${product.id}`}
               style={styles.productCard}
               onPress={() => promptStockUpdate(product)}
             >
@@ -344,7 +369,10 @@ export default function ProductsScreen() {
                   </View>
                   <View style={styles.productDetailItem}>
                     <Package size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>
+                    <Text
+                      style={styles.productDetailText}
+                      testID={`product-stock-${product.id}`}
+                    >
                       Stock: {product.stock_quantity}
                     </Text>
                   </View>
@@ -394,6 +422,7 @@ export default function ProductsScreen() {
               Stock actuel: {stockModalProduct?.stock_quantity}
             </Text>
             <TextInput
+              testID="product-stock-input"
               style={styles.modalInput}
               value={stockModalValue}
               onChangeText={setStockModalValue}
@@ -409,6 +438,7 @@ export default function ProductsScreen() {
                 <Text style={styles.modalCancelText}>Annuler</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                testID="product-stock-confirm"
                 style={styles.modalConfirmButton}
                 onPress={handleStockConfirm}
               >
@@ -480,10 +510,16 @@ export default function ProductsScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 testID="product-add-submit"
-                style={styles.modalConfirmButton}
+                style={[
+                  styles.modalConfirmButton,
+                  addSubmitting && { opacity: 0.5 },
+                ]}
                 onPress={handleAddProduct}
+                disabled={addSubmitting}
               >
-                <Text style={styles.modalConfirmText}>Ajouter</Text>
+                <Text style={styles.modalConfirmText}>
+                  {addSubmitting ? 'Ajout…' : 'Ajouter'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

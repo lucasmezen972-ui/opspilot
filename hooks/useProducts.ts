@@ -1,21 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoProducts, demoId } from '../lib/demoData';
+import { demoId } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Product } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [remoteProducts, setRemoteProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { profile, isDemoMode, session } = useAuth();
 
-  // Mode démo local (Supabase injoignable) : données en mémoire, jamais vides.
+  // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
+  const demoProducts = useDemoCollection('products');
+  const products = isLocalDemo ? demoProducts : remoteProducts;
+  const setProducts = isLocalDemo
+    ? (updater: (prev: Product[]) => Product[]) =>
+        updateDemoCollection('products', updater)
+    : setRemoteProducts;
 
   const fetchProducts = useCallback(async () => {
     if (isLocalDemo) {
-      setProducts(getDemoProducts());
+      // Le store démo est déjà alimenté (et partagé) : rien à charger.
       setLoading(false);
       return;
     }
@@ -37,7 +44,7 @@ export function useProducts() {
         return;
       }
 
-      setProducts(data || []);
+      setRemoteProducts(data || []);
     } catch (error) {
       mapSupabaseError('Erreur fetchProducts', error);
     } finally {

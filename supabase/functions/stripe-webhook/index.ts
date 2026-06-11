@@ -51,42 +51,58 @@ Deno.serve(async (req: Request) => {
       if (session.mode !== 'subscription') break;
 
       const orgId = orgFromMeta(session.metadata);
-      const plan  = planFromMeta(session.metadata);
+      const plan = planFromMeta(session.metadata);
       if (!orgId) break;
 
-      const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+      const sub = await stripe.subscriptions.retrieve(
+        session.subscription as string,
+      );
 
-      await supabase.from('subscriptions').upsert({
-        organization_id: orgId,
-        stripe_customer_id: session.customer as string,
-        stripe_subscription_id: sub.id,
-        plan,
-        status: 'active',
-        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'organization_id' });
+      await supabase.from('subscriptions').upsert(
+        {
+          organization_id: orgId,
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: sub.id,
+          plan,
+          status: 'active',
+          current_period_end: new Date(
+            sub.current_period_end * 1000,
+          ).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'organization_id' },
+      );
       break;
     }
 
     case 'customer.subscription.updated': {
       const sub = event.data.object as Stripe.Subscription;
       const orgId = orgFromMeta(sub.metadata);
-      const plan  = planFromMeta(sub.metadata);
+      const plan = planFromMeta(sub.metadata);
       if (!orgId) break;
 
-      const status = sub.status === 'active' ? 'active'
-        : sub.status === 'past_due' ? 'past_due'
-        : sub.status === 'canceled' ? 'canceled'
-        : 'active';
+      const status =
+        sub.status === 'active'
+          ? 'active'
+          : sub.status === 'past_due'
+            ? 'past_due'
+            : sub.status === 'canceled'
+              ? 'canceled'
+              : 'active';
 
-      await supabase.from('subscriptions').upsert({
-        organization_id: orgId,
-        stripe_subscription_id: sub.id,
-        plan,
-        status,
-        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'organization_id' });
+      await supabase.from('subscriptions').upsert(
+        {
+          organization_id: orgId,
+          stripe_subscription_id: sub.id,
+          plan,
+          status,
+          current_period_end: new Date(
+            sub.current_period_end * 1000,
+          ).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'organization_id' },
+      );
       break;
     }
 
@@ -95,7 +111,8 @@ Deno.serve(async (req: Request) => {
       const orgId = orgFromMeta(sub.metadata);
       if (!orgId) break;
 
-      await supabase.from('subscriptions')
+      await supabase
+        .from('subscriptions')
         .update({ status: 'canceled', updated_at: new Date().toISOString() })
         .eq('organization_id', orgId);
       break;

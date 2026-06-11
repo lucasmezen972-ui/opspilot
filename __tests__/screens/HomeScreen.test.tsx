@@ -22,7 +22,9 @@ vi.mock('../../hooks/useProducts');
 
 const mockUseAuth = useAuth as MockedFunction<typeof useAuth>;
 const mockUseAudits = useAudits as MockedFunction<typeof useAudits>;
-const mockUseCorrectiveActions = useCorrectiveActions as MockedFunction<typeof useCorrectiveActions>;
+const mockUseCorrectiveActions = useCorrectiveActions as MockedFunction<
+  typeof useCorrectiveActions
+>;
 const mockUseProducts = useProducts as MockedFunction<typeof useProducts>;
 
 const mockProfile = {

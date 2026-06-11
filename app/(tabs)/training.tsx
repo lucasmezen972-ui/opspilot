@@ -206,7 +206,9 @@ export default function TrainingScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Formation</Text>
+        <Text style={styles.title} testID="page-training-title">
+          Formation
+        </Text>
         <View style={styles.pointsBadge}>
           <Star size={16} color="#F59E0B" />
           <Text style={styles.pointsText}>{profile?.xp || 0} XP</Text>

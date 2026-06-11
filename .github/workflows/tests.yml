@@ -24,14 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript typecheck
-        run: npm run typecheck
-
-      - name: ESLint
-        run: npm run lint
-
-      - name: Unit tests (vitest)
-        run: npm test
+      # typecheck + lint + format:check + tests unitaires
+      - name: Quality (typecheck, lint, prettier, vitest)
+        run: npm run quality
 
       - name: Build web
         run: npm run build:web

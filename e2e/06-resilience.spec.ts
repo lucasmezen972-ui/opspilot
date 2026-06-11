@@ -1,63 +1,55 @@
 import { test, expect } from '@playwright/test';
 
-import { loginAsDemo } from './helpers';
+import { loginAsLocalDemo, openTab } from './helpers';
+
+/**
+ * Test 6 — Résilience (B3) : reload, deep-link et coupure réseau
+ * ne doivent ni déconnecter la démo locale ni produire d'écran blanc.
+ */
 
 test.describe('Résilience', () => {
-  test('refresh page — pas de crash', async ({ page }) => {
-    await loginAsDemo(page, 'employee');
+  test.beforeEach(async ({ page }) => {
+    await loginAsLocalDemo(page);
+  });
+
+  test('reload — session démo conservée, dashboard affiché', async ({
+    page,
+  }) => {
     await page.reload();
-    await page.waitForTimeout(3_000);
-    const bodyText = await page.locator('body').innerText();
-    expect(bodyText.length).toBeGreaterThan(10);
+    await expect(
+      page.getByText('Tableau de bord opérationnel', { exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
   });
 
-  test('navigation rapide entre onglets — pas de crash', async ({ page }) => {
-    await loginAsDemo(page, 'employee');
-
-    const tabs = ['Audits', 'Produits', 'Actions', 'Formation'];
-    for (const tab of tabs) {
-      await page
-        .locator(`text=${tab}`)
-        .first()
-        .click({ timeout: 5_000 })
-        .catch(() => {});
-      await page.waitForTimeout(500);
-    }
-
-    const bodyText = await page.locator('body').innerText();
-    expect(bodyText.length).toBeGreaterThan(10);
-  });
-
-  test('erreur Supabase sur une page — fallback visible', async ({ page }) => {
-    await loginAsDemo(page, 'employee');
-
-    // Block Supabase after login
-    await page.route('**supabase.co/rest/**', (route) => route.abort());
-
-    // Navigate to a data page — should show loading or empty state, not crash
-    await page
-      .locator('text=Audits')
-      .first()
-      .click({ timeout: 5_000 })
-      .catch(() => {});
-    await page.waitForTimeout(3_000);
-
-    const bodyText = await page.locator('body').innerText();
-    expect(bodyText.length).toBeGreaterThan(10);
-  });
-
-  test('perte réseau totale — pas d\'écran blanc', async ({ page }) => {
-    await loginAsDemo(page, 'employee');
-    await page.route('**/**', (route) => {
-      if (route.request().url().includes('supabase')) {
-        route.abort();
-      } else {
-        route.continue();
-      }
+  test('deep-link /actions — reste connecté', async ({ page }) => {
+    await page.goto('./actions');
+    await expect(page.getByTestId('page-actions-title')).toBeVisible({
+      timeout: 15_000,
     });
+    await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
+  });
+
+  test('navigation rapide entre onglets — chaque page se charge', async ({
+    page,
+  }) => {
+    await openTab(page, 'Audits', 'page-audits-title');
+    await openTab(page, 'Produits', 'page-products-title');
+    await openTab(page, 'Actions', 'page-actions-title');
+    await openTab(page, 'Formation', 'page-training-title');
+    await openTab(page, 'Audits', 'page-audits-title');
+  });
+
+  test('Supabase injoignable après reload — dashboard toujours fonctionnel', async ({
+    page,
+  }) => {
     await page.reload();
-    await page.waitForTimeout(4_000);
-    const bodyText = await page.locator('body').innerText();
-    expect(bodyText.length).toBeGreaterThan(10);
+    await expect(
+      page.getByText('Tableau de bord opérationnel', { exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
+    await openTab(page, 'Audits', 'page-audits-title');
+    await expect(
+      page.getByText('Contrôle hygiène rayon frais').first(),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });
