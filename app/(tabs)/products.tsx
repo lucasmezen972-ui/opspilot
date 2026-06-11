@@ -23,6 +23,7 @@ import {
   AddProductModal,
   type NewProductPayload,
 } from '../../features/products/AddProductModal';
+import { BarcodeScannerModal } from '../../features/products/BarcodeScannerModal';
 import { ProductCard } from '../../features/products/ProductCard';
 import { StockModal } from '../../features/products/StockModal';
 import { useProducts } from '../../hooks/useProducts';
@@ -37,6 +38,7 @@ export default function ProductsScreen() {
     updateProductStock,
   } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
+  const [scannerVisible, setScannerVisible] = useState(false);
   const [stockModalProduct, setStockModalProduct] = useState<Product | null>(
     null,
   );
@@ -73,8 +75,8 @@ export default function ProductsScreen() {
     const q = searchQuery.toLowerCase();
     return (
       p.name.toLowerCase().includes(q) ||
-      (p.barcode || '').includes(q) ||
-      (p.category || '').toLowerCase().includes(q)
+      (p.barcode ?? '').includes(q) ||
+      (p.category ?? '').toLowerCase().includes(q)
     );
   });
 
@@ -87,51 +89,15 @@ export default function ProductsScreen() {
     (p) => p.stock_quantity === 0,
   ).length;
 
-  const simulateBarcodeScan = async () => {
+  const handleBarcodeDetected = async (barcode: string) => {
     setIsScanning(true);
-
-    // Simulation d'un scan de code-barres
-    setTimeout(async () => {
-      const testBarcodes = [
-        '3045320073034',
-        '3564700456789',
-        '3274080005003',
-        '3229820787152',
-        '3560070462235',
-      ];
-      const randomBarcode =
-        testBarcodes[Math.floor(Math.random() * testBarcodes.length)]!;
-
-      const scannedProduct = await scanProduct(randomBarcode);
-
-      if (scannedProduct) {
-        Alert.alert(
-          'Produit scanné',
-          `${scannedProduct.name}\nStock: ${scannedProduct.stock_quantity}\nPrix: ${scannedProduct.price != null ? `${scannedProduct.price}€` : 'N/A'}`,
-          [
-            { text: 'OK', style: 'default' },
-            {
-              text: 'Modifier stock',
-              onPress: () => setStockModalProduct(scannedProduct),
-            },
-          ],
-        );
-      } else {
-        Alert.alert(
-          'Produit non trouvé',
-          `Le code-barres ${randomBarcode} n'existe pas dans la base de données.`,
-          [
-            { text: 'OK', style: 'default' },
-            {
-              text: 'Ajouter produit',
-              onPress: () => openAddModal(randomBarcode),
-            },
-          ],
-        );
-      }
-
+    try {
+      const scannedProduct = await scanProduct(barcode);
+      if (scannedProduct) setStockModalProduct(scannedProduct);
+      else openAddModal(barcode);
+    } finally {
       setIsScanning(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -208,7 +174,7 @@ export default function ProductsScreen() {
           styles.scannerButton,
           isScanning && styles.scannerButtonDisabled,
         ]}
-        onPress={simulateBarcodeScan}
+        onPress={() => setScannerVisible(true)}
         disabled={isScanning}
       >
         <Scan size={24} color="#FFFFFF" />
@@ -246,9 +212,18 @@ export default function ProductsScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={simulateBarcodeScan}>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setScannerVisible(true)}
+      >
         <Scan size={24} color="#FFFFFF" />
       </TouchableOpacity>
+
+      <BarcodeScannerModal
+        visible={scannerVisible}
+        onClose={() => setScannerVisible(false)}
+        onDetected={handleBarcodeDetected}
+      />
 
       <StockModal
         product={stockModalProduct}

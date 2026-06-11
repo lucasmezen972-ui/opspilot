@@ -39,6 +39,47 @@ test.describe('Produits', () => {
     );
   });
 
+  test('scanner un code connu ouvre la fiche de stock du produit', async ({
+    page,
+  }) => {
+    await page.evaluate(() =>
+      localStorage.setItem('opspilot_e2e_barcode', '3000000000001'),
+    );
+    await page.getByTestId('product-scan-button').click();
+    await expect(page.getByTestId('barcode-scanner-modal')).toBeVisible();
+    await page.getByTestId('barcode-e2e-scan').click();
+
+    await expect(page.getByText('Modifier le stock')).toBeVisible({
+      timeout: 8_000,
+    });
+    await expect(page.getByTestId('product-stock-name')).toHaveText(
+      'Yaourt nature x8',
+    );
+    await expect(page.getByTestId('product-stock-input')).toHaveValue('24');
+  });
+
+  test('scanner un code inconnu ouvre l’ajout avec le code prérempli', async ({
+    page,
+  }) => {
+    await page.evaluate(() =>
+      localStorage.setItem('opspilot_e2e_barcode', '9999999999999'),
+    );
+    await page.getByTestId('product-scan-button').click();
+    await page.getByTestId('barcode-e2e-scan').click();
+
+    await expect(page.getByTestId('product-add-modal')).toBeVisible({
+      timeout: 8_000,
+    });
+    await expect(page.getByTestId('product-add-barcode')).toHaveValue(
+      '9999999999999',
+    );
+    await page.getByTestId('product-add-name').fill('Produit scanné inconnu');
+    await page.getByTestId('product-add-submit').click();
+    await expect(page.getByText('Produit scanné inconnu').first()).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
   test('ajouter un produit DLC critique → visible dans la liste et le dashboard', async ({
     page,
   }) => {

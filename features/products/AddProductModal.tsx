@@ -113,6 +113,7 @@ export function AddProductModal({
             placeholder="DLC dans X jours (vide = sans DLC)"
           />
           <TextInput
+            testID="product-add-barcode"
             style={modalStyles.modalInput}
             value={barcode}
             onChangeText={setBarcode}
