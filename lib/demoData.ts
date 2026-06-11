@@ -7,6 +7,8 @@ import type {
   Product,
   Task,
   Training,
+  TrainingChapter,
+  TrainingQuizQuestion,
   UserTrainingProgress,
 } from './supabase';
 
@@ -639,6 +641,7 @@ export function getDemoTrainings(): Training[] {
     is_active: true,
     created_at: days(-30),
     updated_at: days(-7),
+    is_default: true,
   });
 
   return [
@@ -677,6 +680,237 @@ export function getDemoTrainings(): Training[] {
   ];
 }
 
+export function getDemoTrainingChapters(): TrainingChapter[] {
+  const chapters: Record<string, [string, string][]> = {
+    'demo-training-1': [
+      [
+        'Comprendre la méthode HACCP',
+        '# Objectif\n\nIdentifier et maîtriser les dangers biologiques, chimiques et physiques.',
+      ],
+      [
+        'Hygiène personnelle',
+        '# Gestes essentiels\n\n- Mains propres\n- Tenue dédiée\n- Plaies protégées\n- Aucun bijou',
+      ],
+      [
+        'Contaminations croisées',
+        '# Séparer les flux\n\nUtilisez du matériel distinct pour les produits crus et prêts à consommer.',
+      ],
+      [
+        'Tracer et réagir',
+        '# Traçabilité\n\nIsolez tout produit douteux et consignez immédiatement l’action corrective.',
+      ],
+    ],
+    'demo-training-2': [
+      [
+        'DLC, DDM et ouverture',
+        '# Distinguer les dates\n\nLa DLC concerne la sécurité. La DDM concerne principalement la qualité.',
+      ],
+      [
+        'FIFO et FEFO',
+        '# Organiser le stock\n\nPlacez les dates les plus courtes devant et contrôlez chaque référence.',
+      ],
+      [
+        'Contrôle quotidien',
+        '# Routine\n\nVérifiez les produits expirés, à J0, J+1 et J+3 selon le rayon.',
+      ],
+      [
+        'Traiter une anomalie',
+        '# Retrait\n\nRetirez, isolez et signalez immédiatement tout produit non conforme.',
+      ],
+    ],
+    'demo-training-3': [
+      [
+        'Pourquoi le froid est critique',
+        '# Risque sanitaire\n\nLe froid ralentit les microbes sans les détruire.',
+      ],
+      [
+        'Réception',
+        '# Contrôle\n\nMesurez la température et vérifiez les emballages avant acceptation.',
+      ],
+      [
+        'Stockage',
+        '# Circulation de l’air\n\nNe surchargez pas les meubles et gardez les portes fermées.',
+      ],
+      [
+        'Rupture de froid',
+        '# Réaction\n\nNotez la durée, isolez les lots et demandez une décision au responsable.',
+      ],
+    ],
+    'demo-training-4': [
+      [
+        'Les premières secondes',
+        '# Accueil\n\nRegardez le client, saluez-le et rendez-vous disponible.',
+      ],
+      [
+        'Écoute active',
+        '# Comprendre\n\nLaissez parler, reformulez les faits et vérifiez l’attente.',
+      ],
+      [
+        'Proposer une solution',
+        '# Agir\n\nPrécisez l’action, le délai et la prochaine étape.',
+      ],
+      [
+        'Clore et capitaliser',
+        '# Suivi\n\nValidez la satisfaction puis tracez les problèmes récurrents.',
+      ],
+    ],
+  };
+
+  return Object.entries(chapters).flatMap(([trainingId, entries]) =>
+    entries.map(([title, body], index) => ({
+      id: `${trainingId}-chapter-${index + 1}`,
+      training_id: trainingId,
+      title,
+      body,
+      sort_order: index + 1,
+      created_at: days(-30),
+      updated_at: days(-7),
+    })),
+  );
+}
+
+export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
+  const questions: Record<string, [string, string[], number][]> = {
+    'demo-training-1': [
+      [
+        'Quel est le rôle principal de HACCP ?',
+        ['Décorer les locaux', 'Maîtriser les dangers', 'Fixer les prix'],
+        1,
+      ],
+      [
+        'Quand faut-il se laver les mains ?',
+        ['Après une manipulation contaminante', 'Une fois par jour', 'Jamais'],
+        0,
+      ],
+      [
+        'Comment éviter une contamination croisée ?',
+        [
+          'Mélanger les outils',
+          'Séparer le matériel',
+          'Ignorer les allergènes',
+        ],
+        1,
+      ],
+      [
+        'Que faire d’un produit douteux ?',
+        ['Le vendre', 'L’isoler', 'Changer son étiquette'],
+        1,
+      ],
+      [
+        'Quel élément assure la traçabilité ?',
+        ['Le numéro de lot', 'La météo', 'Le planning'],
+        0,
+      ],
+    ],
+    'demo-training-2': [
+      [
+        'Une DLC dépassée impose de…',
+        ['Retirer le produit', 'Le promouvoir', 'Le réétiqueter'],
+        0,
+      ],
+      [
+        'FEFO signifie…',
+        [
+          'Premier expiré, premier sorti',
+          'Dernier entré, premier sorti',
+          'Aucun contrôle',
+        ],
+        0,
+      ],
+      [
+        'Où placer les dates courtes ?',
+        ['Devant', 'Derrière', 'Sans règle'],
+        0,
+      ],
+      [
+        'Que faut-il enregistrer ?',
+        ['Les anomalies', 'La météo', 'La musique'],
+        0,
+      ],
+      [
+        'Un produit expiré en rayon doit être…',
+        ['Isolé immédiatement', 'Vendu rapidement', 'Caché'],
+        0,
+      ],
+    ],
+    'demo-training-3': [
+      [
+        'Le froid détruit-il tous les microbes ?',
+        ['Oui', 'Non', 'Uniquement la nuit'],
+        1,
+      ],
+      [
+        'Que contrôler à la réception ?',
+        ['La température', 'La couleur du camion', 'Le prix'],
+        0,
+      ],
+      [
+        'Pourquoi ne pas surcharger un meuble ?',
+        [
+          'Pour laisser circuler l’air',
+          'Pour réduire la lumière',
+          'Pour gagner du temps',
+        ],
+        0,
+      ],
+      [
+        'Que noter lors d’une rupture ?',
+        ['Température et durée', 'Couleur du produit', 'Nom des clients'],
+        0,
+      ],
+      [
+        'Qui décide du sort du lot ?',
+        ['Le responsable', 'Un client', 'Personne'],
+        0,
+      ],
+    ],
+    'demo-training-4': [
+      [
+        'Quel geste crée un bon contact ?',
+        ['Saluer le client', 'Éviter le regard', 'Continuer sa discussion'],
+        0,
+      ],
+      [
+        'Pourquoi reformuler ?',
+        ['Vérifier la compréhension', 'Interrompre', 'Contester'],
+        0,
+      ],
+      [
+        'Une solution claire précise…',
+        ['Action et délai', 'Uniquement les limites', 'Rien'],
+        0,
+      ],
+      [
+        'Comment clore une réclamation ?',
+        ['Vérifier la satisfaction', 'Partir', 'Supprimer la trace'],
+        0,
+      ],
+      [
+        'Pourquoi tracer les problèmes récurrents ?',
+        [
+          'Pour améliorer les opérations',
+          'Pour ralentir',
+          'Pour éviter de répondre',
+        ],
+        0,
+      ],
+    ],
+  };
+
+  return Object.entries(questions).flatMap(([trainingId, entries]) =>
+    entries.map(([question, options, correctIndex], index) => ({
+      id: `${trainingId}-quiz-${index + 1}`,
+      training_id: trainingId,
+      question,
+      options,
+      correct_index: correctIndex,
+      sort_order: index + 1,
+      created_at: days(-30),
+      updated_at: days(-7),
+    })),
+  );
+}
+
 export function getDemoTrainingProgress(): UserTrainingProgress[] {
   return [
     {
@@ -685,6 +919,12 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
       training_id: 'demo-training-1',
       status: 'completed',
       progress_percentage: 100,
+      completed_chapter_ids: [
+        'demo-training-1-chapter-1',
+        'demo-training-1-chapter-2',
+        'demo-training-1-chapter-3',
+        'demo-training-1-chapter-4',
+      ],
       score: 90,
       started_at: days(-10),
       completed_at: days(-9),
@@ -696,7 +936,11 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
       user_id: DEMO_USER_ID,
       training_id: 'demo-training-2',
       status: 'in_progress',
-      progress_percentage: 40,
+      progress_percentage: 50,
+      completed_chapter_ids: [
+        'demo-training-2-chapter-1',
+        'demo-training-2-chapter-2',
+      ],
       score: null,
       started_at: days(-2),
       completed_at: null,

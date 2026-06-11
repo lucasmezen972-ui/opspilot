@@ -23,6 +23,13 @@ les réponses typées, les politiques RLS et quatre modèles métier par défaut
 Elle conserve `audit_items` pour compatibilité, mais l'application utilise
 désormais `audit_template_items`.
 
+## Formations professionnelles
+
+`20260611180000_professional_trainings.sql` ajoute les chapitres, les quiz,
+la progression par chapitres lus, les politiques RLS et quatre cursus métier
+complets. Les cursus par défaut sont copiés dans les organisations existantes
+et lors de toute nouvelle création d'organisation.
+
 ## Règles
 
 - Toute nouvelle migration doit être **idempotente** (rejouable sans erreur) :

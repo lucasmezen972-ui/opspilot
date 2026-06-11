@@ -8,6 +8,8 @@ import {
   getDemoAuditTemplates,
   getDemoProducts,
   getDemoTasks,
+  getDemoTrainingChapters,
+  getDemoTrainingQuizQuestions,
   getDemoTrainings,
   getDemoTrainingProgress,
 } from './demoData';
@@ -20,6 +22,8 @@ import type {
   Product,
   Task,
   Training,
+  TrainingChapter,
+  TrainingQuizQuestion,
   UserTrainingProgress,
 } from './supabase';
 
@@ -43,6 +47,8 @@ export interface DemoState {
   products: Product[];
   tasks: Task[];
   trainings: Training[];
+  trainingChapters: TrainingChapter[];
+  trainingQuizQuestions: TrainingQuizQuestion[];
   trainingProgress: UserTrainingProgress[];
 }
 
@@ -56,6 +62,8 @@ function seed(): DemoState {
     products: getDemoProducts(),
     tasks: getDemoTasks(),
     trainings: getDemoTrainings(),
+    trainingChapters: getDemoTrainingChapters(),
+    trainingQuizQuestions: getDemoTrainingQuizQuestions(),
     trainingProgress: getDemoTrainingProgress(),
   };
 }

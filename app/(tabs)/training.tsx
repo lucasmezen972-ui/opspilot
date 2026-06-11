@@ -19,6 +19,7 @@ import {
   Alert,
 } from 'react-native';
 
+import { TrainingCourseModal } from '../../features/training/TrainingCourseModal';
 import { useAuth } from '../../hooks/useAuth';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
 import { useTraining } from '../../hooks/useTraining';
@@ -29,11 +30,13 @@ export default function TrainingScreen() {
   const { entries: leaderboard } = useLeaderboard();
   const {
     courses: dbCourses,
-    progress: _progress,
     loading: _trainingLoading,
     startCourse,
-    updateProgress,
+    markChapterRead,
+    completeQuiz,
     getCourseProgress,
+    getChaptersForCourse,
+    getQuizForCourse,
     getCompletedCourses,
   } = useTraining();
 
@@ -44,7 +47,7 @@ export default function TrainingScreen() {
       progress: p?.progress_percentage ?? 0,
       status: p?.status ?? 'not_started',
       description: c.content ?? c.category ?? '',
-      modules: [] as { title: string; content: string }[],
+      chapterCount: getChaptersForCourse(c.id).length,
     };
   });
 
@@ -56,6 +59,9 @@ export default function TrainingScreen() {
   ]);
 
   const [generatingCourse, setGeneratingCourse] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const selectedCourse =
+    dbCourses.find((course) => course.id === selectedCourseId) ?? null;
 
   // Stats calculées
   const completedCoursesList = getCompletedCourses();
@@ -123,40 +129,12 @@ export default function TrainingScreen() {
     }
   };
 
-  const handleStartCourse = async (courseId: string) => {
+  const handleOpenCourse = async (courseId: string) => {
     const result = await startCourse(courseId);
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
     } else {
-      Alert.alert(
-        'Formation démarrée',
-        'Vous pouvez maintenant suivre cette formation !',
-      );
-    }
-  };
-
-  const handleContinueCourse = async (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId);
-    if (course && course.progress < 100) {
-      const newProgress = Math.min(100, course.progress + 20);
-      const result = await updateProgress(courseId, newProgress);
-
-      if (result.error) {
-        Alert.alert('Erreur', String(result.error));
-        return;
-      }
-
-      if (newProgress >= 100) {
-        Alert.alert(
-          'Félicitations !',
-          `Formation "${course.title}" terminée avec succès ! Vous gagnez ${course.xp_reward} XP.`,
-        );
-      } else {
-        Alert.alert(
-          'Progression',
-          `Formation mise à jour : ${newProgress}% terminé`,
-        );
-      }
+      setSelectedCourseId(courseId);
     }
   };
 
@@ -211,7 +189,9 @@ export default function TrainingScreen() {
         </Text>
         <View style={styles.pointsBadge}>
           <Star size={16} color="#F59E0B" />
-          <Text style={styles.pointsText}>{profile?.xp || 0} XP</Text>
+          <Text style={styles.pointsText} testID="training-xp-value">
+            {profile?.xp ?? 0} XP
+          </Text>
         </View>
       </View>
 
@@ -288,7 +268,11 @@ export default function TrainingScreen() {
           </View>
 
           {courses.map((course) => (
-            <TouchableOpacity key={course.id} style={styles.courseCard}>
+            <View
+              key={course.id}
+              testID={`training-card-${course.id}`}
+              style={styles.courseCard}
+            >
               <View style={styles.courseHeader}>
                 <View style={styles.courseTitleSection}>
                   <Text style={styles.courseTitle}>{course.title}</Text>
@@ -319,7 +303,9 @@ export default function TrainingScreen() {
                 </View>
                 <View style={styles.courseMetaItem}>
                   <BookOpen size={14} color="#6B7280" />
-                  <Text style={styles.courseMetaText}>Formation complète</Text>
+                  <Text style={styles.courseMetaText}>
+                    {course.chapterCount} chapitres · quiz final
+                  </Text>
                 </View>
                 <View
                   style={[
@@ -374,6 +360,7 @@ export default function TrainingScreen() {
                     <BookOpen size={12} color={getStatusColor(course.status)} />
                   )}
                   <Text
+                    testID={`training-status-${course.id}`}
                     style={[
                       styles.statusText,
                       { color: getStatusColor(course.status) },
@@ -384,14 +371,9 @@ export default function TrainingScreen() {
                 </View>
 
                 <TouchableOpacity
+                  testID={`training-open-${course.id}`}
                   style={styles.actionButton}
-                  onPress={() => {
-                    if (course.status === 'not_started') {
-                      handleStartCourse(course.id);
-                    } else {
-                      handleContinueCourse(course.id);
-                    }
-                  }}
+                  onPress={() => handleOpenCourse(course.id)}
                 >
                   <Play size={16} color="#2563EB" />
                   <Text style={styles.actionButtonText}>
@@ -403,7 +385,7 @@ export default function TrainingScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           ))}
         </View>
 
@@ -469,7 +451,7 @@ export default function TrainingScreen() {
                         isMe && { fontWeight: '700' },
                       ]}
                     >
-                      {entry.full_name || entry.email || 'Anonyme'}
+                      {entry.full_name ?? entry.email ?? 'Anonyme'}
                       {isMe ? ' (moi)' : ''}
                     </Text>
                     <Text style={styles.leaderboardSub}>
@@ -491,6 +473,18 @@ export default function TrainingScreen() {
           </View>
         </View>
       </ScrollView>
+      <TrainingCourseModal
+        visible={selectedCourse !== null}
+        course={selectedCourse}
+        chapters={selectedCourse ? getChaptersForCourse(selectedCourse.id) : []}
+        questions={selectedCourse ? getQuizForCourse(selectedCourse.id) : []}
+        progress={
+          selectedCourse ? getCourseProgress(selectedCourse.id) : undefined
+        }
+        onClose={() => setSelectedCourseId(null)}
+        onMarkChapterRead={markChapterRead}
+        onCompleteQuiz={completeQuiz}
+      />
     </View>
   );
 }
