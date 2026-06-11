@@ -15,10 +15,13 @@ import {
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
+import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function TabLayout() {
   const { profile } = useAuth();
+  // Modules activables/désactivables depuis le back-office superadmin.
+  const { isEnabled } = useAppSettings();
 
   return (
     <Tabs
@@ -80,6 +83,7 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <FileText size={size} color={color} />
           ),
+          href: isEnabled('features.reports') ? '/reports' : null,
         }}
       />
       <Tabs.Screen
@@ -89,6 +93,7 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <GraduationCap size={size} color={color} />
           ),
+          href: isEnabled('features.training') ? '/training' : null,
         }}
       />
       <Tabs.Screen

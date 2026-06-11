@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useAppSettings } from '../../hooks/useAppSettings';
 import { useMessages } from '../../hooks/useMessages';
 import { getChatAssistantResponse } from '../../lib/openai';
 
@@ -42,8 +43,11 @@ export default function ChatScreen() {
   const [localMessages, setLocalMessages] = useState<any[]>([]);
   const messagesScrollRef = useRef<ScrollView>(null);
 
+  // Modules pilotés depuis le back-office (assistant IA désactivable).
+  const { isEnabled } = useAppSettings();
+
   // Utiliser les conversations de la DB, avec fallback démo
-  const conversations =
+  const allConversations =
     dbConversations.length > 0
       ? dbConversations.map((c) => ({
           id: c.id,
@@ -84,6 +88,10 @@ export default function ChatScreen() {
             online: true,
           },
         ];
+
+  const conversations = allConversations.filter(
+    (c) => c.id !== 'demo-ai' || isEnabled('features.ai_assistant'),
+  );
 
   // Sélectionner la première conversation par défaut
   useEffect(() => {
