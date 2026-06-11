@@ -7,11 +7,13 @@ import {
   getDemoAuditTemplateItems,
   getDemoAuditTemplates,
   getDemoProducts,
+  getDemoSettings,
   getDemoTasks,
   getDemoTrainingChapters,
   getDemoTrainingQuizQuestions,
   getDemoTrainings,
   getDemoTrainingProgress,
+  type DemoSettings,
 } from './demoData';
 import type {
   Audit,
@@ -50,6 +52,7 @@ export interface DemoState {
   trainingChapters: TrainingChapter[];
   trainingQuizQuestions: TrainingQuizQuestion[];
   trainingProgress: UserTrainingProgress[];
+  settings: DemoSettings;
 }
 
 function seed(): DemoState {
@@ -65,6 +68,7 @@ function seed(): DemoState {
     trainingChapters: getDemoTrainingChapters(),
     trainingQuizQuestions: getDemoTrainingQuizQuestions(),
     trainingProgress: getDemoTrainingProgress(),
+    settings: getDemoSettings(),
   };
 }
 

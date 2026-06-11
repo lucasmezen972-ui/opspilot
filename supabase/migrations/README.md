@@ -36,6 +36,12 @@ et lors de toute nouvelle création d'organisation.
 réservé au `service_role`. Il protège la fonction Edge `ai-assistant` sans
 exposer de table ou de RPC au client.
 
+## Réglages utilisateur
+
+`20260611220000_user_settings.sql` ajoute les préférences de notification
+personnelles avec RLS. La modification du nom de l'organisation et du magasin
+est limitée aux administrateurs, y compris au niveau des policies Postgres.
+
 ## Règles
 
 - Toute nouvelle migration doit être **idempotente** (rejouable sans erreur) :

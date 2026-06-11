@@ -285,6 +285,20 @@ export type Profile = {
   updated_at: string;
 };
 
+export type NotificationPreferences = {
+  audit_notifications: boolean;
+  action_notifications: boolean;
+  training_notifications: boolean;
+  weekly_summary: boolean;
+};
+
+export type UserPreferences = NotificationPreferences & {
+  user_id: string;
+  organization_id: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type AuditTemplate = {
   id: string;
   organization_id: string;
