@@ -98,9 +98,8 @@ test.describe('Gestion des audits', () => {
 
   test('audit structuré : score pondéré, preuve photo et action liée', async ({
     page,
-    context,
   }) => {
-    await context.grantPermissions(['camera']);
+    await page.evaluate(() => localStorage.setItem('opspilot_e2e_camera', '1'));
     await page.getByTestId('audit-finish-demo-audit-7').click();
     await expect(
       page.getByTestId('audit-professional-questionnaire'),
@@ -110,18 +109,10 @@ test.describe('Gestion des audits', () => {
 
     await page.getByTestId('audit-item-demo-haccp-item-1-ko').click();
     await page.getByTestId('audit-item-demo-haccp-item-1-photo').click();
-    await expect(page.getByTestId('camera-permission-button')).toBeVisible({
+    await expect(page.getByTestId('camera-e2e-photo-button')).toBeVisible({
       timeout: 15_000,
     });
-    await page.getByTestId('camera-permission-button').click();
-    await expect(page.getByTestId('camera-capture-button')).toBeVisible({
-      timeout: 15_000,
-    });
-    await page.getByTestId('camera-capture-button').click();
-    await expect(page.getByTestId('camera-confirm-button')).toBeVisible({
-      timeout: 15_000,
-    });
-    await page.getByTestId('camera-confirm-button').click();
+    await page.getByTestId('camera-e2e-photo-button').click();
     await expect(
       page.getByTestId('audit-item-demo-haccp-item-1-photo'),
     ).toContainText('Photo jointe');
