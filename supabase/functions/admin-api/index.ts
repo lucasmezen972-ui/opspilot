@@ -193,17 +193,15 @@ Deno.serve(async (req) => {
         const { key, value } = await req.json();
         if (!orgId || !key)
           return json({ error: 'organization_id et key requis' }, 400);
-        const { error } = await admin
-          .from('app_settings')
-          .upsert(
-            {
-              organization_id: orgId,
-              key,
-              value: value ?? {},
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'organization_id,key' },
-          );
+        const { error } = await admin.from('app_settings').upsert(
+          {
+            organization_id: orgId,
+            key,
+            value: value ?? {},
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'organization_id,key' },
+        );
         if (error) return json({ error: error.message }, 400);
         return json({ ok: true });
       }
