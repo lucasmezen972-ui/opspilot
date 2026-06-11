@@ -262,28 +262,52 @@ export type Profile = {
   updated_at: string;
 };
 
-export type AuditItem = {
+export type AuditTemplate = {
+  id: string;
+  organization_id: string;
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  icon?: string | null;
+  estimated_duration?: number | null;
+  max_score: number;
+  is_active: boolean;
+  is_default: boolean;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type AuditTemplateItem = {
   id: string;
   template_id: string;
+  section: string;
   question: string;
-  item_type: 'checkbox' | 'rating' | 'text' | 'photo' | 'numeric';
+  item_type: 'yes_no' | 'score_1_5' | 'text' | 'photo';
   is_required: boolean;
   points: number;
   sort_order: number;
-  options: any;
-  created_at: string;
+  created_at?: string;
 };
 
 export type AuditResponse = {
   id: string;
   audit_id: string;
   item_id: string;
+  value?: boolean | number | string | null;
+  is_compliant?: boolean | null;
+  photo_url?: string | null;
+  comment?: string | null;
+  // Colonnes historiques conservées par la migration pour compatibilité.
   response_value?: string | null;
-  score: number;
+  score?: number | null;
   notes?: string | null;
-  photos: string[];
-  created_at: string;
+  photos?: string[];
+  created_at?: string;
 };
+
+/** Alias historique gardé pour les imports existants. */
+export type AuditItem = AuditTemplateItem;
 
 export type AuditPhoto = {
   id: string;

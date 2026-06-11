@@ -16,6 +16,7 @@ import {
   Alert,
   Image,
   PanResponder,
+  Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -65,6 +66,31 @@ export default function CameraModal({
     }),
   ).current;
   const cameraRef = useRef<CameraView>(null);
+  const isE2ECameraMode =
+    Platform.OS === 'web' &&
+    typeof localStorage !== 'undefined' &&
+    localStorage.getItem('opspilot_e2e_camera') === '1';
+
+  if (visible && isE2ECameraMode) {
+    return (
+      <Modal visible animationType="none">
+        <View style={styles.permissionContainer}>
+          <Camera size={64} color="#2563EB" />
+          <Text style={styles.permissionTitle}>Photo de contrôle E2E</Text>
+          <TouchableOpacity
+            testID="camera-e2e-photo-button"
+            style={styles.permissionButton}
+            onPress={() => {
+              onPhotoTaken('data:image/png;base64,b3BzcGlsb3QtZTJl');
+              onClose();
+            }}
+          >
+            <Text style={styles.permissionButtonText}>Joindre la photo</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    );
+  }
 
   if (!permission) {
     return <View />;
@@ -83,6 +109,7 @@ export default function CameraModal({
             d'audit.
           </Text>
           <TouchableOpacity
+            testID="camera-permission-button"
             style={styles.permissionButton}
             onPress={requestPermission}
           >
@@ -244,6 +271,7 @@ export default function CameraModal({
               <Text style={styles.retakeButtonText}>Reprendre</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              testID="camera-confirm-button"
               style={styles.confirmButton}
               onPress={confirmPhoto}
             >
@@ -285,6 +313,7 @@ export default function CameraModal({
             </TouchableOpacity>
 
             <TouchableOpacity
+              testID="camera-capture-button"
               style={styles.captureButton}
               onPress={takePicture}
             >

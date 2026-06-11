@@ -33,6 +33,29 @@ test.describe('Gestion des audits', () => {
     await expect(
       page.getByText('Bibliothèque de modèles', { exact: true }),
     ).toBeVisible();
+    await expect(
+      page.getByTestId('audit-template-demo-template-haccp'),
+    ).toContainText('HACCP alimentaire');
+  });
+
+  test('créer un audit depuis un modèle puis le démarrer', async ({ page }) => {
+    const title = 'Audit HACCP équipe matin';
+    await page.getByTestId('audit-template-demo-template-haccp').click();
+    await expect(page.getByTestId('audit-create-title-input')).toHaveValue(
+      'HACCP alimentaire',
+    );
+    await page.getByTestId('audit-create-title-input').fill(title);
+    await page.getByTestId('audit-create-submit').click();
+
+    const card = page
+      .locator('[data-testid^="audit-card-"]')
+      .filter({ hasText: title });
+    await expect(card).toHaveCount(1);
+    await expect(card).toBeVisible({ timeout: 10_000 });
+    await card.getByText('Démarrer', { exact: true }).click();
+    await expect(card.getByText('En cours', { exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('démarrer un audit en attente le passe en cours', async ({ page }) => {
@@ -69,6 +92,41 @@ test.describe('Gestion des audits', () => {
           'Non-conformité : Les zones de stockage sont propres et rangées',
         )
         .first(),
+    ).toBeVisible({ timeout: 10_000 });
+    expect(await readCount(page, 'actions-count-open')).toBe(3);
+  });
+
+  test('audit structuré : score pondéré, preuve photo et action liée', async ({
+    page,
+  }) => {
+    await page.evaluate(() => localStorage.setItem('opspilot_e2e_camera', '1'));
+    await page.getByTestId('audit-finish-demo-audit-7').click();
+    await expect(
+      page.getByTestId('audit-professional-questionnaire'),
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Réception', { exact: true })).toBeVisible();
+    await expect(page.getByText('Stockage', { exact: true })).toBeVisible();
+
+    await page.getByTestId('audit-item-demo-haccp-item-1-ko').click();
+    await page.getByTestId('audit-item-demo-haccp-item-1-photo').click();
+    await expect(page.getByTestId('camera-e2e-photo-button')).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByTestId('camera-e2e-photo-button').click();
+    await expect(
+      page.getByTestId('audit-item-demo-haccp-item-1-photo'),
+    ).toContainText('Photo jointe');
+
+    await page.getByTestId('audit-professional-submit').click();
+    await expect(page.getByTestId('audit-finish-demo-audit-7')).toHaveCount(0, {
+      timeout: 10_000,
+    });
+
+    await openTab(page, 'Actions', 'page-actions-title');
+    await expect(
+      page.getByText(
+        'Non-conformité : La température des produits frais est-elle conforme ?',
+      ),
     ).toBeVisible({ timeout: 10_000 });
     expect(await readCount(page, 'actions-count-open')).toBe(3);
   });
