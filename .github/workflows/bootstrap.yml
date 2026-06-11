@@ -32,6 +32,11 @@ jobs:
           echo "=== Application des migrations SQL ==="
           for f in supabase/migrations/2026*.sql; do
             [ -f "$f" ] || continue
+            # Périmée : remplacée par 20260610120000_sync_onboarding_rpcs_live.sql
+            # (le type de retour des RPC a changé sur le projet live → 42P13 si rejouée)
+            case "$f" in
+              *20260609230000_v2_onboarding.sql) echo "-> $(basename "$f") : perimee (ignoree)"; continue ;;
+            esac
             echo "-> $(basename "$f")"
             payload=$(jq -Rs '{query: .}' < "$f")
             out=$(curl -sS -w '\n%{http_code}' -X POST \
