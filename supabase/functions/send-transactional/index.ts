@@ -66,6 +66,26 @@ function build(type: string, data: Record<string, string>): Built | null {
            ${button(APP_URL, 'Accéder à OpsPilot')}`,
         ),
       };
+    case 'audit_completed':
+      return {
+        subject: `Audit terminé : ${data.audit ?? ''}`,
+        html: layout(
+          "Un audit vient d'être clôturé",
+          `<p>L'audit <strong>${data.audit ?? ''}</strong>${data.location ? ` (${data.location})` : ''} de <strong>${data.org ?? 'votre organisation'}</strong> a été terminé${data.auditor ? ` par ${data.auditor}` : ''}.</p>
+           ${data.score ? `<p>Score obtenu : <strong>${data.score}%</strong></p>` : ''}
+           ${button(APP_URL, "Voir l'audit")}`,
+        ),
+      };
+    case 'training_completed':
+      return {
+        subject: `Formation terminée : ${data.training ?? ''}`,
+        html: layout(
+          "Une formation vient d'être validée",
+          `<p><strong>${data.person ?? 'Un collaborateur'}</strong> a terminé la formation <strong>${data.training ?? ''}</strong> chez <strong>${data.org ?? 'votre organisation'}</strong>.</p>
+           ${data.score ? `<p>Score au quiz : <strong>${data.score}%</strong></p>` : ''}
+           ${button(APP_URL, 'Voir la formation')}`,
+        ),
+      };
     default:
       return null;
   }
@@ -168,10 +188,12 @@ Deno.serve(async (req) => {
   }
 
   const recipients = await resolveRecipients(to, organization_id);
+  // Déduplication par destinataire uniquement pour les emails « une fois » ;
+  // les notifications d'audit/formation se répètent à chaque événement.
+  const dedup = new Set(['welcome', 'subscription_active']);
   let sent = 0;
   for (const r of recipients) {
-    // welcome et subscription_active : une fois par destinataire.
-    if (type !== 'invitation' && (await alreadySent(type, r))) continue;
+    if (dedup.has(type) && (await alreadySent(type, r))) continue;
     await deliver(r, type, built, organization_id);
     sent++;
   }
