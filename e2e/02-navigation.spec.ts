@@ -19,6 +19,7 @@ test.describe('Navigation principale', () => {
     { name: 'Tâches', titleTestId: 'page-tasks-title' },
     { name: 'Rapports', titleTestId: 'page-reports-title' },
     { name: 'Formation', titleTestId: 'page-training-title' },
+    { name: 'Messages', titleTestId: 'page-messages-title' },
     { name: 'Profil', titleTestId: 'page-profile-title' },
   ];
 
