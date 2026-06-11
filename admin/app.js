@@ -210,7 +210,12 @@ const views = {
   dashboard: renderDashboard,
   users: renderUsers,
   orgs: renderOrgs,
+  announcements: renderAnnouncements,
   settings: renderSettings,
+  billing: renderBilling,
+  health: renderHealth,
+  platform: renderPlatform,
+  journal: renderJournal,
 };
 
 function navigate() {
@@ -319,7 +324,8 @@ async function renderUsers() {
       <td><strong>${esc(u.full_name ?? '—')}</strong><br /><span style="color:#6b7280">${esc(u.email)}</span></td>
       <td>${esc(u.organizations?.name ?? '—')}</td>
       <td><span class="badge ${u.role === 'superadmin' ? 'red' : u.role === 'admin' ? 'amber' : 'gray'}">${esc(ROLE_LABELS[u.role] ?? u.role)}</span></td>
-      <td>${u.is_active === false ? '<span class="badge red">Désactivé</span>' : '<span class="badge green">Actif</span>'}</td>
+      <td>${u.is_active === false ? '<span class="badge red">Désactivé</span>' : '<span class="badge green">Actif</span>'}<br />
+        <span style="color:#9ca3af;font-size:11px">vu : ${u.last_active ? new Date(u.last_active).toLocaleDateString('fr-FR') : 'jamais'}</span></td>
       <td style="white-space:nowrap">${
         u.role === 'superadmin'
           ? ''
@@ -574,6 +580,8 @@ async function renderOrgs() {
         </select>
         <button class="small" data-rename="${o.id}" title="Renommer">✏️</button>
         <button class="small" data-detail="${o.id}">Détails</button>
+        <button class="small" data-export-org="${o.id}" title="Export RGPD (JSON)">📤</button>
+        <button class="small danger" data-delete-org="${o.id}" data-org-name="${esc(o.name)}" title="Supprimer définitivement">🗑</button>
         ${sub?.stripe_customer_id ? `<a href="https://dashboard.stripe.com/customers/${esc(sub.stripe_customer_id)}" target="_blank" rel="noopener">Stripe ↗</a>` : ''}
       </td>
     </tr>
@@ -656,11 +664,22 @@ async function renderOrgs() {
       row.firstElementChild.innerHTML = 'Chargement…';
       try {
         const orgId = btn.dataset.detail;
-        const [d, { stores }] = await Promise.all([
+        const [d, { stores }, { activity }] = await Promise.all([
           api(`/organization-detail/${orgId}`),
           api(`/stores/${orgId}`),
+          api(`/organization-activity/${orgId}`),
         ]);
+        const counts = Object.values(activity ?? {});
+        const max = Math.max(1, ...counts);
+        const points = counts
+          .map(
+            (v, i) =>
+              `${((i / Math.max(1, counts.length - 1)) * 200).toFixed(1)},${(30 - (v / max) * 28).toFixed(1)}`,
+          )
+          .join(' ');
+        const spark = `<svg width="200" height="32" style="vertical-align:middle"><polyline points="${points}" fill="none" stroke="#2563eb" stroke-width="2" /></svg> <span style="color:#6b7280;font-size:12px">audits / jour (30 j)</span>`;
         row.firstElementChild.innerHTML = `
+          ${spark}<br />
           <strong>${d.counts.audits}</strong> audits ·
           <strong>${d.counts.actions}</strong> actions ·
           <strong>${d.counts.products}</strong> produits<br />
@@ -748,6 +767,48 @@ async function renderOrgs() {
       }),
     );
   });
+  document.querySelectorAll('[data-export-org]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        toast('Export en cours…');
+        const data = await api(`/export-organization/${btn.dataset.exportOrg}`);
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json',
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `opspilot-export-${btn.dataset.exportOrg}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('Export RGPD téléchargé ✅');
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  document.querySelectorAll('[data-delete-org]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const name = btn.dataset.orgName;
+      const typed = prompt(
+        `⚠️ SUPPRESSION DÉFINITIVE de « ${name} » et de TOUTES ses données (membres, audits, produits…).\n\nPour confirmer, recopie exactement le nom de l'organisation :`,
+      );
+      if (typed === null) return;
+      if (typed !== name) {
+        toast('Nom incorrect — suppression annulée.', 4000);
+        return;
+      }
+      try {
+        await api(
+          `/organizations/${btn.dataset.deleteOrg}?confirm=${encodeURIComponent(typed)}`,
+          { method: 'DELETE' },
+        );
+        toast('Organisation supprimée.');
+        renderOrgs();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
   $('#org-create').addEventListener('click', () => {
     openModal(`
       <h3>Créer une organisation</h3>
@@ -791,7 +852,212 @@ const ACTION_LABELS = {
   'user.impersonate': '🕵️ Connexion en tant que',
   'store.create': '🏬 Magasin créé',
   'store.update': '🏬 Magasin modifié',
+  'announcement.create': '📢 Annonce publiée',
+  'announcement.toggle': '📢 Annonce (dés)activée',
+  'organization.export': '⚖️ Export RGPD',
+  'organization.delete': '⚖️ Organisation supprimée',
+  'platform.update': '🛠 Réglage plateforme',
 };
+
+async function renderAnnouncements() {
+  content.innerHTML = '<h2>Annonces</h2><p class="subtitle">Chargement…</p>';
+  const [{ announcements }, { organizations }] = await Promise.all([
+    api('/announcements'),
+    api('/organizations'),
+  ]);
+  const rows = announcements
+    .map(
+      (a) => `
+    <tr>
+      <td><strong>${esc(a.title)}</strong>${a.body ? `<br /><span style="color:#6b7280">${esc(a.body)}</span>` : ''}</td>
+      <td><span class="badge ${a.level === 'warning' ? 'amber' : a.level === 'success' ? 'green' : 'gray'}">${esc(a.level)}</span></td>
+      <td>${esc(a.organizations?.name ?? 'Toutes')}</td>
+      <td>${a.ends_at ? new Date(a.ends_at).toLocaleDateString('fr-FR') : '∞'}</td>
+      <td>${a.is_active ? '<span class="badge green">Active</span>' : '<span class="badge gray">Inactive</span>'}</td>
+      <td><button class="small" data-toggle-ann="${a.id}" data-active="${a.is_active}">${a.is_active ? 'Désactiver' : 'Réactiver'}</button></td>
+    </tr>`,
+    )
+    .join('');
+  const orgOptions = organizations
+    .map((o) => `<option value="${o.id}">${esc(o.name)}</option>`)
+    .join('');
+  content.innerHTML = `
+    <h2>Annonces</h2>
+    <p class="subtitle">Bannières affichées dans l'app (globales ou par organisation)</p>
+    <div class="toolbar"><span></span><button class="small" id="ann-create">+ Publier une annonce</button></div>
+    <table>
+      <thead><tr><th>Annonce</th><th>Niveau</th><th>Cible</th><th>Expire</th><th>État</th><th></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6"><em>Aucune annonce.</em></td></tr>'}</tbody>
+    </table>`;
+  document.querySelectorAll('[data-toggle-ann]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await api(`/announcements/${btn.dataset.toggleAnn}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ is_active: btn.dataset.active !== 'true' }),
+        });
+        toast('Annonce mise à jour ✅');
+        renderAnnouncements();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  $('#ann-create').addEventListener('click', () => {
+    openModal(`
+      <h3>📢 Publier une annonce</h3>
+      <label>Titre</label>
+      <input id="a-title" placeholder="Maintenance dimanche 9h" />
+      <label>Message (optionnel)</label>
+      <input id="a-body" placeholder="Détail affiché sous le titre" />
+      <label>Niveau</label>
+      <select id="a-level">
+        <option value="info">Info (bleu)</option>
+        <option value="warning">Avertissement (orange)</option>
+        <option value="success">Bonne nouvelle (vert)</option>
+      </select>
+      <label>Cible</label>
+      <select id="a-org"><option value="">Toutes les organisations</option>${orgOptions}</select>
+      <label>Expire dans (jours, vide = jamais)</label>
+      <input id="a-days" inputmode="numeric" placeholder="7" />
+      <div class="row-btns">
+        <button class="cancel" data-close>Annuler</button>
+        <button id="a-save">Publier</button>
+      </div>`);
+    $('#a-save').addEventListener('click', async () => {
+      const days = parseInt($('#a-days').value, 10);
+      try {
+        await api('/announcements', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: $('#a-title').value,
+            body: $('#a-body').value,
+            level: $('#a-level').value,
+            organization_id: $('#a-org').value || null,
+            ends_at: Number.isFinite(days)
+              ? new Date(Date.now() + days * 86400000).toISOString()
+              : null,
+          }),
+        });
+        toast('Annonce publiée ✅');
+        closeModal();
+        renderAnnouncements();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+}
+
+async function renderBilling() {
+  content.innerHTML = '<h2>Facturation</h2><p class="subtitle">Chargement…</p>';
+  const b = await api('/billing-overview');
+  if (!b.configured) {
+    content.innerHTML = `
+      <h2>Facturation</h2>
+      <p class="subtitle">La clé STRIPE_SECRET_KEY n'est pas configurée côté serveur — les chiffres Stripe apparaîtront ici dès qu'elle le sera.</p>`;
+    return;
+  }
+  const rows = (b.invoices ?? [])
+    .map(
+      (i) => `
+    <tr>
+      <td>${esc(i.number ?? '—')}</td>
+      <td>${esc(i.customer_email ?? '—')}</td>
+      <td>${(i.amount ?? 0).toFixed(2)} ${esc((i.currency ?? '').toUpperCase())}</td>
+      <td><span class="badge ${i.status === 'paid' ? 'green' : i.status === 'open' ? 'amber' : 'gray'}">${esc(i.status)}</span></td>
+      <td>${i.created ? new Date(i.created * 1000).toLocaleDateString('fr-FR') : ''}</td>
+    </tr>`,
+    )
+    .join('');
+  content.innerHTML = `
+    <h2>Facturation</h2>
+    <p class="subtitle">Données Stripe en direct</p>
+    <div class="cards">
+      <div class="card"><div class="num">${b.mrr.toFixed(2)} €</div><div class="label">MRR (revenu mensuel récurrent)</div></div>
+      <div class="card"><div class="num">${b.active_subscriptions}</div><div class="label">Abonnements Stripe actifs</div></div>
+    </div>
+    <h3 class="col-title">Dernières factures</h3>
+    <table>
+      <thead><tr><th>N°</th><th>Client</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="5"><em>Aucune facture.</em></td></tr>'}</tbody>
+    </table>`;
+}
+
+async function renderHealth() {
+  content.innerHTML = '<h2>Santé</h2><p class="subtitle">Chargement…</p>';
+  const h = await api('/health');
+  const cronRows = (h.cron ?? [])
+    .map(
+      (c) => `
+    <tr>
+      <td>${esc(c.jobname)}</td>
+      <td><span class="badge ${c.status === 'succeeded' ? 'green' : 'red'}">${esc(c.status)}</span></td>
+      <td style="color:#6b7280">${esc(c.return_message ?? '')}</td>
+      <td>${c.end_time ? new Date(c.end_time).toLocaleString('fr-FR') : ''}</td>
+    </tr>`,
+    )
+    .join('');
+  const emailRows = (h.emails ?? [])
+    .map(
+      (e) => `
+    <tr>
+      <td>${esc(e.recipient)}</td>
+      <td>${esc(e.template)}</td>
+      <td><span class="badge ${e.status === 'sent' ? 'green' : e.status === 'skipped' ? 'amber' : 'red'}">${esc(e.status)}</span>${e.error ? `<br /><span style="color:#9ca3af;font-size:11px">${esc(e.error.slice(0, 80))}</span>` : ''}</td>
+      <td>${new Date(e.created_at).toLocaleString('fr-FR')}</td>
+    </tr>`,
+    )
+    .join('');
+  content.innerHTML = `
+    <h2>Santé</h2>
+    <p class="subtitle">Tâches planifiées, emails et base de données</p>
+    <div class="cards">
+      <div class="card"><div class="num">${esc(h.db_size ?? '—')}</div><div class="label">Taille de la base</div></div>
+      <div class="card"><div class="num">${h.audit_log_count}</div><div class="label">Actions au journal</div></div>
+    </div>
+    <h3 class="col-title">Tâches planifiées (3 derniers runs)</h3>
+    <table>
+      <thead><tr><th>Tâche</th><th>Statut</th><th>Message</th><th>Fin</th></tr></thead>
+      <tbody>${cronRows || '<tr><td colspan="4"><em>Aucun run.</em></td></tr>'}</tbody>
+    </table>
+    <h3 class="col-title" style="margin-top:18px">Relances email (20 dernières)</h3>
+    <table>
+      <thead><tr><th>Destinataire</th><th>Modèle</th><th>Statut</th><th>Date</th></tr></thead>
+      <tbody>${emailRows || '<tr><td colspan="4"><em>Aucun email — la première relance partira automatiquement quand un essai approchera de sa fin.</em></td></tr>'}</tbody>
+    </table>`;
+}
+
+async function renderPlatform() {
+  content.innerHTML = '<h2>Plateforme</h2><p class="subtitle">Chargement…</p>';
+  const { settings } = await api('/platform-settings');
+  const defaults = settings.find((x) => x.key === 'defaults')?.value ?? {};
+  content.innerHTML = `
+    <h2>Plateforme</h2>
+    <p class="subtitle">Réglages globaux appliqués aux nouvelles organisations</p>
+    <div class="card" style="max-width:420px">
+      <label>Durée d'essai par défaut (jours)</label>
+      <input id="pf-trial" inputmode="numeric" value="${esc(defaults.trial_days ?? 14)}" />
+      <button id="pf-save" style="margin-top:14px">Enregistrer</button>
+    </div>
+    <p class="subtitle" style="margin-top:14px">📧 Relances automatiques : actives (cron quotidien 08:00 UTC). Les envois réels démarrent dès que la clé RESEND_API_KEY est posée en secret Supabase — d'ici là, chaque relance est journalisée en « skipped » (visible dans Santé).</p>`;
+  $('#pf-save').addEventListener('click', async () => {
+    const days = parseInt($('#pf-trial').value, 10);
+    if (!Number.isFinite(days) || days < 1 || days > 365) {
+      toast('Durée invalide (1-365 jours).', 4000);
+      return;
+    }
+    try {
+      await api('/platform-settings', {
+        method: 'PUT',
+        body: JSON.stringify({ key: 'defaults', value: { trial_days: days } }),
+      });
+      toast('Réglages enregistrés ✅');
+    } catch (e) {
+      toast(`Erreur : ${e.message}`, 5000);
+    }
+  });
+}
 
 async function renderJournal() {
   content.innerHTML = '<h2>Journal</h2><p class="subtitle">Chargement…</p>';
@@ -898,6 +1164,22 @@ $('#login-submit').addEventListener('click', handleLogin);
 $('#login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
 });
+const THEME_KEY = 'opspilot_admin_theme';
+function applyTheme() {
+  document.body.classList.toggle(
+    'dark',
+    localStorage.getItem(THEME_KEY) === 'dark',
+  );
+}
+$('#theme-toggle').addEventListener('click', () => {
+  localStorage.setItem(
+    THEME_KEY,
+    document.body.classList.contains('dark') ? 'light' : 'dark',
+  );
+  applyTheme();
+});
+applyTheme();
+
 $('#setup-2fa').addEventListener('click', setup2fa);
 
 $('#change-password').addEventListener('click', () => {
