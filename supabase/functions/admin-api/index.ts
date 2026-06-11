@@ -1,7 +1,7 @@
 // admin-api — API du back-office superadmin (gestion utilisateurs, orgs,
 // abonnements, réglages). Auth manuelle (verify_jwt=false) : chaque requête
 // doit porter le JWT d'un profil « superadmin », vérifié via service_role.
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
