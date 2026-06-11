@@ -34,6 +34,26 @@ function esc(s) {
   );
 }
 
+function downloadCsv(filename, rows) {
+  // rows: tableau d'objets homogènes → CSV avec en-têtes, séparateur ;
+  if (!rows.length) {
+    toast('Rien à exporter.');
+    return;
+  }
+  const headers = Object.keys(rows[0]);
+  const escCsv = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csv = [
+    headers.join(';'),
+    ...rows.map((r) => headers.map((h) => escCsv(r[h])).join(';')),
+  ].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 async function api(path, options = {}) {
   const { data } = await supabase.auth.getSession();
   const token = data?.session?.access_token;
@@ -69,6 +89,7 @@ async function handleLogin() {
     });
     if (error)
       throw new Error('Identifiants invalides ou réseau indisponible.');
+    await maybeChallenge2fa();
     await enterApp();
   } catch (e) {
     errEl.textContent = e.message;
@@ -76,6 +97,93 @@ async function handleLogin() {
   } finally {
     $('#login-submit').disabled = false;
   }
+}
+
+/**
+ * Si un facteur TOTP est enrôlé et que la session est encore aal1,
+ * demande le code à 6 chiffres (l'admin-api refuse les sessions aal1
+ * dès qu'une 2FA existe : pas de porte dérobée).
+ */
+async function maybeChallenge2fa() {
+  const { data: aal } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel !== 'aal2' || aal.nextLevel === aal.currentLevel) return;
+
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const totp = factors?.totp?.[0];
+  if (!totp) return;
+
+  const code = prompt('Code 2FA (Google Authenticator) :');
+  if (!code) throw new Error('Code 2FA requis.');
+  const { error } = await supabase.auth.mfa.challengeAndVerify({
+    factorId: totp.id,
+    code: code.trim(),
+  });
+  if (error) throw new Error('Code 2FA invalide.');
+}
+
+async function setup2fa() {
+  const { data: factors } = await supabase.auth.mfa.listFactors();
+  const existing = factors?.totp?.[0];
+
+  if (existing) {
+    openModal(`
+      <h3>🔐 2FA activée</h3>
+      <p style="margin:10px 0;color:#374151">La double authentification TOTP est active sur ce compte. Un code est demandé à chaque connexion.</p>
+      <div class="row-btns">
+        <button class="cancel" data-close>Fermer</button>
+        <button class="danger" id="mfa-disable">Désactiver la 2FA</button>
+      </div>`);
+    $('#mfa-disable').addEventListener('click', async () => {
+      if (!confirm('Désactiver la double authentification ?')) return;
+      const { error } = await supabase.auth.mfa.unenroll({
+        factorId: existing.id,
+      });
+      if (error) {
+        toast(`Erreur : ${error.message}`, 5000);
+        return;
+      }
+      closeModal();
+      toast('2FA désactivée.');
+    });
+    return;
+  }
+
+  const { data, error } = await supabase.auth.mfa.enroll({
+    factorType: 'totp',
+    friendlyName: 'OpsPilot Admin',
+  });
+  if (error) {
+    toast(`Erreur : ${error.message}`, 5000);
+    return;
+  }
+  openModal(`
+    <h3>🔐 Activer la 2FA</h3>
+    <p style="margin:10px 0;color:#374151">1. Scanne ce QR code avec Google Authenticator (ou équivalent) :</p>
+    <div style="text-align:center;background:#fff;padding:8px">${data.totp.qr_code}</div>
+    <p style="margin:10px 0;color:#6b7280;font-size:12px">Ou saisis la clé : <code>${esc(data.totp.secret)}</code></p>
+    <label>2. Entre le code à 6 chiffres affiché</label>
+    <input id="mfa-code" inputmode="numeric" placeholder="123456" />
+    <div class="row-btns">
+      <button class="cancel" id="mfa-cancel">Annuler</button>
+      <button id="mfa-verify">Activer</button>
+    </div>`);
+  $('#mfa-cancel').addEventListener('click', async () => {
+    await supabase.auth.mfa.unenroll({ factorId: data.id });
+    closeModal();
+  });
+  $('#mfa-verify').addEventListener('click', async () => {
+    const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: data.id,
+      code: $('#mfa-code').value.trim(),
+    });
+    if (vErr) {
+      toast('Code invalide, réessaie.', 4000);
+      return;
+    }
+    closeModal();
+    toast('2FA activée ✅ Elle sera demandée à chaque connexion.');
+  });
 }
 
 async function enterApp() {
@@ -217,7 +325,8 @@ async function renderUsers() {
           ? ''
           : `<button class="small" data-edit-user="${u.id}">Modifier</button>
              <button class="small" data-reset-user="${u.id}" title="Réinitialiser le mot de passe">🔑</button>
-             <button class="small danger" data-delete-user="${u.id}" title="Supprimer">🗑</button>`
+             <button class="small danger" data-delete-user="${u.id}" title="Supprimer">🗑</button>
+             <button class="small" data-impersonate="${u.id}" title="Se connecter en tant que">🕵️</button>`
       }</td>
     </tr>`,
     )
@@ -227,7 +336,10 @@ async function renderUsers() {
     <p class="subtitle">${users.length} compte(s)</p>
     <div class="toolbar">
       <input id="user-search" placeholder="Rechercher par email…" />
-      <button class="small" id="user-create">+ Créer un utilisateur</button>
+      <div>
+        <button class="small" id="user-export">📥 Export CSV</button>
+        <button class="small" id="user-create">+ Créer un utilisateur</button>
+      </div>
     </div>
     <table>
       <thead><tr><th>Utilisateur</th><th>Organisation</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
@@ -262,6 +374,47 @@ async function renderUsers() {
           <p style="margin:10px 0;color:#374151">Nouveau mot de passe provisoire de <strong>${esc(u.email)}</strong> — copie-le maintenant, il ne sera plus affiché :</p>
           <input readonly value="${esc(password)}" onclick="this.select()" style="font-family:monospace" />
           <div class="row-btns"><button data-close>Fermer</button></div>`);
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  $('#user-export').addEventListener('click', () => {
+    downloadCsv(
+      'opspilot-utilisateurs.csv',
+      users.map((u) => ({
+        email: u.email,
+        nom: u.full_name ?? '',
+        organisation: u.organizations?.name ?? '',
+        role: ROLE_LABELS[u.role] ?? u.role,
+        actif: u.is_active === false ? 'non' : 'oui',
+        cree_le: u.created_at?.slice(0, 10) ?? '',
+      })),
+    );
+  });
+  document.querySelectorAll('[data-impersonate]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const u = users.find((x) => x.id === btn.dataset.impersonate);
+      if (
+        !confirm(
+          `Générer un lien de connexion au compte de ${u.email} ?\nL'action sera tracée dans le journal.`,
+        )
+      )
+        return;
+      try {
+        const { link } = await api(`/impersonate/${u.id}`, { method: 'POST' });
+        openModal(`
+          <h3>🕵️ Connexion en tant que ${esc(u.email)}</h3>
+          <p style="margin:10px 0;color:#374151">⚠️ Ouvre ce lien dans une <strong>fenêtre privée</strong> (sinon il remplacera ta session superadmin). Valable une seule fois, expire rapidement.</p>
+          <input readonly value="${esc(link)}" onclick="this.select()" style="font-size:12px" />
+          <div class="row-btns">
+            <button class="cancel" data-close>Fermer</button>
+            <button id="imp-copy">Copier le lien</button>
+          </div>`);
+        $('#imp-copy').addEventListener('click', () => {
+          navigator.clipboard.writeText(link);
+          toast('Lien copié ✅');
+        });
       } catch (e) {
         toast(`Erreur : ${e.message}`, 5000);
       }
@@ -307,6 +460,8 @@ function userForm(user, organizations) {
     }
     <label>Organisation</label>
     <select id="f-org"><option value="">— Aucune —</option>${orgOptions}</select>
+    <label>Magasin</label>
+    <select id="f-store"><option value="">— Aucun —</option></select>
     <label>Rôle</label>
     <select id="f-role">
       ${['admin', 'manager', 'employé', 'stagiaire']
@@ -330,6 +485,27 @@ function userForm(user, organizations) {
       <button id="f-save">${isNew ? 'Créer' : 'Enregistrer'}</button>
     </div>`);
 
+  const loadStores = async () => {
+    const orgId = $('#f-org').value;
+    const sel = $('#f-store');
+    sel.innerHTML = '<option value="">— Aucun —</option>';
+    if (!orgId) return;
+    try {
+      const { stores } = await api(`/stores/${orgId}`);
+      for (const st of stores) {
+        const opt = document.createElement('option');
+        opt.value = st.id;
+        opt.textContent = st.name + (st.city ? ` (${st.city})` : '');
+        if (user?.store_id === st.id) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    } catch {
+      /* pas bloquant */
+    }
+  };
+  $('#f-org').addEventListener('change', loadStores);
+  loadStores();
+
   $('#f-save').addEventListener('click', async () => {
     try {
       if (isNew) {
@@ -341,6 +517,7 @@ function userForm(user, organizations) {
             full_name: $('#f-name').value.trim() || null,
             role: $('#f-role').value,
             organization_id: $('#f-org').value || null,
+            store_id: $('#f-store').value || null,
           }),
         });
         toast('Utilisateur créé ✅');
@@ -351,6 +528,7 @@ function userForm(user, organizations) {
             full_name: $('#f-name').value.trim() || null,
             role: $('#f-role').value,
             organization_id: $('#f-org').value || null,
+            store_id: $('#f-store').value || null,
             is_active: $('#f-active').value === 'true',
           }),
         });
@@ -406,7 +584,10 @@ async function renderOrgs() {
     <h2>Organisations &amp; abonnés</h2>
     <div class="toolbar">
       <p class="subtitle" style="margin:0">${organizations.length} organisation(s)</p>
-      <button class="small" id="org-create">+ Créer une organisation</button>
+      <div>
+        <button class="small" id="org-export">📥 Export CSV</button>
+        <button class="small" id="org-create">+ Créer une organisation</button>
+      </div>
     </div>
     <table>
       <thead><tr><th>Organisation</th><th>Abonnement</th><th>Fin d'essai</th><th>Actions</th></tr></thead>
@@ -474,7 +655,11 @@ async function renderOrgs() {
       row.hidden = false;
       row.firstElementChild.innerHTML = 'Chargement…';
       try {
-        const d = await api(`/organization-detail/${btn.dataset.detail}`);
+        const orgId = btn.dataset.detail;
+        const [d, { stores }] = await Promise.all([
+          api(`/organization-detail/${orgId}`),
+          api(`/stores/${orgId}`),
+        ]);
         row.firstElementChild.innerHTML = `
           <strong>${d.counts.audits}</strong> audits ·
           <strong>${d.counts.actions}</strong> actions ·
@@ -486,11 +671,82 @@ async function renderOrgs() {
                   `<span class="badge gray" style="margin:2px">${esc(m.full_name ?? m.email)} (${esc(ROLE_LABELS[m.role] ?? m.role)})</span>`,
               )
               .join(' ') || '<em>Aucun membre</em>'
-          }`;
+          }
+          <div style="margin-top:10px">
+            🏬 <strong>Magasins :</strong>
+            ${
+              stores
+                .map(
+                  (st) =>
+                    `<span class="badge ${st.is_active === false ? 'red' : 'gray'}" style="margin:2px">${esc(st.name)}${st.city ? ' — ' + esc(st.city) : ''}</span>
+                     <button class="small" data-store-rename="${st.id}" data-store-name="${esc(st.name)}">✏️</button>`,
+                )
+                .join(' ') || '<em>aucun</em>'
+            }
+            <button class="small" data-store-add="${orgId}">+ Magasin</button>
+          </div>`;
+        const refresh = () => {
+          btn.click();
+          btn.click();
+        };
+        row.querySelectorAll('[data-store-rename]').forEach((b) => {
+          b.addEventListener('click', async () => {
+            const name = prompt(
+              'Nouveau nom du magasin :',
+              b.dataset.storeName,
+            );
+            if (!name?.trim()) return;
+            try {
+              await api(`/stores/${b.dataset.storeRename}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ name: name.trim() }),
+              });
+              toast('Magasin renommé ✅');
+              refresh();
+            } catch (e) {
+              toast(`Erreur : ${e.message}`, 5000);
+            }
+          });
+        });
+        row
+          .querySelector('[data-store-add]')
+          .addEventListener('click', async () => {
+            const name = prompt('Nom du nouveau magasin :');
+            if (!name?.trim()) return;
+            const city = prompt('Ville (optionnel) :') ?? '';
+            try {
+              await api('/stores', {
+                method: 'POST',
+                body: JSON.stringify({ organization_id: orgId, name, city }),
+              });
+              toast('Magasin créé ✅');
+              refresh();
+            } catch (e) {
+              toast(`Erreur : ${e.message}`, 5000);
+            }
+          });
       } catch (e) {
         row.firstElementChild.textContent = `Erreur : ${e.message}`;
       }
     });
+  });
+  $('#org-export').addEventListener('click', () => {
+    downloadCsv(
+      'opspilot-organisations.csv',
+      organizations.map((o) => {
+        const sub = Array.isArray(o.subscriptions)
+          ? o.subscriptions[0]
+          : o.subscriptions;
+        return {
+          nom: o.name,
+          statut: sub?.status ?? 'aucun',
+          plan: sub?.plan ?? '',
+          fin_essai: sub?.trial_ends_at?.slice(0, 10) ?? '',
+          utilisateurs: o.profiles?.[0]?.count ?? 0,
+          cree_le: o.created_at?.slice(0, 10) ?? '',
+        };
+      }),
+    );
   });
   $('#org-create').addEventListener('click', () => {
     openModal(`
@@ -532,6 +788,9 @@ const ACTION_LABELS = {
   'organization.rename': '🏢 Organisation renommée',
   'subscription.update': '💳 Abonnement modifié',
   'settings.update': '⚙️ Réglage modifié',
+  'user.impersonate': '🕵️ Connexion en tant que',
+  'store.create': '🏬 Magasin créé',
+  'store.update': '🏬 Magasin modifié',
 };
 
 async function renderJournal() {
@@ -639,6 +898,8 @@ $('#login-submit').addEventListener('click', handleLogin);
 $('#login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
 });
+$('#setup-2fa').addEventListener('click', setup2fa);
+
 $('#change-password').addEventListener('click', () => {
   openModal(`
     <h3>Changer mon mot de passe</h3>

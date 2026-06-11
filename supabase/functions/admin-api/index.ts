@@ -41,6 +41,26 @@ async function requireSuperadmin(req: Request) {
   if (profile?.role !== 'superadmin') {
     return { error: json({ error: 'Accès réservé au superadmin' }, 403) };
   }
+
+  // 2FA : si un facteur TOTP vérifié existe, exiger une session aal2
+  // (pas de porte dérobée une fois la 2FA activée).
+  const { data: factorData } = await admin.auth.admin.mfa.listFactors({
+    userId: data.user.id,
+  });
+  const hasTotp = (factorData?.factors ?? []).some(
+    (f) => f.factor_type === 'totp' && f.status === 'verified',
+  );
+  if (hasTotp) {
+    let aal = '';
+    try {
+      aal = JSON.parse(atob(token.split('.')[1] ?? ''))?.aal ?? '';
+    } catch {
+      aal = '';
+    }
+    if (aal !== 'aal2') {
+      return { error: json({ error: 'Validation 2FA requise' }, 401) };
+    }
+  }
   return { user: data.user };
 }
 
@@ -220,7 +240,13 @@ Deno.serve(async (req) => {
         if (!id) return json({ error: 'id manquant' }, 400);
         const body = await req.json();
         const updates: Record<string, unknown> = {};
-        for (const k of ['role', 'is_active', 'organization_id', 'full_name']) {
+        for (const k of [
+          'role',
+          'is_active',
+          'organization_id',
+          'full_name',
+          'store_id',
+        ]) {
           if (k in body) updates[k] = body[k];
         }
         if (updates.role === 'superadmin') {
@@ -362,6 +388,91 @@ Deno.serve(async (req) => {
             products: products.count ?? 0,
           },
         });
+      }
+
+      case 'POST /impersonate': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const { data: target } = await admin
+          .from('profiles')
+          .select('role, email')
+          .eq('id', id)
+          .single();
+        if (!target?.email)
+          return json({ error: 'utilisateur introuvable' }, 404);
+        if (target.role === 'superadmin') {
+          return json(
+            { error: 'impersonation d’un superadmin interdite' },
+            400,
+          );
+        }
+        const { data: link, error } = await admin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: target.email,
+          options: {
+            redirectTo: 'https://lucasmezen972-ui.github.io/opspilot/',
+          },
+        });
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'user.impersonate', {
+          id,
+          email: target.email,
+        });
+        return json({ ok: true, link: link.properties?.action_link });
+      }
+
+      case 'GET /stores': {
+        const orgId = parts[1];
+        if (!orgId) return json({ error: 'organization_id manquant' }, 400);
+        const { data, error } = await admin
+          .from('stores')
+          .select('id, name, city, is_active, created_at')
+          .eq('organization_id', orgId)
+          .order('name');
+        if (error) throw error;
+        return json({ stores: data });
+      }
+
+      case 'POST /stores': {
+        const { organization_id, name, city } = await req.json();
+        if (!organization_id || !name?.trim()) {
+          return json({ error: 'organization_id et nom requis' }, 400);
+        }
+        const { data: store, error } = await admin
+          .from('stores')
+          .insert({
+            organization_id,
+            name: name.trim(),
+            city: city?.trim() || null,
+          })
+          .select('id')
+          .single();
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'store.create', {
+          id: store.id,
+          organization_id,
+          name: name.trim(),
+        });
+        return json({ ok: true, id: store.id });
+      }
+
+      case 'PATCH /stores': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const body = await req.json();
+        const updates: Record<string, unknown> = {
+          updated_at: new Date().toISOString(),
+        };
+        for (const k of ['name', 'city', 'is_active']) {
+          if (k in body) updates[k] = body[k];
+        }
+        const { error } = await admin
+          .from('stores')
+          .update(updates)
+          .eq('id', id);
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'store.update', { id, ...updates });
+        return json({ ok: true });
       }
 
       case 'GET /audit-log': {
