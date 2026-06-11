@@ -1,4 +1,11 @@
-import type { Audit, CorrectiveAction, Product, Task } from './supabase';
+import type {
+  Audit,
+  CorrectiveAction,
+  Product,
+  Task,
+  Training,
+  UserTrainingProgress,
+} from './supabase';
 
 /**
  * Données de démonstration en mémoire.
@@ -418,6 +425,94 @@ export function getDemoTasks(): Task[] {
       created_at: days(-2),
       updated_at: days(-1),
       completed_at: days(-1),
+    },
+  ];
+}
+
+export function getDemoTrainings(): Training[] {
+  const t = (
+    id: string,
+    title: string,
+    category: string,
+    difficulty: Training['difficulty'],
+    duration: number,
+    xp: number,
+  ): Training => ({
+    id,
+    organization_id: DEMO_ORG_ID,
+    title,
+    content:
+      'Module de formation interactif : bonnes pratiques, points de contrôle et quiz de validation.',
+    category,
+    difficulty,
+    duration_minutes: duration,
+    xp_reward: xp,
+    is_active: true,
+    created_at: days(-30),
+    updated_at: days(-7),
+  });
+
+  return [
+    t(
+      'demo-training-1',
+      'Hygiène et sécurité alimentaire (HACCP)',
+      'Hygiène',
+      'beginner',
+      25,
+      50,
+    ),
+    t(
+      'demo-training-2',
+      'Gestion des DLC et rotation des stocks',
+      'Qualité',
+      'beginner',
+      15,
+      30,
+    ),
+    t(
+      'demo-training-3',
+      'Chaîne du froid : bonnes pratiques',
+      'Qualité',
+      'intermediate',
+      20,
+      40,
+    ),
+    t(
+      'demo-training-4',
+      'Accueil client et gestion des réclamations',
+      'Relation client',
+      'intermediate',
+      30,
+      60,
+    ),
+  ];
+}
+
+export function getDemoTrainingProgress(): UserTrainingProgress[] {
+  return [
+    {
+      id: 'demo-progress-1',
+      user_id: DEMO_USER_ID,
+      training_id: 'demo-training-1',
+      status: 'completed',
+      progress_percentage: 100,
+      score: 90,
+      started_at: days(-10),
+      completed_at: days(-9),
+      created_at: days(-10),
+      updated_at: days(-9),
+    },
+    {
+      id: 'demo-progress-2',
+      user_id: DEMO_USER_ID,
+      training_id: 'demo-training-2',
+      status: 'in_progress',
+      progress_percentage: 40,
+      score: null,
+      started_at: days(-2),
+      completed_at: null,
+      created_at: days(-2),
+      updated_at: days(-1),
     },
   ];
 }
