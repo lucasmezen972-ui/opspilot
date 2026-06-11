@@ -244,6 +244,7 @@ export default function CameraModal({
               <Text style={styles.retakeButtonText}>Reprendre</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              testID="camera-confirm-button"
               style={styles.confirmButton}
               onPress={confirmPhoto}
             >
@@ -285,6 +286,7 @@ export default function CameraModal({
             </TouchableOpacity>
 
             <TouchableOpacity
+              testID="camera-capture-button"
               style={styles.captureButton}
               onPress={takePicture}
             >

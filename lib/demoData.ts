@@ -1,5 +1,8 @@
 import type {
   Audit,
+  AuditResponse,
+  AuditTemplate,
+  AuditTemplateItem,
   CorrectiveAction,
   Product,
   Task,
@@ -135,7 +138,193 @@ export function getDemoAudits(): Audit[] {
       created_at: days(0),
       updated_at: days(0),
     },
+    {
+      ...base,
+      id: 'demo-audit-7',
+      template_id: 'demo-template-haccp',
+      auditor_id: DEMO_USER_ID,
+      title: 'Audit HACCP professionnel',
+      description: 'Parcours structuré par sections et critères pondérés',
+      location: 'Cuisine centrale',
+      status: 'in_progress',
+      score: null,
+      max_score: 100,
+      issues_count: 0,
+      photos: [],
+      started_at: days(0),
+      completed_at: null,
+      due_date: days(1),
+      created_at: days(0),
+      updated_at: days(0),
+    },
   ];
+}
+
+export function getDemoAuditTemplates(): AuditTemplate[] {
+  const template = (
+    id: string,
+    name: string,
+    description: string,
+    category: string,
+    icon: string,
+    duration: number,
+  ): AuditTemplate => ({
+    id,
+    organization_id: DEMO_ORG_ID,
+    name,
+    description,
+    category,
+    icon,
+    estimated_duration: duration,
+    max_score: 100,
+    is_active: true,
+    is_default: true,
+    created_at: days(-30),
+    updated_at: days(-1),
+  });
+
+  return [
+    template(
+      'demo-template-haccp',
+      'HACCP alimentaire',
+      'Contrôle des points critiques de sécurité alimentaire.',
+      'HACCP',
+      'shield-check',
+      30,
+    ),
+    template(
+      'demo-template-hygiene',
+      'Hygiène générale',
+      'Contrôle du personnel, des locaux et du nettoyage.',
+      'Hygiène',
+      'sparkles',
+      25,
+    ),
+  ];
+}
+
+export function getDemoAuditTemplateItems(): AuditTemplateItem[] {
+  const item = (
+    id: string,
+    templateId: string,
+    section: string,
+    question: string,
+    itemType: AuditTemplateItem['item_type'],
+    points: number,
+    sortOrder: number,
+    isRequired = true,
+  ): AuditTemplateItem => ({
+    id,
+    template_id: templateId,
+    section,
+    question,
+    item_type: itemType,
+    is_required: isRequired,
+    points,
+    sort_order: sortOrder,
+    created_at: days(-30),
+  });
+
+  return [
+    item(
+      'demo-haccp-item-1',
+      'demo-template-haccp',
+      'Réception',
+      'La température des produits frais est-elle conforme ?',
+      'yes_no',
+      25,
+      1,
+    ),
+    item(
+      'demo-haccp-item-2',
+      'demo-template-haccp',
+      'Réception',
+      'Évaluer la propreté de la zone de réception.',
+      'score_1_5',
+      20,
+      2,
+    ),
+    item(
+      'demo-haccp-item-3',
+      'demo-template-haccp',
+      'Stockage',
+      'La séparation cru, cuit et allergènes est-elle respectée ?',
+      'yes_no',
+      25,
+      3,
+    ),
+    item(
+      'demo-haccp-item-4',
+      'demo-template-haccp',
+      'Stockage',
+      'Photographier la zone de stockage contrôlée.',
+      'photo',
+      20,
+      4,
+      false,
+    ),
+    item(
+      'demo-haccp-item-5',
+      'demo-template-haccp',
+      'Conclusion',
+      'Observations complémentaires.',
+      'text',
+      10,
+      5,
+      false,
+    ),
+    item(
+      'demo-hygiene-item-1',
+      'demo-template-hygiene',
+      'Personnel',
+      'Les tenues de travail sont-elles propres et adaptées ?',
+      'yes_no',
+      25,
+      1,
+    ),
+    item(
+      'demo-hygiene-item-2',
+      'demo-template-hygiene',
+      'Personnel',
+      'Évaluer les pratiques de lavage des mains.',
+      'score_1_5',
+      20,
+      2,
+    ),
+    item(
+      'demo-hygiene-item-3',
+      'demo-template-hygiene',
+      'Locaux',
+      'Les sols et surfaces sont-ils propres ?',
+      'yes_no',
+      25,
+      3,
+    ),
+    item(
+      'demo-hygiene-item-4',
+      'demo-template-hygiene',
+      'Locaux',
+      'Photographier la zone contrôlée.',
+      'photo',
+      20,
+      4,
+      false,
+    ),
+    item(
+      'demo-hygiene-item-5',
+      'demo-template-hygiene',
+      'Conclusion',
+      'Préciser les améliorations recommandées.',
+      'text',
+      10,
+      5,
+      false,
+    ),
+  ];
+}
+
+export function getDemoAuditResponses(): AuditResponse[] {
+  return [];
 }
 
 export function getDemoProducts(): Product[] {

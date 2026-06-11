@@ -3,6 +3,9 @@ import { useSyncExternalStore } from 'react';
 import {
   getDemoAudits,
   getDemoActions,
+  getDemoAuditResponses,
+  getDemoAuditTemplateItems,
+  getDemoAuditTemplates,
   getDemoProducts,
   getDemoTasks,
   getDemoTrainings,
@@ -10,6 +13,9 @@ import {
 } from './demoData';
 import type {
   Audit,
+  AuditResponse,
+  AuditTemplate,
+  AuditTemplateItem,
   CorrectiveAction,
   Product,
   Task,
@@ -30,6 +36,9 @@ import type {
 
 export interface DemoState {
   audits: Audit[];
+  auditTemplates: AuditTemplate[];
+  auditTemplateItems: AuditTemplateItem[];
+  auditResponses: AuditResponse[];
   actions: CorrectiveAction[];
   products: Product[];
   tasks: Task[];
@@ -40,6 +49,9 @@ export interface DemoState {
 function seed(): DemoState {
   return {
     audits: getDemoAudits(),
+    auditTemplates: getDemoAuditTemplates(),
+    auditTemplateItems: getDemoAuditTemplateItems(),
+    auditResponses: getDemoAuditResponses(),
     actions: getDemoActions(),
     products: getDemoProducts(),
     tasks: getDemoTasks(),

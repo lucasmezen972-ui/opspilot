@@ -13,7 +13,15 @@ ne pas les rejouer, ne pas les supprimer (historique) :
   `20260610120000_sync_onboarding_rpcs_live.sql` (RPC en jsonb, trial 14 j).
 - `20260609250000_v2_audit_templates.sql` — la table live `audit_templates`
   n'a pas de colonne `icon` ni de table `audit_template_items` ; 3 templates
-  sont déjà seedés et la bibliothèque de modèles de l'app est côté client.
+  étaient déjà seedés. Elle est remplacée par
+  `20260611120000_professional_audits.sql`, compatible avec le schéma live.
+
+## Audits professionnels
+
+`20260611120000_professional_audits.sql` ajoute les modèles structurés,
+les réponses typées, les politiques RLS et quatre modèles métier par défaut.
+Elle conserve `audit_items` pour compatibilité, mais l'application utilise
+désormais `audit_template_items`.
 
 ## Règles
 

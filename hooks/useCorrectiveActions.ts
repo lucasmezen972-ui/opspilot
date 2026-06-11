@@ -69,7 +69,7 @@ export function useCorrectiveActions() {
         organization_id: profile.organization_id,
         store_id: profile.store_id ?? null,
         audit_id: actionData.audit_id ?? null,
-        audit_response_id: null,
+        audit_response_id: actionData.audit_response_id ?? null,
         title: actionData.title || '',
         description: actionData.description ?? null,
         assignee_id: actionData.assignee_id || user.id,

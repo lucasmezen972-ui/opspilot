@@ -26,14 +26,15 @@ import {
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
-import {
-  AUDIT_TEMPLATES,
-  AUDIT_QUESTIONS,
-} from '../../features/audits/constants';
+import { ProfessionalAuditModal } from '../../features/audits/ProfessionalAuditModal';
 import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
+import { AUDIT_QUESTIONS } from '../../features/audits/constants';
+import type { AuditResponseDraft } from '../../features/audits/scoring';
 import { useAppSettings } from '../../hooks/useAppSettings';
+import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
+import type { AuditTemplate } from '../../lib/supabase';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
@@ -46,6 +47,11 @@ export default function AuditsScreen() {
     completeAudit,
     addPhotoToAudit,
   } = useAudits();
+  const {
+    templates,
+    loading: templatesLoading,
+    getItemsForTemplate,
+  } = useAuditTemplates();
   const { createAction } = useCorrectiveActions();
   // Réglage back-office : création auto d'actions sur non-conformité.
   const { isEnabled } = useAppSettings();
@@ -53,6 +59,9 @@ export default function AuditsScreen() {
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newAuditTitle, setNewAuditTitle] = useState('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
   const [showTemplates, setShowTemplates] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -60,6 +69,23 @@ export default function AuditsScreen() {
   const [questionnaireAuditId, setQuestionnaireAuditId] = useState<
     string | null
   >(null);
+  const [professionalAuditId, setProfessionalAuditId] = useState<string | null>(
+    null,
+  );
+
+  const selectedTemplate =
+    templates.find((template) => template.id === selectedTemplateId) || null;
+  const professionalAudit =
+    dbAudits.find((audit) => audit.id === professionalAuditId) || null;
+  const professionalTemplate =
+    templates.find(
+      (template) => template.id === professionalAudit?.template_id,
+    ) || null;
+  const professionalItems = useMemo(
+    () =>
+      professionalTemplate ? getItemsForTemplate(professionalTemplate.id) : [],
+    [getItemsForTemplate, professionalTemplate],
+  );
 
   const audits = useMemo(() => {
     const source =
@@ -133,8 +159,9 @@ export default function AuditsScreen() {
     }
   };
 
-  const handleCreateAudit = (prefillTitle?: string) => {
-    setNewAuditTitle(prefillTitle ?? '');
+  const handleCreateAudit = (template?: AuditTemplate) => {
+    setSelectedTemplateId(template?.id ?? null);
+    setNewAuditTitle(template?.name ?? '');
     setCreateModalVisible(true);
   };
 
@@ -146,10 +173,12 @@ export default function AuditsScreen() {
       title,
       location: 'Magasin principal',
       status: 'pending',
+      template_id: selectedTemplateId,
     });
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
     } else {
+      setSelectedTemplateId(null);
       Alert.alert('Succès', 'Audit créé avec succès !');
     }
   };
@@ -177,8 +206,16 @@ export default function AuditsScreen() {
         Alert.alert('Audit démarré', "L'audit est maintenant en cours.");
       else Alert.alert('Erreur', String(result.error));
     } else if (currentStatus === 'in_progress') {
-      // Clôture via questionnaire : score + actions correctives automatiques.
-      setQuestionnaireAuditId(auditId);
+      const audit = dbAudits.find((candidate) => candidate.id === auditId);
+      const templateItems = audit?.template_id
+        ? getItemsForTemplate(audit.template_id)
+        : [];
+      if (audit?.template_id && templateItems.length > 0) {
+        setProfessionalAuditId(auditId);
+      } else {
+        // Questionnaire historique pour les audits libres ou anciens.
+        setQuestionnaireAuditId(auditId);
+      }
     }
   };
 
@@ -214,6 +251,54 @@ export default function AuditsScreen() {
       }
     }
 
+    Alert.alert(
+      'Audit terminé',
+      `Score : ${score}%${
+        created > 0
+          ? `\n${created} action${created > 1 ? 's' : ''} corrective${created > 1 ? 's' : ''} créée${created > 1 ? 's' : ''} automatiquement.`
+          : '\nAucune non-conformité détectée.'
+      }`,
+    );
+  };
+
+  const handleSubmitProfessionalAudit = async (
+    responses: AuditResponseDraft[],
+    score: number,
+    issuesCount: number,
+  ) => {
+    if (!professionalAuditId) return;
+    const auditId = professionalAuditId;
+    const result = await completeAudit(auditId, score, issuesCount, responses);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+      return;
+    }
+
+    let created = 0;
+    const autoActions = isEnabled('audits.auto_actions');
+    for (const response of responses.filter(
+      (candidate) => autoActions && !candidate.is_compliant,
+    )) {
+      const item = professionalItems.find(
+        (candidate) => candidate.id === response.item_id,
+      );
+      if (!item) continue;
+      const savedResponse = result.responses?.find(
+        (candidate) => candidate.item_id === response.item_id,
+      );
+      const actionResult = await createAction({
+        title: `Non-conformité : ${item.question}`,
+        description: response.comment?.trim()
+          ? `${response.comment.trim()} (score de l'audit : ${score}%).`
+          : `Détectée lors de l'audit (score ${score}%).`,
+        audit_id: auditId,
+        audit_response_id: savedResponse?.id ?? null,
+        priority: item.points >= 10 ? 'critical' : 'high',
+      });
+      if (!actionResult.error) created++;
+    }
+
+    setProfessionalAuditId(null);
     Alert.alert(
       'Audit terminé',
       `Score : ${score}%${
@@ -316,6 +401,7 @@ export default function AuditsScreen() {
 
       {/* Create New Audit Button */}
       <TouchableOpacity
+        testID="audit-create-button"
         style={styles.createButton}
         onPress={() => handleCreateAudit()}
       >
@@ -344,18 +430,31 @@ export default function AuditsScreen() {
         </TouchableOpacity>
         {showTemplates && (
           <View style={styles.templateGrid}>
-            {AUDIT_TEMPLATES.map((tpl) => (
+            {templates.map((template) => (
               <TouchableOpacity
-                key={tpl.id}
-                style={[styles.templateCard, { backgroundColor: tpl.color }]}
-                onPress={() => handleCreateAudit(tpl.name)}
+                key={template.id}
+                testID={`audit-template-${template.id}`}
+                style={styles.templateCard}
+                onPress={() => handleCreateAudit(template)}
               >
-                <Text style={styles.templateEmoji}>{tpl.icon}</Text>
-                <Text style={[styles.templateName, { color: tpl.accent }]}>
-                  {tpl.name}
+                <BookOpen size={22} color="#2563EB" />
+                <Text style={styles.templateName}>{template.name}</Text>
+                <Text style={styles.templateMeta}>
+                  {template.estimated_duration || 20} min ·{' '}
+                  {getItemsForTemplate(template.id).length} critères
                 </Text>
               </TouchableOpacity>
             ))}
+            {templatesLoading && (
+              <Text style={styles.templateLoading}>
+                Chargement des modèles...
+              </Text>
+            )}
+            {!templatesLoading && templates.length === 0 && (
+              <Text style={styles.templateLoading}>
+                Aucun modèle disponible. Créez un audit libre.
+              </Text>
+            )}
           </View>
         )}
 
@@ -367,7 +466,11 @@ export default function AuditsScreen() {
         {audits.map((audit) => {
           const StatusIcon = getStatusIcon(audit.status);
           return (
-            <TouchableOpacity key={audit.id} style={styles.auditCard}>
+            <TouchableOpacity
+              key={audit.id}
+              testID={`audit-card-${audit.id}`}
+              style={styles.auditCard}
+            >
               <View style={styles.auditHeader}>
                 <View style={styles.auditTitleSection}>
                   <Text style={styles.auditTitle}>{audit.title}</Text>
@@ -495,12 +598,18 @@ export default function AuditsScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
+              testID="audit-create-title-input"
               style={styles.modalInput}
               value={newAuditTitle}
               onChangeText={setNewAuditTitle}
               placeholder="Titre de l'audit"
               autoFocus
             />
+            <Text style={styles.selectedTemplateText}>
+              {selectedTemplate
+                ? `Modèle : ${selectedTemplate.name}`
+                : 'Audit libre : questionnaire standard à la clôture'}
+            </Text>
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.modalCancelButton}
@@ -509,6 +618,7 @@ export default function AuditsScreen() {
                 <Text style={styles.modalCancelText}>Annuler</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                testID="audit-create-submit"
                 style={styles.modalConfirmButton}
                 onPress={handleConfirmCreateAudit}
               >
@@ -523,6 +633,13 @@ export default function AuditsScreen() {
         visible={questionnaireAuditId !== null}
         onClose={() => setQuestionnaireAuditId(null)}
         onSubmit={handleSubmitQuestionnaire}
+      />
+      <ProfessionalAuditModal
+        visible={professionalAuditId !== null}
+        template={professionalTemplate}
+        items={professionalItems}
+        onClose={() => setProfessionalAuditId(null)}
+        onSubmit={handleSubmitProfessionalAudit}
       />
     </View>
   );
@@ -811,6 +928,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
   },
+  selectedTemplateText: {
+    marginTop: -6,
+    marginBottom: 16,
+    color: '#6B7280',
+    fontSize: 12,
+    lineHeight: 17,
+  },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -863,14 +987,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    backgroundColor: '#EFF6FF',
     gap: 8,
-  },
-  templateEmoji: {
-    fontSize: 28,
   },
   templateName: {
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
+    color: '#1D4ED8',
+  },
+  templateMeta: {
+    fontSize: 10,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  templateLoading: {
+    paddingVertical: 12,
+    color: '#6B7280',
+    fontSize: 13,
   },
 });

@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import type { AuditResponseDraft } from '../features/audits/scoring';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
-import { supabase, type Audit } from '../lib/supabase';
+import { supabase, type Audit, type AuditResponse } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
@@ -14,6 +15,7 @@ export function useAudits() {
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
   const demoAudits = useDemoCollection('audits');
+  const demoResponses = useDemoCollection('auditResponses');
   const audits = isLocalDemo ? demoAudits : remoteAudits;
   const setAudits = isLocalDemo
     ? (updater: (prev: Audit[]) => Audit[]) =>
@@ -68,7 +70,7 @@ export function useAudits() {
         id: demoId('demo-audit'),
         organization_id: profile.organization_id,
         store_id: profile.store_id ?? null,
-        template_id: null,
+        template_id: auditData.template_id ?? null,
         auditor_id: user.id,
         title: auditData.title || '',
         description: auditData.description ?? null,
@@ -187,6 +189,7 @@ export function useAudits() {
     id: string,
     score: number,
     issuesCount: number,
+    responses: AuditResponseDraft[] = [],
   ) => {
     const updates: Record<string, any> = {
       status: 'completed',
@@ -197,6 +200,35 @@ export function useAudits() {
     };
 
     if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const savedResponses: AuditResponse[] = responses.map((response) => ({
+        id:
+          demoResponses.find(
+            (existing) =>
+              existing.audit_id === id && existing.item_id === response.item_id,
+          )?.id ?? demoId('demo-audit-response'),
+        audit_id: id,
+        item_id: response.item_id,
+        value: response.value,
+        is_compliant: response.is_compliant,
+        photo_url: response.photo_url ?? null,
+        comment: response.comment ?? null,
+        created_at: now,
+      }));
+      if (savedResponses.length > 0) {
+        updateDemoCollection('auditResponses', (current) => [
+          ...current.filter(
+            (existing) =>
+              !savedResponses.some(
+                (saved) =>
+                  saved.audit_id === existing.audit_id &&
+                  saved.item_id === existing.item_id,
+              ),
+          ),
+          ...savedResponses,
+        ]);
+      }
+
       let updated: Audit | null = null;
       setAudits((prev) =>
         prev.map((a) => {
@@ -205,10 +237,39 @@ export function useAudits() {
           return updated;
         }),
       );
-      return { data: updated, error: null };
+      return { data: updated, responses: savedResponses, error: null };
     }
 
     try {
+      let savedResponses: AuditResponse[] = [];
+      if (responses.length > 0) {
+        const { data: responseData, error: responseError } = await supabase
+          .from('audit_responses')
+          .upsert(
+            responses.map((response) => ({
+              audit_id: id,
+              item_id: response.item_id,
+              value: response.value,
+              is_compliant: response.is_compliant,
+              photo_url: response.photo_url ?? null,
+              comment: response.comment ?? null,
+            })),
+            { onConflict: 'audit_id,item_id' },
+          )
+          .select();
+        if (responseError) {
+          return {
+            data: null,
+            responses: [],
+            error: mapSupabaseError(
+              "Erreur lors de l'enregistrement des réponses",
+              responseError,
+            ),
+          };
+        }
+        savedResponses = (responseData || []) as AuditResponse[];
+      }
+
       const { data, error } = await supabase
         .from('audits')
         .update(updates)
@@ -218,6 +279,7 @@ export function useAudits() {
       if (error) {
         return {
           data: null,
+          responses: savedResponses,
           error: mapSupabaseError(
             "Erreur lors de la clôture de l'audit",
             error,
@@ -225,10 +287,11 @@ export function useAudits() {
         };
       }
       setAudits((prev) => prev.map((a) => (a.id === id ? data : a)));
-      return { data, error: null };
+      return { data, responses: savedResponses, error: null };
     } catch (error) {
       return {
         data: null,
+        responses: [],
         error: mapSupabaseError('Erreur completeAudit', error),
       };
     }
