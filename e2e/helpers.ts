@@ -29,13 +29,10 @@ export async function loginAsDemo(
   await demoBtn.click();
 
   // Attendre que le dashboard soit visible (réseau ou fallback local)
+  // Attente STRICTE : si le dashboard n'apparaît pas, le test échoue ici.
   await page
-    .getByText('Bonjour')
-    .or(page.getByText('Tableau de bord'))
-    .or(page.getByText('Demo Employé'))
-    .first()
-    .waitFor({ timeout: 20_000 })
-    .catch(() => {});
+    .getByText('Tableau de bord opérationnel', { exact: true })
+    .waitFor({ timeout: 20_000 });
 }
 
 export async function waitForApp(page: Page) {

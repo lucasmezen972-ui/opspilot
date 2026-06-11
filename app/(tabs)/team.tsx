@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import RequireRole from '../../components/RequireRole';
 import { useInvitations } from '../../hooks/useInvitations';
 import { useTeam } from '../../hooks/useTeam';
 import type { Invitation } from '../../lib/supabase';
@@ -53,6 +54,14 @@ function RoleIcon({ role }: { role: string }) {
 }
 
 export default function TeamScreen() {
+  return (
+    <RequireRole roles={['manager', 'admin']}>
+      <TeamScreenContent />
+    </RequireRole>
+  );
+}
+
+function TeamScreenContent() {
   const { profile } = useAuth();
   const { members, loading: loadingMembers } = useTeam();
   const {

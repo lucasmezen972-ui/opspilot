@@ -89,6 +89,7 @@ export default function HomeScreen() {
 
   const kpis = [
     {
+      id: 'audits-done',
       label: 'Audits réalisés',
       value: auditsCompleted,
       color: '#10B981',
@@ -96,6 +97,7 @@ export default function HomeScreen() {
       icon: CheckCircle,
     },
     {
+      id: 'audits-overdue',
       label: 'Audits en retard',
       value: auditsOverdue,
       color: auditsOverdue > 0 ? '#EF4444' : '#10B981',
@@ -103,6 +105,7 @@ export default function HomeScreen() {
       icon: AlertTriangle,
     },
     {
+      id: 'actions-open',
       label: 'Actions ouvertes',
       value: actionsOpen,
       color: actionsOpen > 0 ? '#F59E0B' : '#10B981',
@@ -110,6 +113,7 @@ export default function HomeScreen() {
       icon: Wrench,
     },
     {
+      id: 'actions-critical',
       label: 'Actions critiques',
       value: actionsCritical,
       color: actionsCritical > 0 ? '#DC2626' : '#10B981',
@@ -117,6 +121,7 @@ export default function HomeScreen() {
       icon: AlertTriangle,
     },
     {
+      id: 'dlc-critical',
       label: 'DLC critiques',
       value: dlcCritical,
       color: dlcCritical > 0 ? '#EF4444' : '#10B981',
@@ -149,12 +154,16 @@ export default function HomeScreen() {
             return (
               <View
                 key={kpi.label}
+                testID={`kpi-${kpi.id}`}
                 style={[styles.kpiCard, { borderLeftColor: kpi.color }]}
               >
                 <View style={[styles.kpiIconWrap, { backgroundColor: kpi.bg }]}>
                   <Icon size={20} color={kpi.color} />
                 </View>
-                <Text style={[styles.kpiValue, { color: kpi.color }]}>
+                <Text
+                  testID={`kpi-${kpi.id}-value`}
+                  style={[styles.kpiValue, { color: kpi.color }]}
+                >
                   {kpi.value}
                 </Text>
                 <Text style={styles.kpiLabel}>{kpi.label}</Text>
@@ -276,7 +285,7 @@ export default function HomeScreen() {
               color: '#0891B2',
               title: 'Rapports',
               sub: 'Exporter PDF',
-              route: '/audits' as const,
+              route: '/reports' as const,
             },
             {
               icon: BookOpen,
@@ -291,6 +300,7 @@ export default function HomeScreen() {
               title: 'Facturation',
               sub: 'Abonnement',
               route: '/billing' as const,
+              roles: ['admin'],
             },
             {
               icon: Settings,
@@ -299,7 +309,12 @@ export default function HomeScreen() {
               sub: 'Profil & équipe',
               route: '/profile' as const,
             },
-          ].map((item) => {
+          ]
+            .filter(
+              (item: any) =>
+                !item.roles || item.roles.includes(profile?.role ?? ''),
+            )
+            .map((item) => {
             const Icon = item.icon;
             return (
               <TouchableOpacity

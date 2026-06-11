@@ -10,11 +10,20 @@ import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
 import { useAudits } from '../../hooks/useAudits';
+import RequireRole from '../../components/RequireRole';
 import { useAuth } from '../../hooks/useAuth';
 import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
 
 export default function ManagerDashboard() {
+  return (
+    <RequireRole roles={['manager', 'admin']}>
+      <ManagerDashboardContent />
+    </RequireRole>
+  );
+}
+
+function ManagerDashboardContent() {
   const { profile } = useAuth();
   const { audits } = useAudits();
   const { tasks } = useTasks();
