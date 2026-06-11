@@ -709,10 +709,18 @@ Deno.serve(async (req) => {
         const { data, error } = await admin
           .from('platform_settings')
           .select('key, value, updated_at')
-          .neq('key', 'email_worker_token')
           .order('key');
         if (error) throw error;
-        return json({ settings: data });
+        // Les secrets ne sortent JAMAIS : on n'expose qu'un statut.
+        const SECRET_KEYS = ['email_worker_token', 'email_provider'];
+        const settings = (data ?? []).filter(
+          (r) => !SECRET_KEYS.includes(r.key),
+        );
+        const provider = (data ?? []).find((r) => r.key === 'email_provider');
+        const emailConfigured = Boolean(
+          Deno.env.get('RESEND_API_KEY') || provider?.value?.resend_key,
+        );
+        return json({ settings, email_configured: emailConfigured });
       }
 
       case 'PUT /platform-settings': {
@@ -720,14 +728,26 @@ Deno.serve(async (req) => {
         if (!key || key === 'email_worker_token') {
           return json({ error: 'clé invalide' }, 400);
         }
+        let toStore = value ?? {};
+        if (key === 'email_provider') {
+          const resendKey = String(value?.resend_key ?? '').trim();
+          if (!resendKey.startsWith('re_')) {
+            return json({ error: 'clé Resend invalide (format re_…)' }, 400);
+          }
+          toStore = { resend_key: resendKey };
+        }
         const { error } = await admin
           .from('platform_settings')
           .upsert(
-            { key, value: value ?? {}, updated_at: new Date().toISOString() },
+            { key, value: toStore, updated_at: new Date().toISOString() },
             { onConflict: 'key' },
           );
         if (error) return json({ error: error.message }, 400);
-        await logAction(actor, 'platform.update', { key, value });
+        // Jamais la valeur d'un secret dans le journal.
+        await logAction(actor, 'platform.update', {
+          key,
+          value: key === 'email_provider' ? { resend_key: '***' } : toStore,
+        });
         return json({ ok: true });
       }
 
