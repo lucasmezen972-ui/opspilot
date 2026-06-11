@@ -26,56 +26,15 @@ import {
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
+import {
+  AUDIT_TEMPLATES,
+  AUDIT_QUESTIONS,
+} from '../../features/audits/constants';
+import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
-
-const AUDIT_TEMPLATES = [
-  {
-    id: 't1',
-    name: 'HACCP alimentaire',
-    icon: '🧫',
-    category: 'haccp',
-    color: '#EFF6FF',
-    accent: '#2563EB',
-  },
-  {
-    id: 't2',
-    name: 'Hygiène générale',
-    icon: '🧹',
-    category: 'hygiene',
-    color: '#F0FDF4',
-    accent: '#16A34A',
-  },
-  {
-    id: 't3',
-    name: 'Sécurité incendie',
-    icon: '🔥',
-    category: 'securite',
-    color: '#FFF7ED',
-    accent: '#EA580C',
-  },
-  {
-    id: 't4',
-    name: 'Contrôle DLC & qualité',
-    icon: '📦',
-    category: 'qualite',
-    color: '#FEFCE8',
-    accent: '#CA8A04',
-  },
-] as const;
-
-// Questionnaire de clôture : chaque réponse « Non conforme » baisse le score
-// et crée automatiquement une action corrective liée à l'audit.
-const AUDIT_QUESTIONS = [
-  'Les zones de stockage sont propres et rangées',
-  'Les températures des frigos/congélateurs sont conformes',
-  'Les DLC des produits en rayon sont valides',
-  'Le personnel respecte les règles d’hygiène (tenue, lavage des mains)',
-  'Les allées et issues de secours sont dégagées',
-  'L’affichage obligatoire (prix, allergènes) est à jour',
-] as const;
 
 export default function AuditsScreen() {
   const {
@@ -98,7 +57,6 @@ export default function AuditsScreen() {
   const [questionnaireAuditId, setQuestionnaireAuditId] = useState<
     string | null
   >(null);
-  const [answers, setAnswers] = useState<boolean[]>([]);
 
   const audits = useMemo(() => {
     const source =
@@ -217,12 +175,11 @@ export default function AuditsScreen() {
       else Alert.alert('Erreur', String(result.error));
     } else if (currentStatus === 'in_progress') {
       // Clôture via questionnaire : score + actions correctives automatiques.
-      setAnswers(AUDIT_QUESTIONS.map(() => true));
       setQuestionnaireAuditId(auditId);
     }
   };
 
-  const handleSubmitQuestionnaire = async () => {
+  const handleSubmitQuestionnaire = async (answers: boolean[]) => {
     if (!questionnaireAuditId) return;
     const auditId = questionnaireAuditId;
     setQuestionnaireAuditId(null);
@@ -557,88 +514,11 @@ export default function AuditsScreen() {
         </View>
       </Modal>
 
-      {/* Questionnaire de clôture d'audit */}
-      <Modal
+      <QuestionnaireModal
         visible={questionnaireAuditId !== null}
-        transparent
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent} testID="audit-questionnaire">
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Questionnaire d'audit</Text>
-              <TouchableOpacity onPress={() => setQuestionnaireAuditId(null)}>
-                <X size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.questionnaireHint}>
-              Évaluez chaque point : une non-conformité crée automatiquement une
-              action corrective.
-            </Text>
-            <ScrollView style={styles.questionList}>
-              {AUDIT_QUESTIONS.map((q, i) => (
-                <View key={q} style={styles.questionRow}>
-                  <Text style={styles.questionText}>{q}</Text>
-                  <View style={styles.questionChoices}>
-                    <TouchableOpacity
-                      testID={`question-${i}-ok`}
-                      style={[
-                        styles.choiceButton,
-                        answers[i] && styles.choiceButtonOk,
-                      ]}
-                      onPress={() =>
-                        setAnswers((prev) =>
-                          prev.map((v, j) => (j === i ? true : v)),
-                        )
-                      }
-                    >
-                      <Text
-                        style={[
-                          styles.choiceText,
-                          answers[i] && styles.choiceTextOk,
-                        ]}
-                      >
-                        Conforme
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      testID={`question-${i}-ko`}
-                      style={[
-                        styles.choiceButton,
-                        !answers[i] && styles.choiceButtonKo,
-                      ]}
-                      onPress={() =>
-                        setAnswers((prev) =>
-                          prev.map((v, j) => (j === i ? false : v)),
-                        )
-                      }
-                    >
-                      <Text
-                        style={[
-                          styles.choiceText,
-                          !answers[i] && styles.choiceTextKo,
-                        ]}
-                      >
-                        Non conforme
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-            <TouchableOpacity
-              testID="questionnaire-submit"
-              style={styles.modalConfirmButton}
-              onPress={handleSubmitQuestionnaire}
-            >
-              <Text style={styles.modalConfirmText}>
-                Valider l'audit ({answers.filter(Boolean).length}/
-                {AUDIT_QUESTIONS.length} conformes)
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setQuestionnaireAuditId(null)}
+        onSubmit={handleSubmitQuestionnaire}
+      />
     </View>
   );
 }
@@ -940,59 +820,6 @@ const styles = StyleSheet.create({
   modalCancelText: {
     color: '#6B7280',
     fontWeight: '500',
-  },
-  questionnaireHint: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 12,
-    lineHeight: 17,
-  },
-  questionList: {
-    maxHeight: 360,
-    marginBottom: 12,
-  },
-  questionRow: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    gap: 8,
-  },
-  questionText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#111827',
-  },
-  questionChoices: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  choiceButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  choiceButtonOk: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#16A34A',
-  },
-  choiceButtonKo: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#DC2626',
-  },
-  choiceText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  choiceTextOk: {
-    color: '#16A34A',
-  },
-  choiceTextKo: {
-    color: '#DC2626',
   },
   modalConfirmButton: {
     paddingHorizontal: 16,

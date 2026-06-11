@@ -3,9 +3,6 @@ import {
   Clock,
   CircleCheck as CheckCircle,
   TriangleAlert as AlertTriangle,
-  Calendar,
-  Flag,
-  X,
   List,
   Columns3 as Columns,
   ChevronRight,
@@ -17,39 +14,16 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  TextInput,
 } from 'react-native';
 
+import { ActionCard } from '../../features/actions/ActionCard';
+import { STATUS_FLOW, STATUS_LABELS } from '../../features/actions/constants';
+import {
+  CreateActionModal,
+  type NewActionPayload,
+} from '../../features/actions/CreateActionModal';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
-
-const STATUS_FLOW: CorrectiveAction['status'][] = [
-  'open',
-  'in_progress',
-  'done',
-];
-
-const STATUS_LABELS: Record<CorrectiveAction['status'], string> = {
-  open: 'À traiter',
-  in_progress: 'En cours',
-  done: 'Résolues',
-  cancelled: 'Annulées',
-};
-
-const PRIORITY_COLORS: Record<CorrectiveAction['priority'], string> = {
-  critical: '#DC2626',
-  high: '#EF4444',
-  medium: '#F59E0B',
-  low: '#10B981',
-};
-
-const PRIORITY_LABELS: Record<CorrectiveAction['priority'], string> = {
-  critical: 'Critique',
-  high: 'Haute',
-  medium: 'Moyenne',
-  low: 'Basse',
-};
 
 export default function ActionsScreen() {
   const {
@@ -63,11 +37,6 @@ export default function ActionsScreen() {
 
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newPriority, setNewPriority] =
-    useState<CorrectiveAction['priority']>('medium');
-  const [newDueDays, setNewDueDays] = useState('7');
 
   const overdueCount = useMemo(
     () => actions.filter(isOverdue).length,
@@ -82,21 +51,8 @@ export default function ActionsScreen() {
     [getActionsByStatus],
   );
 
-  const handleCreate = async () => {
-    if (!newTitle.trim()) return;
-    const dueDays = parseInt(newDueDays, 10);
-    await createAction({
-      title: newTitle.trim(),
-      description: newDescription.trim() || null,
-      priority: newPriority,
-      due_date: Number.isFinite(dueDays)
-        ? new Date(Date.now() + dueDays * 86400000).toISOString()
-        : null,
-    });
-    setNewTitle('');
-    setNewDescription('');
-    setNewPriority('medium');
-    setNewDueDays('7');
+  const handleCreate = async (payload: NewActionPayload) => {
+    await createAction(payload);
     setCreateModalVisible(false);
   };
 
@@ -108,78 +64,15 @@ export default function ActionsScreen() {
     }
   };
 
-  const renderCard = (action: CorrectiveAction, compact = false) => {
-    const overdue = isOverdue(action);
-    return (
-      <View
-        key={action.id}
-        testID={`action-card-${action.id}`}
-        style={[styles.card, overdue && styles.cardOverdue]}
-      >
-        <View style={styles.cardHeader}>
-          <View
-            style={[
-              styles.priorityBadge,
-              { backgroundColor: PRIORITY_COLORS[action.priority] + '22' },
-            ]}
-          >
-            <Flag size={12} color={PRIORITY_COLORS[action.priority]} />
-            <Text
-              style={[
-                styles.priorityText,
-                { color: PRIORITY_COLORS[action.priority] },
-              ]}
-            >
-              {PRIORITY_LABELS[action.priority]}
-            </Text>
-          </View>
-          {overdue && (
-            <View style={styles.overdueBadge}>
-              <AlertTriangle size={12} color="#DC2626" />
-              <Text style={styles.overdueText}>En retard</Text>
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.cardTitle} numberOfLines={compact ? 2 : 3}>
-          {action.title}
-        </Text>
-        {!compact && !!action.description && (
-          <Text style={styles.cardDescription} numberOfLines={2}>
-            {action.description}
-          </Text>
-        )}
-
-        <View style={styles.cardFooter}>
-          {!!action.due_date && (
-            <View style={styles.dueDate}>
-              <Calendar size={14} color={overdue ? '#DC2626' : '#6B7280'} />
-              <Text
-                style={[styles.dueDateText, overdue && { color: '#DC2626' }]}
-              >
-                {new Date(action.due_date).toLocaleDateString('fr-FR')}
-              </Text>
-            </View>
-          )}
-          {action.status !== 'done' && action.status !== 'cancelled' && (
-            <TouchableOpacity
-              style={styles.advanceButton}
-              testID={`action-advance-${action.id}`}
-              onPress={() => advanceStatus(action)}
-            >
-              <Text style={styles.advanceButtonText}>
-                {action.status === 'open' ? 'Démarrer' : 'Résoudre'}
-              </Text>
-              <ChevronRight size={14} color="#2563EB" />
-            </TouchableOpacity>
-          )}
-          {action.status === 'done' && (
-            <CheckCircle size={18} color="#10B981" />
-          )}
-        </View>
-      </View>
-    );
-  };
+  const renderCard = (action: CorrectiveAction, compact = false) => (
+    <ActionCard
+      key={action.id}
+      action={action}
+      overdue={isOverdue(action)}
+      compact={compact}
+      onAdvance={advanceStatus}
+    />
+  );
 
   return (
     <View style={styles.container}>
@@ -309,88 +202,11 @@ export default function ActionsScreen() {
         </ScrollView>
       )}
 
-      <Modal
+      <CreateActionModal
         visible={createModalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setCreateModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nouvelle action corrective</Text>
-              <TouchableOpacity onPress={() => setCreateModalVisible(false)}>
-                <X size={24} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <TextInput
-              testID="action-create-title"
-              style={styles.input}
-              placeholder="Titre de l'action *"
-              placeholderTextColor="#9CA3AF"
-              value={newTitle}
-              onChangeText={setNewTitle}
-            />
-            <TextInput
-              style={[styles.input, styles.inputMultiline]}
-              placeholder="Description"
-              placeholderTextColor="#9CA3AF"
-              value={newDescription}
-              onChangeText={setNewDescription}
-              multiline
-            />
-
-            <Text style={styles.fieldLabel}>Priorité</Text>
-            <View style={styles.priorityRow}>
-              {(['low', 'medium', 'high', 'critical'] as const).map((p) => (
-                <TouchableOpacity
-                  key={p}
-                  style={[
-                    styles.priorityOption,
-                    newPriority === p && {
-                      backgroundColor: PRIORITY_COLORS[p] + '22',
-                      borderColor: PRIORITY_COLORS[p],
-                    },
-                  ]}
-                  onPress={() => setNewPriority(p)}
-                >
-                  <Text
-                    style={[
-                      styles.priorityOptionText,
-                      newPriority === p && { color: PRIORITY_COLORS[p] },
-                    ]}
-                  >
-                    {PRIORITY_LABELS[p]}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.fieldLabel}>Échéance (jours)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="7"
-              placeholderTextColor="#9CA3AF"
-              value={newDueDays}
-              onChangeText={setNewDueDays}
-              keyboardType="number-pad"
-            />
-
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                !newTitle.trim() && styles.submitButtonDisabled,
-              ]}
-              testID="action-create-submit"
-              onPress={handleCreate}
-              disabled={!newTitle.trim()}
-            >
-              <Text style={styles.submitButtonText}>Créer l'action</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setCreateModalVisible(false)}
+        onCreate={handleCreate}
+      />
     </View>
   );
 }
@@ -530,84 +346,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#374151',
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  cardOverdue: {
-    borderColor: '#FECACA',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  priorityBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  priorityText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  overdueBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  overdueText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#DC2626',
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  cardDescription: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  dueDate: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dueDateText: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  advanceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    backgroundColor: '#EEF2FF',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  advanceButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#2563EB',
-  },
   empty: {
     alignItems: 'center',
     paddingVertical: 48,
@@ -616,82 +354,5 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: '#6B7280',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 36,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  input: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
-    marginBottom: 12,
-  },
-  inputMultiline: {
-    minHeight: 70,
-    textAlignVertical: 'top',
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  priorityRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  priorityOption: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  priorityOptionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  submitButton: {
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
   },
 });
