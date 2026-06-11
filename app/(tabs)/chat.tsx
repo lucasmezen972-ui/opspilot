@@ -20,13 +20,27 @@ import {
   Alert,
 } from 'react-native';
 
-import { useAuth } from '../../hooks/useAuth';
+import {
+  getLocalAssistantResponse,
+  getLocalOperationalContext,
+  type AssistantHistoryMessage,
+} from '../../features/chat/assistant';
 import { useAppSettings } from '../../hooks/useAppSettings';
+import { useAuth } from '../../hooks/useAuth';
 import { useMessages } from '../../hooks/useMessages';
-import { getChatAssistantResponse } from '../../lib/openai';
+import { supabase } from '../../lib/supabase';
+
+type DisplayMessage = {
+  id: string;
+  conversationId: string;
+  sender: string;
+  content: string;
+  timestamp: string;
+  isMe: boolean;
+};
 
 export default function ChatScreen() {
-  const { profile } = useAuth();
+  const { profile, session, isDemoMode } = useAuth();
   const {
     messages: dbMessages,
     conversations: dbConversations,
@@ -40,34 +54,38 @@ export default function ChatScreen() {
     string | null
   >(null);
   const [newMessage, setNewMessage] = useState('');
-  const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const [localMessages, setLocalMessages] = useState<DisplayMessage[]>([]);
+  const [assistantLoading, setAssistantLoading] = useState(false);
   const messagesScrollRef = useRef<ScrollView>(null);
+  const isLocalDemo = isDemoMode && !session;
 
   // Modules pilotés depuis le back-office (assistant IA désactivable).
   const { isEnabled } = useAppSettings();
 
   // Utiliser les conversations de la DB, avec fallback démo
-  const allConversations =
-    dbConversations.length > 0
-      ? dbConversations.map((c) => ({
-          id: c.id,
-          name: c.name,
-          lastMessage:
-            (c as any).messages && (c as any).messages.length > 0
-              ? (c as any).messages.sort(
-                  (a: any, b: any) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime(),
-                )[0].content
-              : 'Aucun message',
-          timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          unread: getUnreadCount(c.id),
-          type: c.type,
-          online: true,
-        }))
+  const remoteConversations = dbConversations.map((c) => ({
+    id: c.id,
+    name: c.name,
+    lastMessage:
+      (c as any).messages && (c as any).messages.length > 0
+        ? (c as any).messages.sort(
+            (a: any, b: any) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )[0].content
+        : 'Aucun message',
+    timestamp: new Date(c.last_message_at).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    unread: getUnreadCount(c.id),
+    type: c.type,
+    online: true,
+  }));
+
+  const allConversations = [
+    ...(remoteConversations.length > 0
+      ? remoteConversations
       : [
           {
             id: 'demo-team',
@@ -78,16 +96,17 @@ export default function ChatScreen() {
             type: 'group',
             online: true,
           },
-          {
-            id: 'demo-ai',
-            name: 'Assistant IA OpsPilot',
-            lastMessage: 'Comment puis-je vous aider ?',
-            timestamp: 'Maintenant',
-            unread: 0,
-            type: 'support',
-            online: true,
-          },
-        ];
+        ]),
+    {
+      id: 'demo-ai',
+      name: 'Assistant IA OpsPilot',
+      lastMessage: 'Posez une question sur vos priorités opérationnelles.',
+      timestamp: 'Maintenant',
+      unread: 0,
+      type: 'support',
+      online: true,
+    },
+  ];
 
   const conversations = allConversations.filter(
     (c) => c.id !== 'demo-ai' || isEnabled('features.ai_assistant'),
@@ -109,9 +128,12 @@ export default function ChatScreen() {
 
   // Convertir les messages DB en format d'affichage
   const displayMessages = selectedConversation?.startsWith('demo-')
-    ? localMessages
+    ? localMessages.filter(
+        (message) => message.conversationId === selectedConversation,
+      )
     : dbMessages.map((m) => ({
         id: m.id,
+        conversationId: m.conversation_id,
         sender: (m as any).profiles?.full_name || 'Utilisateur',
         content: m.content,
         timestamp: new Date(m.created_at).toLocaleTimeString('fr-FR', {
@@ -127,49 +149,93 @@ export default function ChatScreen() {
       'support';
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedConversation || assistantLoading) return;
     const content = newMessage.trim();
     setNewMessage('');
 
-    if (selectedConversation?.startsWith('demo-')) {
-      // Mode démo local
-      const msg = {
-        id: `local-${Date.now()}`,
-        sender: profile?.full_name || 'Vous',
-        content,
-        timestamp: new Date().toLocaleTimeString('fr-FR', {
+    if (selectedConversation.startsWith('demo-')) {
+      const messageTime = () =>
+        new Date().toLocaleTimeString('fr-FR', {
           hour: '2-digit',
           minute: '2-digit',
-        }),
+        });
+      const msg: DisplayMessage = {
+        id: `local-${Date.now()}`,
+        conversationId: selectedConversation,
+        sender: profile?.full_name ?? 'Vous',
+        content,
+        timestamp: messageTime(),
         isMe: true,
       };
       setLocalMessages((prev) => [...prev, msg]);
 
-      // Réponse IA si conversation IA
-      if (isAIConversation && process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+      if (isAIConversation) {
+        const previousHistory: AssistantHistoryMessage[] = localMessages
+          .filter((message) => message.conversationId === 'demo-ai')
+          .map<AssistantHistoryMessage>((message) => ({
+            role: message.isMe ? 'user' : 'assistant',
+            content: message.content,
+          }));
+        const currentHistoryMessage: AssistantHistoryMessage = {
+          role: 'user',
+          content,
+        };
+        const history: AssistantHistoryMessage[] = [
+          ...previousHistory,
+          currentHistoryMessage,
+        ].slice(-12);
+
+        setAssistantLoading(true);
         try {
-          const aiResponse = await getChatAssistantResponse(
-            content,
-            `Utilisateur: ${profile?.full_name}, Rôle: ${profile?.role}`,
-          );
+          let aiResponse: string;
+          if (isLocalDemo || !session) {
+            aiResponse = getLocalAssistantResponse(
+              content,
+              getLocalOperationalContext(),
+            );
+          } else {
+            const { data, error } = await supabase.functions.invoke<{
+              reply?: string;
+              error?: string;
+            }>('ai-assistant', {
+              body: { messages: history },
+            });
+            if (error || !data?.reply) {
+              throw new Error(data?.error ?? error?.message ?? 'Réponse vide');
+            }
+            aiResponse = data.reply;
+          }
+
           setLocalMessages((prev) => [
             ...prev,
             {
               id: `ai-${Date.now()}`,
+              conversationId: 'demo-ai',
               sender: 'Assistant IA OpsPilot',
               content: aiResponse,
-              timestamp: new Date().toLocaleTimeString('fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
+              timestamp: messageTime(),
               isMe: false,
             },
           ]);
         } catch (error) {
           console.error('Erreur assistant IA:', error);
+          setLocalMessages((prev) => [
+            ...prev,
+            {
+              id: `ai-error-${Date.now()}`,
+              conversationId: 'demo-ai',
+              sender: 'Assistant IA OpsPilot',
+              content:
+                'Je suis temporairement indisponible. Vérifiez la connexion puis réessayez dans quelques instants.',
+              timestamp: messageTime(),
+              isMe: false,
+            },
+          ]);
+        } finally {
+          setAssistantLoading(false);
         }
       }
-    } else if (selectedConversation) {
+    } else {
       // Envoi réel via Supabase
       const result = await sendDbMessage(selectedConversation, content);
       if (result.error) {
@@ -192,7 +258,7 @@ export default function ChatScreen() {
   };
 
   const selectedConvName =
-    conversations.find((c) => c.id === selectedConversation)?.name ||
+    conversations.find((c) => c.id === selectedConversation)?.name ??
     'Conversation';
 
   return (
@@ -220,6 +286,7 @@ export default function ChatScreen() {
           return (
             <TouchableOpacity
               key={conversation.id}
+              testID={`conversation-${conversation.id}`}
               style={[
                 styles.conversationCard,
                 selectedConversation === conversation.id &&
@@ -276,7 +343,9 @@ export default function ChatScreen() {
                   <>
                     <Sparkles size={12} color="#8B5CF6" />
                     <Text style={styles.conversationStatusText}>
-                      Assistant IA disponible
+                      {assistantLoading
+                        ? 'Assistant IA réfléchit…'
+                        : 'Assistant IA disponible'}
                     </Text>
                   </>
                 ) : (
@@ -337,6 +406,11 @@ export default function ChatScreen() {
                     <Text style={styles.messageSender}>{message.sender}</Text>
                   )}
                   <Text
+                    testID={
+                      message.isMe
+                        ? 'chat-user-message'
+                        : 'chat-assistant-message'
+                    }
                     style={[
                       styles.messageContent,
                       message.isMe
@@ -359,11 +433,20 @@ export default function ChatScreen() {
                 </View>
               </View>
             ))}
+            {assistantLoading && (
+              <Text
+                style={styles.assistantLoading}
+                testID="chat-assistant-loading"
+              >
+                Analyse de vos priorités…
+              </Text>
+            )}
           </ScrollView>
 
           {/* Message Input */}
           <View style={styles.messageInput}>
             <TextInput
+              testID="chat-message-input"
               style={styles.messageTextInput}
               value={newMessage}
               onChangeText={setNewMessage}
@@ -372,12 +455,14 @@ export default function ChatScreen() {
               onSubmitEditing={handleSendMessage}
             />
             <TouchableOpacity
+              testID="chat-send-button"
               style={[
                 styles.sendButton,
-                !newMessage.trim() && styles.sendButtonDisabled,
+                (!newMessage.trim() || assistantLoading) &&
+                  styles.sendButtonDisabled,
               ]}
               onPress={handleSendMessage}
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || assistantLoading}
             >
               <Send size={20} color="#FFFFFF" />
             </TouchableOpacity>
@@ -618,6 +703,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
     gap: 8,
+  },
+  assistantLoading: {
+    color: '#7C3AED',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 12,
   },
   messageTextInput: {
     flex: 1,

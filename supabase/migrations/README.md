@@ -30,6 +30,12 @@ la progression par chapitres lus, les politiques RLS et quatre cursus métier
 complets. Les cursus par défaut sont copiés dans les organisations existantes
 et lors de toute nouvelle création d'organisation.
 
+## Assistant IA
+
+`20260611210000_ai_assistant_rate_limit.sql` ajoute un compteur distribué
+réservé au `service_role`. Il protège la fonction Edge `ai-assistant` sans
+exposer de table ou de RPC au client.
+
 ## Règles
 
 - Toute nouvelle migration doit être **idempotente** (rejouable sans erreur) :

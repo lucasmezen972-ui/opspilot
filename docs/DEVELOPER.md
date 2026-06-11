@@ -90,6 +90,23 @@ Pièges historiques (ne pas réintroduire) :
   sont volontairement sautés (voir `supabase/migrations/README.md`).
 - **Deploy Supabase Edge Functions** (`deploy-functions.yml`).
 
+## Assistant IA
+
+La conversation « Assistant IA OpsPilot » appelle la fonction Edge
+`ai-assistant` uniquement avec une vraie session Supabase. La clé Anthropic
+reste un secret serveur et ne doit jamais être exposée via une variable
+`EXPO_PUBLIC_*`.
+
+```bash
+supabase secrets set \
+  --project-ref hpqfmuzkkxrqoqoabjmb \
+  ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+En démo locale, l'assistant utilise les KPIs du `demoStore` et répond sans
+réseau. La fonction distante vérifie le JWT, l'organisation et applique un
+rate limit par utilisateur.
+
 ## Conventions
 
 - Branche de travail → PR vers `main` ; la CI doit être verte avant merge.
