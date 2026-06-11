@@ -6,7 +6,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const FROM = Deno.env.get('EMAIL_FROM') ?? 'OpsPilot <onboarding@resend.dev>';
+
 const APP_URL = 'https://lucasmezen972-ui.github.io/opspilot/';
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
@@ -15,21 +15,29 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
 
 // Clé Resend : secret d'environnement prioritaire, sinon platform_settings
 // (posable/rotatable depuis le back-office sans redéploiement).
-let resendKeyCache: string | null = null;
-async function getResendKey(): Promise<string> {
-  if (resendKeyCache !== null) return resendKeyCache;
-  const envKey = Deno.env.get('RESEND_API_KEY') ?? '';
-  if (envKey) {
-    resendKeyCache = envKey;
-    return envKey;
-  }
+// L'expéditeur est aussi configurable en base (email_provider.from) :
+// bascule vers le domaine vérifié sans redéploiement.
+interface EmailConfig {
+  key: string;
+  from: string;
+}
+let configCache: EmailConfig | null = null;
+async function getEmailConfig(): Promise<EmailConfig> {
+  if (configCache) return configCache;
   const { data } = await admin
     .from('platform_settings')
     .select('value')
     .eq('key', 'email_provider')
     .maybeSingle();
-  resendKeyCache = (data?.value?.resend_key as string) ?? '';
-  return resendKeyCache;
+  configCache = {
+    key:
+      Deno.env.get('RESEND_API_KEY') ||
+      ((data?.value?.resend_key as string) ?? ''),
+    from:
+      Deno.env.get('EMAIL_FROM') ||
+      ((data?.value?.from as string) ?? 'OpsPilot <onboarding@resend.dev>'),
+  };
+  return configCache;
 }
 
 const layout = (title: string, inner: string) => `
@@ -139,7 +147,7 @@ async function deliver(
   built: Built,
   orgId?: string,
 ) {
-  const resendKey = await getResendKey();
+  const { key: resendKey, from: emailFrom } = await getEmailConfig();
   if (!resendKey) {
     await admin.from('email_log').insert({
       organization_id: orgId ?? null,
@@ -158,7 +166,7 @@ async function deliver(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM,
+        from: emailFrom,
         to: [recipient],
         subject: built.subject,
         html: built.html,
