@@ -52,6 +52,9 @@ export function StockModal({
               <X size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
+          <Text style={styles.productName} testID="product-stock-name">
+            {product?.name}
+          </Text>
           <Text style={styles.modalSubtitle}>
             Stock actuel: {product?.stock_quantity}
           </Text>
@@ -86,6 +89,12 @@ export function StockModal({
 }
 
 const styles = StyleSheet.create({
+  productName: {
+    color: '#111827',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
   modalSubtitle: {
     fontSize: 14,
     color: '#6B7280',

@@ -18,7 +18,17 @@
       "themeColor": "#2563EB",
       "backgroundColor": "#F8FAFC"
     },
-    "plugins": ["expo-router", "expo-font", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser OpsPilot à utiliser la caméra pour scanner les produits et documenter les audits."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true,
       "baseUrl": "/opspilot"
