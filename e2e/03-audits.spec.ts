@@ -110,6 +110,10 @@ test.describe('Gestion des audits', () => {
 
     await page.getByTestId('audit-item-demo-haccp-item-1-ko').click();
     await page.getByTestId('audit-item-demo-haccp-item-1-photo').click();
+    await expect(page.getByTestId('camera-permission-button')).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByTestId('camera-permission-button').click();
     await expect(page.getByTestId('camera-capture-button')).toBeVisible({
       timeout: 15_000,
     });

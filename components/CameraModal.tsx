@@ -83,6 +83,7 @@ export default function CameraModal({
             d'audit.
           </Text>
           <TouchableOpacity
+            testID="camera-permission-button"
             style={styles.permissionButton}
             onPress={requestPermission}
           >
