@@ -119,6 +119,10 @@ si 2FA). Les secrets (`platform_settings` : `email_worker_token`,
 
 ## Reste à faire connu
 
+- Optimisations RLS à volume (advisors performance, non bloquant à
+  l'échelle actuelle) : wrapper `auth.uid()` en `(select auth.uid())`
+  dans ~27 policies, fusionner les policies permissives multiples.
+
 - Cycle Stripe bout-en-bout jamais testé en réel (checkout test →
   webhook → statut active → email de confirmation).
 - Rotation de la clé Resend par Lucas (elle a transité par le chat).
