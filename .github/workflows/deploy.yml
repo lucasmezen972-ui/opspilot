@@ -36,6 +36,10 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
 
+      # Back-office superadmin (statique, sans build)
+      - name: Inclure le back-office admin
+        run: cp -R admin dist/admin
+
       # GitHub Pages ne gère pas les SPA : 404.html redirige vers index.html
       - name: Add SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html

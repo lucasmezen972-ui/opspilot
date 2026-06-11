@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>OpsPilot Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- Écran de connexion -->
+    <section id="login-view" class="login-wrap">
+      <div class="login-card">
+        <div class="login-logo">OP</div>
+        <h1>OpsPilot Admin</h1>
+        <p class="login-hint">Back-office réservé au superadmin</p>
+        <label for="login-email">Email</label>
+        <input
+          id="login-email"
+          data-testid="admin-login-email"
+          type="email"
+          autocomplete="username"
+          placeholder="vous@exemple.com"
+        />
+        <label for="login-password">Mot de passe</label>
+        <input
+          id="login-password"
+          data-testid="admin-login-password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        />
+        <button id="login-submit" data-testid="admin-login-submit">
+          Se connecter
+        </button>
+        <p
+          id="login-error"
+          data-testid="admin-login-error"
+          class="error"
+          hidden
+        ></p>
+      </div>
+    </section>
+
+    <!-- Application -->
+    <section id="app-view" hidden>
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-badge">OP</span> Admin</div>
+        <nav>
+          <a href="#/dashboard" data-view="dashboard">📊 Tableau de bord</a>
+          <a href="#/users" data-view="users">👥 Utilisateurs</a>
+          <a href="#/orgs" data-view="orgs">🏢 Organisations &amp; abonnés</a>
+          <a href="#/settings" data-view="settings">⚙️ Paramètres</a>
+        </nav>
+        <div class="sidebar-footer">
+          <span id="me-email"></span>
+          <button id="logout" class="ghost">Se déconnecter</button>
+        </div>
+      </aside>
+      <main id="content"></main>
+    </section>
+
+    <div id="toast" hidden></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
