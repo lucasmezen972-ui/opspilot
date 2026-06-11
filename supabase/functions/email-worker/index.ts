@@ -7,12 +7,30 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const RESEND_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
 const FROM = Deno.env.get('EMAIL_FROM') ?? 'OpsPilot <onboarding@resend.dev>';
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { persistSession: false },
 });
+
+// Clé Resend : secret d'environnement prioritaire, sinon platform_settings
+// (posable/rotatable depuis le back-office sans redéploiement).
+let resendKeyCache: string | null = null;
+async function getResendKey(): Promise<string> {
+  if (resendKeyCache !== null) return resendKeyCache;
+  const envKey = Deno.env.get('RESEND_API_KEY') ?? '';
+  if (envKey) {
+    resendKeyCache = envKey;
+    return envKey;
+  }
+  const { data } = await admin
+    .from('platform_settings')
+    .select('value')
+    .eq('key', 'email_provider')
+    .maybeSingle();
+  resendKeyCache = (data?.value?.resend_key as string) ?? '';
+  return resendKeyCache;
+}
 
 interface Reminder {
   template: string;
@@ -62,7 +80,8 @@ async function sendEmail(
   orgId: string,
   date: string,
 ) {
-  if (!RESEND_KEY) {
+  const resendKey = await getResendKey();
+  if (!resendKey) {
     await admin.from('email_log').insert({
       organization_id: orgId,
       recipient: to,
@@ -76,7 +95,7 @@ async function sendEmail(
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${RESEND_KEY}`,
+        Authorization: `Bearer ${resendKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

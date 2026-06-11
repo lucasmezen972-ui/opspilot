@@ -1030,7 +1030,7 @@ async function renderHealth() {
 
 async function renderPlatform() {
   content.innerHTML = '<h2>Plateforme</h2><p class="subtitle">Chargement…</p>';
-  const { settings } = await api('/platform-settings');
+  const { settings, email_configured } = await api('/platform-settings');
   const defaults = settings.find((x) => x.key === 'defaults')?.value ?? {};
   content.innerHTML = `
     <h2>Plateforme</h2>
@@ -1040,7 +1040,35 @@ async function renderPlatform() {
       <input id="pf-trial" inputmode="numeric" value="${esc(defaults.trial_days ?? 14)}" />
       <button id="pf-save" style="margin-top:14px">Enregistrer</button>
     </div>
-    <p class="subtitle" style="margin-top:14px">📧 Relances automatiques : actives (cron quotidien 08:00 UTC). Les envois réels démarrent dès que la clé RESEND_API_KEY est posée en secret Supabase — d'ici là, chaque relance est journalisée en « skipped » (visible dans Santé).</p>`;
+    <h3 class="col-title" style="margin-top:22px">📧 Envoi d'emails (Resend)</h3>
+    <div class="card" style="max-width:420px">
+      <p style="margin-bottom:10px">Statut : ${email_configured ? '<span class="badge green">Clé configurée — envois actifs</span>' : '<span class="badge red">Aucune clé — emails journalisés sans envoi</span>'}</p>
+      <label>Remplacer la clé API Resend (jamais affichée)</label>
+      <input id="pf-resend" type="password" placeholder="re_..." autocomplete="off" />
+      <button id="pf-resend-save" style="margin-top:14px">Enregistrer la clé</button>
+      <p style="color:#6b7280;font-size:12px;margin-top:10px">Relances d'essai (cron 08:00 UTC), emails transactionnels et notifications de clôture utilisent cette clé. Pour la faire tourner : crée une nouvelle clé sur resend.com, colle-la ici, puis révoque l'ancienne.</p>
+    </div>`;
+  $('#pf-resend-save').addEventListener('click', async () => {
+    const key = $('#pf-resend').value.trim();
+    if (!key.startsWith('re_')) {
+      toast('Format attendu : re_…', 4000);
+      return;
+    }
+    try {
+      await api('/platform-settings', {
+        method: 'PUT',
+        body: JSON.stringify({
+          key: 'email_provider',
+          value: { resend_key: key },
+        }),
+      });
+      $('#pf-resend').value = '';
+      toast('Clé enregistrée ✅ Envois actifs.');
+      renderPlatform();
+    } catch (e) {
+      toast(`Erreur : ${e.message}`, 5000);
+    }
+  });
   $('#pf-save').addEventListener('click', async () => {
     const days = parseInt($('#pf-trial').value, 10);
     if (!Number.isFinite(days) || days < 1 || days > 365) {
