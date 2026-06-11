@@ -4,6 +4,7 @@ import type {
   AuditTemplate,
   AuditTemplateItem,
   CorrectiveAction,
+  NotificationPreferences,
   Product,
   Task,
   Training,
@@ -23,12 +24,31 @@ import type {
 export const DEMO_ORG_ID = 'demo-org-00000000-0000-0000-0000-000000000001';
 export const DEMO_USER_ID = 'demo-user-00000000-0000-0000-0000-000000000001';
 
+export type DemoSettings = {
+  organizationName: string;
+  storeName: string;
+  preferences: NotificationPreferences;
+};
+
 const days = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
 
 const base = {
   organization_id: DEMO_ORG_ID,
   store_id: null,
 };
+
+export function getDemoSettings(): DemoSettings {
+  return {
+    organizationName: 'OpsPilot Démo',
+    storeName: 'Magasin Démo',
+    preferences: {
+      audit_notifications: true,
+      action_notifications: true,
+      training_notifications: true,
+      weekly_summary: true,
+    },
+  };
+}
 
 export function getDemoAudits(): Audit[] {
   return [

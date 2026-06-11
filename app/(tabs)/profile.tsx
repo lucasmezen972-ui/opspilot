@@ -94,7 +94,12 @@ export default function ProfileScreen() {
         <Text style={styles.title} testID="page-profile-title">
           Profil
         </Text>
-        <TouchableOpacity style={styles.headerButton}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.push('/settings')}
+          testID="profile-settings-button"
+          accessibilityLabel="Ouvrir les réglages"
+        >
           <Settings size={20} color="#6B7280" />
         </TouchableOpacity>
       </View>
@@ -166,12 +171,7 @@ export default function ProfileScreen() {
           <View style={styles.settingsMenu}>
             <TouchableOpacity
               style={styles.settingsItem}
-              onPress={() =>
-                Alert.alert(
-                  'Notifications',
-                  'Les notifications push seront disponibles prochainement.',
-                )
-              }
+              onPress={() => router.push('/settings')}
             >
               <Bell size={20} color="#6B7280" />
               <Text style={styles.settingsItemText}>Notifications</Text>
