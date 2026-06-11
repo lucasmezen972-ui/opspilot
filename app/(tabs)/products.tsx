@@ -3,10 +3,7 @@ import {
   Scan,
   Search,
   TriangleAlert as AlertTriangle,
-  CircleCheck as CheckCircle,
   Package,
-  Calendar,
-  DollarSign,
   TrendingDown,
   TrendingUp,
   X,
@@ -18,13 +15,18 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
   TextInput,
-  Modal,
 } from 'react-native';
 
+import {
+  AddProductModal,
+  type NewProductPayload,
+} from '../../features/products/AddProductModal';
+import { ProductCard } from '../../features/products/ProductCard';
+import { StockModal } from '../../features/products/StockModal';
 import { useProducts } from '../../hooks/useProducts';
+import type { Product } from '../../lib/supabase';
 
 export default function ProductsScreen() {
   const {
@@ -35,57 +37,34 @@ export default function ProductsScreen() {
     updateProductStock,
   } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
-  const [stockModalVisible, setStockModalVisible] = useState(false);
-  const [stockModalProduct, setStockModalProduct] = useState<any>(null);
-  const [stockModalValue, setStockModalValue] = useState('');
+  const [stockModalProduct, setStockModalProduct] = useState<Product | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [addSubmitting, setAddSubmitting] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState('');
-  const [newStock, setNewStock] = useState('0');
-  const [newPrice, setNewPrice] = useState('');
-  const [newDlcDays, setNewDlcDays] = useState('');
-  const [newBarcode, setNewBarcode] = useState('');
+  const [prefillBarcode, setPrefillBarcode] = useState('');
 
-  const openAddModal = (prefillBarcode?: string) => {
-    setNewName('');
-    setNewCategory('');
-    setNewStock('0');
-    setNewPrice('');
-    setNewDlcDays('');
-    setNewBarcode(prefillBarcode ?? '');
+  const openAddModal = (barcode?: string) => {
+    setPrefillBarcode(barcode ?? '');
     setAddModalVisible(true);
   };
 
-  const handleAddProduct = async () => {
-    if (!newName.trim() || addSubmitting) return;
-    setAddSubmitting(true);
-    try {
-      const dlcDays = parseInt(newDlcDays, 10);
-      const price = parseFloat(newPrice.replace(',', '.'));
-      const result = await createProduct({
-        name: newName.trim(),
-        category: newCategory.trim() || null,
-        stock_quantity: parseInt(newStock, 10) || 0,
-        price: Number.isFinite(price) ? price : null,
-        dlc: Number.isFinite(dlcDays)
-          ? new Date(Date.now() + dlcDays * 86400000).toISOString()
-          : null,
-        barcode: newBarcode.trim() || null,
-      });
-      setAddModalVisible(false);
-      if (result.error) {
-        Alert.alert('Erreur', String(result.error));
-      } else {
-        Alert.alert(
-          'Produit ajouté',
-          `${newName.trim()} a été ajouté au stock.`,
-        );
-      }
-    } finally {
-      setAddSubmitting(false);
+  const handleAddProduct = async (payload: NewProductPayload) => {
+    const result = await createProduct(payload);
+    setAddModalVisible(false);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
+      Alert.alert('Produit ajouté', `${payload.name} a été ajouté au stock.`);
+    }
+  };
+
+  const handleStockConfirm = async (product: Product, newStock: number) => {
+    const { error } = await updateProductStock(product.id, newStock);
+    setStockModalProduct(null);
+    if (error) {
+      Alert.alert('Erreur', String(error));
     }
   };
 
@@ -107,45 +86,6 @@ export default function ProductsScreen() {
   const outOfStockProducts = products.filter(
     (p) => p.stock_quantity === 0,
   ).length;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return '#10B981';
-      case 'low_stock':
-        return '#F59E0B';
-      case 'out_of_stock':
-        return '#EF4444';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return CheckCircle;
-      case 'low_stock':
-        return AlertTriangle;
-      case 'out_of_stock':
-        return TrendingDown;
-      default:
-        return Package;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return 'En stock';
-      case 'low_stock':
-        return 'Stock faible';
-      case 'out_of_stock':
-        return 'Rupture';
-      default:
-        return 'Inconnu';
-    }
-  };
 
   const simulateBarcodeScan = async () => {
     setIsScanning(true);
@@ -172,7 +112,7 @@ export default function ProductsScreen() {
             { text: 'OK', style: 'default' },
             {
               text: 'Modifier stock',
-              onPress: () => promptStockUpdate(scannedProduct),
+              onPress: () => setStockModalProduct(scannedProduct),
             },
           ],
         );
@@ -192,27 +132,6 @@ export default function ProductsScreen() {
 
       setIsScanning(false);
     }, 1500);
-  };
-
-  const promptStockUpdate = (product: any) => {
-    setStockModalProduct(product);
-    setStockModalValue(String(product.stock_quantity));
-    setStockModalVisible(true);
-  };
-
-  const handleStockConfirm = async () => {
-    const parsed = parseInt(stockModalValue || '0', 10);
-    if (Number.isNaN(parsed) || parsed < 0 || !stockModalProduct) {
-      setStockModalVisible(false);
-      setStockModalProduct(null);
-      return;
-    }
-    const { error } = await updateProductStock(stockModalProduct.id, parsed);
-    setStockModalVisible(false);
-    setStockModalProduct(null);
-    if (error) {
-      Alert.alert('Erreur', String(error));
-    }
   };
 
   return (
@@ -306,90 +225,13 @@ export default function ProductsScreen() {
           </View>
         )}
 
-        {products.map((product) => {
-          // Calculer le statut en temps réel
-          const status =
-            product.stock_quantity === 0
-              ? 'out_of_stock'
-              : product.stock_quantity <= (product.min_stock || 5)
-                ? 'low_stock'
-                : 'ok';
-          const StatusIcon = getStatusIcon(status);
-
-          return (
-            <TouchableOpacity
-              key={product.id}
-              testID={`product-card-${product.id}`}
-              style={styles.productCard}
-              onPress={() => promptStockUpdate(product)}
-            >
-              <Image
-                source={{
-                  uri:
-                    product.image_url ||
-                    'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
-                }}
-                style={styles.productImage}
-              />
-
-              <View style={styles.productInfo}>
-                <View style={styles.productHeader}>
-                  <Text style={styles.productName}>{product.name}</Text>
-                  <View
-                    style={[
-                      styles.productStatus,
-                      { backgroundColor: `${getStatusColor(status)}20` },
-                    ]}
-                  >
-                    <StatusIcon size={12} color={getStatusColor(status)} />
-                    <Text
-                      style={[
-                        styles.productStatusText,
-                        { color: getStatusColor(status) },
-                      ]}
-                    >
-                      {getStatusText(status)}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text style={styles.productCategory}>
-                  {product.category || 'Divers'}
-                </Text>
-                <Text style={styles.productBarcode}>
-                  Code: {product.barcode || 'N/A'}
-                </Text>
-
-                <View style={styles.productDetails}>
-                  <View style={styles.productDetailItem}>
-                    <DollarSign size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>
-                      {product.price != null ? `${product.price}€` : 'N/A'}
-                    </Text>
-                  </View>
-                  <View style={styles.productDetailItem}>
-                    <Package size={14} color="#6B7280" />
-                    <Text
-                      style={styles.productDetailText}
-                      testID={`product-stock-${product.id}`}
-                    >
-                      Stock: {product.stock_quantity}
-                    </Text>
-                  </View>
-                  <View style={styles.productDetailItem}>
-                    <Calendar size={14} color="#6B7280" />
-                    <Text style={styles.productDetailText}>
-                      DLC:{' '}
-                      {product.dlc
-                        ? new Date(product.dlc).toLocaleDateString()
-                        : 'N/A'}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onPress={setStockModalProduct}
+          />
+        ))}
 
         {!loading && products.length === 0 && (
           <View style={styles.emptyState}>
@@ -408,123 +250,19 @@ export default function ProductsScreen() {
         <Scan size={24} color="#FFFFFF" />
       </TouchableOpacity>
 
-      {/* Stock Update Modal */}
-      <Modal visible={stockModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Modifier le stock</Text>
-              <TouchableOpacity onPress={() => setStockModalVisible(false)}>
-                <X size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.modalSubtitle}>
-              Stock actuel: {stockModalProduct?.stock_quantity}
-            </Text>
-            <TextInput
-              testID="product-stock-input"
-              style={styles.modalInput}
-              value={stockModalValue}
-              onChangeText={setStockModalValue}
-              keyboardType="numeric"
-              placeholder="Nouveau stock"
-              autoFocus
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setStockModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="product-stock-confirm"
-                style={styles.modalConfirmButton}
-                onPress={handleStockConfirm}
-              >
-                <Text style={styles.modalConfirmText}>Valider</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <StockModal
+        product={stockModalProduct}
+        visible={stockModalProduct !== null}
+        onClose={() => setStockModalProduct(null)}
+        onConfirm={handleStockConfirm}
+      />
 
-      {/* Add product modal */}
-      <Modal visible={addModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent} testID="product-add-modal">
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ajouter un produit</Text>
-              <TouchableOpacity onPress={() => setAddModalVisible(false)}>
-                <X size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              testID="product-add-name"
-              style={styles.modalInput}
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="Nom du produit *"
-              autoFocus
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={newCategory}
-              onChangeText={setNewCategory}
-              placeholder="Catégorie (ex : Crèmerie)"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={newStock}
-              onChangeText={setNewStock}
-              keyboardType="numeric"
-              placeholder="Stock initial"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={newPrice}
-              onChangeText={setNewPrice}
-              keyboardType="numeric"
-              placeholder="Prix (€)"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={newDlcDays}
-              onChangeText={setNewDlcDays}
-              keyboardType="numeric"
-              placeholder="DLC dans X jours (vide = sans DLC)"
-            />
-            <TextInput
-              style={styles.modalInput}
-              value={newBarcode}
-              onChangeText={setNewBarcode}
-              keyboardType="numeric"
-              placeholder="Code-barres (optionnel)"
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setAddModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="product-add-submit"
-                style={[
-                  styles.modalConfirmButton,
-                  addSubmitting && { opacity: 0.5 },
-                ]}
-                onPress={handleAddProduct}
-                disabled={addSubmitting}
-              >
-                <Text style={styles.modalConfirmText}>
-                  {addSubmitting ? 'Ajout…' : 'Ajouter'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <AddProductModal
+        visible={addModalVisible}
+        prefillBarcode={prefillBarcode}
+        onClose={() => setAddModalVisible(false)}
+        onSubmit={handleAddProduct}
+      />
     </View>
   );
 }
@@ -635,77 +373,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 0,
   },
-  productCard: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  productImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 16,
-  },
-  productInfo: {
-    flex: 1,
-  },
-  productHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    flex: 1,
-    marginRight: 8,
-  },
-  productStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  productStatusText: {
-    fontSize: 10,
-    fontWeight: '500',
-    marginLeft: 2,
-  },
-  productCategory: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 2,
-  },
-  productBarcode: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    marginBottom: 8,
-    fontFamily: 'monospace',
-  },
-  productDetails: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  productDetailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  productDetailText: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginLeft: 4,
-  },
   loadingContainer: {
     padding: 40,
     alignItems: 'center',
@@ -746,68 +413,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 16,
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  modalCancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  modalCancelText: {
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  modalConfirmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  modalConfirmText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
   },
 });
