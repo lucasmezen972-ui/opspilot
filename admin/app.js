@@ -165,10 +165,12 @@ async function renderUsers() {
       <td>${esc(u.organizations?.name ?? '—')}</td>
       <td><span class="badge ${u.role === 'superadmin' ? 'red' : u.role === 'admin' ? 'amber' : 'gray'}">${esc(ROLE_LABELS[u.role] ?? u.role)}</span></td>
       <td>${u.is_active === false ? '<span class="badge red">Désactivé</span>' : '<span class="badge green">Actif</span>'}</td>
-      <td>${
+      <td style="white-space:nowrap">${
         u.role === 'superadmin'
           ? ''
-          : `<button class="small" data-edit-user="${u.id}">Modifier</button>`
+          : `<button class="small" data-edit-user="${u.id}">Modifier</button>
+             <button class="small" data-reset-user="${u.id}" title="Réinitialiser le mot de passe">🔑</button>
+             <button class="small danger" data-delete-user="${u.id}" title="Supprimer">🗑</button>`
       }</td>
     </tr>`,
     )
@@ -198,6 +200,42 @@ async function renderUsers() {
     btn.addEventListener('click', () => {
       const u = users.find((x) => x.id === btn.dataset.editUser);
       userForm(u, organizations);
+    });
+  });
+  document.querySelectorAll('[data-reset-user]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const u = users.find((x) => x.id === btn.dataset.resetUser);
+      if (!confirm(`Réinitialiser le mot de passe de ${u.email} ?`)) return;
+      try {
+        const { password } = await api(`/reset-password/${u.id}`, {
+          method: 'POST',
+        });
+        openModal(`
+          <h3>Mot de passe réinitialisé</h3>
+          <p style="margin:10px 0;color:#374151">Nouveau mot de passe provisoire de <strong>${esc(u.email)}</strong> — copie-le maintenant, il ne sera plus affiché :</p>
+          <input readonly value="${esc(password)}" onclick="this.select()" style="font-family:monospace" />
+          <div class="row-btns"><button data-close>Fermer</button></div>`);
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  document.querySelectorAll('[data-delete-user]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const u = users.find((x) => x.id === btn.dataset.deleteUser);
+      if (
+        !confirm(
+          `Supprimer définitivement le compte ${u.email} ? Cette action est irréversible.`,
+        )
+      )
+        return;
+      try {
+        await api(`/users/${u.id}`, { method: 'DELETE' });
+        toast('Utilisateur supprimé ✅');
+        renderUsers();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
     });
   });
 }
@@ -299,16 +337,30 @@ async function renderOrgs() {
       <td><strong>${esc(o.name)}</strong><br /><span style="color:#6b7280">${userCount} utilisateur(s)</span></td>
       <td><span class="badge ${badge}">${esc(status)}</span><br /><span style="color:#6b7280">plan : ${esc(sub?.plan ?? '—')}</span></td>
       <td>${trial}</td>
-      <td>
+      <td style="white-space:nowrap">
         <button class="small" data-extend="${o.id}">+30 j d'essai</button>
+        <select class="small-select" data-status="${o.id}">
+          ${['trialing', 'active', 'past_due', 'canceled']
+            .map(
+              (st) =>
+                `<option value="${st}" ${status === st ? 'selected' : ''}>${st}</option>`,
+            )
+            .join('')}
+        </select>
+        <button class="small" data-rename="${o.id}" title="Renommer">✏️</button>
+        <button class="small" data-detail="${o.id}">Détails</button>
         ${sub?.stripe_customer_id ? `<a href="https://dashboard.stripe.com/customers/${esc(sub.stripe_customer_id)}" target="_blank" rel="noopener">Stripe ↗</a>` : ''}
       </td>
-    </tr>`;
+    </tr>
+    <tr hidden data-detail-row="${o.id}"><td colspan="4"></td></tr>`;
     })
     .join('');
   content.innerHTML = `
     <h2>Organisations &amp; abonnés</h2>
-    <p class="subtitle">${organizations.length} organisation(s)</p>
+    <div class="toolbar">
+      <p class="subtitle" style="margin:0">${organizations.length} organisation(s)</p>
+      <button class="small" id="org-create">+ Créer une organisation</button>
+    </div>
     <table>
       <thead><tr><th>Organisation</th><th>Abonnement</th><th>Fin d'essai</th><th>Actions</th></tr></thead>
       <tbody>${rows}</tbody>
@@ -332,6 +384,132 @@ async function renderOrgs() {
       }
     });
   });
+  document.querySelectorAll('[data-status]').forEach((sel) => {
+    sel.addEventListener('change', async () => {
+      try {
+        await api(`/subscriptions/${sel.dataset.status}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: sel.value }),
+        });
+        toast(`Statut → ${sel.value} ✅`);
+        renderOrgs();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  document.querySelectorAll('[data-rename]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const o = organizations.find((x) => x.id === btn.dataset.rename);
+      const name = prompt("Nouveau nom de l'organisation :", o.name);
+      if (!name?.trim() || name.trim() === o.name) return;
+      try {
+        await api(`/organizations/${o.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ name: name.trim() }),
+        });
+        toast('Organisation renommée ✅');
+        renderOrgs();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+  document.querySelectorAll('[data-detail]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const row = document.querySelector(
+        `[data-detail-row="${btn.dataset.detail}"]`,
+      );
+      if (!row.hidden) {
+        row.hidden = true;
+        return;
+      }
+      row.hidden = false;
+      row.firstElementChild.innerHTML = 'Chargement…';
+      try {
+        const d = await api(`/organization-detail/${btn.dataset.detail}`);
+        row.firstElementChild.innerHTML = `
+          <strong>${d.counts.audits}</strong> audits ·
+          <strong>${d.counts.actions}</strong> actions ·
+          <strong>${d.counts.products}</strong> produits<br />
+          ${
+            d.members
+              .map(
+                (m) =>
+                  `<span class="badge gray" style="margin:2px">${esc(m.full_name ?? m.email)} (${esc(ROLE_LABELS[m.role] ?? m.role)})</span>`,
+              )
+              .join(' ') || '<em>Aucun membre</em>'
+          }`;
+      } catch (e) {
+        row.firstElementChild.textContent = `Erreur : ${e.message}`;
+      }
+    });
+  });
+  $('#org-create').addEventListener('click', () => {
+    openModal(`
+      <h3>Créer une organisation</h3>
+      <label>Nom de l'organisation</label>
+      <input id="o-name" placeholder="Ma société" />
+      <label>Premier magasin (optionnel)</label>
+      <input id="o-store" placeholder="Magasin principal" />
+      <p style="font-size:12px;color:#6b7280;margin-top:8px">Un abonnement d'essai de 14 jours est créé automatiquement.</p>
+      <div class="row-btns">
+        <button class="cancel" data-close>Annuler</button>
+        <button id="o-save">Créer</button>
+      </div>`);
+    $('#o-save').addEventListener('click', async () => {
+      try {
+        await api('/organizations', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: $('#o-name').value,
+            store_name: $('#o-store').value,
+          }),
+        });
+        toast('Organisation créée ✅');
+        closeModal();
+        renderOrgs();
+      } catch (e) {
+        toast(`Erreur : ${e.message}`, 5000);
+      }
+    });
+  });
+}
+
+const ACTION_LABELS = {
+  'user.create': '👤 Utilisateur créé',
+  'user.update': '✏️ Utilisateur modifié',
+  'user.delete': '🗑 Utilisateur supprimé',
+  'user.reset_password': '🔑 Mot de passe réinitialisé',
+  'organization.create': '🏢 Organisation créée',
+  'organization.rename': '🏢 Organisation renommée',
+  'subscription.update': '💳 Abonnement modifié',
+  'settings.update': '⚙️ Réglage modifié',
+};
+
+async function renderJournal() {
+  content.innerHTML = '<h2>Journal</h2><p class="subtitle">Chargement…</p>';
+  const { log } = await api('/audit-log');
+  const rows = log
+    .map(
+      (l) => `
+    <tr>
+      <td>${new Date(l.created_at).toLocaleString('fr-FR')}</td>
+      <td>${esc(ACTION_LABELS[l.action] ?? l.action)}</td>
+      <td style="font-family:monospace;font-size:12px;color:#6b7280">${esc(
+        JSON.stringify(l.target),
+      )}</td>
+      <td>${esc(l.actor_email ?? '—')}</td>
+    </tr>`,
+    )
+    .join('');
+  content.innerHTML = `
+    <h2>Journal</h2>
+    <p class="subtitle">Les 100 dernières actions du back-office</p>
+    <table>
+      <thead><tr><th>Date</th><th>Action</th><th>Détail</th><th>Par</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="4"><em>Aucune action enregistrée.</em></td></tr>'}</tbody>
+    </table>`;
 }
 
 // Réglages proposés par défaut pour chaque organisation.
@@ -414,6 +592,37 @@ $('#login-submit').addEventListener('click', handleLogin);
 $('#login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
 });
+$('#change-password').addEventListener('click', () => {
+  openModal(`
+    <h3>Changer mon mot de passe</h3>
+    <label>Nouveau mot de passe (min. 8 caractères)</label>
+    <input id="pw-new" type="password" autocomplete="new-password" />
+    <label>Confirmer</label>
+    <input id="pw-confirm" type="password" autocomplete="new-password" />
+    <div class="row-btns">
+      <button class="cancel" data-close>Annuler</button>
+      <button id="pw-save">Changer</button>
+    </div>`);
+  $('#pw-save').addEventListener('click', async () => {
+    const pw = $('#pw-new').value;
+    if (pw.length < 8) {
+      toast('8 caractères minimum.', 4000);
+      return;
+    }
+    if (pw !== $('#pw-confirm').value) {
+      toast('Les deux saisies ne correspondent pas.', 4000);
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    if (error) {
+      toast(`Erreur : ${error.message}`, 5000);
+      return;
+    }
+    closeModal();
+    toast('Mot de passe changé ✅');
+  });
+});
+
 $('#logout').addEventListener('click', async () => {
   await supabase.auth.signOut();
   location.reload();
