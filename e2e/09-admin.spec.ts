@@ -8,7 +8,7 @@ import { blockSupabase } from './helpers';
 
 test.describe('Back-office admin', () => {
   test("l'écran de connexion admin s'affiche", async ({ page }) => {
-    await page.goto('./admin/index.html');
+    await page.goto('./admin/');
     await expect(page.getByText('OpsPilot Admin').first()).toBeVisible({
       timeout: 15_000,
     });
@@ -20,7 +20,7 @@ test.describe('Back-office admin', () => {
     page,
   }) => {
     await blockSupabase(page);
-    await page.goto('./admin/index.html');
+    await page.goto('./admin/');
     await page.getByTestId('admin-login-email').fill('inconnu@exemple.com');
     await page.getByTestId('admin-login-password').fill('mauvais-mdp');
     await page.getByTestId('admin-login-submit').click();

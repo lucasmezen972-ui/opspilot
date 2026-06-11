@@ -22,12 +22,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // serve.json : cleanUrls désactivé + réécriture SPA. `--single` réécrivait
-    // aussi /opspilot/admin/* vers l'index racine (cleanUrls redirige
-    // index.html → URL sans extension, puis la réécriture SPA s'applique) :
-    // le back-office était inatteignable dans les E2E.
+    // e2e/server.mjs : serveur statique déterministe (équivalent GitHub
+    // Pages : index de répertoire, cleanUrls, fallback SPA). `serve --single`
+    // réécrivait /opspilot/admin/* vers l'index racine.
     command:
-      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && printf \'{"cleanUrls": false, "rewrites": [{"source": "**", "destination": "/index.html"}]}\' > .playwright-site/serve.json && npx serve .playwright-site -l 3000',
+      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && node e2e/server.mjs .playwright-site 3000',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
