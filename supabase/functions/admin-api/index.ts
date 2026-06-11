@@ -14,7 +14,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
 };
 
 function json(body: unknown, status = 200) {
@@ -44,6 +44,27 @@ async function requireSuperadmin(req: Request) {
   return { user: data.user };
 }
 
+function tempPassword(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  let out = '';
+  for (const b of bytes) out += alphabet[b % alphabet.length];
+  return `OpsPilot-${out}!`;
+}
+
+async function logAction(
+  actor: { id: string; email?: string },
+  action: string,
+  target: Record<string, unknown>,
+) {
+  await admin.from('admin_audit_log').insert({
+    actor_id: actor.id,
+    actor_email: actor.email ?? null,
+    action,
+    target,
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -51,6 +72,7 @@ Deno.serve(async (req) => {
 
   const gate = await requireSuperadmin(req);
   if ('error' in gate && gate.error) return gate.error;
+  const actor = { id: gate.user!.id, email: gate.user!.email };
 
   const url = new URL(req.url);
   // chemin après /admin-api : ex. ['users', ':id']
@@ -135,6 +157,7 @@ Deno.serve(async (req) => {
           organization_id: organization_id ?? null,
         });
         if (pErr) return json({ error: pErr.message }, 400);
+        await logAction(actor, 'user.create', { id: uid, email, role });
         return json({ ok: true, id: uid });
       }
 
@@ -154,7 +177,147 @@ Deno.serve(async (req) => {
           .update(updates)
           .eq('id', id);
         if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'user.update', { id, ...updates });
         return json({ ok: true });
+      }
+
+      case 'POST /reset-password': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const { data: target } = await admin
+          .from('profiles')
+          .select('role, email')
+          .eq('id', id)
+          .single();
+        if (target?.role === 'superadmin' && id !== actor.id) {
+          return json(
+            { error: 'impossible de réinitialiser un autre superadmin' },
+            400,
+          );
+        }
+        const password = tempPassword();
+        const { error } = await admin.auth.admin.updateUserById(id, {
+          password,
+        });
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'user.reset_password', {
+          id,
+          email: target?.email,
+        });
+        return json({ ok: true, password });
+      }
+
+      case 'DELETE /users': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        if (id === actor.id) {
+          return json(
+            { error: 'impossible de supprimer son propre compte' },
+            400,
+          );
+        }
+        const { data: target } = await admin
+          .from('profiles')
+          .select('role, email')
+          .eq('id', id)
+          .single();
+        if (target?.role === 'superadmin') {
+          return json({ error: 'impossible de supprimer un superadmin' }, 400);
+        }
+        const { error } = await admin.auth.admin.deleteUser(id);
+        if (error) return json({ error: error.message }, 400);
+        await admin.from('profiles').delete().eq('id', id);
+        await logAction(actor, 'user.delete', { id, email: target?.email });
+        return json({ ok: true });
+      }
+
+      case 'POST /organizations': {
+        const { name, store_name } = await req.json();
+        if (!name?.trim()) return json({ error: 'nom requis' }, 400);
+        const { data: org, error } = await admin
+          .from('organizations')
+          .insert({ name: name.trim() })
+          .select('id')
+          .single();
+        if (error) return json({ error: error.message }, 400);
+        if (store_name?.trim()) {
+          await admin
+            .from('stores')
+            .insert({ organization_id: org.id, name: store_name.trim() });
+        }
+        await admin.from('subscriptions').upsert(
+          {
+            organization_id: org.id,
+            plan: 'trial',
+            status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 14 * 86400000).toISOString(),
+          },
+          { onConflict: 'organization_id' },
+        );
+        await logAction(actor, 'organization.create', {
+          id: org.id,
+          name: name.trim(),
+        });
+        return json({ ok: true, id: org.id });
+      }
+
+      case 'PATCH /organizations': {
+        const id = parts[1];
+        const { name } = await req.json();
+        if (!id || !name?.trim())
+          return json({ error: 'id et nom requis' }, 400);
+        const { error } = await admin
+          .from('organizations')
+          .update({ name: name.trim() })
+          .eq('id', id);
+        if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'organization.rename', {
+          id,
+          name: name.trim(),
+        });
+        return json({ ok: true });
+      }
+
+      case 'GET /organization-detail': {
+        const id = parts[1];
+        if (!id) return json({ error: 'id manquant' }, 400);
+        const [members, audits, actions, products] = await Promise.all([
+          admin
+            .from('profiles')
+            .select('id, email, full_name, role, is_active')
+            .eq('organization_id', id)
+            .order('full_name'),
+          admin
+            .from('audits')
+            .select('id', { count: 'exact', head: true })
+            .eq('organization_id', id),
+          admin
+            .from('corrective_actions')
+            .select('id', { count: 'exact', head: true })
+            .eq('organization_id', id),
+          admin
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('organization_id', id),
+        ]);
+        return json({
+          members: members.data ?? [],
+          counts: {
+            audits: audits.count ?? 0,
+            actions: actions.count ?? 0,
+            products: products.count ?? 0,
+          },
+        });
+      }
+
+      case 'GET /audit-log': {
+        const { data, error } = await admin
+          .from('admin_audit_log')
+          .select('actor_email, action, target, created_at')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (error) throw error;
+        return json({ log: data });
       }
 
       case 'PATCH /subscriptions': {
@@ -174,6 +337,7 @@ Deno.serve(async (req) => {
             { onConflict: 'organization_id' },
           );
         if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'subscription.update', { orgId, ...updates });
         return json({ ok: true });
       }
 
@@ -203,6 +367,7 @@ Deno.serve(async (req) => {
           { onConflict: 'organization_id,key' },
         );
         if (error) return json({ error: error.message }, 400);
+        await logAction(actor, 'settings.update', { orgId, key, value });
         return json({ ok: true });
       }
 
