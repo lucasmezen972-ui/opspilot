@@ -22,8 +22,11 @@ export default defineConfig({
     },
   ],
   webServer: {
+    // e2e/server.mjs : serveur statique déterministe (équivalent GitHub
+    // Pages : index de répertoire, cleanUrls, fallback SPA). `serve --single`
+    // réécrivait /opspilot/admin/* vers l'index racine.
     command:
-      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && npx serve .playwright-site -l 3000 --single',
+      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && node e2e/server.mjs .playwright-site 3000',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
