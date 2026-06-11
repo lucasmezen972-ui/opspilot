@@ -12,7 +12,8 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 ---
 
 > 👩‍💻 **Développeurs** : architecture, conventions, mode démo, CI/CD →
-> [docs/DEVELOPER.md](docs/DEVELOPER.md)
+> [docs/DEVELOPER.md](docs/DEVELOPER.md) · état complet du projet →
+> [docs/ETAT-PROJET.md](docs/ETAT-PROJET.md)
 
 ## 1) Fonctionnalités
 

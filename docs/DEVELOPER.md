@@ -2,6 +2,8 @@
 
 Tout ce qu'il faut savoir pour travailler sur le code. Le README racine
 décrit le produit ; ce document décrit l'architecture et les conventions.
+**État complet du projet (fonctionnalités, infra, back-office, emails) :
+[ETAT-PROJET.md](ETAT-PROJET.md).**
 
 ## Stack
 
