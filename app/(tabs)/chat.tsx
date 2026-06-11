@@ -191,7 +191,9 @@ export default function ChatScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Messages</Text>
+        <Text style={styles.title} testID="page-messages-title">
+          Messages
+        </Text>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.headerButton}>
             <Search size={20} color="#6B7280" />

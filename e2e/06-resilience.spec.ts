@@ -40,6 +40,24 @@ test.describe('Résilience', () => {
     await openTab(page, 'Audits', 'page-audits-title');
   });
 
+  test('déconnexion — retour au login, reload reste déconnecté', async ({
+    page,
+  }) => {
+    await openTab(page, 'Profil', 'page-profile-title');
+    // Le polyfill Alert web passe par window.confirm : on accepte.
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.getByTestId('logout-button').click();
+    await expect(page.getByTestId('demo-login-button')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // Le flag démo est nettoyé : un reload ne réhydrate pas la session.
+    await page.reload();
+    await expect(page.getByTestId('demo-login-button')).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+
   test('Supabase injoignable après reload — dashboard toujours fonctionnel', async ({
     page,
   }) => {

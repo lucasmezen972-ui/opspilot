@@ -275,7 +275,11 @@ export default function ProfileScreen() {
 
         {/* Logout */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <TouchableOpacity
+            testID="logout-button"
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
             <LogOut size={20} color="#EF4444" />
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>
