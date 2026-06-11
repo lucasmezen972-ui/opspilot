@@ -14,22 +14,24 @@ const APP_SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) =>
-      cache.addAll(APP_SHELL).catch(() => {})
-    )
+    caches
+      .open(STATIC_CACHE)
+      .then((cache) => cache.addAll(APP_SHELL).catch(() => {})),
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(
-        names
-          .filter((n) => n !== STATIC_CACHE && n !== API_CACHE)
-          .map((n) => caches.delete(n))
-      )
-    )
+    caches
+      .keys()
+      .then((names) =>
+        Promise.all(
+          names
+            .filter((n) => n !== STATIC_CACHE && n !== API_CACHE)
+            .map((n) => caches.delete(n)),
+        ),
+      ),
   );
   self.clients.claim();
 });
@@ -51,7 +53,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => caches.match(request)),
     );
     return;
   }
@@ -71,7 +73,11 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match(BASE + '/')))
+        .catch(() =>
+          caches
+            .match(request)
+            .then((cached) => cached || caches.match(BASE + '/')),
+        ),
     );
     return;
   }
@@ -87,7 +93,7 @@ self.addEventListener('fetch', (event) => {
             caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
           }
           return response;
-        })
-    )
+        }),
+    ),
   );
 });

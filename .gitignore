@@ -33,3 +33,13 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# tests / artefacts
+test-results/
+playwright-report/
+coverage/
+.vitest-cache/
+
+# auth / outils locaux
+.gh-auth/
+.playwright-site/

@@ -113,6 +113,7 @@ export default function ActionsScreen() {
     return (
       <View
         key={action.id}
+        testID={`action-card-${action.id}`}
         style={[styles.card, overdue && styles.cardOverdue]}
       >
         <View style={styles.cardHeader}>
@@ -184,7 +185,9 @@ export default function ActionsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Actions correctives</Text>
+          <Text style={styles.title} testID="page-actions-title">
+            Actions correctives
+          </Text>
           <Text style={styles.subtitle}>
             Suivi des non-conformités et plans d'action
           </Text>
@@ -201,17 +204,24 @@ export default function ActionsScreen() {
       <View style={styles.statsRow} testID="actions-counters">
         <View style={styles.statCard}>
           <Clock size={18} color="#F59E0B" />
-          <Text style={styles.statValue}>{openCount}</Text>
+          <Text style={styles.statValue} testID="actions-count-open">
+            {openCount}
+          </Text>
           <Text style={styles.statLabel}>À traiter</Text>
         </View>
         <View style={styles.statCard}>
           <ChevronRight size={18} color="#2563EB" />
-          <Text style={styles.statValue}>{inProgressCount}</Text>
+          <Text style={styles.statValue} testID="actions-count-inprogress">
+            {inProgressCount}
+          </Text>
           <Text style={styles.statLabel}>En cours</Text>
         </View>
         <View style={[styles.statCard, overdueCount > 0 && styles.statAlert]}>
           <AlertTriangle size={18} color="#DC2626" />
-          <Text style={[styles.statValue, { color: '#DC2626' }]}>
+          <Text
+            style={[styles.statValue, { color: '#DC2626' }]}
+            testID="actions-count-overdue"
+          >
             {overdueCount}
           </Text>
           <Text style={styles.statLabel}>En retard</Text>
@@ -315,6 +325,7 @@ export default function ActionsScreen() {
             </View>
 
             <TextInput
+              testID="action-create-title"
               style={styles.input}
               placeholder="Titre de l'action *"
               placeholderTextColor="#9CA3AF"

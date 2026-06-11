@@ -100,10 +100,10 @@ export default function ReportsScreen() {
     <ScrollView style={styles.container} testID="reports-screen">
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Rapports</Text>
-          <Text style={styles.subtitle}>
-            Synthèse conformité & exports
+          <Text style={styles.title} testID="page-reports-title">
+            Rapports
           </Text>
+          <Text style={styles.subtitle}>Synthèse conformité & exports</Text>
         </View>
         <View style={styles.headerIcon}>
           <FileText size={22} color="#2563EB" />

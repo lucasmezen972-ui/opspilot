@@ -8,7 +8,10 @@ import Stripe from 'https://esm.sh/stripe@14';
 
 type Plan = 'essential' | 'business';
 
-const PLAN_CONFIG: Record<Plan, { name: string; description: string; amount: number }> = {
+const PLAN_CONFIG: Record<
+  Plan,
+  { name: string; description: string; amount: number }
+> = {
   essential: {
     name: 'OpsPilot Essential',
     description: '1 magasin · 15 utilisateurs · Audits illimités · Export CSV',
@@ -16,7 +19,8 @@ const PLAN_CONFIG: Record<Plan, { name: string; description: string; amount: num
   },
   business: {
     name: 'OpsPilot Business',
-    description: '5 magasins · 75 utilisateurs · Multi-sites · Support prioritaire',
+    description:
+      '5 magasins · 75 utilisateurs · Multi-sites · Support prioritaire',
     amount: 79900, // 799,00 €
   },
 };
@@ -26,7 +30,8 @@ Deno.serve(async (req: Request) => {
     return new Response(null, {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Headers':
+          'authorization, x-client-info, apikey, content-type',
       },
     });
   }
@@ -53,7 +58,9 @@ Deno.serve(async (req: Request) => {
     { global: { headers: { Authorization: authHeader } } },
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return new Response(JSON.stringify({ error: 'Utilisateur introuvable' }), {
       status: 401,
@@ -74,7 +81,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const { plan } = await req.json() as { plan: string };
+  const { plan } = (await req.json()) as { plan: string };
   const planConfig = PLAN_CONFIG[plan as Plan];
   if (!planConfig) {
     return new Response(JSON.stringify({ error: `Plan invalide : ${plan}` }), {
@@ -102,27 +109,30 @@ Deno.serve(async (req: Request) => {
     customerId = customer.id;
   }
 
-  const appUrl = Deno.env.get('APP_URL') ?? 'https://lucasmezen972-ui.github.io/opspilot';
+  const appUrl =
+    Deno.env.get('APP_URL') ?? 'https://lucasmezen972-ui.github.io/opspilot';
 
   // Utilise price_data inline — aucun Price ID Stripe à préconfigurer
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     payment_method_types: ['card'],
-    line_items: [{
-      quantity: 1,
-      price_data: {
-        currency: 'eur',
-        unit_amount: planConfig.amount,
-        recurring: { interval: 'month' },
-        product_data: {
-          name: planConfig.name,
-          description: planConfig.description,
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: 'eur',
+          unit_amount: planConfig.amount,
+          recurring: { interval: 'month' },
+          product_data: {
+            name: planConfig.name,
+            description: planConfig.description,
+          },
         },
       },
-    }],
+    ],
     success_url: `${appUrl}/billing?success=1`,
-    cancel_url:  `${appUrl}/billing?canceled=1`,
+    cancel_url: `${appUrl}/billing?canceled=1`,
     metadata: { organization_id: profile.organization_id, plan },
     subscription_data: {
       metadata: { organization_id: profile.organization_id, plan },

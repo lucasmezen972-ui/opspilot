@@ -266,7 +266,9 @@ export default function AuditsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Audits</Text>
+        <Text style={styles.title} testID="page-audits-title">
+          Audits
+        </Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -468,7 +470,9 @@ export default function AuditsScreen() {
                     }}
                   >
                     <Download size={16} color="#7C3AED" />
-                    <Text style={[styles.actionButtonText, { color: '#7C3AED' }]}>
+                    <Text
+                      style={[styles.actionButtonText, { color: '#7C3AED' }]}
+                    >
                       Rapport
                     </Text>
                   </TouchableOpacity>
@@ -568,8 +572,8 @@ export default function AuditsScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.questionnaireHint}>
-              Évaluez chaque point : une non-conformité crée automatiquement
-              une action corrective.
+              Évaluez chaque point : une non-conformité crée automatiquement une
+              action corrective.
             </Text>
             <ScrollView style={styles.questionList}>
               {AUDIT_QUESTIONS.map((q, i) => (

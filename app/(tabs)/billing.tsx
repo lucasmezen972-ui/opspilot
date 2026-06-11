@@ -153,7 +153,11 @@ function BillingScreenContent() {
     try {
       const { data, error } = await supabase.functions.invoke(
         'create-customer-portal',
-        { body: { returnUrl: 'https://lucasmezen972-ui.github.io/opspilot/billing' } },
+        {
+          body: {
+            returnUrl: 'https://lucasmezen972-ui.github.io/opspilot/billing',
+          },
+        },
       );
       if (error || !data?.url) {
         const msg =

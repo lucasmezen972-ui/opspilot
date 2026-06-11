@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 
+import { resetDemoStore } from '../lib/demoStore';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
@@ -68,7 +69,11 @@ function hasDemoFlag(): boolean {
   }
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  fallback: T,
+): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
@@ -84,7 +89,10 @@ interface AuthContextValue {
   authError: string | null;
   isOffline: boolean;
   isDemoMode: boolean;
-  signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ data: any; error: any }>;
   signInDemo: () => Promise<{ data: any; error: any }>;
   signUp: (
     email: string,
@@ -92,7 +100,9 @@ interface AuthContextValue {
     fullName: string,
   ) => Promise<{ data: any; error: any }>;
   signOut: () => Promise<{ error: any }>;
-  updateProfile: (updates: Partial<Profile>) => Promise<{ data: any; error: any }>;
+  updateProfile: (
+    updates: Partial<Profile>,
+  ) => Promise<{ data: any; error: any }>;
   fetchProfile: (userId: string) => Promise<{ data: any; error: any }>;
 }
 
@@ -206,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
       sub?.subscription?.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -274,6 +284,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Fallback local garanti (Supabase injoignable) : démo 100 % locale.
+    // Reset du store démo : connexion explicite = repartir de données propres.
+    // (Le reload/deep-link réhydrate via enterDemo() SANS reset, B3.)
+    resetDemoStore();
     enterDemo();
     return { data: { user: DEMO_USER, profile: DEMO_PROFILE }, error: null };
   };

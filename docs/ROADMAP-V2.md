@@ -9,15 +9,15 @@
 
 ### Ce qui existe déjà — et c'est solide
 
-| Domaine | État |
-|---|---|
-| Base multi-tenant | ✅ `organizations` → `stores` → `departments`, toutes les données scopées par `organization_id` |
-| Plans d'abonnement | ✅ `organizations.subscription_plan` (basic/pro/enterprise) + `max_users`/`max_stores` |
-| RLS | ✅ 17/20 tables avec policies par organisation et hiérarchie de rôles (admin > manager > employé) |
-| Rôles | ✅ 4 niveaux dans `profiles.role` |
-| Modules métier | ✅ Audits, Tâches, Produits/DLC (scan), Formation, Chat, Dashboard manager — requêtes Supabase réelles |
-| Offline | ✅ File de sync AsyncStorage (`useOfflineSync`) |
-| PWA | ✅ Manifest, service worker, installation écran d'accueil (PR #56/#57) |
+| Domaine            | État                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Base multi-tenant  | ✅ `organizations` → `stores` → `departments`, toutes les données scopées par `organization_id`        |
+| Plans d'abonnement | ✅ `organizations.subscription_plan` (basic/pro/enterprise) + `max_users`/`max_stores`                 |
+| RLS                | ✅ 17/20 tables avec policies par organisation et hiérarchie de rôles (admin > manager > employé)      |
+| Rôles              | ✅ 4 niveaux dans `profiles.role`                                                                      |
+| Modules métier     | ✅ Audits, Tâches, Produits/DLC (scan), Formation, Chat, Dashboard manager — requêtes Supabase réelles |
+| Offline            | ✅ File de sync AsyncStorage (`useOfflineSync`)                                                        |
+| PWA                | ✅ Manifest, service worker, installation écran d'accueil (PR #56/#57)                                 |
 
 ### Problèmes à corriger en priorité
 
@@ -52,6 +52,7 @@
 ```
 
 Choix structurants :
+
 - **Supabase Edge Functions** plutôt qu'un serveur Express à héberger : webhooks Stripe,
   génération PDF, cron d'alertes DLC. Le serveur Express actuel reste pour le dev/l'analyse IA.
 - **Stripe Checkout + Customer Portal** : pas d'UI de paiement custom à maintenir.
@@ -120,6 +121,7 @@ CREATE TABLE activity_log (
 ```
 
 Modifications de tables existantes :
+
 - `products` : ajouter `expiry_date`, `alert_threshold_days`, index sur `(organization_id, expiry_date)` pour le module DLC.
 - `audits` : ajouter `signature_url`, `latitude`, `longitude`, `completed_by`.
 - `badges` : remplacer la policy `USING (true)` par un scope organisation.
@@ -131,13 +133,13 @@ Modifications de tables existantes :
 
 ### MVP (semaines 1-4) — vendable à 299 €/mois
 
-| # | Lot | Contenu |
-|---|---|---|
-| 1 | Sécurité | Rotation clés, suppression secrets en dur, fix policy badges, `activity_log` |
-| 2 | Onboarding | Inscription → création organisation + magasin, invitations e-mail, gestion des rôles |
-| 3 | Stripe | Checkout (3 plans), Customer Portal, webhooks, essai 14 jours, application des quotas |
-| 4 | Actions correctives | Génération auto depuis non-conformité, vue Liste + Kanban, relances retard |
-| 5 | DLC v1 | `expiry_date` sur produits, écran "produits critiques", alertes J-7/J-3/J-1 |
+| #   | Lot                 | Contenu                                                                               |
+| --- | ------------------- | ------------------------------------------------------------------------------------- |
+| 1   | Sécurité            | Rotation clés, suppression secrets en dur, fix policy badges, `activity_log`          |
+| 2   | Onboarding          | Inscription → création organisation + magasin, invitations e-mail, gestion des rôles  |
+| 3   | Stripe              | Checkout (3 plans), Customer Portal, webhooks, essai 14 jours, application des quotas |
+| 4   | Actions correctives | Génération auto depuis non-conformité, vue Liste + Kanban, relances retard            |
+| 5   | DLC v1              | `expiry_date` sur produits, écran "produits critiques", alertes J-7/J-3/J-1           |
 
 ### V2 (semaines 5-8) — justifie 799 €/mois
 
@@ -161,21 +163,21 @@ Modifications de tables existantes :
 
 ## 5. Backlog priorisé (extrait)
 
-| P | Tâche | Fichiers concernés |
-|---|---|---|
-| P0 | Supprimer les clés en dur | `lib/supabase.ts`, `server/supabase.ts` |
-| P0 | Migration `invitations` + `corrective_actions` + `subscriptions` | `supabase/migrations/` (nouveau) |
-| P0 | Écran onboarding organisation | `app/onboarding.tsx` (nouveau), `components/AuthScreen.tsx` |
-| P0 | Intégration Stripe Checkout + webhooks | `supabase/functions/stripe-webhook/` (nouveau), `app/(tabs)/profile.tsx` |
-| P0 | Module actions correctives | `app/(tabs)/actions.tsx` (nouveau), `hooks/useCorrectiveActions.ts` (nouveau) |
-| P0 | DLC : date de péremption + alertes | `app/(tabs)/products.tsx`, `hooks/useProducts.ts`, migration |
-| P1 | Trigger quotas `max_users`/`max_stores` | migration |
-| P1 | Bibliothèque de modèles d'audit | `data/templates/` (nouveau), seed SQL |
-| P1 | Rapports PDF | `supabase/functions/generate-report/` (nouveau) |
-| P1 | Invitations e-mail | `supabase/functions/send-invitation/` (nouveau) |
-| P1 | Journal d'activité | migration + `utils/activityLog.ts` (nouveau) |
-| P2 | Vue Kanban/Calendrier actions | `components/KanbanBoard.tsx`, `components/ActionCalendar.tsx` (nouveaux) |
-| P2 | SSO, API publique, multi-régions | V3 |
+| P   | Tâche                                                            | Fichiers concernés                                                            |
+| --- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| P0  | Supprimer les clés en dur                                        | `lib/supabase.ts`, `server/supabase.ts`                                       |
+| P0  | Migration `invitations` + `corrective_actions` + `subscriptions` | `supabase/migrations/` (nouveau)                                              |
+| P0  | Écran onboarding organisation                                    | `app/onboarding.tsx` (nouveau), `components/AuthScreen.tsx`                   |
+| P0  | Intégration Stripe Checkout + webhooks                           | `supabase/functions/stripe-webhook/` (nouveau), `app/(tabs)/profile.tsx`      |
+| P0  | Module actions correctives                                       | `app/(tabs)/actions.tsx` (nouveau), `hooks/useCorrectiveActions.ts` (nouveau) |
+| P0  | DLC : date de péremption + alertes                               | `app/(tabs)/products.tsx`, `hooks/useProducts.ts`, migration                  |
+| P1  | Trigger quotas `max_users`/`max_stores`                          | migration                                                                     |
+| P1  | Bibliothèque de modèles d'audit                                  | `data/templates/` (nouveau), seed SQL                                         |
+| P1  | Rapports PDF                                                     | `supabase/functions/generate-report/` (nouveau)                               |
+| P1  | Invitations e-mail                                               | `supabase/functions/send-invitation/` (nouveau)                               |
+| P1  | Journal d'activité                                               | migration + `utils/activityLog.ts` (nouveau)                                  |
+| P2  | Vue Kanban/Calendrier actions                                    | `components/KanbanBoard.tsx`, `components/ActionCalendar.tsx` (nouveaux)      |
+| P2  | SSO, API publique, multi-régions                                 | V3                                                                            |
 
 ---
 

@@ -22,12 +22,14 @@
 ## Test de connexion
 
 Après création, vous pouvez vous connecter avec:
-- **Email:** demo@opspilot.com  
+
+- **Email:** demo@opspilot.com
 - **Password:** demo123
 
 ## Troubleshooting
 
 Si "Invalid login credentials":
+
 1. Vérifier que l'utilisateur existe dans Authentication > Users
 2. Vérifier que l'email/mot de passe sont corrects
 3. Vérifier que l'utilisateur est confirmé (email_confirmed_at doit être défini)

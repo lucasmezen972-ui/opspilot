@@ -14,6 +14,7 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 ## 1) Fonctionnalités
 
 ### 1.1 Fonctionnalités cœur (inspirées de Yoobic)
+
 - Création et gestion d'audits personnalisés.
 - Checklists dynamiques pour les opérations terrain.
 - Prise de photos justificatives dans les audits.
@@ -22,6 +23,7 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 - Dashboard analytique de performance.
 
 ### 1.2 Différenciation OpsPilot (améliorations)
+
 - Scanner de code-barres (ajout/vérification produits).
 - Annotation des photos (flèches, texte, etc.).
 - Mode hors-ligne avec synchronisation au retour réseau.
@@ -35,17 +37,19 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 ## 2) Architecture produit
 
 ### 2.1 Navigation par onglets
-| Onglet | Rôle |
-|---|---|
-| Accueil | Dashboard + actions rapides |
-| Audits | Contrôles qualité et suivi |
-| Produits | Scanner + gestion catalogue/stock |
-| Tâches | Exécution individuelle et équipe |
-| Formation | Cours + quiz + progression |
-| Messages | Communication temps réel |
-| Profil | Stats personnelles + paramètres |
+
+| Onglet    | Rôle                              |
+| --------- | --------------------------------- |
+| Accueil   | Dashboard + actions rapides       |
+| Audits    | Contrôles qualité et suivi        |
+| Produits  | Scanner + gestion catalogue/stock |
+| Tâches    | Exécution individuelle et équipe  |
+| Formation | Cours + quiz + progression        |
+| Messages  | Communication temps réel          |
+| Profil    | Stats personnelles + paramètres   |
 
 ### 2.2 UX / design
+
 - Interface moderne React Native.
 - Charte cohérente orientée entreprise.
 - Couleur principale : `#2563EB`.
@@ -56,22 +60,23 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 
 ## 3) Stack technique
 
-| Domaine | Choix |
-|---|---|
+| Domaine          | Choix                      |
+| ---------------- | -------------------------- |
 | Framework mobile | Expo React Native `53.0.0` |
-| Navigation | Expo Router `5.0.2` |
-| Langage | TypeScript |
-| Icônes | Lucide React Native |
-| Styling | StyleSheet React Native |
-| État | React Hooks |
-| Capture image | Expo Camera |
-| Backend / DB | Supabase |
+| Navigation       | Expo Router `5.0.2`        |
+| Langage          | TypeScript                 |
+| Icônes           | Lucide React Native        |
+| Styling          | StyleSheet React Native    |
+| État             | React Hooks                |
+| Capture image    | Expo Camera                |
+| Backend / DB     | Supabase                   |
 
 ---
 
 ## 4) Configuration Supabase
 
 ### Option A — automatique (recommandée)
+
 1. Cliquer sur **“Connect to Supabase”** dans Bolt.
 2. Bolt va automatiquement :
    - créer le projet Supabase,
@@ -80,6 +85,7 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
    - injecter les données d’exemple.
 
 ### Option B — manuelle
+
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Copier l’URL et la clé anonyme.
 3. Créer un fichier `.env` :
@@ -96,12 +102,14 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ## 5) Modules métier détaillés
 
 ### Gamification
+
 - Niveaux d’expérience (XP).
 - Badges/récompenses.
 - Classements d’équipe.
 - Suivi de performance individuel/collectif.
 
 ### Audits
+
 - Modèles personnalisés.
 - Checklists interactives.
 - Scoring automatique.
@@ -109,12 +117,14 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - Historique d’audits.
 
 ### Produits / stock
+
 - Scan code-barres (simulation).
 - Suivi de stock temps réel.
 - Alertes ruptures et DLC.
 - Fiches produits enrichies.
 
 ### Formation
+
 - Parcours par compétences.
 - Quiz de validation.
 - Progression personnalisée.
@@ -155,18 +165,21 @@ Pour les démos sans comptes réels, utiliser le compte de test dédié document
 ## 9) Cas d’usage
 
 ### Supermarché / grande distribution
+
 - Contrôles qualité rayon.
 - Vérification DLC/stock.
 - Formation personnel caisse.
 - Coordination d’équipe.
 
 ### Retail / points de vente
+
 - Audits merchandising.
 - Contrôles sécurité.
 - Formation produit.
 - Pilotage des performances.
 
 ### Restauration
+
 - Contrôles hygiène HACCP.
 - Gestion stock.
 - Formation sécurité alimentaire.
@@ -179,6 +192,7 @@ Pour les démos sans comptes réels, utiliser le compte de test dédié document
 **Nom : OpsPilot** — évoque pilotage opérationnel, précision et efficacité terrain.
 
 Palette principale :
+
 - Primary Blue `#2563EB`
 - Success Green `#10B981`
 - Warning Orange `#F59E0B`
@@ -187,4 +201,4 @@ Palette principale :
 
 ---
 
-**OpsPilot** — *Votre copilote pour des opérations terrain efficaces.*
+**OpsPilot** — _Votre copilote pour des opérations terrain efficaces._

@@ -74,9 +74,7 @@ export default function HomeScreen() {
 
   const dlcCritical = useMemo(() => {
     const in3Days = new Date(now.getTime() + 3 * 86_400_000);
-    return products.filter(
-      (p) => p.dlc && new Date(p.dlc) <= in3Days,
-    ).length;
+    return products.filter((p) => p.dlc && new Date(p.dlc) <= in3Days).length;
   }, [products, now]);
 
   const dlcAlerts = useMemo(() => {
@@ -182,7 +180,7 @@ export default function HomeScreen() {
               <Text style={styles.sectionLink}>Voir tout →</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.dlcCard}>
+          <View style={styles.dlcCard} testID="dlc-alerts">
             {dlcAlerts.map((product, idx) => {
               const dlcDate = new Date(product.dlc!);
               const diffDays = Math.ceil(
@@ -200,6 +198,7 @@ export default function HomeScreen() {
               return (
                 <TouchableOpacity
                   key={product.id}
+                  testID={`dlc-alert-${product.id}`}
                   style={[
                     styles.dlcItem,
                     idx < dlcAlerts.length - 1 && styles.dlcItemBorder,
@@ -237,7 +236,11 @@ export default function HomeScreen() {
                   >
                     <Calendar size={11} color={color} />
                     <Text style={[styles.dlcBadgeText, { color }]}>
-                      {isExpired ? 'Expiré' : isToday ? "Aujourd'hui" : `J−${diffDays}`}
+                      {isExpired
+                        ? 'Expiré'
+                        : isToday
+                          ? "Aujourd'hui"
+                          : `J−${diffDays}`}
                     </Text>
                   </View>
                 </TouchableOpacity>
@@ -315,21 +318,26 @@ export default function HomeScreen() {
                 !item.roles || item.roles.includes(profile?.role ?? ''),
             )
             .map((item) => {
-            const Icon = item.icon;
-            return (
-              <TouchableOpacity
-                key={item.title}
-                style={styles.quickCard}
-                onPress={() => router.push(item.route)}
-              >
-                <View style={[styles.quickIconWrap, { backgroundColor: `${item.color}18` }]}>
-                  <Icon size={26} color={item.color} />
-                </View>
-                <Text style={styles.quickTitle}>{item.title}</Text>
-                <Text style={styles.quickSub}>{item.sub}</Text>
-              </TouchableOpacity>
-            );
-          })}
+              const Icon = item.icon;
+              return (
+                <TouchableOpacity
+                  key={item.title}
+                  style={styles.quickCard}
+                  onPress={() => router.push(item.route)}
+                >
+                  <View
+                    style={[
+                      styles.quickIconWrap,
+                      { backgroundColor: `${item.color}18` },
+                    ]}
+                  >
+                    <Icon size={26} color={item.color} />
+                  </View>
+                  <Text style={styles.quickTitle}>{item.title}</Text>
+                  <Text style={styles.quickSub}>{item.sub}</Text>
+                </TouchableOpacity>
+              );
+            })}
         </View>
       </View>
 
@@ -374,7 +382,14 @@ export default function HomeScreen() {
                 <Text
                   style={[
                     styles.auditScore,
-                    { color: audit.score >= 80 ? '#10B981' : audit.score >= 60 ? '#F59E0B' : '#EF4444' },
+                    {
+                      color:
+                        audit.score >= 80
+                          ? '#10B981'
+                          : audit.score >= 60
+                            ? '#F59E0B'
+                            : '#EF4444',
+                    },
                   ]}
                 >
                   {audit.score}%
@@ -408,12 +423,15 @@ export default function HomeScreen() {
           <View style={styles.gamificationPanel}>
             <View style={styles.levelRow}>
               <View style={styles.levelBadge}>
-                <Text style={styles.levelBadgeText}>Niv. {profile.level ?? 1}</Text>
+                <Text style={styles.levelBadgeText}>
+                  Niv. {profile.level ?? 1}
+                </Text>
               </View>
               <View style={styles.levelInfo}>
                 <Text style={styles.levelName}>{profile.full_name}</Text>
                 <Text style={styles.levelXP}>
-                  {profile.xp ?? 0} XP · {profile.completed_trainings ?? 0} formations
+                  {profile.xp ?? 0} XP · {profile.completed_trainings ?? 0}{' '}
+                  formations
                 </Text>
               </View>
               <TouchableOpacity
