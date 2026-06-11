@@ -186,6 +186,28 @@ export type Training = {
   created_at?: string;
   updated_at?: string;
   ai_generated?: boolean;
+  is_default?: boolean;
+};
+
+export type TrainingChapter = {
+  id: string;
+  training_id: string;
+  title: string;
+  body: string;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type TrainingQuizQuestion = {
+  id: string;
+  training_id: string;
+  question: string;
+  options: string[];
+  correct_index: number;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type UserTrainingProgress = {
@@ -194,6 +216,7 @@ export type UserTrainingProgress = {
   training_id: string;
   status: 'not_started' | 'in_progress' | 'completed';
   progress_percentage: number;
+  completed_chapter_ids?: string[];
   score?: number | null;
   started_at?: string | null;
   completed_at?: string | null;

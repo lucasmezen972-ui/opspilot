@@ -1,17 +1,27 @@
 import { useEffect, useState } from 'react';
 
 import { useAuth } from './useAuth';
+import {
+  calculateReadingProgress,
+  uniqueChapterIds,
+} from '../features/training/progress';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import {
   supabase,
   type Training,
+  type TrainingChapter,
+  type TrainingQuizQuestion,
   type UserTrainingProgress,
 } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTraining() {
   const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
+  const [remoteChapters, setRemoteChapters] = useState<TrainingChapter[]>([]);
+  const [remoteQuizQuestions, setRemoteQuizQuestions] = useState<
+    TrainingQuizQuestion[]
+  >([]);
   const [remoteProgress, setRemoteProgress] = useState<UserTrainingProgress[]>(
     [],
   );
@@ -22,8 +32,12 @@ export function useTraining() {
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
   const demoCourses = useDemoCollection('trainings');
+  const demoChapters = useDemoCollection('trainingChapters');
+  const demoQuizQuestions = useDemoCollection('trainingQuizQuestions');
   const demoProgress = useDemoCollection('trainingProgress');
   const courses = isLocalDemo ? demoCourses : remoteCourses;
+  const chapters = isLocalDemo ? demoChapters : remoteChapters;
+  const quizQuestions = isLocalDemo ? demoQuizQuestions : remoteQuizQuestions;
   const progress = isLocalDemo ? demoProgress : remoteProgress;
 
   useEffect(() => {
@@ -61,6 +75,45 @@ export function useTraining() {
       }
 
       setRemoteCourses(coursesData || []);
+
+      const courseIds = (coursesData || []).map((course) => course.id);
+      if (courseIds.length > 0) {
+        const [chaptersResult, quizResult] = await Promise.all([
+          supabase
+            .from('training_chapters')
+            .select('*')
+            .in('training_id', courseIds)
+            .order('sort_order', { ascending: true }),
+          supabase
+            .from('training_quiz_questions')
+            .select('*')
+            .in('training_id', courseIds)
+            .order('sort_order', { ascending: true }),
+        ]);
+
+        if (chaptersResult.error) {
+          mapSupabaseError(
+            'Erreur lors de la récupération des chapitres',
+            chaptersResult.error,
+          );
+          return;
+        }
+        if (quizResult.error) {
+          mapSupabaseError(
+            'Erreur lors de la récupération du quiz',
+            quizResult.error,
+          );
+          return;
+        }
+
+        setRemoteChapters((chaptersResult.data || []) as TrainingChapter[]);
+        setRemoteQuizQuestions(
+          (quizResult.data || []) as TrainingQuizQuestion[],
+        );
+      } else {
+        setRemoteChapters([]);
+        setRemoteQuizQuestions([]);
+      }
 
       // Récupérer la progression de l'utilisateur
       const { data: progressData, error: progressError } = await supabase
@@ -103,6 +156,7 @@ export function useTraining() {
           training_id: courseId,
           status: 'in_progress',
           progress_percentage: 0,
+          completed_chapter_ids: [],
           score: null,
           started_at: now,
           completed_at: null,
@@ -121,6 +175,7 @@ export function useTraining() {
           training_id: courseId,
           status: 'in_progress',
           progress_percentage: 0,
+          completed_chapter_ids: [],
           started_at: new Date().toISOString(),
         })
         .select()
@@ -139,75 +194,76 @@ export function useTraining() {
     }
   };
 
-  const updateProgress = async (
+  const markChapterRead = async (
     courseId: string,
-    progressPercentage: number,
+    chapterId: string,
+    totalChapters: number,
   ) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
 
+    let courseProgress = progress.find((item) => item.training_id === courseId);
+    if (!courseProgress) {
+      const started = await startCourse(courseId);
+      if (started.error) return started;
+      if (!started.data) {
+        return { error: 'Impossible de démarrer la formation' };
+      }
+      courseProgress = started.data;
+    }
+    if (!courseProgress) {
+      return { error: 'Progression de formation introuvable' };
+    }
+
+    const completedChapterIds = uniqueChapterIds([
+      ...(courseProgress.completed_chapter_ids ?? []),
+      chapterId,
+    ]);
+    const progressPercentage = calculateReadingProgress(
+      completedChapterIds,
+      totalChapters,
+    );
+    const updates = {
+      completed_chapter_ids: completedChapterIds,
+      progress_percentage: progressPercentage,
+      status: (courseProgress.status === 'completed'
+        ? 'completed'
+        : 'in_progress') as UserTrainingProgress['status'],
+      updated_at: new Date().toISOString(),
+    };
+
     if (isLocalDemo) {
-      const updates = {
-        progress_percentage: progressPercentage,
-        status: (progressPercentage >= 100
-          ? 'completed'
-          : 'in_progress') as UserTrainingProgress['status'],
-        completed_at:
-          progressPercentage >= 100 ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      };
       let updated: UserTrainingProgress | null = null;
-      updateDemoCollection('trainingProgress', (prev) =>
-        prev.map((p) => {
-          if (p.training_id !== courseId) return p;
-          updated = { ...p, ...updates };
+      updateDemoCollection('trainingProgress', (current) =>
+        current.map((item) => {
+          if (item.training_id !== courseId) return item;
+          updated = { ...item, ...updates };
           return updated;
         }),
       );
-      if (progressPercentage >= 100) {
-        await updateProfile({
-          completed_trainings: (profile.completed_trainings ?? 0) + 1,
-        });
-      }
       return { data: updated };
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('user_training_progress')
-        .update({
-          progress_percentage: progressPercentage,
-          status: progressPercentage >= 100 ? 'completed' : 'in_progress',
-          completed_at:
-            progressPercentage >= 100 ? new Date().toISOString() : null,
-        })
-        .eq('user_id', profile.id)
-        .eq('training_id', courseId)
-        .select()
-        .single();
+    const { data, error } = await supabase
+      .from('user_training_progress')
+      .update(updates)
+      .eq('user_id', profile.id)
+      .eq('training_id', courseId)
+      .select()
+      .single();
 
-      if (error) {
-        return {
-          error: mapSupabaseError(
-            'Erreur lors de la mise à jour de la progression',
-            error,
-          ),
-        };
-      }
-
-      // Mettre à jour la liste locale
-      setRemoteProgress(
-        progress.map((p) => (p.training_id === courseId ? data : p)),
-      );
-
-      // Si le cours est terminé, mettre à jour les stats du profil
-      if (progressPercentage >= 100) {
-        await updateProfileTrainingStats();
-      }
-
-      return { data };
-    } catch (error) {
-      return { error: mapSupabaseError('Erreur updateProgress', error) };
+    if (error) {
+      return {
+        error: mapSupabaseError(
+          'Erreur lors de la validation du chapitre',
+          error,
+        ),
+      };
     }
+
+    setRemoteProgress((current) =>
+      current.map((item) => (item.training_id === courseId ? data : item)),
+    );
+    return { data };
   };
 
   const completeQuiz = async (courseId: string, score: number) => {
@@ -218,15 +274,27 @@ export function useTraining() {
 
     // Passing score is fixed at 70%
     const passed = score >= 70;
+    const existingProgress = progress.find(
+      (item) => item.training_id === courseId,
+    );
+    const alreadyCompleted = existingProgress?.status === 'completed';
+    const remainsCompleted = passed || alreadyCompleted;
+    const savedScore = alreadyCompleted
+      ? Math.max(existingProgress.score ?? 0, score)
+      : score;
 
     if (isLocalDemo) {
       const updates = {
-        score,
-        status: (passed
+        score: savedScore,
+        status: (remainsCompleted
           ? 'completed'
           : 'in_progress') as UserTrainingProgress['status'],
-        progress_percentage: passed ? 100 : 80,
-        completed_at: passed ? new Date().toISOString() : null,
+        progress_percentage: remainsCompleted
+          ? 100
+          : (existingProgress?.progress_percentage ?? 0),
+        completed_at: remainsCompleted
+          ? (existingProgress?.completed_at ?? new Date().toISOString())
+          : null,
         updated_at: new Date().toISOString(),
       };
       let updated: UserTrainingProgress | null = null;
@@ -237,7 +305,7 @@ export function useTraining() {
           return updated;
         }),
       );
-      if (passed) {
+      if (passed && !alreadyCompleted) {
         const newXP = (profile.xp ?? 0) + course.xp_reward;
         await updateProfile({
           xp: newXP,
@@ -252,10 +320,14 @@ export function useTraining() {
       const { data, error } = await supabase
         .from('user_training_progress')
         .update({
-          score,
-          status: passed ? 'completed' : 'in_progress',
-          progress_percentage: passed ? 100 : 80,
-          completed_at: passed ? new Date().toISOString() : null,
+          score: savedScore,
+          status: remainsCompleted ? 'completed' : 'in_progress',
+          progress_percentage: remainsCompleted
+            ? 100
+            : (existingProgress?.progress_percentage ?? 0),
+          completed_at: remainsCompleted
+            ? (existingProgress?.completed_at ?? new Date().toISOString())
+            : null,
         })
         .eq('user_id', profile.id)
         .eq('training_id', courseId)
@@ -276,39 +348,13 @@ export function useTraining() {
       );
 
       // Si réussi, ajouter les XP
-      if (passed) {
+      if (passed && !alreadyCompleted) {
         await addXP(course.xp_reward);
       }
 
       return { data, passed };
     } catch (error) {
       return { error: mapSupabaseError('Erreur completeQuiz', error) };
-    }
-  };
-
-  const updateProfileTrainingStats = async () => {
-    if (!profile) return;
-
-    try {
-      const completedCount =
-        progress.filter((p) => p.status === 'completed').length + 1;
-
-      await supabase
-        .from('profiles')
-        .update({
-          completed_trainings: completedCount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', profile.id);
-
-      if (profile?.id) {
-        await fetchProfile(profile.id);
-      }
-    } catch (error) {
-      mapSupabaseError(
-        'Erreur lors de la mise à jour des stats de formation',
-        error,
-      );
     }
   };
 
@@ -348,14 +394,28 @@ export function useTraining() {
     return progress.filter((p) => p.status === 'in_progress');
   };
 
+  const getChaptersForCourse = (courseId: string) => {
+    return chapters.filter((chapter) => chapter.training_id === courseId);
+  };
+
+  const getQuizForCourse = (courseId: string) => {
+    return quizQuestions.filter(
+      (question) => question.training_id === courseId,
+    );
+  };
+
   return {
     courses,
+    chapters,
+    quizQuestions,
     progress,
     loading,
     startCourse,
-    updateProgress,
+    markChapterRead,
     completeQuiz,
     getCourseProgress,
+    getChaptersForCourse,
+    getQuizForCourse,
     getCompletedCourses,
     getInProgressCourses,
     refetch: fetchTrainingData,
