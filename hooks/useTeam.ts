@@ -7,9 +7,15 @@ import { mapSupabaseError } from '../utils/error';
 export function useTeam() {
   const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchMembers = useCallback(async () => {
+    if (isLocalDemo) {
+      setMembers([]);
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -34,7 +40,7 @@ export function useTeam() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchMembers();

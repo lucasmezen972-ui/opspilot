@@ -7,11 +7,16 @@ import { mapSupabaseError } from '../utils/error';
 export function useInvitations() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user, profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const canManage = profile?.role === 'admin' || profile?.role === 'manager';
 
   const fetchInvitations = useCallback(async () => {
+    if (isLocalDemo) {
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id || !canManage) {
       setLoading(false);
       return;
@@ -39,7 +44,7 @@ export function useInvitations() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id, canManage]);
+  }, [profile?.organization_id, canManage, isLocalDemo]);
 
   useEffect(() => {
     fetchInvitations();
