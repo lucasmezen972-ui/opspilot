@@ -178,7 +178,7 @@ export function TrainingCourseModal({
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.eyebrow}>
-                {mode === 'quiz' ? 'Quiz final' : course.category}
+                {mode === 'quiz' ? 'Évaluation finale' : course.category}
               </Text>
               <Text style={styles.title}>{course.title}</Text>
             </View>
@@ -240,7 +240,9 @@ export function TrainingCourseModal({
                     style={styles.primaryButton}
                     onPress={() => setMode('quiz')}
                   >
-                    <Text style={styles.primaryButtonText}>Lancer le quiz</Text>
+                    <Text style={styles.primaryButtonText}>
+                      Lancer l'évaluation
+                    </Text>
                     <ChevronRight size={18} color="#FFFFFF" />
                   </TouchableOpacity>
                 ) : (
@@ -364,7 +366,7 @@ export function TrainingCourseModal({
 
           {mode === 'quiz' && sortedQuestions.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>Quiz indisponible</Text>
+              <Text style={styles.emptyTitle}>Évaluation indisponible</Text>
               <Text style={styles.emptyText}>
                 Cette formation ne contient pas encore de question.
               </Text>
@@ -384,12 +386,14 @@ export function TrainingCourseModal({
                 </Text>
               </View>
               <Text style={styles.resultTitle}>
-                {score >= 70 ? 'Formation validée !' : 'Quiz à retravailler'}
+                {score >= 70
+                  ? 'Formation validée !'
+                  : 'Évaluation à retravailler'}
               </Text>
               <Text style={styles.resultText}>
                 {score >= 70
                   ? `Vous gagnez ${course.xp_reward} XP.`
-                  : 'Relisez les chapitres puis retentez le quiz. Un score de 70 % est requis.'}
+                  : "Relisez les chapitres puis retentez l'évaluation. Un score de 70 % est requis."}
               </Text>
               <TouchableOpacity
                 testID="training-result-close"
