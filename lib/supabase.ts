@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-console.log('SUPABASE START');
+import { logger } from '../utils/logger';
 
 // `||` plutôt que `??` : en CI, un secret GitHub absent est injecté comme
 // chaîne vide, qui doit retomber sur le fallback.
@@ -18,18 +18,14 @@ if (
   !process.env.EXPO_PUBLIC_SUPABASE_URL &&
   !process.env.NEXT_PUBLIC_SUPABASE_URL
 )
-  console.info(
-    '[Supabase] URL publique absente, utilisation du fallback OpsPilot.',
-  );
+  logger.info('[Supabase] URL publique absente, fallback OpsPilot utilisé.');
 
 if (
   !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY &&
   !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY &&
   !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
-  console.info(
-    '[Supabase] Clé publique absente, utilisation du fallback OpsPilot.',
-  );
+  logger.info('[Supabase] Clé publique absente, fallback OpsPilot utilisé.');
 
 export const customFetch = async (
   input: RequestInfo | URL,
@@ -54,9 +50,6 @@ export const supabase: SupabaseClient = createClient(
   SUPABASE_ANON_KEY,
   { global: { fetch: customFetch } },
 );
-
-if (typeof __DEV__ !== 'undefined' && __DEV__)
-  console.log('[Supabase] client initialisé');
 
 export type Audit = {
   id: string;
