@@ -54,6 +54,29 @@ export function toAuditListItems(
   });
 }
 
+/** Onglets de filtrage par statut affichés au-dessus de la liste d'audits. */
+export const AUDIT_STATUS_FILTERS: { key: string; label: string }[] = [
+  { key: 'all', label: 'Tous' },
+  { key: 'pending', label: 'À faire' },
+  { key: 'in_progress', label: 'En cours' },
+  { key: 'completed', label: 'Terminés' },
+];
+
+export interface AuditCounts {
+  pending: number;
+  inProgress: number;
+  completed: number;
+}
+
+/** Compteurs d'audits par statut, pour le bandeau de statistiques rapides. */
+export function getAuditCounts(items: AuditListItem[]): AuditCounts {
+  return {
+    pending: items.filter((a) => a.status === 'pending').length,
+    inProgress: items.filter((a) => a.status === 'in_progress').length,
+    completed: items.filter((a) => a.status === 'completed').length,
+  };
+}
+
 export function getAuditStatusColor(status: string): string {
   switch (status) {
     case 'completed':
