@@ -1,13 +1,4 @@
-import {
-  Search,
-  Plus,
-  Camera,
-  X,
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  Download,
-} from 'lucide-react-native';
+import { Search, Plus, Camera, X, Download } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
   View,
@@ -24,6 +15,7 @@ import CameraModal from '../../components/CameraModal';
 import { ProfessionalAuditModal } from '../../features/audits/ProfessionalAuditModal';
 import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
 import { AuditListCard } from '../../features/audits/AuditListCard';
+import { AuditTemplateLibrary } from '../../features/audits/AuditTemplateLibrary';
 import {
   toAuditListItems,
   getAuditStatusColor,
@@ -37,6 +29,7 @@ import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { AuditTemplate } from '../../lib/supabase';
+import { AppLoadingState } from '../../shared/components/AppLoadingState';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
@@ -357,57 +350,20 @@ export default function AuditsScreen() {
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
-        {/* Template library */}
-        <TouchableOpacity
-          style={styles.templateHeader}
-          onPress={() => setShowTemplates(!showTemplates)}
-        >
-          <View style={styles.templateHeaderLeft}>
-            <BookOpen size={16} color="#2563EB" />
-            <Text style={styles.templateHeaderText}>
-              Bibliothèque de modèles
-            </Text>
-          </View>
-          {showTemplates ? (
-            <ChevronDown size={16} color="#6B7280" />
-          ) : (
-            <ChevronRight size={16} color="#6B7280" />
-          )}
-        </TouchableOpacity>
-        {showTemplates && (
-          <View style={styles.templateGrid}>
-            {templates.map((template) => (
-              <TouchableOpacity
-                key={template.id}
-                testID={`audit-template-${template.id}`}
-                style={styles.templateCard}
-                onPress={() => handleCreateAudit(template)}
-              >
-                <BookOpen size={22} color="#2563EB" />
-                <Text style={styles.templateName}>{template.name}</Text>
-                <Text style={styles.templateMeta}>
-                  {template.estimated_duration || 20} min ·{' '}
-                  {getItemsForTemplate(template.id).length} critères
-                </Text>
-              </TouchableOpacity>
-            ))}
-            {templatesLoading && (
-              <Text style={styles.templateLoading}>
-                Chargement des modèles...
-              </Text>
-            )}
-            {!templatesLoading && templates.length === 0 && (
-              <Text style={styles.templateLoading}>
-                Aucun modèle disponible. Créez un audit libre.
-              </Text>
-            )}
-          </View>
-        )}
+        <AuditTemplateLibrary
+          templates={templates}
+          expanded={showTemplates}
+          loading={templatesLoading}
+          onToggle={() => setShowTemplates(!showTemplates)}
+          onSelectTemplate={(template) => handleCreateAudit(template)}
+          getItemCount={(templateId) => getItemsForTemplate(templateId).length}
+        />
 
         {loading && audits.length === 0 && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Chargement des audits...</Text>
-          </View>
+          <AppLoadingState
+            testID="audit-loading"
+            label="Chargement des audits..."
+          />
         )}
         {audits.map((audit) => (
           <AuditListCard
@@ -606,14 +562,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  loadingContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#6B7280',
-    fontSize: 16,
-  },
   auditsList: {
     flex: 1,
     padding: 20,
@@ -699,51 +647,5 @@ const styles = StyleSheet.create({
   modalConfirmText: {
     color: '#FFFFFF',
     fontWeight: '500',
-  },
-  templateHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
-  templateHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  templateHeaderText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  templateGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 16,
-  },
-  templateCard: {
-    width: '48%',
-    borderRadius: 12,
-    padding: 14,
-    alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    gap: 8,
-  },
-  templateName: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#1D4ED8',
-  },
-  templateMeta: {
-    fontSize: 10,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  templateLoading: {
-    paddingVertical: 12,
-    color: '#6B7280',
-    fontSize: 13,
   },
 });
