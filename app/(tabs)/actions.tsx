@@ -1,12 +1,4 @@
-import {
-  Plus,
-  Clock,
-  CircleCheck as CheckCircle,
-  TriangleAlert as AlertTriangle,
-  List,
-  Columns3 as Columns,
-  ChevronRight,
-} from 'lucide-react-native';
+import { Plus, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
   View,
@@ -17,14 +9,20 @@ import {
 } from 'react-native';
 
 import { ActionCard } from '../../features/actions/ActionCard';
-import { STATUS_FLOW, STATUS_LABELS } from '../../features/actions/constants';
+import { ActionsKanban } from '../../features/actions/ActionsKanban';
+import { ActionsStatsRow } from '../../features/actions/ActionsStatsRow';
+import {
+  ActionsViewToggle,
+  type ActionsViewMode,
+} from '../../features/actions/ActionsViewToggle';
 import {
   CreateActionModal,
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
-import { AppEmptyState } from '../../shared/components/AppEmptyState';
+import { STATUS_FLOW } from '../../features/actions/constants';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
 
 export default function ActionsScreen() {
   const {
@@ -36,21 +34,15 @@ export default function ActionsScreen() {
     getActionsByStatus,
   } = useCorrectiveActions();
 
-  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+  const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
 
   const overdueCount = useMemo(
     () => actions.filter(isOverdue).length,
     [actions, isOverdue],
   );
-  const openCount = useMemo(
-    () => getActionsByStatus('open').length,
-    [getActionsByStatus],
-  );
-  const inProgressCount = useMemo(
-    () => getActionsByStatus('in_progress').length,
-    [getActionsByStatus],
-  );
+  const openCount = getActionsByStatus('open').length;
+  const inProgressCount = getActionsByStatus('in_progress').length;
 
   const handleCreate = async (payload: NewActionPayload) => {
     await createAction(payload);
@@ -64,16 +56,6 @@ export default function ActionsScreen() {
       updateActionStatus(action.id, next);
     }
   };
-
-  const renderCard = (action: CorrectiveAction, compact = false) => (
-    <ActionCard
-      key={action.id}
-      action={action}
-      overdue={isOverdue(action)}
-      compact={compact}
-      onAdvance={advanceStatus}
-    />
-  );
 
   return (
     <View style={styles.container}>
@@ -95,74 +77,13 @@ export default function ActionsScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.statsRow} testID="actions-counters">
-        <View style={styles.statCard}>
-          <Clock size={18} color="#F59E0B" />
-          <Text style={styles.statValue} testID="actions-count-open">
-            {openCount}
-          </Text>
-          <Text style={styles.statLabel}>À traiter</Text>
-        </View>
-        <View style={styles.statCard}>
-          <ChevronRight size={18} color="#2563EB" />
-          <Text style={styles.statValue} testID="actions-count-inprogress">
-            {inProgressCount}
-          </Text>
-          <Text style={styles.statLabel}>En cours</Text>
-        </View>
-        <View style={[styles.statCard, overdueCount > 0 && styles.statAlert]}>
-          <AlertTriangle size={18} color="#DC2626" />
-          <Text
-            style={[styles.statValue, { color: '#DC2626' }]}
-            testID="actions-count-overdue"
-          >
-            {overdueCount}
-          </Text>
-          <Text style={styles.statLabel}>En retard</Text>
-        </View>
-      </View>
+      <ActionsStatsRow
+        open={openCount}
+        inProgress={inProgressCount}
+        overdue={overdueCount}
+      />
 
-      <View style={styles.viewToggle}>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            viewMode === 'list' && styles.toggleButtonActive,
-          ]}
-          onPress={() => setViewMode('list')}
-          testID="actions-view-list"
-        >
-          <List size={16} color={viewMode === 'list' ? '#2563EB' : '#6B7280'} />
-          <Text
-            style={[
-              styles.toggleText,
-              viewMode === 'list' && styles.toggleTextActive,
-            ]}
-          >
-            Liste
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            viewMode === 'kanban' && styles.toggleButtonActive,
-          ]}
-          onPress={() => setViewMode('kanban')}
-          testID="actions-view-kanban"
-        >
-          <Columns
-            size={16}
-            color={viewMode === 'kanban' ? '#2563EB' : '#6B7280'}
-          />
-          <Text
-            style={[
-              styles.toggleText,
-              viewMode === 'kanban' && styles.toggleTextActive,
-            ]}
-          >
-            Kanban
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <ActionsViewToggle viewMode={viewMode} onChange={setViewMode} />
 
       {viewMode === 'list' ? (
         <ScrollView
@@ -176,30 +97,21 @@ export default function ActionsScreen() {
               description="Les non-conformités relevées en audit génèrent automatiquement un plan d'action correctif."
             />
           )}
-          {actions.map((a) => renderCard(a))}
-        </ScrollView>
-      ) : (
-        <ScrollView
-          horizontal
-          style={styles.kanban}
-          contentContainerStyle={styles.kanbanContent}
-        >
-          {STATUS_FLOW.map((status) => (
-            <View key={status} style={styles.kanbanColumn}>
-              <View style={styles.kanbanHeader}>
-                <Text style={styles.kanbanTitle}>{STATUS_LABELS[status]}</Text>
-                <View style={styles.kanbanCount}>
-                  <Text style={styles.kanbanCountText}>
-                    {getActionsByStatus(status).length}
-                  </Text>
-                </View>
-              </View>
-              <ScrollView>
-                {getActionsByStatus(status).map((a) => renderCard(a, true))}
-              </ScrollView>
-            </View>
+          {actions.map((action) => (
+            <ActionCard
+              key={action.id}
+              action={action}
+              overdue={isOverdue(action)}
+              onAdvance={advanceStatus}
+            />
           ))}
         </ScrollView>
+      ) : (
+        <ActionsKanban
+          getActionsByStatus={getActionsByStatus}
+          isOverdue={isOverdue}
+          onAdvance={advanceStatus}
+        />
       )}
 
       <CreateActionModal
@@ -245,105 +157,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  statAlert: {
-    borderColor: '#FECACA',
-    backgroundColor: '#FEF2F2',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  viewToggle: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    marginBottom: 10,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 10,
-    padding: 3,
-  },
-  toggleButton: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  toggleButtonActive: {
-    backgroundColor: '#FFFFFF',
-  },
-  toggleText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  toggleTextActive: {
-    color: '#2563EB',
-  },
   list: {
     flex: 1,
   },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 24,
-  },
-  kanban: {
-    flex: 1,
-  },
-  kanbanContent: {
-    paddingHorizontal: 14,
-    paddingBottom: 24,
-  },
-  kanbanColumn: {
-    width: 270,
-    marginHorizontal: 6,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    padding: 10,
-  },
-  kanbanHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  kanbanTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#374151',
-  },
-  kanbanCount: {
-    backgroundColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  kanbanCountText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#374151',
   },
 });
