@@ -523,7 +523,7 @@ export default function AuditsScreen() {
                   onPress={() => handleOpenCamera(audit.id)}
                 >
                   <Camera size={16} color="#2563EB" />
-                  <Text style={styles.actionButtonText}>Photos</Text>
+                  <Text style={styles.actionButtonText}>Preuve photo</Text>
                 </TouchableOpacity>
                 {audit.status === 'completed' && (
                   <TouchableOpacity

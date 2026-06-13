@@ -115,7 +115,7 @@ test.describe('Gestion des audits', () => {
     await page.getByTestId('camera-e2e-photo-button').click();
     await expect(
       page.getByTestId('audit-item-demo-haccp-item-1-photo'),
-    ).toContainText('Photo jointe');
+    ).toContainText('Preuve jointe');
 
     await page.getByTestId('audit-professional-submit').click();
     await expect(page.getByTestId('audit-finish-demo-audit-7')).toHaveCount(0, {
