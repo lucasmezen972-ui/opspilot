@@ -1,19 +1,31 @@
 import {
-  ChartBar as BarChart3,
   ClipboardCheck,
   TriangleAlert as AlertTriangle,
   TrendingUp,
-  Target,
-  Store,
 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
-import { useAudits } from '../../hooks/useAudits';
 import RequireRole from '../../components/RequireRole';
+import { ManagerActivityList } from '../../features/manager/ManagerActivityList';
+import { ManagerStatCards } from '../../features/manager/ManagerStatCards';
+import { StatusBreakdown } from '../../features/manager/StatusBreakdown';
+import { StorePerformanceList } from '../../features/manager/StorePerformanceList';
+import {
+  computeManagerStats,
+  computeStoreStats,
+  getUrgentTasks,
+} from '../../features/manager/managerModel';
+import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
+
+function auditStatusColor(status: string): string {
+  if (status === 'completed') return '#10B981';
+  if (status === 'in_progress') return '#F59E0B';
+  return '#6B7280';
+}
 
 export default function ManagerDashboard() {
   return (
@@ -29,74 +41,16 @@ function ManagerDashboardContent() {
   const { tasks } = useTasks();
   const { stores } = useStores();
 
-  const stats = useMemo(() => {
-    const pendingAudits = audits.filter((a) => a.status === 'pending').length;
-    const inProgressAudits = audits.filter(
-      (a) => a.status === 'in_progress',
-    ).length;
-    const completedAudits = audits.filter(
-      (a) => a.status === 'completed',
-    ).length;
-    const scoredAudits = audits.filter((a) => a.score != null);
-    const avgScore =
-      scoredAudits.length > 0
-        ? Math.round(
-            scoredAudits.reduce((sum, a) => sum + (a.score || 0), 0) /
-              scoredAudits.length,
-          )
-        : 0;
-
-    const pendingTasks = tasks.filter((t) => t.status === 'pending').length;
-    const inProgressTasks = tasks.filter(
-      (t) => t.status === 'in_progress',
-    ).length;
-    const completedTasks = tasks.filter((t) => t.status === 'completed').length;
-    const highPriorityTasks = tasks.filter(
-      (t) => t.priority === 'high' && t.status !== 'completed',
-    ).length;
-
-    return {
-      pendingAudits,
-      inProgressAudits,
-      completedAudits,
-      avgScore,
-      pendingTasks,
-      inProgressTasks,
-      completedTasks,
-      highPriorityTasks,
-      totalAudits: audits.length,
-      totalTasks: tasks.length,
-    };
-  }, [audits, tasks]);
-
-  const storeStats = useMemo(() => {
-    return stores.map((store) => {
-      const storeAudits = audits.filter((a) => a.store_id === store.id);
-      const completed = storeAudits.filter((a) => a.status === 'completed');
-      const scored = completed.filter((a) => a.score != null);
-      const avg =
-        scored.length > 0
-          ? Math.round(
-              scored.reduce((s, a) => s + (a.score ?? 0), 0) / scored.length,
-            )
-          : null;
-      return {
-        store,
-        total: storeAudits.length,
-        completed: completed.length,
-        avg,
-      };
-    });
-  }, [stores, audits]);
-
-  const recentAudits = useMemo(() => audits.slice(0, 5), [audits]);
-  const urgentTasks = useMemo(
-    () =>
-      tasks
-        .filter((t) => t.priority === 'high' && t.status !== 'completed')
-        .slice(0, 5),
-    [tasks],
+  const stats = useMemo(
+    () => computeManagerStats(audits, tasks),
+    [audits, tasks],
   );
+  const storeStats = useMemo(
+    () => computeStoreStats(stores, audits),
+    [stores, audits],
+  );
+  const recentAudits = useMemo(() => audits.slice(0, 5), [audits]);
+  const urgentTasks = useMemo(() => getUrgentTasks(tasks), [tasks]);
 
   return (
     <ScrollView style={styles.container}>
@@ -107,181 +61,68 @@ function ManagerDashboardContent() {
         </Text>
       </View>
 
-      {/* Vue d'ensemble */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Vue d'ensemble</Text>
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#EFF6FF' }]}>
-              <ClipboardCheck size={20} color="#2563EB" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalAudits}</Text>
-            <Text style={styles.statLabel}>Audits total</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#F0FDF4' }]}>
-              <Target size={20} color="#10B981" />
-            </View>
-            <Text style={styles.statValue}>{stats.avgScore}%</Text>
-            <Text style={styles.statLabel}>Score moyen</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#FEF3C7' }]}>
-              <BarChart3 size={20} color="#F59E0B" />
-            </View>
-            <Text style={styles.statValue}>{stats.totalTasks}</Text>
-            <Text style={styles.statLabel}>Tâches total</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#FEE2E2' }]}>
-              <AlertTriangle size={20} color="#EF4444" />
-            </View>
-            <Text style={styles.statValue}>{stats.highPriorityTasks}</Text>
-            <Text style={styles.statLabel}>Urgentes</Text>
-          </View>
-        </View>
-      </View>
+      <ManagerStatCards stats={stats} />
 
-      {/* Statut des audits */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Statut des audits</Text>
-        <View style={styles.statusRow}>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#6B7280' }]} />
-            <Text style={styles.statusLabel}>En attente</Text>
-            <Text style={styles.statusCount}>{stats.pendingAudits}</Text>
-          </View>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
-            <Text style={styles.statusLabel}>En cours</Text>
-            <Text style={styles.statusCount}>{stats.inProgressAudits}</Text>
-          </View>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-            <Text style={styles.statusLabel}>Terminés</Text>
-            <Text style={styles.statusCount}>{stats.completedAudits}</Text>
-          </View>
-        </View>
-      </View>
+      <StatusBreakdown
+        title="Statut des audits"
+        entries={[
+          { label: 'En attente', count: stats.pendingAudits, color: '#6B7280' },
+          {
+            label: 'En cours',
+            count: stats.inProgressAudits,
+            color: '#F59E0B',
+          },
+          { label: 'Terminés', count: stats.completedAudits, color: '#10B981' },
+        ]}
+      />
 
-      {/* Statut des tâches */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Statut des tâches</Text>
-        <View style={styles.statusRow}>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#6B7280' }]} />
-            <Text style={styles.statusLabel}>À faire</Text>
-            <Text style={styles.statusCount}>{stats.pendingTasks}</Text>
-          </View>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#F59E0B' }]} />
-            <Text style={styles.statusLabel}>En cours</Text>
-            <Text style={styles.statusCount}>{stats.inProgressTasks}</Text>
-          </View>
-          <View style={styles.statusItem}>
-            <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-            <Text style={styles.statusLabel}>Terminées</Text>
-            <Text style={styles.statusCount}>{stats.completedTasks}</Text>
-          </View>
-        </View>
-      </View>
+      <StatusBreakdown
+        title="Statut des tâches"
+        entries={[
+          { label: 'À faire', count: stats.pendingTasks, color: '#6B7280' },
+          { label: 'En cours', count: stats.inProgressTasks, color: '#F59E0B' },
+          {
+            label: 'Terminées',
+            count: stats.completedTasks,
+            color: '#10B981',
+          },
+        ]}
+      />
 
-      {/* Multi-sites */}
-      {storeStats.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Par magasin</Text>
-          {storeStats.map(({ store, total, completed, avg }) => (
-            <View key={store.id} style={styles.storeRow}>
-              <View style={styles.storeIconWrapper}>
-                <Store size={16} color="#2563EB" />
-              </View>
-              <View style={styles.storeInfo}>
-                <Text style={styles.storeName}>{store.name}</Text>
-                <Text style={styles.storeSubtitle}>
-                  {completed}/{total} audits terminés
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.scoreChip,
-                  avg === null
-                    ? styles.scoreChipGray
-                    : avg >= 80
-                      ? styles.scoreChipGreen
-                      : avg >= 60
-                        ? styles.scoreChipOrange
-                        : styles.scoreChipRed,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.scoreChipText,
-                    avg === null
-                      ? { color: '#9CA3AF' }
-                      : avg >= 80
-                        ? { color: '#16A34A' }
-                        : avg >= 60
-                          ? { color: '#D97706' }
-                          : { color: '#DC2626' },
-                  ]}
-                >
-                  {avg !== null ? `${avg}%` : '—'}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
+      {storeStats.length > 0 && <StorePerformanceList stores={storeStats} />}
 
-      {/* Tâches urgentes */}
       {urgentTasks.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tâches urgentes</Text>
-          {urgentTasks.map((task) => (
-            <View key={task.id} style={styles.listItem}>
-              <View style={styles.listItemLeft}>
-                <AlertTriangle size={16} color="#EF4444" />
-                <View style={styles.listItemInfo}>
-                  <Text style={styles.listItemTitle}>{task.title}</Text>
-                  <Text style={styles.listItemSubtitle}>
-                    {task.location || 'Aucune localisation'} -{' '}
-                    {task.status === 'in_progress' ? 'En cours' : 'À faire'}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          ))}
-        </View>
+        <ManagerActivityList
+          title="Tâches urgentes"
+          items={urgentTasks.map((task) => ({
+            id: task.id,
+            icon: <AlertTriangle size={16} color="#EF4444" />,
+            title: task.title,
+            subtitle: `${task.location || 'Aucune localisation'} - ${
+              task.status === 'in_progress' ? 'En cours' : 'À faire'
+            }`,
+          }))}
+        />
       )}
 
-      {/* Audits récents */}
       {recentAudits.length > 0 && (
-        <View style={[styles.section, { marginBottom: 40 }]}>
-          <Text style={styles.sectionTitle}>Audits récents</Text>
-          {recentAudits.map((audit) => (
-            <View key={audit.id} style={styles.listItem}>
-              <View style={styles.listItemLeft}>
-                <ClipboardCheck
-                  size={16}
-                  color={
-                    audit.status === 'completed'
-                      ? '#10B981'
-                      : audit.status === 'in_progress'
-                        ? '#F59E0B'
-                        : '#6B7280'
-                  }
-                />
-                <View style={styles.listItemInfo}>
-                  <Text style={styles.listItemTitle}>{audit.title}</Text>
-                  <Text style={styles.listItemSubtitle}>
-                    {audit.location || ''}{' '}
-                    {audit.score != null ? `- Score: ${audit.score}%` : ''}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          ))}
-        </View>
+        <ManagerActivityList
+          title="Audits récents"
+          last
+          items={recentAudits.map((audit) => ({
+            id: audit.id,
+            icon: (
+              <ClipboardCheck
+                size={16}
+                color={auditStatusColor(audit.status)}
+              />
+            ),
+            title: audit.title,
+            subtitle: `${audit.location || ''} ${
+              audit.score != null ? `- Score: ${audit.score}%` : ''
+            }`,
+          }))}
+        />
       )}
 
       {audits.length === 0 && tasks.length === 0 && (
@@ -319,116 +160,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
   },
-  section: {
-    marginHorizontal: 20,
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  statCard: {
-    width: '47%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  statusRow: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statusItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginBottom: 6,
-  },
-  statusLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 4,
-  },
-  statusCount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  listItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  listItemInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  listItemTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  listItemSubtitle: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
   emptyState: {
     alignItems: 'center',
     padding: 40,
@@ -445,39 +176,4 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
   },
-  storeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  storeIconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EFF6FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  storeInfo: { flex: 1 },
-  storeName: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  storeSubtitle: { fontSize: 12, color: '#6B7280', marginTop: 2 },
-  scoreChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  scoreChipGray: { backgroundColor: '#F3F4F6' },
-  scoreChipGreen: { backgroundColor: '#DCFCE7' },
-  scoreChipOrange: { backgroundColor: '#FEF3C7' },
-  scoreChipRed: { backgroundColor: '#FEE2E2' },
-  scoreChipText: { fontSize: 14, fontWeight: '700' },
 });
