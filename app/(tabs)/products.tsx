@@ -1,14 +1,5 @@
-import {
-  Plus,
-  Scan,
-  Search,
-  TriangleAlert as AlertTriangle,
-  Package,
-  TrendingDown,
-  TrendingUp,
-  X,
-} from 'lucide-react-native';
-import { useState } from 'react';
+import { Plus, Scan, Search, Package, X } from 'lucide-react-native';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,11 +16,16 @@ import {
 } from '../../features/products/AddProductModal';
 import { BarcodeScannerModal } from '../../features/products/BarcodeScannerModal';
 import { ProductCard } from '../../features/products/ProductCard';
+import { ProductQuickStats } from '../../features/products/ProductQuickStats';
 import { StockModal } from '../../features/products/StockModal';
-import { AppEmptyState } from '../../shared/components/AppEmptyState';
-import { AppLoadingState } from '../../shared/components/AppLoadingState';
+import {
+  filterProducts,
+  getStockCounts,
+} from '../../features/products/productModel';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
+import { AppLoadingState } from '../../shared/components/AppLoadingState';
 
 export default function ProductsScreen() {
   const {
@@ -72,24 +68,11 @@ export default function ProductsScreen() {
     }
   };
 
-  const products = allProducts.filter((p) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(q) ||
-      (p.barcode ?? '').includes(q) ||
-      (p.category ?? '').toLowerCase().includes(q)
-    );
-  });
-
-  // Statistiques calculées en temps réel
-  const okProducts = products.filter((p) => p.stock_quantity > 10).length;
-  const lowStockProducts = products.filter(
-    (p) => p.stock_quantity > 0 && p.stock_quantity <= 10,
-  ).length;
-  const outOfStockProducts = products.filter(
-    (p) => p.stock_quantity === 0,
-  ).length;
+  const products = useMemo(
+    () => filterProducts(allProducts, searchQuery),
+    [allProducts, searchQuery],
+  );
+  const stockCounts = useMemo(() => getStockCounts(products), [products]);
 
   const handleBarcodeDetected = async (barcode: string) => {
     setIsScanning(true);
@@ -144,30 +127,7 @@ export default function ProductsScreen() {
         </View>
       )}
 
-      {/* Quick Stats */}
-      <View style={styles.quickStats}>
-        <View style={styles.quickStatItem}>
-          <TrendingUp size={20} color="#10B981" />
-          <Text style={styles.quickStatNumber} testID="products-count-ok">
-            {okProducts}
-          </Text>
-          <Text style={styles.quickStatLabel}>En stock</Text>
-        </View>
-        <View style={styles.quickStatItem}>
-          <AlertTriangle size={20} color="#F59E0B" />
-          <Text style={styles.quickStatNumber} testID="products-count-low">
-            {lowStockProducts}
-          </Text>
-          <Text style={styles.quickStatLabel}>Stock faible</Text>
-        </View>
-        <View style={styles.quickStatItem}>
-          <TrendingDown size={20} color="#EF4444" />
-          <Text style={styles.quickStatNumber} testID="products-count-out">
-            {outOfStockProducts}
-          </Text>
-          <Text style={styles.quickStatLabel}>Ruptures</Text>
-        </View>
-      </View>
+      <ProductQuickStats counts={stockCounts} />
 
       {/* Scanner Button */}
       <TouchableOpacity
@@ -289,33 +249,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 6,
     color: '#111827',
-  },
-  quickStats: {
-    flexDirection: 'row',
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    gap: 16,
-  },
-  quickStatItem: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 8,
-  },
-  quickStatNumber: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginTop: 4,
-  },
-  quickStatLabel: {
-    fontSize: 11,
-    color: '#6B7280',
-    marginTop: 2,
-    textAlign: 'center',
   },
   scannerButton: {
     flexDirection: 'row',
