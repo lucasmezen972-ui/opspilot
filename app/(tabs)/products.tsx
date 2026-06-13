@@ -27,6 +27,7 @@ import { BarcodeScannerModal } from '../../features/products/BarcodeScannerModal
 import { ProductCard } from '../../features/products/ProductCard';
 import { StockModal } from '../../features/products/StockModal';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
+import { AppLoadingState } from '../../shared/components/AppLoadingState';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
 
@@ -187,9 +188,7 @@ export default function ProductsScreen() {
       {/* Products List */}
       <ScrollView style={styles.productsList}>
         {loading && products.length === 0 && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Chargement des produits...</Text>
-          </View>
+          <AppLoadingState label="Chargement des produits…" />
         )}
 
         {products.map((product) => (
@@ -345,14 +344,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 0,
-  },
-  loadingContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#6B7280',
-    fontSize: 16,
   },
   fab: {
     position: 'absolute',
