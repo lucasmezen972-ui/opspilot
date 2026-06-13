@@ -24,6 +24,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { AppKpiCard } from '../../shared/components/AppKpiCard';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
@@ -147,27 +148,18 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>KPIs du jour</Text>
         <View style={styles.kpiGrid}>
-          {kpis.map((kpi) => {
-            const Icon = kpi.icon;
-            return (
-              <View
-                key={kpi.label}
-                testID={`kpi-${kpi.id}`}
-                style={[styles.kpiCard, { borderLeftColor: kpi.color }]}
-              >
-                <View style={[styles.kpiIconWrap, { backgroundColor: kpi.bg }]}>
-                  <Icon size={20} color={kpi.color} />
-                </View>
-                <Text
-                  testID={`kpi-${kpi.id}-value`}
-                  style={[styles.kpiValue, { color: kpi.color }]}
-                >
-                  {kpi.value}
-                </Text>
-                <Text style={styles.kpiLabel}>{kpi.label}</Text>
-              </View>
-            );
-          })}
+          {kpis.map((kpi) => (
+            <AppKpiCard
+              key={kpi.label}
+              testID={`kpi-${kpi.id}`}
+              valueTestID={`kpi-${kpi.id}-value`}
+              value={kpi.value}
+              label={kpi.label}
+              accent={kpi.color}
+              accentSoft={kpi.bg}
+              icon={kpi.icon}
+            />
+          ))}
         </View>
       </View>
 
@@ -550,36 +542,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-  },
-  kpiCard: {
-    width: '47%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    borderLeftWidth: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  kpiIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  kpiValue: {
-    fontSize: 26,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  kpiLabel: {
-    fontSize: 11,
-    color: '#6B7280',
-    lineHeight: 15,
   },
   dlcCard: {
     backgroundColor: '#FFFFFF',
