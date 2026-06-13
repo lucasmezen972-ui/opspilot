@@ -7,20 +7,20 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Modal,
   TextInput,
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
+import { AuditFilters } from '../../features/audits/AuditFilters';
+import { AuditListCard } from '../../features/audits/AuditListCard';
+import { AuditQuickStats } from '../../features/audits/AuditQuickStats';
+import { AuditTemplateLibrary } from '../../features/audits/AuditTemplateLibrary';
+import { CreateAuditModal } from '../../features/audits/CreateAuditModal';
 import { ProfessionalAuditModal } from '../../features/audits/ProfessionalAuditModal';
 import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
-import { AuditListCard } from '../../features/audits/AuditListCard';
-import { AuditTemplateLibrary } from '../../features/audits/AuditTemplateLibrary';
 import {
   toAuditListItems,
-  getAuditStatusColor,
-  getAuditStatusIcon,
-  getAuditStatusText,
+  getAuditCounts,
 } from '../../features/audits/auditListModel';
 import { AUDIT_QUESTIONS } from '../../features/audits/constants';
 import type { AuditResponseDraft } from '../../features/audits/scoring';
@@ -87,12 +87,7 @@ export default function AuditsScreen() {
     [dbAudits, searchQuery, statusFilter],
   );
 
-  // Stats dynamiques
-  const pendingCount = audits.filter((a) => a.status === 'pending').length;
-  const inProgressCount = audits.filter(
-    (a) => a.status === 'in_progress',
-  ).length;
-  const completedCount = audits.filter((a) => a.status === 'completed').length;
+  const counts = useMemo(() => getAuditCounts(audits), [audits]);
 
   const handleCreateAudit = (template?: AuditTemplate) => {
     setSelectedTemplateId(template?.id ?? null);
@@ -289,54 +284,9 @@ export default function AuditsScreen() {
         </View>
       )}
 
-      {/* Status Filters */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filtersRow}
-        contentContainerStyle={styles.filtersContent}
-      >
-        {[
-          { key: 'all', label: 'Tous' },
-          { key: 'pending', label: 'À faire' },
-          { key: 'in_progress', label: 'En cours' },
-          { key: 'completed', label: 'Terminés' },
-        ].map((f) => (
-          <TouchableOpacity
-            key={f.key}
-            style={[
-              styles.filterChip,
-              statusFilter === f.key && styles.filterChipActive,
-            ]}
-            onPress={() => setStatusFilter(f.key)}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                statusFilter === f.key && styles.filterChipTextActive,
-              ]}
-            >
-              {f.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <AuditFilters statusFilter={statusFilter} onChange={setStatusFilter} />
 
-      {/* Quick Stats */}
-      <View style={styles.quickStats}>
-        <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{pendingCount}</Text>
-          <Text style={styles.quickStatLabel}>À faire</Text>
-        </View>
-        <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{inProgressCount}</Text>
-          <Text style={styles.quickStatLabel}>En cours</Text>
-        </View>
-        <View style={styles.quickStatItem}>
-          <Text style={styles.quickStatNumber}>{completedCount}</Text>
-          <Text style={styles.quickStatLabel}>Terminés</Text>
-        </View>
-      </View>
+      <AuditQuickStats counts={counts} />
 
       {/* Create New Audit Button */}
       <TouchableOpacity
@@ -387,47 +337,14 @@ export default function AuditsScreen() {
         onPhotoTaken={handlePhotoTaken}
       />
 
-      {/* Create Audit Modal */}
-      <Modal visible={createModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nouvel audit</Text>
-              <TouchableOpacity onPress={() => setCreateModalVisible(false)}>
-                <X size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              testID="audit-create-title-input"
-              style={styles.modalInput}
-              value={newAuditTitle}
-              onChangeText={setNewAuditTitle}
-              placeholder="Titre de l'audit"
-              autoFocus
-            />
-            <Text style={styles.selectedTemplateText}>
-              {selectedTemplate
-                ? `Modèle : ${selectedTemplate.name}`
-                : 'Audit libre : questionnaire standard à la clôture'}
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setCreateModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                testID="audit-create-submit"
-                style={styles.modalConfirmButton}
-                onPress={handleConfirmCreateAudit}
-              >
-                <Text style={styles.modalConfirmText}>Créer</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <CreateAuditModal
+        visible={createModalVisible}
+        title={newAuditTitle}
+        selectedTemplateName={selectedTemplate?.name ?? null}
+        onChangeTitle={setNewAuditTitle}
+        onClose={() => setCreateModalVisible(false)}
+        onConfirm={handleConfirmCreateAudit}
+      />
 
       <QuestionnaireModal
         visible={questionnaireAuditId !== null}
@@ -493,55 +410,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     color: '#111827',
   },
-  filtersRow: {
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    maxHeight: 52,
-  },
-  filtersContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-  },
-  filterChipActive: {
-    backgroundColor: '#2563EB',
-  },
-  filterChipText: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  filterChipTextActive: {
-    color: '#FFFFFF',
-  },
-  quickStats: {
-    flexDirection: 'row',
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  quickStatItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  quickStatNumber: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  quickStatLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginTop: 4,
-  },
   createButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -582,70 +450,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  selectedTemplateText: {
-    marginTop: -6,
-    marginBottom: 16,
-    color: '#6B7280',
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  modalCancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  modalCancelText: {
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  modalConfirmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  modalConfirmText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
   },
 });

@@ -4,6 +4,7 @@ import {
   toAuditListItems,
   getAuditStatusText,
   getAuditStatusColor,
+  getAuditCounts,
 } from '../../features/audits/auditListModel';
 import type { Audit } from '../../lib/supabase';
 
@@ -47,5 +48,23 @@ describe('auditListModel', () => {
   it('expose libellé et couleur de statut', () => {
     expect(getAuditStatusText('completed')).toBe('Terminé');
     expect(getAuditStatusColor('in_progress')).toMatch(/^#/);
+  });
+
+  it('compte les audits par statut', () => {
+    const items = toAuditListItems(
+      [
+        audit({ id: 'a1', status: 'pending' }),
+        audit({ id: 'a2', status: 'in_progress' }),
+        audit({ id: 'a3', status: 'completed' }),
+        audit({ id: 'a4', status: 'completed' }),
+      ],
+      '',
+      'all',
+    );
+    expect(getAuditCounts(items)).toEqual({
+      pending: 1,
+      inProgress: 1,
+      completed: 2,
+    });
   });
 });
