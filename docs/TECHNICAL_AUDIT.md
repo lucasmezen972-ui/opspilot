@@ -15,45 +15,48 @@ transactionnels. CI verte (typecheck, lint, prettier, 57 tests unitaires,
 
 ## 2. Métriques relevées
 
-| Signal | Valeur | Cible Lot 0 |
-|---|---|---|
-| `console.log/info` en prod | 8 | 0 (via `utils/logger`, dev uniquement) |
-| `any` explicites | 41 | < 15, typés sur les surfaces métier |
-| `catch {}` vides | 1 (enregistrement SW, acceptable) | inchangé |
-| `TODO/FIXME` | 0 | 0 |
-| Écrans `(tabs)` > 450 lignes | 10 | orchestrateurs < 250 lignes |
-| Styles de modale dupliqués | 7 fichiers | 1 source partagée |
-| Assertions E2E faibles | 0 | 0 (déjà durci) |
+| Signal                       | Valeur                            | Cible Lot 0                            |
+| ---------------------------- | --------------------------------- | -------------------------------------- |
+| `console.log/info` en prod   | 8                                 | 0 (via `utils/logger`, dev uniquement) |
+| `any` explicites             | 41                                | < 15, typés sur les surfaces métier    |
+| `catch {}` vides             | 1 (enregistrement SW, acceptable) | inchangé                               |
+| `TODO/FIXME`                 | 0                                 | 0                                      |
+| Écrans `(tabs)` > 450 lignes | 10                                | orchestrateurs < 250 lignes            |
+| Styles de modale dupliqués   | 7 fichiers                        | 1 source partagée                      |
+| Assertions E2E faibles       | 0                                 | 0 (déjà durci)                         |
 
 ## 3. Principaux risques / dette technique
 
 ### 3.1 Logique métier mêlée à l'UI (priorité haute)
+
 Dix écrans dépassent 450 lignes en mélangeant état, appels de données,
 rendu et styles :
 
-| Écran | Lignes |
-|---|---|
-| `app/(tabs)/audits.tsx` | 1009 |
-| `app/(tabs)/index.tsx` | 817 |
-| `app/(tabs)/training.tsx` | 817 |
-| `app/(tabs)/tasks.tsx` | 807 |
-| `app/(tabs)/chat.tsx` | 734 |
-| `app/settings.tsx` | 599 |
-| `app/(tabs)/team.tsx` | 563 |
-| `app/(tabs)/profile.tsx` | 536 |
-| `app/(tabs)/billing.tsx` | 515 |
-| `app/(tabs)/manager.tsx` | 483 |
+| Écran                     | Lignes |
+| ------------------------- | ------ |
+| `app/(tabs)/audits.tsx`   | 1009   |
+| `app/(tabs)/index.tsx`    | 817    |
+| `app/(tabs)/training.tsx` | 817    |
+| `app/(tabs)/tasks.tsx`    | 807    |
+| `app/(tabs)/chat.tsx`     | 734    |
+| `app/settings.tsx`        | 599    |
+| `app/(tabs)/team.tsx`     | 563    |
+| `app/(tabs)/profile.tsx`  | 536    |
+| `app/(tabs)/billing.tsx`  | 515    |
+| `app/(tabs)/manager.tsx`  | 483    |
 
 → Extraire composants (`features/<domaine>/components`), hooks de données
 (`features/<domaine>/hooks`) et constantes ; l'écran devient orchestrateur.
 
 ### 3.2 Bruit de logs (priorité moyenne, rapide)
+
 8 `console.log`/`console.info` de débogage subsistent
 (`app/_layout.tsx` « APP START »/« ROUTER START », `lib/supabase.ts`
 « SUPABASE START »/« client initialisé », `audits.tsx` « Photo prise »).
 → Remplacer par `utils/logger` (silencieux en prod) ou supprimer.
 
 ### 3.3 Incohérence visuelle (priorité haute — objectif premium)
+
 Pas de design system : couleurs, espacements, rayons et ombres sont
 recopiés en dur dans chaque écran. Les styles de modale sont dupliqués
 dans 7 fichiers. Les états vides / erreur / chargement sont traités au cas
@@ -62,12 +65,14 @@ par cas.
 Input, Modal, EmptyState, ErrorState, LoadingState, KpiCard, StatusBadge…).
 
 ### 3.4 Typage à resserrer (priorité moyenne)
+
 41 `any` explicites, surtout sur les payloads de mutation des hooks et les
 réponses Supabase.
 → Introduire des types par domaine (`features/<domaine>/types`) et typer
 les fonctions de service.
 
 ### 3.5 Wording faible (priorité moyenne — premium)
+
 Termes génériques (« Action », « Photo », « Message », « Quiz »…) là où un
 vocabulaire métier renforcerait la crédibilité (« Plan d'action correctif »,
 « Preuve photo », « Communication interne », « Évaluation »…).
