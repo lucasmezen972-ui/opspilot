@@ -271,7 +271,7 @@ export function ProfessionalAuditModal({
                             ]}
                           >
                             {response.photo_url
-                              ? 'Photo jointe'
+                              ? 'Preuve jointe'
                               : !response.is_compliant
                                 ? 'Joindre la preuve obligatoire'
                                 : 'Prendre une photo'}
