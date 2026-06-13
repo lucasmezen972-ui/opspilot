@@ -19,7 +19,21 @@ export const mapSupabaseError = (context: string, error: unknown): string => {
       return 'Le mot de passe doit contenir au moins 6 caractères.';
     if (msg.includes('rate limit'))
       return 'Trop de tentatives. Veuillez patienter quelques minutes.';
-    return msg;
+    if (/Failed to fetch|NetworkError|network|fetch failed/i.test(msg))
+      return 'Connexion indisponible. Vérifiez votre réseau et réessayez.';
+    if (/JWT|token .*expired|session.*expired/i.test(msg))
+      return 'Votre session a expiré. Veuillez vous reconnecter.';
+    if (
+      /row-level security|permission denied|not authorized|forbidden/i.test(msg)
+    )
+      return "Vous n'avez pas les droits pour cette action.";
+    if (/duplicate key|already exists|unique constraint/i.test(msg))
+      return 'Cet élément existe déjà.';
+    if (/not found|does not exist|0 rows/i.test(msg))
+      return 'Élément introuvable.';
+    // Message technique inconnu : on ne l'expose pas brut à l'utilisateur
+    // (souvent en anglais) ; il reste loggé pour le développeur ci-dessus.
+    return GENERIC_SUPABASE_ERROR;
   }
   return GENERIC_SUPABASE_ERROR;
 };
