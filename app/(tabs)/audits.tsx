@@ -3,7 +3,6 @@ import {
   Plus,
   MapPin,
   CircleCheck as CheckCircle,
-  Clock,
   CircleAlert as AlertCircle,
   Camera,
   X,
@@ -28,6 +27,12 @@ import {
 import CameraModal from '../../components/CameraModal';
 import { ProfessionalAuditModal } from '../../features/audits/ProfessionalAuditModal';
 import { QuestionnaireModal } from '../../features/audits/QuestionnaireModal';
+import {
+  toAuditListItems,
+  getAuditStatusColor,
+  getAuditStatusIcon,
+  getAuditStatusText,
+} from '../../features/audits/auditListModel';
 import { AUDIT_QUESTIONS } from '../../features/audits/constants';
 import type { AuditResponseDraft } from '../../features/audits/scoring';
 import { useAppSettings } from '../../hooks/useAppSettings';
@@ -87,31 +92,10 @@ export default function AuditsScreen() {
     [getItemsForTemplate, professionalTemplate],
   );
 
-  const audits = useMemo(() => {
-    const source =
-      dbAudits.length > 0
-        ? dbAudits.map((a) => ({
-            id: a.id,
-            title: a.title,
-            location: a.location || '',
-            status: a.status,
-            date: a.created_at
-              ? new Date(a.created_at).toLocaleDateString('fr-FR')
-              : '',
-            score: a.score,
-            issues: a.issues_count,
-          }))
-        : [];
-
-    return source.filter((a) => {
-      const matchesSearch =
-        !searchQuery ||
-        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.location.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [dbAudits, searchQuery, statusFilter]);
+  const audits = useMemo(
+    () => toAuditListItems(dbAudits, searchQuery, statusFilter),
+    [dbAudits, searchQuery, statusFilter],
+  );
 
   // Stats dynamiques
   const pendingCount = audits.filter((a) => a.status === 'pending').length;
@@ -119,45 +103,6 @@ export default function AuditsScreen() {
     (a) => a.status === 'in_progress',
   ).length;
   const completedCount = audits.filter((a) => a.status === 'completed').length;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '#10B981';
-      case 'in_progress':
-        return '#F59E0B';
-      case 'pending':
-        return '#6B7280';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return CheckCircle;
-      case 'in_progress':
-        return Clock;
-      case 'pending':
-        return AlertCircle;
-      default:
-        return Clock;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'Terminé';
-      case 'in_progress':
-        return 'En cours';
-      case 'pending':
-        return 'À faire';
-      default:
-        return 'Inconnu';
-    }
-  };
 
   const handleCreateAudit = (template?: AuditTemplate) => {
     setSelectedTemplateId(template?.id ?? null);
@@ -463,7 +408,7 @@ export default function AuditsScreen() {
           </View>
         )}
         {audits.map((audit) => {
-          const StatusIcon = getStatusIcon(audit.status);
+          const StatusIcon = getAuditStatusIcon(audit.status);
           return (
             <TouchableOpacity
               key={audit.id}
@@ -483,17 +428,22 @@ export default function AuditsScreen() {
                 <View
                   style={[
                     styles.auditStatus,
-                    { backgroundColor: `${getStatusColor(audit.status)}20` },
+                    {
+                      backgroundColor: `${getAuditStatusColor(audit.status)}20`,
+                    },
                   ]}
                 >
-                  <StatusIcon size={16} color={getStatusColor(audit.status)} />
+                  <StatusIcon
+                    size={16}
+                    color={getAuditStatusColor(audit.status)}
+                  />
                   <Text
                     style={[
                       styles.auditStatusText,
-                      { color: getStatusColor(audit.status) },
+                      { color: getAuditStatusColor(audit.status) },
                     ]}
                   >
-                    {getStatusText(audit.status)}
+                    {getAuditStatusText(audit.status)}
                   </Text>
                 </View>
               </View>
