@@ -8,6 +8,8 @@ import {
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
+import { AppStatusBadge } from '../../shared/components/AppStatusBadge';
+import { type StatusLevel } from '../../shared/styles/tokens';
 import type { Product } from '../../lib/supabase';
 
 type StockStatus = 'ok' | 'low_stock' | 'out_of_stock';
@@ -18,10 +20,10 @@ export function getStockStatus(product: Product): StockStatus {
   return 'ok';
 }
 
-const STATUS_COLORS: Record<StockStatus, string> = {
-  ok: '#10B981',
-  low_stock: '#F59E0B',
-  out_of_stock: '#EF4444',
+const STATUS_LEVEL: Record<StockStatus, StatusLevel> = {
+  ok: 'success',
+  low_stock: 'warning',
+  out_of_stock: 'danger',
 };
 
 const STATUS_TEXTS: Record<StockStatus, string> = {
@@ -44,7 +46,6 @@ interface ProductCardProps {
 export function ProductCard({ product, onPress }: ProductCardProps) {
   const status = getStockStatus(product);
   const StatusIcon = STATUS_ICONS[status];
-  const color = STATUS_COLORS[status];
 
   return (
     <TouchableOpacity
@@ -64,14 +65,11 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
       <View style={styles.productInfo}>
         <View style={styles.productHeader}>
           <Text style={styles.productName}>{product.name}</Text>
-          <View
-            style={[styles.productStatus, { backgroundColor: `${color}20` }]}
-          >
-            <StatusIcon size={12} color={color} />
-            <Text style={[styles.productStatusText, { color }]}>
-              {STATUS_TEXTS[status]}
-            </Text>
-          </View>
+          <AppStatusBadge
+            level={STATUS_LEVEL[status]}
+            label={STATUS_TEXTS[status]}
+            icon={StatusIcon}
+          />
         </View>
 
         <Text style={styles.productCategory}>
@@ -144,18 +142,6 @@ const styles = StyleSheet.create({
     color: '#111827',
     flex: 1,
     marginRight: 8,
-  },
-  productStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  productStatusText: {
-    fontSize: 10,
-    fontWeight: '500',
-    marginLeft: 2,
   },
   productCategory: {
     fontSize: 12,
