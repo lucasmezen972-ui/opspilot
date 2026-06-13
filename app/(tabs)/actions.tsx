@@ -22,6 +22,7 @@ import {
   CreateActionModal,
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
 
@@ -169,12 +170,11 @@ export default function ActionsScreen() {
           contentContainerStyle={styles.listContent}
         >
           {actions.length === 0 && !loading && (
-            <View style={styles.empty}>
-              <CheckCircle size={40} color="#10B981" />
-              <Text style={styles.emptyText}>
-                Aucune action corrective ouverte
-              </Text>
-            </View>
+            <AppEmptyState
+              icon={CheckCircle}
+              title="Aucune action corrective ouverte"
+              description="Les non-conformités relevées en audit génèrent automatiquement un plan d'action correctif."
+            />
           )}
           {actions.map((a) => renderCard(a))}
         </ScrollView>
@@ -345,14 +345,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#374151',
-  },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 48,
-    gap: 12,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#6B7280',
   },
 });
