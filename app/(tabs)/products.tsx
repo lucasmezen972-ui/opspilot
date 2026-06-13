@@ -26,6 +26,7 @@ import {
 import { BarcodeScannerModal } from '../../features/products/BarcodeScannerModal';
 import { ProductCard } from '../../features/products/ProductCard';
 import { StockModal } from '../../features/products/StockModal';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
 
@@ -200,14 +201,11 @@ export default function ProductsScreen() {
         ))}
 
         {!loading && products.length === 0 && (
-          <View style={styles.emptyState}>
-            <Package size={48} color="#9CA3AF" />
-            <Text style={styles.emptyStateTitle}>Aucun produit</Text>
-            <Text style={styles.emptyStateText}>
-              Scannez votre premier produit pour commencer la gestion des
-              stocks.
-            </Text>
-          </View>
+          <AppEmptyState
+            icon={Package}
+            title="Aucun produit"
+            description="Scannez votre premier produit pour commencer la gestion des stocks."
+          />
         )}
       </ScrollView>
 
@@ -355,23 +353,6 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B7280',
     fontSize: 16,
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
   },
   fab: {
     position: 'absolute',
