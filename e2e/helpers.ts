@@ -3,9 +3,16 @@ import { type Page, expect } from '@playwright/test';
 /**
  * Bloque tout trafic vers Supabase : force le mode démo 100 % local
  * (lib/demoStore.ts), donc des données déterministes pour les tests.
+ *
+ * On filtre par expression régulière sur l'hôte : le glob précédent
+ * `**​/supabase.co/**` n'a jamais rien bloqué car l'URL réelle est
+ * `xxx.supabase.co` (point avant « supabase.co », pas un slash). Tant que
+ * le login démo échouait (compte cassé), l'app retombait quand même en
+ * local ; depuis que le login fonctionne, un blocage réel est indispensable
+ * pour garder ces tests déterministes.
  */
 export async function blockSupabase(page: Page) {
-  await page.route('**/supabase.co/**', (route) => route.abort());
+  await page.route(/supabase\.co/, (route) => route.abort());
 }
 
 /**
