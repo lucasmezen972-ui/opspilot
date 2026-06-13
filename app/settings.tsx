@@ -1,26 +1,23 @@
 import { Stack, useRouter } from 'expo-router';
-import {
-  ArrowLeft,
-  Bell,
-  Building2,
-  ExternalLink,
-  KeyRound,
-  Save,
-  UserRound,
-} from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import {
+  AboutCard,
+  NotificationsCard,
+  OrganizationCard,
+  ProfileCard,
+  SecurityCard,
+} from '../features/settings/SettingsCards';
 import {
   normalizePhone,
   validateNewPassword,
@@ -190,274 +187,58 @@ export default function SettingsScreen() {
             </View>
           ) : null}
 
-          <SettingsCard
-            icon={<UserRound size={20} color="#2563EB" />}
-            title="Mon profil"
-            description="Les informations visibles par votre équipe."
-          >
-            <FieldLabel>Nom complet</FieldLabel>
-            <TextInput
-              value={fullName}
-              onChangeText={setFullName}
-              style={styles.input}
-              placeholder="Votre nom"
-              testID="settings-full-name-input"
-            />
-            <FieldLabel>Téléphone</FieldLabel>
-            <TextInput
-              value={phone}
-              onChangeText={setPhone}
-              style={styles.input}
-              placeholder="+33 6 00 00 00 00"
-              keyboardType="phone-pad"
-              testID="settings-phone-input"
-            />
-            <PrimaryButton
-              label="Enregistrer le profil"
-              onPress={handleSaveProfile}
-              disabled={saving}
-              testID="settings-profile-save"
-            />
-          </SettingsCard>
+          <ProfileCard
+            fullName={fullName}
+            phone={phone}
+            onChangeFullName={setFullName}
+            onChangePhone={setPhone}
+            onSave={handleSaveProfile}
+            saving={saving}
+          />
 
-          <SettingsCard
-            icon={<Bell size={20} color="#7C3AED" />}
-            title="Notifications"
-            description="Choisissez les alertes opérationnelles à recevoir."
-          >
-            <PreferenceRow
-              label="Audits et contrôles"
-              value={nextPreferences.audit_notifications}
-              onValueChange={() => togglePreference('audit_notifications')}
-              testID="settings-notification-audits"
-            />
-            <PreferenceRow
-              label="Actions correctives"
-              value={nextPreferences.action_notifications}
-              onValueChange={() => togglePreference('action_notifications')}
-              testID="settings-notification-actions"
-            />
-            <PreferenceRow
-              label="Formations"
-              value={nextPreferences.training_notifications}
-              onValueChange={() => togglePreference('training_notifications')}
-              testID="settings-notification-training"
-            />
-            <PreferenceRow
-              label="Synthèse hebdomadaire"
-              value={nextPreferences.weekly_summary}
-              onValueChange={() => togglePreference('weekly_summary')}
-              testID="settings-notification-weekly"
-            />
-            <PrimaryButton
-              label="Enregistrer les notifications"
-              onPress={() =>
-                runSave(
-                  () => savePreferences(nextPreferences),
-                  'Préférences enregistrées.',
-                )
-              }
-              disabled={saving}
-              testID="settings-notifications-save"
-            />
-          </SettingsCard>
-
-          <SettingsCard
-            icon={<KeyRound size={20} color="#D97706" />}
-            title="Sécurité"
-            description={
-              isLocalDemo
-                ? 'Validation locale en mode démo, sans modifier de compte réel.'
-                : 'Utilisez au moins 8 caractères.'
+          <NotificationsCard
+            preferences={nextPreferences}
+            onToggle={togglePreference}
+            onSave={() =>
+              runSave(
+                () => savePreferences(nextPreferences),
+                'Préférences enregistrées.',
+              )
             }
-          >
-            <FieldLabel>Nouveau mot de passe</FieldLabel>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="8 caractères minimum"
-              secureTextEntry
-              testID="settings-password-input"
-            />
-            <FieldLabel>Confirmer le mot de passe</FieldLabel>
-            <TextInput
-              value={passwordConfirmation}
-              onChangeText={setPasswordConfirmation}
-              style={styles.input}
-              placeholder="Confirmez le mot de passe"
-              secureTextEntry
-              testID="settings-password-confirmation-input"
-            />
-            <PrimaryButton
-              label="Changer le mot de passe"
-              onPress={handleChangePassword}
-              disabled={saving}
-              testID="settings-password-save"
-            />
-          </SettingsCard>
+            saving={saving}
+          />
+
+          <SecurityCard
+            password={password}
+            confirmation={passwordConfirmation}
+            onChangePassword={setPassword}
+            onChangeConfirmation={setPasswordConfirmation}
+            onSave={handleChangePassword}
+            saving={saving}
+            isLocalDemo={isLocalDemo}
+          />
 
           {profile?.role === 'admin' ? (
-            <SettingsCard
-              icon={<Building2 size={20} color="#059669" />}
-              title="Organisation"
-              description="Zone réservée aux administrateurs."
-            >
-              <FieldLabel>Nom de l’organisation</FieldLabel>
-              <TextInput
-                value={nextOrganizationName}
-                onChangeText={setNextOrganizationName}
-                style={styles.input}
-                testID="settings-organization-input"
-              />
-              {profile.store_id ? (
-                <>
-                  <FieldLabel>Nom du magasin</FieldLabel>
-                  <TextInput
-                    value={nextStoreName}
-                    onChangeText={setNextStoreName}
-                    style={styles.input}
-                    testID="settings-store-input"
-                  />
-                </>
-              ) : null}
-              <PrimaryButton
-                label="Enregistrer l’organisation"
-                onPress={handleSaveOrganization}
-                disabled={saving}
-                testID="settings-organization-save"
-              />
-            </SettingsCard>
+            <OrganizationCard
+              organizationName={nextOrganizationName}
+              storeName={nextStoreName}
+              onChangeOrganizationName={setNextOrganizationName}
+              onChangeStoreName={setNextStoreName}
+              onSave={handleSaveOrganization}
+              saving={saving}
+              showStore={Boolean(profile.store_id)}
+            />
           ) : null}
 
-          <SettingsCard
-            icon={<ExternalLink size={20} color="#475569" />}
-            title="À propos et documents légaux"
-            description="OpsPilot v1.0.0 · Support : support@opspilot.com"
-          >
-            <LegalLink
-              label="Politique de confidentialité"
-              onPress={() => router.push('/legal/confidentialite')}
-              testID="settings-privacy-link"
-            />
-            <LegalLink
-              label="Conditions d’utilisation"
-              onPress={() => router.push('/legal/cgu')}
-              testID="settings-terms-link"
-            />
-            <LegalLink
-              label="Mentions légales"
-              onPress={() => router.push('/legal/mentions-legales')}
-              testID="settings-legal-link"
-            />
-            <LegalLink
-              label="Contacter le support"
-              onPress={() => Linking.openURL('mailto:support@opspilot.com')}
-              testID="settings-support-link"
-            />
-          </SettingsCard>
+          <AboutCard
+            onPrivacy={() => router.push('/legal/confidentialite')}
+            onTerms={() => router.push('/legal/cgu')}
+            onLegal={() => router.push('/legal/mentions-legales')}
+            onSupport={() => Linking.openURL('mailto:support@opspilot.com')}
+          />
         </ScrollView>
       </View>
     </>
-  );
-}
-
-function SettingsCard({
-  icon,
-  title,
-  description,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardIcon}>{icon}</View>
-        <View style={styles.cardHeading}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardDescription}>{description}</Text>
-        </View>
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.label}>{children}</Text>;
-}
-
-function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-  testID,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled: boolean;
-  testID: string;
-}) {
-  return (
-    <TouchableOpacity
-      style={[styles.primaryButton, disabled && styles.buttonDisabled]}
-      onPress={onPress}
-      disabled={disabled}
-      testID={testID}
-    >
-      <Save size={17} color="#FFFFFF" />
-      <Text style={styles.primaryButtonText}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
-
-function PreferenceRow({
-  label,
-  value,
-  onValueChange,
-  testID,
-}: {
-  label: string;
-  value: boolean;
-  onValueChange: () => void;
-  testID: string;
-}) {
-  return (
-    <View style={styles.preferenceRow}>
-      <Text style={styles.preferenceLabel}>{label}</Text>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: '#CBD5E1', true: '#93C5FD' }}
-        thumbColor={value ? '#2563EB' : '#F8FAFC'}
-        testID={testID}
-      />
-    </View>
-  );
-}
-
-function LegalLink({
-  label,
-  onPress,
-  testID,
-}: {
-  label: string;
-  onPress: () => void;
-  testID: string;
-}) {
-  return (
-    <TouchableOpacity
-      style={styles.legalLink}
-      onPress={onPress}
-      testID={testID}
-    >
-      <Text style={styles.legalLinkText}>{label}</Text>
-      <ExternalLink size={16} color="#64748B" />
-    </TouchableOpacity>
   );
 }
 
@@ -514,86 +295,4 @@ const styles = StyleSheet.create({
   feedbackError: { backgroundColor: '#FEF2F2', borderColor: '#FCA5A5' },
   feedbackSuccessText: { color: '#047857', fontWeight: '600' },
   feedbackErrorText: { color: '#B91C1C', fontWeight: '600' },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 18,
-    padding: 20,
-  },
-  cardHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginBottom: 18,
-  },
-  cardIcon: {
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
-    height: 40,
-    justifyContent: 'center',
-    marginRight: 12,
-    width: 40,
-  },
-  cardHeading: { flex: 1 },
-  cardTitle: {
-    color: '#111827',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  cardDescription: { color: '#64748B', fontSize: 13, lineHeight: 18 },
-  label: {
-    color: '#374151',
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#D1D5DB',
-    borderRadius: 10,
-    borderWidth: 1,
-    color: '#111827',
-    fontSize: 15,
-    marginBottom: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  primaryButton: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: '#2563EB',
-    borderRadius: 9,
-    flexDirection: 'row',
-    marginTop: 2,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-  },
-  buttonDisabled: { opacity: 0.55 },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-    marginLeft: 8,
-  },
-  preferenceRow: {
-    alignItems: 'center',
-    borderBottomColor: '#F1F5F9',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 52,
-  },
-  preferenceLabel: { color: '#334155', flex: 1, fontSize: 15 },
-  legalLink: {
-    alignItems: 'center',
-    borderBottomColor: '#F1F5F9',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 48,
-  },
-  legalLinkText: { color: '#1D4ED8', flex: 1, fontSize: 15 },
 });
