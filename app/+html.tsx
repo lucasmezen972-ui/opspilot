@@ -56,7 +56,6 @@ export default function Root({ children }: PropsWithChildren) {
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              console.log('APP START');
               window.onerror = function(message, source, lineno, colno, error) {
                 console.error('[window.onerror]', message, source, lineno, colno, error && (error.stack || error.message || error));
               };

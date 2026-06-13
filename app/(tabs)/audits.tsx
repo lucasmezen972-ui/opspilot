@@ -191,7 +191,6 @@ export default function AuditsScreen() {
     if (cameraAuditId) {
       await addPhotoToAudit(cameraAuditId, uri);
     }
-    console.log('Photo prise', uri, annotations);
   };
 
   const handleOpenCamera = (auditId?: string) => {

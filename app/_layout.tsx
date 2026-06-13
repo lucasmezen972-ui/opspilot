@@ -11,9 +11,6 @@ import { AuthProvider, useAuth } from '../hooks/AuthContext';
 
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
-console.log('APP START');
-console.log('ROUTER START');
-
 function AuthGate() {
   const { user, profile, ready, loading } = useAuth();
   const segments = useSegments();

@@ -38,7 +38,9 @@ if (isNodeEnvironment) {
   }
 } else {
   // Client-side: Use console-based logger
-  const logLevel = 'info'; // Default log level for client
+  // En production : seuls warn/error sortent (info/debug silencieux).
+  // En dev : tout est visible pour le débogage.
+  const logLevel = typeof __DEV__ !== 'undefined' && __DEV__ ? 'debug' : 'warn';
   const shouldLog = (level: string) => {
     const levels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
     return (
