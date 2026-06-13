@@ -22,9 +22,9 @@ const audit = (over: Partial<Audit>): Audit =>
 
 describe('auditListModel', () => {
   it('projette et formate les audits', () => {
-    const [item] = toAuditListItems([audit({})], '', 'all');
-    expect(item.title).toBe('Contrôle hygiène');
-    expect(item.date).not.toBe('');
+    const items = toAuditListItems([audit({})], '', 'all');
+    expect(items[0]?.title).toBe('Contrôle hygiène');
+    expect(items[0]?.date).not.toBe('');
   });
 
   it('filtre par recherche sur titre et lieu', () => {
