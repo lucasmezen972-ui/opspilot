@@ -29,8 +29,9 @@ import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { AuditTemplate } from '../../lib/supabase';
+import { AppButton } from '../../shared/components/AppButton';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
-import { colors, shadow } from '../../shared/styles/tokens';
+import { shadow } from '../../shared/styles/tokens';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
@@ -293,14 +294,14 @@ export default function AuditsScreen() {
       <AuditQuickStats counts={counts} />
 
       {/* Create New Audit Button */}
-      <TouchableOpacity
+      <AppButton
         testID="audit-create-button"
-        style={styles.createButton}
+        label="Créer un audit"
+        icon={Plus}
+        size="lg"
         onPress={() => handleCreateAudit()}
-      >
-        <Plus size={24} color="#FFFFFF" />
-        <Text style={styles.createButtonText}>Créer un audit</Text>
-      </TouchableOpacity>
+        style={styles.createButton}
+      />
 
       {/* Audits List */}
       <ScrollView style={styles.auditsList}>
@@ -416,22 +417,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#2563EB',
     margin: 20,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
   },
   auditsList: {
     flex: 1,

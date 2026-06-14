@@ -24,6 +24,7 @@ import {
 } from '../../features/tasks/taskModel';
 import { useAuth } from '../../hooks/useAuth';
 import { useTasks } from '../../hooks/useTasks';
+import { AppButton } from '../../shared/components/AppButton';
 import { colors, shadow } from '../../shared/styles/tokens';
 
 export default function TasksScreen() {
@@ -92,15 +93,13 @@ export default function TasksScreen() {
 
       <TaskFilters selected={selectedFilter} onSelect={setSelectedFilter} />
 
-      <TouchableOpacity
-        style={styles.createButton}
+      <AppButton
+        label="Nouvelle tâche"
+        icon={Plus}
+        size="lg"
         onPress={() => setCreateModalVisible(true)}
-        accessibilityRole="button"
-        accessibilityLabel="Créer une nouvelle tâche"
-      >
-        <Plus size={24} color="#FFFFFF" />
-        <Text style={styles.createButtonText}>Nouvelle tâche</Text>
-      </TouchableOpacity>
+        style={styles.createButton}
+      />
 
       <FlatList
         data={filteredTasks}
@@ -180,22 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
     margin: 20,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
   },
   tasksList: {
     flex: 1,
