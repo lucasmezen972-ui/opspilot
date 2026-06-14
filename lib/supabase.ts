@@ -445,3 +445,31 @@ export type UserSession = {
   actions_count: number;
   created_at: string;
 };
+
+export type Channel = {
+  id: string;
+  organization_id: string;
+  store_id?: string | null;
+  name: string;
+  description?: string | null;
+  type: 'general' | 'store' | 'department' | 'announcement';
+  is_archived?: boolean;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ChannelMessage = {
+  id: string;
+  channel_id: string;
+  user_id: string;
+  sender_name: string;
+  sender_role?: string | null;
+  content: string;
+  message_type?: 'text' | 'announcement' | 'link';
+  is_pinned?: boolean;
+  attachment_url?: string | null;
+  read_by?: string[];
+  created_at?: string;
+  updated_at?: string;
+};
