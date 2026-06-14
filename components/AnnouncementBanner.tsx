@@ -23,11 +23,13 @@ const DISMISSED_KEY = 'opspilot_dismissed_announcements';
 
 function getDismissed(): string[] {
   try {
+    /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
     return JSON.parse(
       (typeof window !== 'undefined' &&
         window.localStorage?.getItem(DISMISSED_KEY)) ||
         '[]',
     );
+    /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
   } catch {
     return [];
   }

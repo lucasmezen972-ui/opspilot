@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 
 import { AUDIT_STATUS_FILTERS } from './auditListModel';
 

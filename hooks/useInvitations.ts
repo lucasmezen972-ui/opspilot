@@ -60,7 +60,7 @@ export function useInvitations() {
           organization_id: profile.organization_id,
           email: email.trim().toLowerCase(),
           role,
-          store_id: profile.store_id || null,
+          store_id: profile.store_id ?? null,
           invited_by: user.id,
         })
         .select()

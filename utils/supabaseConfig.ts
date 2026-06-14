@@ -9,10 +9,12 @@ const DEFAULT_SUPABASE_URL = 'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
 
 export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
   // `||` keeps GitHub Actions empty secrets from disabling the public fallback.
+  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
   const url =
     process.env.EXPO_PUBLIC_SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     DEFAULT_SUPABASE_URL;
+  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
   if (!url || url === '') return { status: 'missing' };
   if (url === 'https://placeholder.supabase.co')
     return { status: 'placeholder' };

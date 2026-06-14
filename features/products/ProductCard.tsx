@@ -16,7 +16,7 @@ type StockStatus = 'ok' | 'low_stock' | 'out_of_stock';
 
 export function getStockStatus(product: Product): StockStatus {
   if (product.stock_quantity === 0) return 'out_of_stock';
-  if (product.stock_quantity <= (product.min_stock || 5)) return 'low_stock';
+  if (product.stock_quantity <= (product.min_stock ?? 5)) return 'low_stock';
   return 'ok';
 }
 
@@ -56,7 +56,7 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
       <Image
         source={{
           uri:
-            product.image_url ||
+            product.image_url ??
             'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
         }}
         style={styles.productImage}
@@ -73,10 +73,10 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
         </View>
 
         <Text style={styles.productCategory}>
-          {product.category || 'Divers'}
+          {product.category ?? 'Divers'}
         </Text>
         <Text style={styles.productBarcode}>
-          Code: {product.barcode || 'N/A'}
+          Code: {product.barcode ?? 'N/A'}
         </Text>
 
         <View style={styles.productDetails}>
