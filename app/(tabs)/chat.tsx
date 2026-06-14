@@ -29,8 +29,10 @@ import { useAuth } from '../../hooks/useAuth';
 import { useChannels } from '../../hooks/useChannels';
 import { useMessages } from '../../hooks/useMessages';
 import { supabase } from '../../lib/supabase';
+import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
+import { isManagerRole } from '../../utils/roles';
 
 export default function ChatScreen() {
   const { profile, session, isDemoMode } = useAuth();
@@ -49,7 +51,7 @@ export default function ChatScreen() {
   } = useChannels();
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null);
   const activeChannel = channels.find((c) => c.id === activeChannelId) ?? null;
-  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+  const isManager = isManagerRole(profile?.role);
 
   const handleSelectChannel = (channelId: string) => {
     setActiveChannelId(channelId);
@@ -204,36 +206,14 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'messages' && styles.tabActive]}
-          onPress={() => setActiveTab('messages')}
-          testID="chat-tab-messages"
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'messages' && styles.tabTextActive,
-            ]}
-          >
-            Messages
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'canaux' && styles.tabActive]}
-          onPress={() => setActiveTab('canaux')}
-          testID="chat-tab-canaux"
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'canaux' && styles.tabTextActive,
-            ]}
-          >
-            Canaux
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <AppTabBar
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        tabs={[
+          { key: 'messages', label: 'Messages', testID: 'chat-tab-messages' },
+          { key: 'canaux', label: 'Canaux', testID: 'chat-tab-canaux' },
+        ]}
+      />
 
       {activeTab === 'canaux' ? (
         <View style={styles.channelContainer} testID="chat-channels-container">
@@ -333,32 +313,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textStrong,
     marginBottom: 16,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingHorizontal: 20,
-  },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginRight: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: colors.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textMuted,
-  },
-  tabTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   channelContainer: {
     flex: 1,

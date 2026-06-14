@@ -13,6 +13,7 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { useProducts } from '../../hooks/useProducts';
 import { AppKpiCard } from '../../shared/components/AppKpiCard';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
+import { isManagerRole } from '../../utils/roles';
 
 export default function HomeScreen() {
   const { profile } = useAuth();
@@ -26,7 +27,7 @@ export default function HomeScreen() {
     [audits, actions, products, now],
   );
 
-  const isManager = profile?.role === 'admin' || profile?.role === 'manager';
+  const isManager = isManagerRole(profile?.role);
 
   return (
     <ScrollView style={styles.container}>

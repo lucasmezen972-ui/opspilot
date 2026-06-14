@@ -18,6 +18,7 @@ import { StyleSheet } from 'react-native';
 import AnnouncementBanner from '../../components/AnnouncementBanner';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
+import { isManagerRole } from '../../utils/roles';
 
 export default function TabLayout() {
   const { profile } = useAuth();
@@ -117,10 +118,7 @@ export default function TabLayout() {
             tabBarIcon: ({ size, color }) => (
               <Users size={size} color={color} />
             ),
-            href:
-              profile?.role === 'manager' || profile?.role === 'admin'
-                ? '/team'
-                : null,
+            href: isManagerRole(profile?.role) ? '/team' : null,
           }}
         />
         <Tabs.Screen
@@ -130,10 +128,7 @@ export default function TabLayout() {
             tabBarIcon: ({ size, color }) => (
               <LayoutDashboard size={size} color={color} />
             ),
-            href:
-              profile?.role === 'manager' || profile?.role === 'admin'
-                ? '/manager'
-                : null,
+            href: isManagerRole(profile?.role) ? '/manager' : null,
           }}
         />
         <Tabs.Screen

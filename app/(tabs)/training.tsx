@@ -28,8 +28,10 @@ import {
 import { useTraining } from '../../hooks/useTraining';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { generateTrainingContent } from '../../lib/openai';
+import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
+import { isManagerRole } from '../../utils/roles';
 
 export default function TrainingScreen() {
   const { profile } = useAuth();
@@ -46,7 +48,7 @@ export default function TrainingScreen() {
     getCompletedCourses,
   } = useTraining();
 
-  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+  const isManager = isManagerRole(profile?.role);
   const [activeTab, setActiveTab] = useState<'catalogue' | 'supervision'>(
     'catalogue',
   );
@@ -164,39 +166,22 @@ export default function TrainingScreen() {
       </View>
 
       {isManager && (
-        <View style={styles.tabBar}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'catalogue' && styles.tabActive]}
-            onPress={() => setActiveTab('catalogue')}
-            testID="training-tab-catalogue"
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'catalogue' && styles.tabTextActive,
-              ]}
-            >
-              Catalogue
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'supervision' && styles.tabActive,
-            ]}
-            onPress={() => setActiveTab('supervision')}
-            testID="training-tab-supervision"
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'supervision' && styles.tabTextActive,
-              ]}
-            >
-              Supervision
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <AppTabBar
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          tabs={[
+            {
+              key: 'catalogue',
+              label: 'Catalogue',
+              testID: 'training-tab-catalogue',
+            },
+            {
+              key: 'supervision',
+              label: 'Supervision',
+              testID: 'training-tab-supervision',
+            },
+          ]}
+        />
       )}
 
       {isManager && activeTab === 'supervision' ? (
@@ -299,32 +284,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingHorizontal: 20,
-  },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginRight: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: colors.primary,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.textMuted,
-  },
-  tabTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
   },
   content: {
     flex: 1,
