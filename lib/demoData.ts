@@ -1179,6 +1179,102 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
   ];
 }
 
+export interface DemoTeamMember {
+  id: string;
+  full_name: string;
+  role: 'admin' | 'manager' | 'employé' | 'stagiaire';
+  email: string;
+}
+
+export function getDemoTeamMembers(): DemoTeamMember[] {
+  return [
+    {
+      id: DEMO_USER_ID,
+      full_name: 'Marie Dupont',
+      role: 'manager',
+      email: 'marie.dupont@demo.fr',
+    },
+    {
+      id: 'demo-member-2',
+      full_name: 'Jean Martin',
+      role: 'employé',
+      email: 'jean.martin@demo.fr',
+    },
+    {
+      id: 'demo-member-3',
+      full_name: 'Sophie Bernard',
+      role: 'employé',
+      email: 'sophie.bernard@demo.fr',
+    },
+    {
+      id: 'demo-member-4',
+      full_name: 'Thomas Lefèvre',
+      role: 'stagiaire',
+      email: 'thomas.lefevre@demo.fr',
+    },
+    {
+      id: 'demo-member-5',
+      full_name: 'Emma Rousseau',
+      role: 'employé',
+      email: 'emma.rousseau@demo.fr',
+    },
+    {
+      id: 'demo-member-6',
+      full_name: 'Lucas Moreau',
+      role: 'employé',
+      email: 'lucas.moreau@demo.fr',
+    },
+  ];
+}
+
+export function getDemoOrgTrainingProgress(): UserTrainingProgress[] {
+  type Scenario = {
+    tid: string;
+    status: UserTrainingProgress['status'];
+    score: number | null;
+    pct: number;
+  };
+  const scenarios: Record<string, Scenario[]> = {
+    'demo-member-2': [
+      { tid: 'demo-training-1', status: 'completed', score: 85, pct: 100 },
+      { tid: 'demo-training-2', status: 'completed', score: 92, pct: 100 },
+      { tid: 'demo-training-3', status: 'in_progress', score: null, pct: 50 },
+    ],
+    'demo-member-3': [
+      { tid: 'demo-training-1', status: 'completed', score: 78, pct: 100 },
+      { tid: 'demo-training-3', status: 'completed', score: 95, pct: 100 },
+      { tid: 'demo-training-5', status: 'in_progress', score: null, pct: 25 },
+    ],
+    'demo-member-4': [
+      { tid: 'demo-training-1', status: 'in_progress', score: null, pct: 33 },
+    ],
+    'demo-member-5': [
+      { tid: 'demo-training-1', status: 'completed', score: 90, pct: 100 },
+      { tid: 'demo-training-2', status: 'completed', score: 88, pct: 100 },
+      { tid: 'demo-training-3', status: 'completed', score: 75, pct: 100 },
+      { tid: 'demo-training-4', status: 'completed', score: 82, pct: 100 },
+      { tid: 'demo-training-5', status: 'in_progress', score: null, pct: 60 },
+    ],
+    'demo-member-6': [],
+  };
+
+  return Object.entries(scenarios).flatMap(([userId, entries]) =>
+    entries.map(({ tid, status, score, pct }, i) => ({
+      id: `demo-org-progress-${userId}-${tid}`,
+      user_id: userId,
+      training_id: tid,
+      status,
+      progress_percentage: pct,
+      completed_chapter_ids: status === 'completed' ? ['all'] : [],
+      score,
+      started_at: days(-20 - i),
+      completed_at: status === 'completed' ? days(-5 - i) : null,
+      created_at: days(-25),
+      updated_at: days(-1),
+    })),
+  );
+}
+
 /** Génère un identifiant local unique pour les créations en mode démo. */
 export function demoId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}`;

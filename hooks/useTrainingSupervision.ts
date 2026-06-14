@@ -1,0 +1,121 @@
+import { useEffect, useState } from 'react';
+
+import { useAuth } from './useAuth';
+import {
+  getDemoOrgTrainingProgress,
+  getDemoTeamMembers,
+} from '../lib/demoData';
+import { useDemoCollection } from '../lib/demoStore';
+import {
+  supabase,
+  type Training,
+  type UserTrainingProgress,
+} from '../lib/supabase';
+import { type MemberTrainingStatus } from '../features/training/trainingModel';
+
+interface RemoteMember {
+  id: string;
+  full_name: string;
+  role: string;
+}
+
+function buildEntries(
+  members: Array<{ id: string; full_name: string; role: string }>,
+  courses: Training[],
+  orgProgress: UserTrainingProgress[],
+): MemberTrainingStatus[] {
+  return courses.flatMap((course) =>
+    members.map((member) => {
+      const prog = orgProgress.find(
+        (p) => p.user_id === member.id && p.training_id === course.id,
+      );
+      return {
+        memberId: member.id,
+        memberName: member.full_name,
+        memberRole: member.role,
+        trainingId: course.id,
+        trainingTitle: course.title,
+        status: prog?.status ?? 'not_started',
+        score: prog?.score ?? null,
+        completedAt: prog?.completed_at ?? null,
+        hasCertificate: false,
+      };
+    }),
+  );
+}
+
+export function useTrainingSupervision() {
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
+
+  const demoCourses = useDemoCollection('trainings');
+  const [remoteMembers, setRemoteMembers] = useState<RemoteMember[]>([]);
+  const [remoteOrgProgress, setRemoteOrgProgress] = useState<
+    UserTrainingProgress[]
+  >([]);
+  const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
+  const [loading, setLoading] = useState(!isLocalDemo);
+
+  const members = isLocalDemo ? getDemoTeamMembers() : remoteMembers;
+  const orgProgress = isLocalDemo
+    ? getDemoOrgTrainingProgress()
+    : remoteOrgProgress;
+  const courses = isLocalDemo ? demoCourses : remoteCourses;
+
+  useEffect(() => {
+    if (isLocalDemo) return;
+    if (!profile?.organization_id) return;
+    void fetchOrgData();
+  }, [profile?.organization_id, isLocalDemo]);
+
+  const fetchOrgData = async () => {
+    if (!profile?.organization_id) return;
+    setLoading(true);
+    try {
+      const [membersResult, coursesResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('id, full_name, role')
+          .eq('organization_id', profile.organization_id),
+        supabase
+          .from('trainings')
+          .select('*')
+          .eq('organization_id', profile.organization_id),
+      ]);
+
+      const fetchedMembers = (membersResult.data ?? []) as RemoteMember[];
+      const fetchedCourses = (coursesResult.data ?? []) as Training[];
+      setRemoteMembers(fetchedMembers);
+      setRemoteCourses(fetchedCourses);
+
+      const courseIds = fetchedCourses.map((c) => c.id);
+      if (courseIds.length > 0) {
+        const { data: progressData } = await supabase
+          .from('user_training_progress')
+          .select('*')
+          .in('training_id', courseIds);
+        setRemoteOrgProgress((progressData ?? []) as UserTrainingProgress[]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const entries = buildEntries(members, courses, orgProgress);
+
+  const sendReminder = (memberId: string, trainingId: string) => {
+    const member = members.find((m) => m.id === memberId);
+    const course = courses.find((c) => c.id === trainingId);
+    return {
+      memberName: member?.full_name ?? '',
+      trainingTitle: course?.title ?? '',
+    };
+  };
+
+  return {
+    loading,
+    courses,
+    entries,
+    sendReminder,
+  };
+}

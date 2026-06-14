@@ -14,6 +14,7 @@ import { TrainingCourseCard } from '../../features/training/TrainingCourseCard';
 import { TrainingCourseModal } from '../../features/training/TrainingCourseModal';
 import { TrainingLeaderboard } from '../../features/training/TrainingLeaderboard';
 import { TrainingStatsOverview } from '../../features/training/TrainingStatsOverview';
+import { TrainingSupervision } from '../../features/training/TrainingSupervision';
 import {
   computeAverageScore,
   computeStudyTime,
@@ -25,6 +26,7 @@ import {
   type LeaderboardEntry,
 } from '../../hooks/useLeaderboard';
 import { useTraining } from '../../hooks/useTraining';
+import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { generateTrainingContent } from '../../lib/openai';
 import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
@@ -43,6 +45,16 @@ export default function TrainingScreen() {
     getQuizForCourse,
     getCompletedCourses,
   } = useTraining();
+
+  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+  const [activeTab, setActiveTab] = useState<'catalogue' | 'supervision'>(
+    'catalogue',
+  );
+  const {
+    courses: supervisionCourses,
+    entries: supervisionEntries,
+    sendReminder,
+  } = useTrainingSupervision();
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
     const progress = getCourseProgress(c.id);
@@ -151,46 +163,90 @@ export default function TrainingScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.content}>
-        <TrainingStatsOverview
-          completedCourses={completedCourses}
-          totalStudyTime={totalStudyTime}
-          avgScore={avgScore}
+      {isManager && (
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'catalogue' && styles.tabActive]}
+            onPress={() => setActiveTab('catalogue')}
+            testID="training-tab-catalogue"
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'catalogue' && styles.tabTextActive,
+              ]}
+            >
+              Catalogue
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === 'supervision' && styles.tabActive,
+            ]}
+            onPress={() => setActiveTab('supervision')}
+            testID="training-tab-supervision"
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'supervision' && styles.tabTextActive,
+              ]}
+            >
+              Supervision
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {isManager && activeTab === 'supervision' ? (
+        <TrainingSupervision
+          courses={supervisionCourses}
+          entries={supervisionEntries}
+          onSendReminder={sendReminder}
         />
+      ) : (
+        <ScrollView style={styles.content}>
+          <TrainingStatsOverview
+            completedCourses={completedCourses}
+            totalStudyTime={totalStudyTime}
+            avgScore={avgScore}
+          />
 
-        <TrainingAchievements />
+          <TrainingAchievements />
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Formations disponibles</Text>
-            {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-              <TouchableOpacity
-                style={styles.aiGenerateButton}
-                onPress={generateAICourse}
-                disabled={generatingCourse}
-              >
-                <Sparkles size={16} color="#F59E0B" />
-                <Text style={styles.aiGenerateButtonText}>
-                  {generatingCourse ? 'Génération...' : 'IA'}
-                </Text>
-              </TouchableOpacity>
-            )}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Formations disponibles</Text>
+              {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
+                <TouchableOpacity
+                  style={styles.aiGenerateButton}
+                  onPress={generateAICourse}
+                  disabled={generatingCourse}
+                >
+                  <Sparkles size={16} color="#F59E0B" />
+                  <Text style={styles.aiGenerateButtonText}>
+                    {generatingCourse ? 'Génération...' : 'IA'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {courses.map((course) => (
+              <TrainingCourseCard
+                key={course.id}
+                course={course}
+                onOpen={handleOpenCourse}
+              />
+            ))}
           </View>
 
-          {courses.map((course) => (
-            <TrainingCourseCard
-              key={course.id}
-              course={course}
-              onOpen={handleOpenCourse}
-            />
-          ))}
-        </View>
-
-        <TrainingLeaderboard
-          entries={leaderboardEntries}
-          currentUserId={profile?.id}
-        />
-      </ScrollView>
+          <TrainingLeaderboard
+            entries={leaderboardEntries}
+            currentUserId={profile?.id}
+          />
+        </ScrollView>
+      )}
 
       <TrainingCourseModal
         visible={selectedCourse !== null}
@@ -243,6 +299,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    paddingHorizontal: 20,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginRight: 4,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: colors.primary,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textMuted,
+  },
+  tabTextActive: {
+    color: colors.primary,
+    fontWeight: '600',
   },
   content: {
     flex: 1,

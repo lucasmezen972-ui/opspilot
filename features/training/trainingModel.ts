@@ -86,3 +86,50 @@ export function computeAverageScore(
   const sum = completed.reduce((acc, p) => acc + (p.score ?? 0), 0);
   return Math.round(sum / completed.length);
 }
+
+export interface MemberTrainingStatus {
+  memberId: string;
+  memberName: string;
+  memberRole: string;
+  trainingId: string;
+  trainingTitle: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+  score: number | null;
+  completedAt: string | null;
+  hasCertificate: boolean;
+}
+
+export interface SupervisionStats {
+  totalPairs: number;
+  completedCount: number;
+  completionRate: number;
+  avgScore: number;
+  certifiedCount: number;
+  inProgressCount: number;
+  notStartedCount: number;
+}
+
+export function computeSupervisionStats(
+  entries: MemberTrainingStatus[],
+): SupervisionStats {
+  const completed = entries.filter((e) => e.status === 'completed');
+  const withScore = completed.filter((e) => e.score !== null);
+  return {
+    totalPairs: entries.length,
+    completedCount: completed.length,
+    completionRate:
+      entries.length > 0
+        ? Math.round((completed.length / entries.length) * 100)
+        : 0,
+    avgScore:
+      withScore.length > 0
+        ? Math.round(
+            withScore.reduce((s, e) => s + (e.score ?? 0), 0) /
+              withScore.length,
+          )
+        : 0,
+    certifiedCount: entries.filter((e) => e.hasCertificate).length,
+    inProgressCount: entries.filter((e) => e.status === 'in_progress').length,
+    notStartedCount: entries.filter((e) => e.status === 'not_started').length,
+  };
+}
