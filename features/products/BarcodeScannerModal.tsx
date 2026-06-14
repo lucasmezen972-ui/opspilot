@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { normalizeBarcode } from './barcode';
+import { normalizeBarcode, validateBarcode } from './barcode';
 
 type BarcodeDetectorResult = { rawValue?: string };
 type BarcodeDetectorInstance = {
@@ -319,6 +319,14 @@ function ManualBarcodeForm({
   onChange: (value: string) => void;
   onSubmit: () => void;
 }) {
+  const validation = validateBarcode(value);
+  const touched = normalizeBarcode(value).length > 0;
+  const showError = touched && !validation.valid;
+
+  const handleSubmit = () => {
+    if (validation.valid) onSubmit();
+  };
+
   return (
     <View style={styles.manualSection}>
       <View style={styles.manualTitleRow}>
@@ -328,25 +336,30 @@ function ManualBarcodeForm({
       <View style={styles.manualRow}>
         <TextInput
           testID="barcode-manual-input"
-          style={styles.manualInput}
+          style={[styles.manualInput, showError && styles.manualInputError]}
           value={value}
           onChangeText={onChange}
           keyboardType="numeric"
           placeholder="Ex : 3000000000001"
-          onSubmitEditing={onSubmit}
+          onSubmitEditing={handleSubmit}
         />
         <TouchableOpacity
           testID="barcode-manual-submit"
           style={[
             styles.manualSubmit,
-            normalizeBarcode(value).length === 0 && styles.buttonDisabled,
+            !validation.valid && styles.buttonDisabled,
           ]}
-          onPress={onSubmit}
-          disabled={normalizeBarcode(value).length === 0}
+          onPress={handleSubmit}
+          disabled={!validation.valid}
         >
           <Text style={styles.manualSubmitText}>Rechercher</Text>
         </TouchableOpacity>
       </View>
+      {showError && (
+        <Text style={styles.manualError} testID="barcode-manual-error">
+          {validation.reason}
+        </Text>
+      )}
     </View>
   );
 }
@@ -475,4 +488,12 @@ const styles = StyleSheet.create({
   },
   manualSubmitText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   buttonDisabled: { opacity: 0.45 },
+  manualInputError: {
+    borderColor: '#DC2626',
+  },
+  manualError: {
+    marginTop: 8,
+    color: '#DC2626',
+    fontSize: 12.5,
+  },
 });
