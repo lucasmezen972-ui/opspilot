@@ -27,19 +27,17 @@ test.describe('Formations réelles', () => {
     await expect(page.getByTestId('training-quiz-start')).toBeVisible();
     await page.getByTestId('training-quiz-start').click();
 
-    const correctAnswers = [1, 0, 0, 0, 0];
-    for (let index = 0; index < correctAnswers.length; index += 1) {
-      await page
-        .getByTestId(
-          `training-quiz-${courseId}-quiz-${index + 1}-option-${correctAnswers[index]}`,
-        )
-        .click();
+    // Le moteur anti-triche mélange l'ordre des questions ET des options.
+    // On clique toujours sur la bonne réponse via le testID stable 'training-quiz-option-correct'.
+    const questionCount = 5;
+    for (let index = 0; index < questionCount; index += 1) {
+      await page.getByTestId('training-quiz-option-correct').click();
       await expect(
         page.getByText('Bonne réponse.', { exact: true }),
       ).toBeVisible();
       await page
         .getByTestId(
-          index === correctAnswers.length - 1
+          index === questionCount - 1
             ? 'training-quiz-submit'
             : 'training-quiz-next',
         )
@@ -58,15 +56,11 @@ test.describe('Formations réelles', () => {
     // Une révision réussie ne doit jamais recréditer la récompense.
     await page.getByTestId(`training-open-${courseId}`).click();
     await page.getByTestId('training-quiz-start').click();
-    for (let index = 0; index < correctAnswers.length; index += 1) {
+    for (let index = 0; index < questionCount; index += 1) {
+      await page.getByTestId('training-quiz-option-correct').click();
       await page
         .getByTestId(
-          `training-quiz-${courseId}-quiz-${index + 1}-option-${correctAnswers[index]}`,
-        )
-        .click();
-      await page
-        .getByTestId(
-          index === correctAnswers.length - 1
+          index === questionCount - 1
             ? 'training-quiz-submit'
             : 'training-quiz-next',
         )

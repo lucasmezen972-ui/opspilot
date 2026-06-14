@@ -648,17 +648,19 @@ export function getDemoTrainings(): Training[] {
     difficulty: Training['difficulty'],
     duration: number,
     xp: number,
+    minScore = 70,
   ): Training => ({
     id,
     organization_id: DEMO_ORG_ID,
     title,
     content:
-      'Module de formation interactif : bonnes pratiques, points de contrôle et quiz de validation.',
+      'Module de formation interactif avec chapitres, cas pratiques et quiz certifiant.',
     category,
     difficulty,
     duration_minutes: duration,
     xp_reward: xp,
     is_active: true,
+    min_score: minScore,
     created_at: days(-30),
     updated_at: days(-7),
     is_default: true,
@@ -696,6 +698,23 @@ export function getDemoTrainings(): Training[] {
       'intermediate',
       30,
       60,
+    ),
+    t(
+      'demo-training-5',
+      'Procédures de caisse et sécurité des encaissements',
+      'Caisse',
+      'beginner',
+      20,
+      40,
+    ),
+    t(
+      'demo-training-6',
+      "Management de proximité et animation d'équipe",
+      'Management',
+      'advanced',
+      45,
+      80,
+      75,
     ),
   ];
 }
@@ -772,6 +791,42 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
       [
         'Clore et capitaliser',
         '# Suivi\n\nValidez la satisfaction puis tracez les problèmes récurrents.',
+      ],
+    ],
+    'demo-training-5': [
+      [
+        'Ouverture de caisse et fonds de départ',
+        "# Objectif\n\nSécuriser chaque ouverture et garantir l'exactitude du fond de départ.\n\n# Procédure\n\n1. Récupérer l'enveloppe scellée auprès du responsable\n2. Compter devant témoin et signer le registre\n3. Vérifier le bon état des équipements (scanner, TPE, imprimante)\n4. Lancer le logiciel et s'authentifier avec ses propres identifiants\n\n# Règle d'or\n\nNe jamais utiliser le code d'un collègue. Fond de départ standard : 150 €.",
+      ],
+      [
+        "Procédures d'encaissement",
+        "# Types de paiement\n\n- Espèces : rendre la monnaie en comptant à voix haute\n- CB/NFC : vérifier l'approbation avant de rendre la marchandise\n- Chèques : vérifier date, montant en lettres et pièce d'identité\n\n# Annulation et remboursement\n\nToute annulation > 50 € doit être validée par un responsable.\n\n# Litiges\n\nSi un client conteste : ne jamais ouvrir le tiroir sans vérification. Appeler le responsable si le désaccord persiste.",
+      ],
+      [
+        'Clôture de caisse et remise en coffre',
+        '# Procédure de clôture\n\n1. Éditer le ticket de clôture depuis le logiciel\n2. Compter physiquement toutes les coupures et pièces\n3. Comparer au montant théorique\n4. Remplir la fiche de clôture\n5. Isoler la remise du fond suivant\n6. Déposer en enveloppe scellée en coffre devant témoin\n\n# Écarts de caisse\n\n- < 5 € : note dans le registre\n- 5 à 50 € : responsable + investigation\n- > 50 € : direction + possible déclaration',
+      ],
+      [
+        'Sécurité et vigilance anti-fraude',
+        "# Faux billets\n\nUtilisez le stylo détecteur ou UV pour tout billet de 50 € et plus.\n\n# Techniques de fraude courantes\n\n- Confusion sur le rendu de monnaie\n- Retrait rapide après paiement CB\n- Faux avoirs ou bons périmés\n\n# Conduite à tenir\n\nNe jamais céder à la pression. Appeler le responsable pour toute situation anormale. En cas d'agression : activez l'alarme discrète, mémorisez les traits, ne résistez pas.",
+      ],
+    ],
+    'demo-training-6': [
+      [
+        'Rôle et styles de management',
+        "# Objectif\n\nComprendre le rôle de manager de première ligne en grande distribution.\n\n# Missions fondamentales\n\n- Animer et motiver l'équipe au quotidien\n- Garantir la qualité d'exécution des procédures\n- Gérer les plannings et les aléas RH\n\n# Les 4 styles de management\n\n- Directif : donne des instructions claires (nouveau collaborateur)\n- Persuasif : explique le sens et obtient l'adhésion\n- Participatif : implique l'équipe dans les décisions\n- Délégatif : donne autonomie aux collaborateurs expérimentés",
+      ],
+      [
+        "Animation et motivation de l'équipe",
+        '# Leviers de motivation\n\n- Reconnaissance : valoriser les réussites en public\n- Responsabilisation : confier des missions avec autonomie\n- Développement : proposer des formations et des évolutions\n\n# Réunion de rayon hebdomadaire (15 min)\n\n1. Résultats de la semaine\n2. Objectifs à venir\n3. Points opérationnels urgents\n4. Temps de parole équipe\n\n# Gestion des conflits\n\nEntretien individuel séparé, puis réunion commune, puis solution formalisée.',
+      ],
+      [
+        'Entretiens individuels et évaluation',
+        "# Types d'entretiens\n\n- Suivi mensuel (15-30 min) : progression, difficultés, objectifs\n- Évaluation annuelle : bilan, objectifs N+1, formation\n- Recadrage : écart constaté, plan de progrès formalisé\n\n# Structure d'un entretien efficace\n\n1. Cadrer (durée, objectif, confidentialité)\n2. Écouter (70 % du temps de parole au collaborateur)\n3. Reformuler et co-construire les actions\n4. Formaliser par compte-rendu signé",
+      ],
+      [
+        'Planification et gestion des aléas',
+        "# Planification du planning\n\n- Anticiper les pics d'activité (promotions, fêtes, livraisons)\n- Respecter les 11h de repos entre deux services\n- Afficher le planning 2 semaines à l'avance minimum\n\n# Délégation efficace\n\nDéléguer = confier une mission avec les moyens et l'autorité. Faire reformuler la mission par le collaborateur.\n\n# Gestion des aléas\n\n- Absence imprévue : liste remplaçants + réorganisation immédiate\n- Rupture de stock : alerte responsable + affichage rayon\n- Incident client : prise en charge + rapport sous 24h",
       ],
     ],
   };
@@ -917,7 +972,7 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
     ],
   };
 
-  return Object.entries(questions).flatMap(([trainingId, entries]) =>
+  const base = Object.entries(questions).flatMap(([trainingId, entries]) =>
     entries.map(([question, options, correctIndex], index) => ({
       id: `${trainingId}-quiz-${index + 1}`,
       training_id: trainingId,
@@ -925,10 +980,164 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
       options,
       correct_index: correctIndex,
       sort_order: index + 1,
+      difficulty: 'easy' as TrainingQuizQuestion['difficulty'],
+      question_type: 'qcm_single' as TrainingQuizQuestion['question_type'],
+      is_critical: false,
       created_at: days(-30),
       updated_at: days(-7),
     })),
   );
+
+  // Modules 5 et 6 avec niveaux de difficulté et questions critiques
+  type RichQ = {
+    q: string;
+    opts: string[];
+    c: number;
+    d: TrainingQuizQuestion['difficulty'];
+    crit?: boolean;
+  };
+  const richModules: Record<string, RichQ[]> = {
+    'demo-training-5': [
+      {
+        q: "Que faire avant d'ouvrir la caisse ?",
+        opts: [
+          'Compter le fond devant un témoin et signer',
+          'Ouvrir directement',
+          'Utiliser le code du collègue',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Pour un billet de 50 € ou plus, que faire ?',
+        opts: [
+          'Vérifier avec le stylo ou UV',
+          'Accepter sans vérification',
+          'Refuser systématiquement',
+        ],
+        c: 0,
+        d: 'medium',
+        crit: true,
+      },
+      {
+        q: 'Que faire si un écart de caisse dépasse 50 € ?',
+        opts: [
+          'Alerter la direction + déclaration possible',
+          'Compenser de sa poche',
+          'Ne rien faire',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
+      {
+        q: 'Quelle procédure pour une annulation supérieure à 50 € ?',
+        opts: [
+          'Validation obligatoire du responsable',
+          'Annuler seul discrètement',
+          'Rembourser en espèces sans trace',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: "En cas d'agression, quelle est la priorité ?",
+        opts: [
+          'Votre sécurité — ne résistez pas',
+          'Protéger la caisse',
+          'Appeler la police seul',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Le fond de départ standard est de…',
+        opts: ['150 €', '50 €', '500 €', '1 000 €'],
+        c: 0,
+        d: 'easy',
+      },
+    ],
+    'demo-training-6': [
+      {
+        q: 'Le manager de proximité est avant tout…',
+        opts: [
+          "Un facilitateur pour l'équipe",
+          'Un contrôleur strict',
+          'Un exécutant de la direction',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Quel style de management convient à un nouveau collaborateur ?',
+        opts: ['Directif', 'Délégatif', 'Participatif'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Quelle proportion de temps de parole pour le collaborateur en entretien ?',
+        opts: ['70 % du temps', '10 % du temps', '50 % du temps'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Quel est le repos minimum entre deux services consécutifs ?',
+        opts: ['11 heures', '8 heures', '6 heures'],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
+      {
+        q: 'Comment déléguer efficacement ?',
+        opts: [
+          'Confier mission + moyens + faire reformuler',
+          "Donner l'ordre et partir",
+          'Faire soi-même pour être sûr',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: "Pourquoi formaliser les engagements d'entretien par écrit ?",
+        opts: [
+          'Pour tracer et éviter les malentendus',
+          'Pour faire peur au collaborateur',
+          'Pour la DRH uniquement',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: "Lors d'un conflit entre collègues, quelle est la première étape ?",
+        opts: [
+          'Entretien individuel séparé de chaque partie',
+          'Réunion commune immédiate',
+          'Ignorer le conflit',
+        ],
+        c: 0,
+        d: 'hard',
+      },
+    ],
+  };
+
+  const richEntries = Object.entries(richModules).flatMap(
+    ([trainingId, entries]) =>
+      entries.map((e, index) => ({
+        id: `${trainingId}-quiz-${index + 1}`,
+        training_id: trainingId,
+        question: e.q,
+        options: e.opts,
+        correct_index: e.c,
+        sort_order: index + 1,
+        difficulty: e.d,
+        question_type: 'qcm_single' as TrainingQuizQuestion['question_type'],
+        is_critical: e.crit ?? false,
+        created_at: days(-30),
+        updated_at: days(-7),
+      })),
+  );
+
+  return [...base, ...richEntries];
 }
 
 export function getDemoTrainingProgress(): UserTrainingProgress[] {

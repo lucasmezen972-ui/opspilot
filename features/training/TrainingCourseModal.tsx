@@ -320,10 +320,16 @@ export function TrainingCourseModal({
                     const isWrong =
                       isSelected &&
                       selectedAnswer !== currentQuestion.correctAnswerIndex;
+                    const isAnswerCorrect =
+                      optionIndex === currentQuestion.correctAnswerIndex;
                     return (
                       <TouchableOpacity
                         key={option}
-                        testID={`training-quiz-${currentQuestion.id}-option-${optionIndex}`}
+                        testID={
+                          isAnswerCorrect
+                            ? 'training-quiz-option-correct'
+                            : `training-quiz-${currentQuestion.id}-option-${optionIndex}`
+                        }
                         style={[
                           styles.option,
                           isCorrect && styles.optionCorrect,
