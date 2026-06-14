@@ -177,6 +177,7 @@ export type Training = {
   duration_minutes: number;
   xp_reward: number;
   is_active: boolean;
+  min_score?: number | null;
   created_at?: string;
   updated_at?: string;
   ai_generated?: boolean;
@@ -193,6 +194,15 @@ export type TrainingChapter = {
   updated_at?: string;
 };
 
+export type QuizQuestionType =
+  | 'qcm_single'
+  | 'qcm_multi'
+  | 'true_false'
+  | 'situation'
+  | 'chronological'
+  | 'association'
+  | 'critical';
+
 export type TrainingQuizQuestion = {
   id: string;
   training_id: string;
@@ -200,8 +210,25 @@ export type TrainingQuizQuestion = {
   options: string[];
   correct_index: number;
   sort_order: number;
+  difficulty?: 'easy' | 'medium' | 'hard' | null;
+  question_type?: QuizQuestionType | null;
+  is_critical?: boolean | null;
   created_at?: string;
   updated_at?: string;
+};
+
+export type TrainingCertificate = {
+  id: string;
+  user_id: string;
+  training_id: string;
+  organization_id: string;
+  full_name: string;
+  training_title: string;
+  score: number;
+  issued_at: string;
+  expires_at?: string | null;
+  certificate_number: string;
+  created_at?: string;
 };
 
 export type UserTrainingProgress = {
@@ -417,4 +444,32 @@ export type UserSession = {
   duration_minutes?: number | null;
   actions_count: number;
   created_at: string;
+};
+
+export type Channel = {
+  id: string;
+  organization_id: string;
+  store_id?: string | null;
+  name: string;
+  description?: string | null;
+  type: 'general' | 'store' | 'department' | 'announcement';
+  is_archived?: boolean;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ChannelMessage = {
+  id: string;
+  channel_id: string;
+  user_id: string;
+  sender_name: string;
+  sender_role?: string | null;
+  content: string;
+  message_type?: 'text' | 'announcement' | 'link';
+  is_pinned?: boolean;
+  attachment_url?: string | null;
+  read_by?: string[];
+  created_at?: string;
+  updated_at?: string;
 };

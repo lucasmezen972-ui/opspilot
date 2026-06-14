@@ -10,7 +10,13 @@ import {
   View,
 } from 'react-native';
 
-import { calculateQuizScore, uniqueChapterIds } from './progress';
+import { uniqueChapterIds } from './progress';
+import {
+  createQuizSession,
+  isQuizPassed,
+  scoreQuizSession,
+  type QuizSession,
+} from './quizEngine';
 import type {
   Training,
   TrainingChapter,
@@ -36,7 +42,12 @@ type Props = {
     chapterId: string,
     totalChapters: number,
   ) => Promise<OperationResult>;
-  onCompleteQuiz: (courseId: string, score: number) => Promise<OperationResult>;
+  onCompleteQuiz: (
+    courseId: string,
+    score: number,
+    failedCritical: boolean,
+  ) => Promise<OperationResult>;
+  onGenerateCertificate?: (courseId: string, score: number) => void;
 };
 
 function MarkdownBody({ body }: { body: string }) {
@@ -78,6 +89,7 @@ export function TrainingCourseModal({
   onClose,
   onMarkChapterRead,
   onCompleteQuiz,
+  onGenerateCertificate,
 }: Props) {
   const [mode, setMode] = useState<'chapters' | 'quiz' | 'result'>('chapters');
   const [chapterIndex, setChapterIndex] = useState(0);
@@ -85,6 +97,8 @@ export function TrainingCourseModal({
   const [answers, setAnswers] = useState<number[]>([]);
   const [localCompletedIds, setLocalCompletedIds] = useState<string[]>([]);
   const [score, setScore] = useState<number | null>(null);
+  const [failedCritical, setFailedCritical] = useState(false);
+  const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -99,18 +113,23 @@ export function TrainingCourseModal({
     setAnswers([]);
     setLocalCompletedIds(completed);
     setScore(null);
+    setFailedCritical(false);
+    setQuizSession(null);
   }, [visible, course?.id]);
 
   const sortedChapters = useMemo(
     () => [...chapters].sort((a, b) => a.sort_order - b.sort_order),
     [chapters],
   );
-  const sortedQuestions = useMemo(
+  const sortedQuestionsForBank = useMemo(
     () => [...questions].sort((a, b) => a.sort_order - b.sort_order),
     [questions],
   );
+  const sessionQuestions = quizSession?.questions ?? [];
+  const minScore = course?.min_score ?? 70;
+  const passed = isQuizPassed(score ?? 0, failedCritical, minScore);
   const currentChapter = sortedChapters[chapterIndex];
-  const currentQuestion = sortedQuestions[questionIndex];
+  const currentQuestion = sessionQuestions[questionIndex];
   const allChaptersRead =
     sortedChapters.length > 0 &&
     sortedChapters.every((chapter) => localCompletedIds.includes(chapter.id));
@@ -151,23 +170,24 @@ export function TrainingCourseModal({
 
   const advanceQuiz = async () => {
     if (selectedAnswer === undefined || saving) return;
-    if (questionIndex < sortedQuestions.length - 1) {
+    if (questionIndex < sessionQuestions.length - 1) {
       setQuestionIndex((current) => current + 1);
       return;
     }
 
-    const finalScore = calculateQuizScore(
-      sortedQuestions.map((question) => question.correct_index),
+    const { score: finalScore, failedCritical: fc } = scoreQuizSession(
+      sessionQuestions,
       answers,
     );
     setSaving(true);
-    const result = await onCompleteQuiz(course.id, finalScore);
+    const result = await onCompleteQuiz(course.id, finalScore, fc);
     setSaving(false);
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
       return;
     }
     setScore(finalScore);
+    setFailedCritical(fc);
     setMode('result');
   };
 
@@ -238,7 +258,21 @@ export function TrainingCourseModal({
                   <TouchableOpacity
                     testID="training-quiz-start"
                     style={styles.primaryButton}
-                    onPress={() => setMode('quiz')}
+                    onPress={() => {
+                      setQuizSession(
+                        createQuizSession(
+                          sortedQuestionsForBank.map((q) => ({
+                            ...q,
+                            question_type: q.question_type ?? undefined,
+                            difficulty: q.difficulty ?? undefined,
+                            is_critical: q.is_critical ?? undefined,
+                          })),
+                        ),
+                      );
+                      setQuestionIndex(0);
+                      setAnswers([]);
+                      setMode('quiz');
+                    }}
                   >
                     <Text style={styles.primaryButtonText}>
                       Lancer l'évaluation
@@ -275,9 +309,9 @@ export function TrainingCourseModal({
             <>
               <View style={styles.progressHeader}>
                 <Text style={styles.progressLabel}>
-                  Question {questionIndex + 1} sur {sortedQuestions.length}
+                  Question {questionIndex + 1} sur {sessionQuestions.length}
                 </Text>
-                <Text style={styles.progressLabel}>70 % requis</Text>
+                <Text style={styles.progressLabel}>{minScore} % requis</Text>
               </View>
               <ScrollView style={styles.body}>
                 <Text style={styles.questionText}>
@@ -288,14 +322,20 @@ export function TrainingCourseModal({
                     const isSelected = selectedAnswer === optionIndex;
                     const isCorrect =
                       selectedAnswer !== undefined &&
-                      optionIndex === currentQuestion.correct_index;
+                      optionIndex === currentQuestion.correctAnswerIndex;
                     const isWrong =
                       isSelected &&
-                      selectedAnswer !== currentQuestion.correct_index;
+                      selectedAnswer !== currentQuestion.correctAnswerIndex;
+                    const isAnswerCorrect =
+                      optionIndex === currentQuestion.correctAnswerIndex;
                     return (
                       <TouchableOpacity
                         key={option}
-                        testID={`training-quiz-${currentQuestion.id}-option-${optionIndex}`}
+                        testID={
+                          isAnswerCorrect
+                            ? 'training-quiz-option-correct'
+                            : `training-quiz-${currentQuestion.id}-option-${optionIndex}`
+                        }
                         style={[
                           styles.option,
                           isCorrect && styles.optionCorrect,
@@ -320,17 +360,17 @@ export function TrainingCourseModal({
                   <View
                     style={[
                       styles.feedback,
-                      selectedAnswer === currentQuestion.correct_index
+                      selectedAnswer === currentQuestion.correctAnswerIndex
                         ? styles.feedbackCorrect
                         : styles.feedbackWrong,
                     ]}
                   >
                     <Text style={styles.feedbackText}>
-                      {selectedAnswer === currentQuestion.correct_index
+                      {selectedAnswer === currentQuestion.correctAnswerIndex
                         ? 'Bonne réponse.'
                         : `Réponse incorrecte. La bonne réponse est : ${
                             currentQuestion.options[
-                              currentQuestion.correct_index
+                              currentQuestion.correctAnswerIndex
                             ]
                           }.`}
                     </Text>
@@ -340,7 +380,7 @@ export function TrainingCourseModal({
               <View style={styles.footer}>
                 <TouchableOpacity
                   testID={
-                    questionIndex === sortedQuestions.length - 1
+                    questionIndex === sessionQuestions.length - 1
                       ? 'training-quiz-submit'
                       : 'training-quiz-next'
                   }
@@ -354,7 +394,7 @@ export function TrainingCourseModal({
                   <Text style={styles.primaryButtonText}>
                     {saving
                       ? 'Validation...'
-                      : questionIndex === sortedQuestions.length - 1
+                      : questionIndex === sessionQuestions.length - 1
                         ? 'Voir mon résultat'
                         : 'Question suivante'}
                   </Text>
@@ -364,7 +404,7 @@ export function TrainingCourseModal({
             </>
           )}
 
-          {mode === 'quiz' && sortedQuestions.length === 0 && (
+          {mode === 'quiz' && sessionQuestions.length === 0 && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyTitle}>Évaluation indisponible</Text>
               <Text style={styles.emptyText}>
@@ -378,7 +418,7 @@ export function TrainingCourseModal({
               <View
                 style={[
                   styles.scoreCircle,
-                  score >= 70 ? styles.scorePassed : styles.scoreFailed,
+                  passed ? styles.scorePassed : styles.scoreFailed,
                 ]}
               >
                 <Text style={styles.scoreText} testID="training-quiz-score">
@@ -386,15 +426,26 @@ export function TrainingCourseModal({
                 </Text>
               </View>
               <Text style={styles.resultTitle}>
-                {score >= 70
-                  ? 'Formation validée !'
-                  : 'Évaluation à retravailler'}
+                {passed ? 'Formation validée !' : 'Évaluation à retravailler'}
               </Text>
               <Text style={styles.resultText}>
-                {score >= 70
+                {passed
                   ? `Vous gagnez ${course.xp_reward} XP.`
-                  : "Relisez les chapitres puis retentez l'évaluation. Un score de 70 % est requis."}
+                  : failedCritical
+                    ? 'Une question critique a été ratée. Relisez les procédures obligatoires.'
+                    : `Relisez les chapitres puis retentez l'évaluation. Un score de ${minScore} % est requis.`}
               </Text>
+              {passed && onGenerateCertificate && (
+                <TouchableOpacity
+                  testID="training-certificate-btn"
+                  style={styles.certificateButton}
+                  onPress={() => onGenerateCertificate(course.id, score)}
+                >
+                  <Text style={styles.certificateButtonText}>
+                    Télécharger l'attestation
+                  </Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 testID="training-result-close"
                 style={styles.primaryButton}
@@ -516,6 +567,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
   },
   primaryButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+  certificateButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#2563EB',
+    marginBottom: 10,
+    width: '100%',
+  },
+  certificateButtonText: {
+    color: '#2563EB',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   secondaryButton: {
     minHeight: 44,
     flexDirection: 'row',

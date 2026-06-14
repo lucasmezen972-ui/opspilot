@@ -1,15 +1,23 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoTeamProfiles } from '../lib/demoData';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTeam() {
   const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchMembers = useCallback(async () => {
+    if (isLocalDemo) {
+      setMembers(getDemoTeamProfiles());
+      setLoading(false);
+      return;
+    }
+
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -34,13 +42,25 @@ export function useTeam() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
 
   const updateMemberRole = async (memberId: string, role: Profile['role']) => {
+    if (isLocalDemo) {
+      let updated: Profile | null = null;
+      setMembers((prev) =>
+        prev.map((m) => {
+          if (m.id !== memberId) return m;
+          updated = { ...m, role };
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')

@@ -6,6 +6,8 @@ import {
   getDemoAuditResponses,
   getDemoAuditTemplateItems,
   getDemoAuditTemplates,
+  getDemoChannelMessages,
+  getDemoChannels,
   getDemoProducts,
   getDemoSettings,
   getDemoTasks,
@@ -20,10 +22,13 @@ import type {
   AuditResponse,
   AuditTemplate,
   AuditTemplateItem,
+  Channel,
+  ChannelMessage,
   CorrectiveAction,
   Product,
   Task,
   Training,
+  TrainingCertificate,
   TrainingChapter,
   TrainingQuizQuestion,
   UserTrainingProgress,
@@ -52,6 +57,9 @@ export interface DemoState {
   trainingChapters: TrainingChapter[];
   trainingQuizQuestions: TrainingQuizQuestion[];
   trainingProgress: UserTrainingProgress[];
+  trainingCertificates: TrainingCertificate[];
+  channels: Channel[];
+  channelMessages: ChannelMessage[];
   settings: DemoSettings;
 }
 
@@ -68,6 +76,9 @@ function seed(): DemoState {
     trainingChapters: getDemoTrainingChapters(),
     trainingQuizQuestions: getDemoTrainingQuizQuestions(),
     trainingProgress: getDemoTrainingProgress(),
+    trainingCertificates: [],
+    channels: getDemoChannels(),
+    channelMessages: getDemoChannelMessages(),
     settings: getDemoSettings(),
   };
 }
