@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { isRecurring, nextDueDate } from '../features/tasks/taskRecurrence';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Task } from '../lib/supabase';
@@ -77,6 +78,7 @@ export function useTasks() {
         status: 'pending',
         estimated_time_minutes: taskData.estimated_time_minutes ?? null,
         due_date: taskData.due_date ?? null,
+        recurrence: taskData.recurrence ?? 'none',
         created_at: now,
         updated_at: now,
         completed_at: null,
@@ -123,6 +125,26 @@ export function useTasks() {
     }
   };
 
+  /**
+   * À la clôture d'une tâche récurrente, génère la prochaine occurrence
+   * (même contenu, échéance décalée selon la fréquence).
+   */
+  const spawnNextOccurrence = async (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || !isRecurring(task.recurrence)) return;
+    const from = task.due_date ? new Date(task.due_date) : new Date();
+    await createTask({
+      title: task.title,
+      description: task.description ?? undefined,
+      location: task.location ?? undefined,
+      priority: task.priority,
+      estimated_time_minutes: task.estimated_time_minutes ?? undefined,
+      assigned_to: task.assigned_to ?? undefined,
+      recurrence: task.recurrence,
+      due_date: nextDueDate(task.recurrence, from) ?? undefined,
+    });
+  };
+
   const updateTaskStatus = async (id: string, status: string) => {
     try {
       const updates: Record<string, any> = {
@@ -142,6 +164,7 @@ export function useTasks() {
             return updated;
           }),
         );
+        if (status === 'completed') await spawnNextOccurrence(id);
         return { data: updated, error: null };
       }
 
@@ -163,6 +186,7 @@ export function useTasks() {
       }
 
       setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
+      if (status === 'completed') await spawnNextOccurrence(id);
       return { data, error: null };
     } catch (error) {
       return {

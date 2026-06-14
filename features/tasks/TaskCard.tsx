@@ -6,6 +6,7 @@ import {
   MapPin,
   Flag,
   User,
+  Repeat,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -15,6 +16,7 @@ import {
   getTaskStatusColor,
   getTaskStatusText,
 } from './taskModel';
+import { isRecurring, recurrenceLabel } from './taskRecurrence';
 import type { Task } from '../../lib/supabase';
 import { colors, radius, shadow } from '../../shared/styles/tokens';
 
@@ -76,6 +78,14 @@ export function TaskCard({
                 {getTaskStatusText(task.status)}
               </Text>
             </View>
+            {isRecurring(task.recurrence) && (
+              <View style={styles.recurrence}>
+                <Repeat size={11} color="#7C3AED" />
+                <Text style={styles.recurrenceText}>
+                  {recurrenceLabel(task.recurrence)}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -163,7 +173,22 @@ const styles = StyleSheet.create({
   },
   meta: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+  },
+  recurrence: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    backgroundColor: '#F3E8FF',
+  },
+  recurrenceText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#7C3AED',
   },
   priority: {
     flexDirection: 'row',

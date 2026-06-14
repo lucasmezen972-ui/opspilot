@@ -66,6 +66,7 @@ export default function TasksScreen() {
       description: draft.description.trim() || undefined,
       priority: draft.priority,
       location: 'Magasin principal',
+      recurrence: draft.recurrence,
     });
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
