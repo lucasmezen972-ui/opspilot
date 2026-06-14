@@ -16,7 +16,7 @@ import {
 import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import type { DisplayMessage } from './chatModel';
-import { colors, radius } from '../../shared/styles/tokens';
+import { colors, radius, shadow } from '../../shared/styles/tokens';
 
 interface ConversationPanelProps {
   name: string;
@@ -117,11 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
     maxHeight: 400,
   },
   header: {

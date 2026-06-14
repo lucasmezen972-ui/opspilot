@@ -6,6 +6,7 @@ import {
 import { View, Text, StyleSheet } from 'react-native';
 
 import { formatPlanName, getStatusInfo } from './billingModel';
+import { shadow } from '../../shared/styles/tokens';
 
 interface CurrentPlanCardProps {
   currentPlan: string;
@@ -82,11 +83,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadow.card,
   },
   left: { flex: 1 },
   label: { fontSize: 12, color: '#6B7280', marginBottom: 4 },

@@ -32,6 +32,7 @@ import {
   getProfileRoleLabel,
 } from '../../features/profile/profileModel';
 import { useAuth } from '../../hooks/useAuth';
+import { shadow } from '../../shared/styles/tokens';
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
@@ -192,11 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#FEE2E2',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   logoutText: {
     fontSize: 16,

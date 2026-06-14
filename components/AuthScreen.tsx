@@ -13,6 +13,7 @@ import {
 
 import ConnectedStatus from './ConnectedStatus';
 import { useAuth } from '../hooks/useAuth';
+import { shadow } from '../shared/styles/tokens';
 import { loginSchema } from '../utils/validation';
 
 export default function AuthScreen() {
@@ -322,11 +323,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 8,
+    ...shadow.card,
   },
   formTitle: {
     fontSize: 20,

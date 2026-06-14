@@ -2,6 +2,7 @@ import { CircleCheck as CheckCircle, ExternalLink } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { getPlanState, type Plan } from './billingModel';
+import { shadow } from '../../shared/styles/tokens';
 
 interface PlanCardProps {
   plan: Plan;
@@ -103,18 +104,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1.5,
     borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    ...shadow.card,
   },
   cardCurrent: {
     borderColor: '#2563EB',
-    shadowColor: '#2563EB',
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
+    ...shadow.cardActive,
   },
   popularBadge: {
     alignSelf: 'flex-end',

@@ -24,7 +24,7 @@ import {
 } from '../../features/tasks/taskModel';
 import { useAuth } from '../../hooks/useAuth';
 import { useTasks } from '../../hooks/useTasks';
-import { colors } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export default function TasksScreen() {
   const { tasks, loading, updateTaskStatus, createTask } = useTasks();
@@ -186,11 +186,7 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   createButtonText: {
     color: '#FFFFFF',
@@ -240,10 +236,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    ...shadow.floating,
   },
 });

@@ -2,6 +2,7 @@ import { FileText, Download } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { Audit } from '../../lib/supabase';
+import { shadow } from '../../shared/styles/tokens';
 
 interface AuditReportListProps {
   audits: Audit[];
@@ -68,11 +69,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 3,
+    ...shadow.card,
   },
   item: {
     flexDirection: 'row',

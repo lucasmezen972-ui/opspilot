@@ -2,7 +2,7 @@ import { Users, Bot } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { ChatConversation } from './chatModel';
-import { colors, radius } from '../../shared/styles/tokens';
+import { colors, radius, shadow } from '../../shared/styles/tokens';
 
 interface ConversationCardProps {
   conversation: ChatConversation;
@@ -60,11 +60,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 8,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadow.card,
   },
   cardActive: {
     borderWidth: 2,

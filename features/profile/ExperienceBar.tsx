@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 
 import type { XpProgress } from './profileModel';
+import { shadow } from '../../shared/styles/tokens';
 
 interface ExperienceBarProps {
   progress: XpProgress;
@@ -35,11 +36,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   header: {
     flexDirection: 'row',
