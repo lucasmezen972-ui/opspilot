@@ -7,7 +7,7 @@ import {
 import { View, Text, StyleSheet } from 'react-native';
 
 import type { ManagerStats } from './managerModel';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 interface ManagerStatCardsProps {
   stats: ManagerStats;
@@ -74,6 +74,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   icon: {

@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    letterSpacing: -0.4,
     fontWeight: '700',
     color: colors.textStrong,
   },

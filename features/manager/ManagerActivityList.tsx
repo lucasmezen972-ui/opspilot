@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export interface ActivityItem {
   id: string;
@@ -62,6 +62,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   left: {

@@ -26,7 +26,7 @@ import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export default function ProductsScreen() {
   const {
@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    letterSpacing: -0.4,
     fontWeight: '700',
     color: '#111827',
   },
@@ -259,6 +260,8 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   scannerButtonText: {

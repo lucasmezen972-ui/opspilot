@@ -60,6 +60,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 8,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   cardActive: {

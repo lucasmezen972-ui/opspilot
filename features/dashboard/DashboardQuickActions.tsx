@@ -140,6 +140,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 14,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   iconWrap: {

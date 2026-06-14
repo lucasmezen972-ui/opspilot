@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { getRoleColor, getRoleLabel } from './teamModel';
 import type { Invitation } from '../../lib/supabase';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 interface InvitationCardProps {
   invitation: Invitation;
@@ -52,6 +52,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   left: {

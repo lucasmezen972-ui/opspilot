@@ -276,7 +276,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 2,
   },
-  title: { color: '#111827', fontSize: 24, fontWeight: '700' },
+  title: {
+    color: '#111827',
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.4,
+  },
   scroll: { flex: 1 },
   content: {
     alignSelf: 'center',

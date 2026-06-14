@@ -167,6 +167,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    letterSpacing: -0.4,
     fontWeight: '700',
     color: colors.textStrong,
   },
@@ -186,6 +187,8 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   createButtonText: {

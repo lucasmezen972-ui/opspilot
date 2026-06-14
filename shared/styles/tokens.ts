@@ -29,6 +29,9 @@ export const colors = {
   background: '#F8FAFC',
   backgroundAlt: '#F1F5F9',
   border: '#E5E7EB',
+  // Liseré « hairline » très clair des cartes : donne de la définition aux
+  // surfaces blanches sur fond clair (rendu premium type dashboard SaaS).
+  hairline: '#ECEFF3',
   textStrong: '#111827',
   text: '#374151',
   textMuted: '#6B7280',
