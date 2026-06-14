@@ -93,6 +93,7 @@ describe('HomeScreen', () => {
       updateAuditStatus: vi.fn(),
       completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
+      getAuditResponses: vi.fn(),
       refetch: vi.fn(),
     });
 
@@ -161,6 +162,7 @@ describe('HomeScreen', () => {
       updateAuditStatus: vi.fn(),
       completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
+      getAuditResponses: vi.fn(),
       refetch: vi.fn(),
     });
 
