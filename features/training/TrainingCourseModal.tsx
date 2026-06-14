@@ -43,6 +43,7 @@ type Props = {
     totalChapters: number,
   ) => Promise<OperationResult>;
   onCompleteQuiz: (courseId: string, score: number) => Promise<OperationResult>;
+  onGenerateCertificate?: (courseId: string, score: number) => void;
 };
 
 function MarkdownBody({ body }: { body: string }) {
@@ -84,6 +85,7 @@ export function TrainingCourseModal({
   onClose,
   onMarkChapterRead,
   onCompleteQuiz,
+  onGenerateCertificate,
 }: Props) {
   const [mode, setMode] = useState<'chapters' | 'quiz' | 'result'>('chapters');
   const [chapterIndex, setChapterIndex] = useState(0);
@@ -251,7 +253,16 @@ export function TrainingCourseModal({
                     testID="training-quiz-start"
                     style={styles.primaryButton}
                     onPress={() => {
-                      setQuizSession(createQuizSession(sortedQuestionsForBank));
+                      setQuizSession(
+                        createQuizSession(
+                          sortedQuestionsForBank.map((q) => ({
+                            ...q,
+                            question_type: q.question_type ?? undefined,
+                            difficulty: q.difficulty ?? undefined,
+                            is_critical: q.is_critical ?? undefined,
+                          })),
+                        ),
+                      );
                       setQuestionIndex(0);
                       setAnswers([]);
                       setMode('quiz');
@@ -416,6 +427,17 @@ export function TrainingCourseModal({
                     ? 'Une question critique a été ratée. Relisez les procédures obligatoires.'
                     : "Relisez les chapitres puis retentez l'évaluation. Un score de 70 % est requis."}
               </Text>
+              {isQuizPassed(score, failedCritical) && onGenerateCertificate && (
+                <TouchableOpacity
+                  testID="training-certificate-btn"
+                  style={styles.certificateButton}
+                  onPress={() => onGenerateCertificate(course.id, score)}
+                >
+                  <Text style={styles.certificateButtonText}>
+                    Télécharger l'attestation
+                  </Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 testID="training-result-close"
                 style={styles.primaryButton}
@@ -537,6 +559,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
   },
   primaryButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+  certificateButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#2563EB',
+    marginBottom: 10,
+    width: '100%',
+  },
+  certificateButtonText: {
+    color: '#2563EB',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   secondaryButton: {
     minHeight: 44,
     flexDirection: 'row',

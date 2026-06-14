@@ -37,6 +37,7 @@ export default function TrainingScreen() {
     startCourse,
     markChapterRead,
     completeQuiz,
+    generateCertificate,
     getCourseProgress,
     getChaptersForCourse,
     getQuizForCourse,
@@ -202,6 +203,7 @@ export default function TrainingScreen() {
         onClose={() => setSelectedCourseId(null)}
         onMarkChapterRead={markChapterRead}
         onCompleteQuiz={completeQuiz}
+        onGenerateCertificate={generateCertificate}
       />
     </View>
   );

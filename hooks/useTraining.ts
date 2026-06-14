@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import {
+  generateCertificateNumber,
+  openCertificate,
+} from '../features/training/certificate';
+import {
   calculateReadingProgress,
   uniqueChapterIds,
 } from '../features/training/progress';
@@ -10,6 +14,7 @@ import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import {
   supabase,
   type Training,
+  type TrainingCertificate,
   type TrainingChapter,
   type TrainingQuizQuestion,
   type UserTrainingProgress,
@@ -25,6 +30,9 @@ export function useTraining() {
   const [remoteProgress, setRemoteProgress] = useState<UserTrainingProgress[]>(
     [],
   );
+  const [remoteCertificates, setRemoteCertificates] = useState<
+    TrainingCertificate[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const { profile, fetchProfile, updateProfile, isDemoMode, session } =
     useAuth();
@@ -35,10 +43,12 @@ export function useTraining() {
   const demoChapters = useDemoCollection('trainingChapters');
   const demoQuizQuestions = useDemoCollection('trainingQuizQuestions');
   const demoProgress = useDemoCollection('trainingProgress');
+  const demoCertificates = useDemoCollection('trainingCertificates');
   const courses = isLocalDemo ? demoCourses : remoteCourses;
   const chapters = isLocalDemo ? demoChapters : remoteChapters;
   const quizQuestions = isLocalDemo ? demoQuizQuestions : remoteQuizQuestions;
   const progress = isLocalDemo ? demoProgress : remoteProgress;
+  const certificates = isLocalDemo ? demoCertificates : remoteCertificates;
 
   useEffect(() => {
     if (isLocalDemo) {
@@ -404,16 +414,94 @@ export function useTraining() {
     );
   };
 
+  const getCertificateForCourse = (courseId: string) => {
+    return certificates.find((c) => c.training_id === courseId);
+  };
+
+  /**
+   * Génère (ou récupère) le certificat d'un cours validé et l'ouvre.
+   */
+  const generateCertificate = async (courseId: string, score: number) => {
+    if (!profile) return { error: 'Utilisateur non connecté' };
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return { error: 'Cours non trouvé' };
+
+    const existing = getCertificateForCourse(courseId);
+    if (existing) {
+      openCertificate(existing, {
+        category: course.category,
+        organizationName: undefined,
+      });
+      return { data: existing };
+    }
+
+    const certNumber = generateCertificateNumber(profile.id, courseId);
+    const now = new Date().toISOString();
+    const cert: TrainingCertificate = {
+      id: demoId('cert'),
+      user_id: profile.id,
+      training_id: courseId,
+      organization_id: profile.organization_id ?? '',
+      full_name: profile.full_name ?? profile.email,
+      training_title: course.title,
+      score,
+      issued_at: now,
+      expires_at: null,
+      certificate_number: certNumber,
+      created_at: now,
+    };
+
+    if (isLocalDemo) {
+      updateDemoCollection('trainingCertificates', (prev) => [...prev, cert]);
+      openCertificate(cert, { category: course.category });
+      return { data: cert };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('training_certificates')
+        .insert({
+          user_id: cert.user_id,
+          training_id: cert.training_id,
+          organization_id: cert.organization_id,
+          full_name: cert.full_name,
+          training_title: cert.training_title,
+          score: cert.score,
+          issued_at: cert.issued_at,
+          certificate_number: cert.certificate_number,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          error: mapSupabaseError('Erreur génération certificat', error),
+        };
+      }
+
+      setRemoteCertificates((prev) => [...prev, data as TrainingCertificate]);
+      openCertificate(data as TrainingCertificate, {
+        category: course.category,
+      });
+      return { data };
+    } catch (error) {
+      return { error: mapSupabaseError('Erreur generateCertificate', error) };
+    }
+  };
+
   return {
     courses,
     chapters,
     quizQuestions,
     progress,
+    certificates,
     loading,
     startCourse,
     markChapterRead,
     completeQuiz,
     getCourseProgress,
+    getCertificateForCourse,
+    generateCertificate,
     getChaptersForCourse,
     getQuizForCourse,
     getCompletedCourses,

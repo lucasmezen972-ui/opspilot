@@ -24,6 +24,7 @@ import type {
   Product,
   Task,
   Training,
+  TrainingCertificate,
   TrainingChapter,
   TrainingQuizQuestion,
   UserTrainingProgress,
@@ -52,6 +53,7 @@ export interface DemoState {
   trainingChapters: TrainingChapter[];
   trainingQuizQuestions: TrainingQuizQuestion[];
   trainingProgress: UserTrainingProgress[];
+  trainingCertificates: TrainingCertificate[];
   settings: DemoSettings;
 }
 
@@ -68,6 +70,7 @@ function seed(): DemoState {
     trainingChapters: getDemoTrainingChapters(),
     trainingQuizQuestions: getDemoTrainingQuizQuestions(),
     trainingProgress: getDemoTrainingProgress(),
+    trainingCertificates: [],
     settings: getDemoSettings(),
   };
 }
