@@ -134,6 +134,40 @@ Deno.serve(async (req) => {
         });
       }
 
+      case 'GET /search': {
+        // Recherche globale (lecture seule) : organisations, utilisateurs,
+        // magasins. La requête est nettoyée des caractères qui casseraient la
+        // syntaxe de filtre PostgREST (virgules, parenthèses, wildcards).
+        const raw = (url.searchParams.get('q') ?? '').trim().slice(0, 60);
+        const term = raw.replace(/[,()%*\\]/g, ' ').trim();
+        if (term.length < 2) {
+          return json({ organizations: [], users: [], stores: [] });
+        }
+        const like = `%${term}%`;
+        const [orgs, users, stores] = await Promise.all([
+          admin
+            .from('organizations')
+            .select('id, name, created_at')
+            .ilike('name', like)
+            .limit(10),
+          admin
+            .from('profiles')
+            .select('id, full_name, email, role, organization_id')
+            .or(`full_name.ilike.${like},email.ilike.${like}`)
+            .limit(10),
+          admin
+            .from('stores')
+            .select('id, name, organization_id')
+            .ilike('name', like)
+            .limit(10),
+        ]);
+        return json({
+          organizations: orgs.data ?? [],
+          users: users.data ?? [],
+          stores: stores.data ?? [],
+        });
+      }
+
       case 'GET /dashboard': {
         const now = Date.now();
         const d7 = new Date(now - 7 * 86400000).toISOString();
