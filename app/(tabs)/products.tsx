@@ -26,6 +26,7 @@ import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
+import { shadow } from '../../shared/styles/tokens';
 
 export default function ProductsScreen() {
   const {
@@ -258,11 +259,7 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   scannerButtonText: {
     color: '#FFFFFF',
@@ -288,10 +285,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#059669',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    ...shadow.floating,
   },
 });

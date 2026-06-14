@@ -59,14 +59,36 @@ export const typography = {
   label: { fontSize: 11, fontWeight: '500' as const },
 } as const;
 
-/** Ombre douce homogène (cartes, modales). */
+/**
+ * Échelle d'élévation premium. Ombres douces, teintées « slate » (et non
+ * noir pur) avec un flou large : rendu moderne et discret sur web comme sur
+ * mobile, sans changer la mise en page ni les couleurs de marque.
+ *
+ * - `card` : cartes, panneaux, lignes de liste (élévation au repos).
+ * - `floating` : éléments flottants (bouton d'action, modales).
+ * - `cardActive` : carte sélectionnée (liseré d'élévation teinté marque).
+ */
 export const shadow = {
   card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  floating: {
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  cardActive: {
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    elevation: 6,
   },
 } as const;
 

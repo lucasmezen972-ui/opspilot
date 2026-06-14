@@ -8,9 +8,9 @@ import {
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-import { AppStatusBadge } from '../../shared/components/AppStatusBadge';
-import { type StatusLevel } from '../../shared/styles/tokens';
 import type { Product } from '../../lib/supabase';
+import { AppStatusBadge } from '../../shared/components/AppStatusBadge';
+import { type StatusLevel, shadow } from '../../shared/styles/tokens';
 
 type StockStatus = 'ok' | 'low_stock' | 'out_of_stock';
 
@@ -115,11 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   productImage: {
     width: 60,

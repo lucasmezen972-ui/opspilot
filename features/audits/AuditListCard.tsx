@@ -14,6 +14,7 @@ import {
   getAuditStatusText,
   type AuditListItem,
 } from './auditListModel';
+import { shadow } from '../../shared/styles/tokens';
 
 interface AuditListCardProps {
   audit: AuditListItem;
@@ -130,11 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   auditHeader: {
     flexDirection: 'row',

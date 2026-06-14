@@ -1,6 +1,8 @@
 import { User, Star } from 'lucide-react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
+import { shadow } from '../../shared/styles/tokens';
+
 interface ProfileSummaryProps {
   name: string;
   role: string;
@@ -41,11 +43,7 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadow.card,
   },
   avatar: {
     width: 60,

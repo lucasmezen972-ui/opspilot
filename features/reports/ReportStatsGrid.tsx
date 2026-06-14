@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 
 import type { ReportStat } from './reportsModel';
+import { shadow } from '../../shared/styles/tokens';
 
 interface ReportStatsGridProps {
   stats: ReportStat[];
@@ -51,11 +52,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     gap: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 3,
+    ...shadow.card,
   },
   value: {
     fontSize: 22,
