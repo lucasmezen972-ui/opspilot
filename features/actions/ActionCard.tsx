@@ -4,6 +4,7 @@ import {
   Calendar,
   Flag,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -15,6 +16,7 @@ interface ActionCardProps {
   overdue: boolean;
   compact?: boolean;
   onAdvance: (action: CorrectiveAction) => void;
+  onGeneratePlan?: (action: CorrectiveAction) => void;
 }
 
 export function ActionCard({
@@ -22,6 +24,7 @@ export function ActionCard({
   overdue,
   compact = false,
   onAdvance,
+  onGeneratePlan,
 }: ActionCardProps) {
   return (
     <View
@@ -71,19 +74,33 @@ export function ActionCard({
             </Text>
           </View>
         )}
-        {action.status !== 'done' && action.status !== 'cancelled' && (
-          <TouchableOpacity
-            style={styles.advanceButton}
-            testID={`action-advance-${action.id}`}
-            onPress={() => onAdvance(action)}
-          >
-            <Text style={styles.advanceButtonText}>
-              {action.status === 'open' ? 'Démarrer' : 'Résoudre'}
-            </Text>
-            <ChevronRight size={14} color="#2563EB" />
-          </TouchableOpacity>
-        )}
-        {action.status === 'done' && <CheckCircle size={18} color="#10B981" />}
+        <View style={styles.footerActions}>
+          {onGeneratePlan && (
+            <TouchableOpacity
+              style={styles.planButton}
+              testID={`action-plan-${action.id}`}
+              onPress={() => onGeneratePlan(action)}
+            >
+              <Sparkles size={13} color="#7C3AED" />
+              <Text style={styles.planButtonText}>Plan</Text>
+            </TouchableOpacity>
+          )}
+          {action.status !== 'done' && action.status !== 'cancelled' && (
+            <TouchableOpacity
+              style={styles.advanceButton}
+              testID={`action-advance-${action.id}`}
+              onPress={() => onAdvance(action)}
+            >
+              <Text style={styles.advanceButtonText}>
+                {action.status === 'open' ? 'Démarrer' : 'Résoudre'}
+              </Text>
+              <ChevronRight size={14} color="#2563EB" />
+            </TouchableOpacity>
+          )}
+          {action.status === 'done' && (
+            <CheckCircle size={18} color="#10B981" />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -153,6 +170,26 @@ const styles = StyleSheet.create({
   dueDateText: {
     fontSize: 12,
     color: '#6B7280',
+  },
+  footerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 'auto',
+  },
+  planButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F3E8FF',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  planButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#7C3AED',
   },
   advanceButton: {
     flexDirection: 'row',

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { ActionCard } from '../../features/actions/ActionCard';
+import { ActionPlanModal } from '../../features/actions/ActionPlanModal';
 import { ActionsKanban } from '../../features/actions/ActionsKanban';
 import { ActionsStatsRow } from '../../features/actions/ActionsStatsRow';
 import {
@@ -19,9 +20,17 @@ import {
   CreateActionModal,
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
+import {
+  buildActionPlanPrompt,
+  buildLocalActionPlan,
+  formatActionPlanText,
+} from '../../features/actions/actionPlan';
 import { STATUS_FLOW } from '../../features/actions/constants';
+import { useAppSettings } from '../../hooks/useAppSettings';
+import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 
 export default function ActionsScreen() {
@@ -33,9 +42,16 @@ export default function ActionsScreen() {
     isOverdue,
     getActionsByStatus,
   } = useCorrectiveActions();
+  const { session, isDemoMode } = useAuth();
+  const { isEnabled } = useAppSettings();
+  const isLocalDemo = isDemoMode && !session;
 
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [planAction, setPlanAction] = useState<CorrectiveAction | null>(null);
+  const [planText, setPlanText] = useState<string | null>(null);
+  const [planLoading, setPlanLoading] = useState(false);
+  const [planSource, setPlanSource] = useState<'ia' | 'local' | null>(null);
 
   const overdueCount = useMemo(
     () => actions.filter(isOverdue).length,
@@ -54,6 +70,43 @@ export default function ActionsScreen() {
     const next = idx >= 0 ? STATUS_FLOW[idx + 1] : undefined;
     if (next) {
       updateActionStatus(action.id, next);
+    }
+  };
+
+  // Plan d'action correctif : IA en ligne si disponible, sinon plan proposé.
+  const handleGeneratePlan = async (action: CorrectiveAction) => {
+    setPlanAction(action);
+    setPlanText(null);
+    setPlanSource(null);
+    setPlanLoading(true);
+
+    const localPlan = formatActionPlanText(buildLocalActionPlan(action));
+    const aiAvailable =
+      !isLocalDemo && !!session && isEnabled('features.ai_assistant');
+
+    if (!aiAvailable) {
+      setPlanSource('local');
+      setPlanText(localPlan);
+      setPlanLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        reply?: string;
+      }>('ai-assistant', {
+        body: {
+          messages: [{ role: 'user', content: buildActionPlanPrompt(action) }],
+        },
+      });
+      if (error || !data?.reply) throw new Error('Réponse vide');
+      setPlanSource('ia');
+      setPlanText(data.reply);
+    } catch {
+      setPlanSource('local');
+      setPlanText(localPlan);
+    } finally {
+      setPlanLoading(false);
     }
   };
 
@@ -103,6 +156,7 @@ export default function ActionsScreen() {
               action={action}
               overdue={isOverdue(action)}
               onAdvance={advanceStatus}
+              onGeneratePlan={handleGeneratePlan}
             />
           ))}
         </ScrollView>
@@ -111,6 +165,7 @@ export default function ActionsScreen() {
           getActionsByStatus={getActionsByStatus}
           isOverdue={isOverdue}
           onAdvance={advanceStatus}
+          onGeneratePlan={handleGeneratePlan}
         />
       )}
 
@@ -118,6 +173,15 @@ export default function ActionsScreen() {
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
         onCreate={handleCreate}
+      />
+
+      <ActionPlanModal
+        visible={planAction !== null}
+        subject={planAction?.title ?? ''}
+        loading={planLoading}
+        planText={planText}
+        source={planSource}
+        onClose={() => setPlanAction(null)}
       />
     </View>
   );

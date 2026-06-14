@@ -11,6 +11,7 @@ interface ActionsKanbanProps {
   ) => CorrectiveAction[];
   isOverdue: (action: CorrectiveAction) => boolean;
   onAdvance: (action: CorrectiveAction) => void;
+  onGeneratePlan?: (action: CorrectiveAction) => void;
 }
 
 /** Tableau kanban des actions, une colonne par statut du flux. */
@@ -18,6 +19,7 @@ export function ActionsKanban({
   getActionsByStatus,
   isOverdue,
   onAdvance,
+  onGeneratePlan,
 }: ActionsKanbanProps): ReactNode {
   return (
     <ScrollView
@@ -43,6 +45,7 @@ export function ActionsKanban({
                   overdue={isOverdue(action)}
                   compact
                   onAdvance={onAdvance}
+                  onGeneratePlan={onGeneratePlan}
                 />
               ))}
             </ScrollView>
