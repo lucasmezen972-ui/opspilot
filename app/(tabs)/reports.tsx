@@ -14,20 +14,37 @@ import {
   buildReportStats,
   getCompletedAudits,
 } from '../../features/reports/reportsModel';
+import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
+import type { Audit } from '../../lib/supabase';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 
 export default function ReportsScreen() {
-  const { audits } = useAudits();
+  const { audits, getAuditResponses } = useAudits();
   const { actions } = useCorrectiveActions();
+  const { getItemsForTemplate } = useAuditTemplates();
 
   const completed = useMemo(() => getCompletedAudits(audits), [audits]);
   const stats = useMemo(
     () => buildReportStats(audits, actions),
     [audits, actions],
   );
+
+  // Rapport PDF enrichi : critères détaillés + plan d'action correctif lié.
+  const handleExport = async (audit: Audit) => {
+    const responses = await getAuditResponses(audit.id);
+    const items = audit.template_id
+      ? getItemsForTemplate(audit.template_id)
+      : [];
+    const auditActions = actions.filter((a) => a.audit_id === audit.id);
+    await exportAuditReport(audit, {
+      responses,
+      items,
+      actions: auditActions,
+    });
+  };
 
   return (
     <ScrollView style={styles.container} testID="reports-screen">
@@ -60,7 +77,7 @@ export default function ReportsScreen() {
         </TouchableOpacity>
       </View>
 
-      <AuditReportList audits={completed} onExport={exportAuditReport} />
+      <AuditReportList audits={completed} onExport={handleExport} />
 
       <View style={styles.bottomPadding} />
     </ScrollView>

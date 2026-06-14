@@ -63,6 +63,7 @@ describe('ManagerDashboard', () => {
       updateAuditStatus: vi.fn(),
       completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
+      getAuditResponses: vi.fn(),
       refetch: vi.fn(),
     });
 

@@ -43,13 +43,14 @@ export default function AuditsScreen() {
     updateAuditStatus,
     completeAudit,
     addPhotoToAudit,
+    getAuditResponses,
   } = useAudits();
   const {
     templates,
     loading: templatesLoading,
     getItemsForTemplate,
   } = useAuditTemplates();
-  const { createAction } = useCorrectiveActions();
+  const { createAction, actions } = useCorrectiveActions();
   // Réglage back-office : création auto d'actions sur non-conformité.
   const { isEnabled } = useAppSettings();
   const [cameraVisible, setCameraVisible] = useState(false);
@@ -243,9 +244,19 @@ export default function AuditsScreen() {
     );
   };
 
-  const handleExportReport = (auditId: string) => {
+  const handleExportReport = async (auditId: string) => {
     const fullAudit = dbAudits.find((a) => a.id === auditId);
-    if (fullAudit) exportAuditReport(fullAudit);
+    if (!fullAudit) return;
+    const responses = await getAuditResponses(auditId);
+    const items = fullAudit.template_id
+      ? getItemsForTemplate(fullAudit.template_id)
+      : [];
+    const auditActions = actions.filter((a) => a.audit_id === auditId);
+    await exportAuditReport(fullAudit, {
+      responses,
+      items,
+      actions: auditActions,
+    });
   };
 
   return (

@@ -338,6 +338,33 @@ export function useAudits() {
     }
   };
 
+  /** Réponses enregistrées d'un audit (détail par critère, pour le rapport). */
+  const getAuditResponses = useCallback(
+    async (auditId: string): Promise<AuditResponse[]> => {
+      if (isLocalDemo) {
+        return demoResponses.filter((r) => r.audit_id === auditId);
+      }
+      try {
+        const { data, error } = await supabase
+          .from('audit_responses')
+          .select('*')
+          .eq('audit_id', auditId);
+        if (error) {
+          mapSupabaseError(
+            'Erreur lors de la récupération des réponses',
+            error,
+          );
+          return [];
+        }
+        return data ?? [];
+      } catch (error) {
+        mapSupabaseError('Erreur getAuditResponses', error);
+        return [];
+      }
+    },
+    [isLocalDemo, demoResponses],
+  );
+
   return {
     audits,
     loading,
@@ -345,6 +372,7 @@ export function useAudits() {
     updateAuditStatus,
     completeAudit,
     addPhotoToAudit,
+    getAuditResponses,
     refetch: fetchAudits,
   };
 }
