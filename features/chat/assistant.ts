@@ -1,4 +1,5 @@
 import { getDemoState } from '../../lib/demoStore';
+import { classifyIntent, OUT_OF_SCOPE_RESPONSE } from './knowledgeBase';
 
 export type AssistantHistoryMessage = {
   role: 'user' | 'assistant';
@@ -34,13 +35,6 @@ export function getLocalOperationalContext(
   };
 }
 
-function normalized(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-}
-
 function countLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
@@ -49,35 +43,34 @@ export function getLocalAssistantResponse(
   userMessage: string,
   context: OperationalContext,
 ): string {
-  const message = normalized(userMessage);
+  const domain = classifyIntent(userMessage);
 
-  if (message.includes('audit') || message.includes('retard')) {
-    return `${countLabel(context.overdueAudits, 'audit est en retard', 'audits sont en retard')}. Commencez par le plus ancien, vérifiez son échéance et assignez immédiatement les éventuelles non-conformités.`;
+  switch (domain) {
+    case 'greeting':
+      return `Bonjour ! Situation actuelle : ${countLabel(context.overdueAudits, 'audit en retard', 'audits en retard')}, ${countLabel(context.criticalActions, 'action corrective critique ouverte', 'actions correctives critiques ouvertes')} et ${countLabel(context.criticalDlc, 'produit à DLC critique', 'produits à DLC critique')}. Quel sujet voulez-vous traiter ?`;
+
+    case 'audit':
+      return `${countLabel(context.overdueAudits, 'audit est en retard', 'audits sont en retard')}. Commencez par le plus ancien, vérifiez son échéance et assignez immédiatement les éventuelles non-conformités.`;
+
+    case 'action':
+      return `${countLabel(context.criticalActions, 'action corrective critique reste ouverte', 'actions correctives critiques restent ouvertes')}. Priorisez la sécurisation immédiate, nommez un responsable et confirmez une échéance aujourd'hui.`;
+
+    case 'dlc':
+      return `${countLabel(context.criticalDlc, 'produit a une DLC critique', 'produits ont une DLC critique')} dans les 7 prochains jours. Contrôlez d'abord les produits déjà dépassés, puis appliquez la rotation FEFO.`;
+
+    case 'haccp':
+      return 'Vérifiez les points critiques de contrôle (CCP) : températures de réception (< +4 °C pour les frais), stockage séparé cru/cuit, et traçabilité des lots. Notez toute déviation dans le journal de bord HACCP.';
+
+    case 'formation':
+      return "Consultez le catalogue de formations dans l'onglet Formation. Les formations HACCP et Hygiène alimentaire sont prioritaires pour les nouveaux membres. Votre progression et vos certificats sont disponibles directement dans l'application.";
+
+    case 'tache':
+      return "Vérifiez l'onglet Tâches pour voir vos missions du jour et celles en retard. Priorisez par criticité et échéance — commencez par les tâches déjà dépassées.";
+
+    case 'messagerie':
+      return "Utilisez l'onglet Messages > Canaux pour les communications officielles de votre équipe. Les annonces importantes sont épinglées en haut de chaque canal.";
+
+    default:
+      return OUT_OF_SCOPE_RESPONSE;
   }
-
-  if (
-    message.includes('action') ||
-    message.includes('critique') ||
-    message.includes('non-conform')
-  ) {
-    return `${countLabel(context.criticalActions, 'action corrective critique reste ouverte', 'actions correctives critiques restent ouvertes')}. Priorisez la sécurisation immédiate, nommez un responsable et confirmez une échéance aujourd’hui.`;
-  }
-
-  if (
-    message.includes('dlc') ||
-    message.includes('stock') ||
-    message.includes('produit')
-  ) {
-    return `${countLabel(context.criticalDlc, 'produit a une DLC critique', 'produits ont une DLC critique')} dans les 7 prochains jours. Contrôlez d’abord les produits déjà dépassés, puis appliquez la rotation FEFO.`;
-  }
-
-  if (
-    message.includes('bonjour') ||
-    message.includes('aide') ||
-    message.includes('priorite')
-  ) {
-    return `Bonjour. Votre situation actuelle : ${context.overdueAudits} audit(s) en retard, ${context.criticalActions} action(s) critique(s) ouverte(s) et ${context.criticalDlc} produit(s) à DLC critique. Dites-moi quel sujet vous voulez traiter en premier.`;
-  }
-
-  return `Je peux vous aider sur les audits, les actions correctives et les DLC. Aujourd’hui, je surveille surtout ${context.overdueAudits} audit(s) en retard, ${context.criticalActions} action(s) critique(s) et ${context.criticalDlc} DLC critique(s).`;
 }
