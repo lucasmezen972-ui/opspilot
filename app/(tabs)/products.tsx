@@ -24,9 +24,10 @@ import {
 } from '../../features/products/productModel';
 import { useProducts } from '../../hooks/useProducts';
 import type { Product } from '../../lib/supabase';
+import { AppButton } from '../../shared/components/AppButton';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
-import { colors, shadow } from '../../shared/styles/tokens';
+import { shadow } from '../../shared/styles/tokens';
 
 export default function ProductsScreen() {
   const {
@@ -131,20 +132,16 @@ export default function ProductsScreen() {
       <ProductQuickStats counts={stockCounts} />
 
       {/* Scanner Button */}
-      <TouchableOpacity
+      <AppButton
         testID="product-scan-button"
-        style={[
-          styles.scannerButton,
-          isScanning && styles.scannerButtonDisabled,
-        ]}
-        onPress={() => setScannerVisible(true)}
+        label={isScanning ? 'Scan en cours...' : 'Scanner un produit'}
+        icon={Scan}
+        variant="success"
+        size="lg"
         disabled={isScanning}
-      >
-        <Scan size={24} color="#FFFFFF" />
-        <Text style={styles.scannerButtonText}>
-          {isScanning ? 'Scan en cours...' : 'Scanner un produit'}
-        </Text>
-      </TouchableOpacity>
+        onPress={() => setScannerVisible(true)}
+        style={styles.scannerButton}
+      />
 
       {/* Products List */}
       <ScrollView style={styles.productsList}>
@@ -253,25 +250,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   scannerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#059669',
     margin: 20,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
-  },
-  scannerButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  scannerButtonDisabled: {
-    opacity: 0.7,
   },
   productsList: {
     flex: 1,
