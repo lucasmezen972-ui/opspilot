@@ -3,23 +3,33 @@ import {
   TriangleAlert as AlertTriangle,
   TrendingUp,
 } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
 import RequireRole from '../../components/RequireRole';
 import { ManagerActivityList } from '../../features/manager/ManagerActivityList';
+import { ManagerCockpit } from '../../features/manager/ManagerCockpit';
 import { ManagerStatCards } from '../../features/manager/ManagerStatCards';
 import { StatusBreakdown } from '../../features/manager/StatusBreakdown';
 import { StorePerformanceList } from '../../features/manager/StorePerformanceList';
+import {
+  buildCockpitRisks,
+  computeCockpitSignals,
+} from '../../features/manager/cockpitModel';
 import {
   computeManagerStats,
   computeStoreStats,
   getUrgentTasks,
 } from '../../features/manager/managerModel';
+import { computeSupervisionStats } from '../../features/training/trainingModel';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
+import { useChannels } from '../../hooks/useChannels';
+import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
+import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
+import { AppTabBar } from '../../shared/components/AppTabBar';
 
 function auditStatusColor(status: string): string {
   if (status === 'completed') return '#10B981';
@@ -40,6 +50,10 @@ function ManagerDashboardContent() {
   const { audits } = useAudits();
   const { tasks } = useTasks();
   const { stores } = useStores();
+  const { actions } = useCorrectiveActions();
+  const { channels, getUnreadCount } = useChannels();
+  const { entries: trainingEntries } = useTrainingSupervision();
+  const [activeTab, setActiveTab] = useState<'cockpit' | 'details'>('cockpit');
 
   const stats = useMemo(
     () => computeManagerStats(audits, tasks),
@@ -52,15 +66,80 @@ function ManagerDashboardContent() {
   const recentAudits = useMemo(() => audits.slice(0, 5), [audits]);
   const urgentTasks = useMemo(() => getUrgentTasks(tasks), [tasks]);
 
+  const unreadMessages = useMemo(
+    () => channels.reduce((sum, c) => sum + getUnreadCount(c.id), 0),
+    [channels, getUnreadCount],
+  );
+  const trainingGaps = useMemo(() => {
+    const supervision = computeSupervisionStats(trainingEntries);
+    return supervision.notStartedCount + supervision.inProgressCount;
+  }, [trainingEntries]);
+  const cockpitSignals = useMemo(
+    () =>
+      computeCockpitSignals({
+        audits,
+        actions,
+        tasks,
+        trainingGaps,
+        unreadMessages,
+      }),
+    [audits, actions, tasks, trainingGaps, unreadMessages],
+  );
+  const cockpitRisks = useMemo(
+    () => buildCockpitRisks(cockpitSignals),
+    [cockpitSignals],
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard Manager</Text>
+        <Text style={styles.title}>Cockpit Manager</Text>
         <Text style={styles.subtitle}>
           Bienvenue, {profile?.full_name ?? 'Manager'}
         </Text>
       </View>
 
+      <AppTabBar
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        tabs={[
+          { key: 'cockpit', label: 'Cockpit', testID: 'manager-tab-cockpit' },
+          { key: 'details', label: 'Détails', testID: 'manager-tab-details' },
+        ]}
+      />
+
+      {activeTab === 'cockpit' ? (
+        <ManagerCockpit signals={cockpitSignals} risks={cockpitRisks} />
+      ) : (
+        <ManagerDetails
+          stats={stats}
+          storeStats={storeStats}
+          urgentTasks={urgentTasks}
+          recentAudits={recentAudits}
+          auditsEmpty={audits.length === 0 && tasks.length === 0}
+        />
+      )}
+    </ScrollView>
+  );
+}
+
+type DetailsProps = {
+  stats: ReturnType<typeof computeManagerStats>;
+  storeStats: ReturnType<typeof computeStoreStats>;
+  urgentTasks: ReturnType<typeof getUrgentTasks>;
+  recentAudits: ReturnType<typeof useAudits>['audits'];
+  auditsEmpty: boolean;
+};
+
+function ManagerDetails({
+  stats,
+  storeStats,
+  urgentTasks,
+  recentAudits,
+  auditsEmpty,
+}: DetailsProps) {
+  return (
+    <>
       <ManagerStatCards stats={stats} />
 
       <StatusBreakdown
@@ -125,7 +204,7 @@ function ManagerDashboardContent() {
         />
       )}
 
-      {audits.length === 0 && tasks.length === 0 && (
+      {auditsEmpty && (
         <View style={styles.emptyState}>
           <TrendingUp size={48} color="#9CA3AF" />
           <Text style={styles.emptyTitle}>Aucune donnée</Text>
@@ -134,7 +213,7 @@ function ManagerDashboardContent() {
           </Text>
         </View>
       )}
-    </ScrollView>
+    </>
   );
 }
 

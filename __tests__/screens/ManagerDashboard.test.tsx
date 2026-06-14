@@ -94,13 +94,14 @@ describe('ManagerDashboard', () => {
     });
   });
 
-  it('renders manager stats', () => {
-    const { getByText } = render(<ManagerDashboard />);
+  it('affiche le cockpit manager par défaut', () => {
+    const { getByText, getByTestId } = render(<ManagerDashboard />);
 
-    expect(getByText('Dashboard Manager')).toBeTruthy();
+    expect(getByText('Cockpit Manager')).toBeTruthy();
     expect(getByText('Bienvenue, Marie Dupont')).toBeTruthy();
-    expect(getByText("Vue d'ensemble")).toBeTruthy();
-    expect(getByText('Audits total')).toBeTruthy();
-    expect(getByText('Tâches total')).toBeTruthy();
+    expect(getByText('Conformité globale')).toBeTruthy();
+    expect(getByText('Risques prioritaires')).toBeTruthy();
+    // Audit terminé à 90% → score de conformité affiché.
+    expect(getByTestId('cockpit-conformity-score')).toBeTruthy();
   });
 });
