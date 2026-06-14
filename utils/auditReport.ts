@@ -1,5 +1,9 @@
 import { Platform, Share } from 'react-native';
 
+import {
+  calculateSectionScores,
+  type AuditResponseDraft,
+} from '../features/audits/scoring';
 import type {
   Audit,
   AuditResponse,
@@ -95,8 +99,27 @@ function criteriaSection(ctx: AuditReportContext): string {
     sections.get(key)!.push(item);
   }
 
+  // Analyse de conformité par section (pondérée) : met en avant les zones
+  // faibles. Affichée uniquement si l'audit comporte des réponses.
+  const drafts: AuditResponseDraft[] = responses.map((r) => ({
+    item_id: r.item_id,
+    value: r.value ?? null,
+    photo_url: r.photo_url ?? null,
+    comment: r.comment ?? null,
+    is_compliant: r.is_compliant ?? false,
+  }));
+  const sectionScoreByName = new Map(
+    calculateSectionScores(items, drafts).map((s) => [s.section, s]),
+  );
+
   const blocks = [...sections.entries()]
     .map(([section, sectionItems]) => {
+      const sectionScore = responses.length
+        ? sectionScoreByName.get(section)
+        : undefined;
+      const sectionBadge = sectionScore
+        ? `<span class="crit-score" style="color:${scoreColor(sectionScore.score)}">${sectionScore.score}% conforme · ${sectionScore.conformCount}/${sectionScore.evaluatedCount}</span>`
+        : '';
       const rows = sectionItems
         .map((item) => {
           const response = byItem.get(item.id);
@@ -125,7 +148,7 @@ function criteriaSection(ctx: AuditReportContext): string {
         })
         .join('');
       return `
-      <h3 class="crit-section">${esc(section)}</h3>
+      <h3 class="crit-section">${esc(section)} ${sectionBadge}</h3>
       <table class="crit-table">
         <thead><tr><th>Critère</th><th>Points</th><th>Résultat</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -222,6 +245,7 @@ export function buildAuditReportHTML(
   .row:last-child { border-bottom: none; }
   .row span:first-child { color: #6B7280; }
   .crit-section { font-size: 13px; font-weight: 700; color: #1D4ED8; text-transform: uppercase; letter-spacing: .5px; margin: 18px 0 8px; }
+  .crit-score { font-size: 11.5px; font-weight: 700; letter-spacing: 0; text-transform: none; margin-left: 6px; }
   .crit-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .crit-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: #9CA3AF; padding: 6px 10px; border-bottom: 1px solid #E5E7EB; }
   .crit-table td { padding: 11px 10px; border-bottom: 1px solid #F3F4F6; vertical-align: top; }
