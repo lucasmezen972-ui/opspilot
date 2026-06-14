@@ -9,7 +9,13 @@ import {
 } from 'react-native';
 
 import { AuditReportList } from '../../features/reports/AuditReportList';
+import { DirectionReport } from '../../features/reports/DirectionReport';
 import { ReportStatsGrid } from '../../features/reports/ReportStatsGrid';
+import {
+  buildEvolution,
+  buildSiteConformity,
+  directionReportRows,
+} from '../../features/reports/directionReportModel';
 import {
   buildReportStats,
   getCompletedAudits,
@@ -20,6 +26,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { Audit } from '../../lib/supabase';
 import { exportAuditReport } from '../../utils/auditReport';
+import { downloadDataset } from '../../utils/export';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 import { can } from '../../utils/permissions';
 
@@ -35,6 +42,11 @@ export default function ReportsScreen() {
     () => buildReportStats(audits, actions),
     [audits, actions],
   );
+  const sites = useMemo(() => buildSiteConformity(audits), [audits]);
+  const evolution = useMemo(() => buildEvolution(audits), [audits]);
+
+  const handleExportDirection = (format: 'csv' | 'xlsx') =>
+    downloadDataset(directionReportRows(sites), 'rapport-direction', format);
 
   // Rapport PDF enrichi : critères détaillés + plan d'action correctif lié.
   const handleExport = async (audit: Audit) => {
@@ -65,6 +77,13 @@ export default function ReportsScreen() {
       </View>
 
       <ReportStatsGrid stats={stats} />
+
+      <DirectionReport
+        sites={sites}
+        evolution={evolution}
+        canExport={canExport}
+        onExport={handleExportDirection}
+      />
 
       {canExport && (
         <View style={styles.section}>
