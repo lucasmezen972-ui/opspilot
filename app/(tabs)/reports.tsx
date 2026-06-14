@@ -16,15 +16,19 @@ import {
 } from '../../features/reports/reportsModel';
 import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { Audit } from '../../lib/supabase';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
+import { can } from '../../utils/permissions';
 
 export default function ReportsScreen() {
+  const { profile } = useAuth();
   const { audits, getAuditResponses } = useAudits();
   const { actions } = useCorrectiveActions();
   const { getItemsForTemplate } = useAuditTemplates();
+  const canExport = can(profile?.role, 'reports.export');
 
   const completed = useMemo(() => getCompletedAudits(audits), [audits]);
   const stats = useMemo(
@@ -62,22 +66,27 @@ export default function ReportsScreen() {
 
       <ReportStatsGrid stats={stats} />
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Exports</Text>
-        <TouchableOpacity
-          testID="export-csv-button"
-          style={styles.exportButton}
-          onPress={() => exportAuditsAsCSV(audits)}
-          disabled={audits.length === 0}
-        >
-          <Download size={18} color="#FFFFFF" />
-          <Text style={styles.exportButtonText}>
-            Exporter tous les audits (CSV)
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {canExport && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Exports</Text>
+          <TouchableOpacity
+            testID="export-csv-button"
+            style={styles.exportButton}
+            onPress={() => exportAuditsAsCSV(audits)}
+            disabled={audits.length === 0}
+          >
+            <Download size={18} color="#FFFFFF" />
+            <Text style={styles.exportButtonText}>
+              Exporter tous les audits (CSV)
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-      <AuditReportList audits={completed} onExport={handleExport} />
+      <AuditReportList
+        audits={completed}
+        onExport={canExport ? handleExport : undefined}
+      />
 
       <View style={styles.bottomPadding} />
     </ScrollView>

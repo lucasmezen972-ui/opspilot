@@ -208,6 +208,7 @@ async function enterApp() {
 /* ── Router ── */
 const views = {
   dashboard: renderDashboard,
+  search: renderSearch,
   users: renderUsers,
   orgs: renderOrgs,
   announcements: renderAnnouncements,
@@ -1085,6 +1086,78 @@ async function renderPlatform() {
       toast(`Erreur : ${e.message}`, 5000);
     }
   });
+}
+
+function searchSection(title, rows) {
+  return `
+    <h3 class="col-title">${title}</h3>
+    <table><tbody>${rows || '<tr><td><em>Aucun résultat.</em></td></tr>'}</tbody></table>`;
+}
+
+async function renderSearch() {
+  const initial = decodeURIComponent(
+    (location.hash.split('?')[1] || '').replace(/^q=/, ''),
+  );
+  content.innerHTML = `
+    <h2>Recherche globale</h2>
+    <p class="subtitle">Organisations, utilisateurs et magasins</p>
+    <input
+      id="search-input"
+      data-testid="admin-search-input"
+      type="search"
+      placeholder="Nom, email ou magasin…"
+      value="${esc(initial)}"
+      style="width:100%;max-width:480px;margin:8px 0 16px;padding:10px 12px"
+    />
+    <div id="search-results"></div>`;
+
+  const input = $('#search-input');
+  const results = $('#search-results');
+  input.focus();
+
+  const run = async () => {
+    const value = input.value.trim();
+    if (value.length < 2) {
+      results.innerHTML =
+        '<p class="subtitle">Saisissez au moins 2 caractères.</p>';
+      return;
+    }
+    results.innerHTML = '<p class="subtitle">Recherche…</p>';
+    try {
+      const r = await api(`/search?q=${encodeURIComponent(value)}`);
+      const orgs = (r.organizations ?? [])
+        .map(
+          (o) =>
+            `<tr><td><strong>${esc(o.name ?? '—')}</strong></td><td style="text-align:right"><a href="#/orgs">Ouvrir →</a></td></tr>`,
+        )
+        .join('');
+      const users = (r.users ?? [])
+        .map(
+          (u) =>
+            `<tr><td><strong>${esc(u.full_name ?? u.email ?? '—')}</strong><br /><span style="color:#6b7280">${esc(u.email ?? '')} · ${esc(u.role ?? '')}</span></td><td style="text-align:right"><a href="#/users">Ouvrir →</a></td></tr>`,
+        )
+        .join('');
+      const stores = (r.stores ?? [])
+        .map(
+          (st) =>
+            `<tr><td><strong>${esc(st.name ?? '—')}</strong></td><td></td></tr>`,
+        )
+        .join('');
+      results.innerHTML =
+        searchSection('Organisations', orgs) +
+        searchSection('Utilisateurs', users) +
+        searchSection('Magasins', stores);
+    } catch (e) {
+      results.innerHTML = `<p class="error">${esc(e.message)}</p>`;
+    }
+  };
+
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(run, 250);
+  });
+  if (input.value.trim().length >= 2) run();
 }
 
 async function renderJournal() {
