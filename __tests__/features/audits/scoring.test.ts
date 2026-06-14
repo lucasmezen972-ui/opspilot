@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   calculateAuditScore,
+  calculateSectionScores,
   getResponseCompliance,
   validateAuditResponses,
   type AuditResponseDraft,
@@ -79,5 +80,31 @@ describe('audit scoring', () => {
         response('rating', 5),
       ]),
     ).toEqual([]);
+  });
+
+  it('calcule un score de conformité par section', () => {
+    const multi = [
+      ...items,
+      {
+        id: 'recep',
+        template_id: 'template',
+        section: 'Réception',
+        question: 'Température OK ?',
+        item_type: 'yes_no' as const,
+        is_required: true,
+        points: 20,
+        sort_order: 3,
+      },
+    ];
+    const sections = calculateSectionScores(multi, [
+      response('yes-no', true),
+      response('rating', 3),
+      { item_id: 'recep', value: false, is_compliant: false },
+    ]);
+    const byName = Object.fromEntries(sections.map((s) => [s.section, s]));
+    expect(byName['Contrôle']?.score).toBe(80);
+    expect(byName['Réception']?.score).toBe(0);
+    expect(byName['Réception']?.conformCount).toBe(0);
+    expect(byName['Réception']?.evaluatedCount).toBe(1);
   });
 });

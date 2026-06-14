@@ -66,6 +66,33 @@ export function validateAuditResponses(
   return errors;
 }
 
+/**
+ * Points obtenus / disponibles pour un critère. Un critère facultatif non
+ * renseigné ne compte pas (availability 0).
+ */
+function itemPoints(
+  item: AuditTemplateItem,
+  response?: AuditResponseDraft,
+): { earned: number; available: number } {
+  if (!item.is_required && !hasValue(item, response)) {
+    return { earned: 0, available: 0 };
+  }
+  const available = item.points;
+  if (!response) return { earned: 0, available };
+
+  if (item.item_type === 'score_1_5') {
+    const rating =
+      typeof response.value === 'number'
+        ? Math.min(5, Math.max(1, response.value))
+        : 1;
+    return { earned: item.points * ((rating - 1) / 4), available };
+  }
+  if (item.item_type === 'yes_no') {
+    return { earned: response.value === true ? item.points : 0, available };
+  }
+  return { earned: hasValue(item, response) ? item.points : 0, available };
+}
+
 export function calculateAuditScore(
   items: AuditTemplateItem[],
   responses: AuditResponseDraft[],
@@ -77,25 +104,73 @@ export function calculateAuditScore(
   let availablePoints = 0;
 
   for (const item of items) {
-    const response = byItem.get(item.id);
-    if (!item.is_required && !hasValue(item, response)) continue;
-
-    availablePoints += item.points;
-    if (!response) continue;
-
-    if (item.item_type === 'score_1_5') {
-      const rating =
-        typeof response.value === 'number'
-          ? Math.min(5, Math.max(1, response.value))
-          : 1;
-      earnedPoints += item.points * ((rating - 1) / 4);
-    } else if (item.item_type === 'yes_no') {
-      if (response.value === true) earnedPoints += item.points;
-    } else if (hasValue(item, response)) {
-      earnedPoints += item.points;
-    }
+    const { earned, available } = itemPoints(item, byItem.get(item.id));
+    earnedPoints += earned;
+    availablePoints += available;
   }
 
   if (availablePoints === 0) return 0;
   return Math.round((earnedPoints / availablePoints) * 100);
+}
+
+export interface SectionScore {
+  section: string;
+  /** Score pondéré de la section (0–100). */
+  score: number;
+  /** Critères conformes / évalués dans la section. */
+  conformCount: number;
+  evaluatedCount: number;
+}
+
+/**
+ * Score de conformité par section : met en évidence les zones faibles d'un
+ * audit (analyse de conformité avancée).
+ */
+export function calculateSectionScores(
+  items: AuditTemplateItem[],
+  responses: AuditResponseDraft[],
+): SectionScore[] {
+  const byItem = new Map(
+    responses.map((response) => [response.item_id, response]),
+  );
+  const groups = new Map<
+    string,
+    { earned: number; available: number; conform: number; evaluated: number }
+  >();
+  const order: string[] = [];
+
+  for (const item of [...items].sort((a, b) => a.sort_order - b.sort_order)) {
+    const response = byItem.get(item.id);
+    const { earned, available } = itemPoints(item, response);
+    if (available === 0) continue;
+
+    const section = item.section || 'Critères';
+    if (!groups.has(section)) {
+      groups.set(section, {
+        earned: 0,
+        available: 0,
+        conform: 0,
+        evaluated: 0,
+      });
+      order.push(section);
+    }
+    const group = groups.get(section)!;
+    group.earned += earned;
+    group.available += available;
+    group.evaluated += 1;
+    if (response?.is_compliant) group.conform += 1;
+  }
+
+  return order.map((section) => {
+    const group = groups.get(section)!;
+    return {
+      section,
+      score:
+        group.available > 0
+          ? Math.round((group.earned / group.available) * 100)
+          : 0,
+      conformCount: group.conform,
+      evaluatedCount: group.evaluated,
+    };
+  });
 }

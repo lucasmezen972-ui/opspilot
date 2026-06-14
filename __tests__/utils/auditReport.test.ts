@@ -86,5 +86,7 @@ describe('buildAuditReportHTML', () => {
     expect(html).toContain('Non conforme');
     expect(html).toContain("Plan d'action correctif");
     expect(html).toContain('Recalibrer la chambre froide');
+    // Analyse de conformité par section (audits avancés).
+    expect(html).toMatch(/% conforme ·/);
   });
 });
