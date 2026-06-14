@@ -19,12 +19,14 @@ export function generateCertificateNumber(
   trainingId: string,
 ): string {
   const year = new Date().getFullYear();
-  const hash =
-    Math.abs(
-      (userId + trainingId)
-        .split('')
-        .reduce((acc, c) => acc * 31 + c.charCodeAt(0), 0),
-    ) % 99999;
+  // Hash de Horner avec modulo dans la boucle : évite le débordement en
+  // flottant (perte de précision) de l'accumulation brute et répartit mieux
+  // les numéros sur l'espace disponible.
+  const source = `${userId}:${trainingId}`;
+  let hash = 0;
+  for (let i = 0; i < source.length; i += 1) {
+    hash = (hash * 31 + source.charCodeAt(i)) % 100000;
+  }
   return `OPS-${year}-${String(hash).padStart(5, '0')}`;
 }
 

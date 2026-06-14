@@ -80,15 +80,20 @@ export function useChannels() {
 
   const markChannelRead = useCallback(
     (channelId: string) => {
-      if (!isLocalDemo) return;
-      updateDemoCollection('channelMessages', (prev) =>
-        prev.map((m) => {
-          if (m.channel_id !== channelId) return m;
-          const readBy = m.read_by ?? [];
-          if (readBy.includes(currentUserId)) return m;
-          return { ...m, read_by: [...readBy, currentUserId] };
-        }),
-      );
+      const markRead = (m: ChannelMessage) => {
+        if (m.channel_id !== channelId) return m;
+        const readBy = m.read_by ?? [];
+        if (readBy.includes(currentUserId)) return m;
+        return { ...m, read_by: [...readBy, currentUserId] };
+      };
+      if (isLocalDemo) {
+        updateDemoCollection('channelMessages', (prev) => prev.map(markRead));
+        return;
+      }
+      // Mode connecté : mise à jour optimiste locale pour vider le badge à
+      // l'ouverture. La persistance serveur des accusés de lecture nécessite
+      // une table dédiée (les membres n'ont pas de droit UPDATE sur read_by).
+      setRemoteMessages((prev) => prev.map(markRead));
     },
     [isLocalDemo, currentUserId],
   );
@@ -132,6 +137,9 @@ export function useChannels() {
           content: msg.content,
           message_type: msg.message_type,
           attachment_url: msg.attachment_url,
+          // L'auteur a déjà « lu » son message : évite de le compter comme
+          // non lu dans son propre badge.
+          read_by: msg.read_by,
         })
         .select()
         .single();

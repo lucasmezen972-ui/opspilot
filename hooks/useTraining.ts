@@ -126,21 +126,38 @@ export function useTraining() {
         setRemoteQuizQuestions([]);
       }
 
-      // Récupérer la progression de l'utilisateur
-      const { data: progressData, error: progressError } = await supabase
-        .from('user_training_progress')
-        .select('*')
-        .eq('user_id', profile.id);
+      // Récupérer la progression et les certificats de l'utilisateur
+      const [progressResult, certResult] = await Promise.all([
+        supabase
+          .from('user_training_progress')
+          .select('*')
+          .eq('user_id', profile.id),
+        supabase
+          .from('training_certificates')
+          .select('*')
+          .eq('user_id', profile.id),
+      ]);
 
-      if (progressError) {
+      if (progressResult.error) {
         mapSupabaseError(
           'Erreur lors de la récupération de la progression',
-          progressError,
+          progressResult.error,
         );
         return;
       }
 
-      setRemoteProgress(progressData || []);
+      setRemoteProgress(progressResult.data || []);
+
+      // Les certificats sont secondaires : on n'interrompt pas le chargement
+      // de la formation si leur récupération échoue.
+      if (certResult.error) {
+        mapSupabaseError(
+          'Erreur lors de la récupération des certificats',
+          certResult.error,
+        );
+      } else {
+        setRemoteCertificates((certResult.data || []) as TrainingCertificate[]);
+      }
     } catch (error) {
       mapSupabaseError('Erreur fetchTrainingData', error);
     } finally {
@@ -480,6 +497,27 @@ export function useTraining() {
         .single();
 
       if (error) {
+        // Un certificat existe déjà (état local périmé ou double clic) :
+        // on récupère l'existant plutôt que d'échouer sur la contrainte
+        // d'unicité, et on l'ouvre.
+        const { data: found } = await supabase
+          .from('training_certificates')
+          .select('*')
+          .eq('user_id', cert.user_id)
+          .eq('training_id', cert.training_id)
+          .maybeSingle();
+
+        if (found) {
+          const existingCert = found as TrainingCertificate;
+          setRemoteCertificates((prev) =>
+            prev.some((c) => c.id === existingCert.id)
+              ? prev
+              : [...prev, existingCert],
+          );
+          openCertificate(existingCert, { category: course.category });
+          return { data: existingCert };
+        }
+
         return {
           error: mapSupabaseError('Erreur génération certificat', error),
         };
