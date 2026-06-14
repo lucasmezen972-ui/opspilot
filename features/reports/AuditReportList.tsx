@@ -6,7 +6,8 @@ import { colors, shadow } from '../../shared/styles/tokens';
 
 interface AuditReportListProps {
   audits: Audit[];
-  onExport: (audit: Audit) => void;
+  /** Export PDF unitaire. Omis si l'utilisateur n'a pas la permission d'export. */
+  onExport?: (audit: Audit) => void;
 }
 
 /** Liste des audits terminés avec export PDF unitaire. */
@@ -31,14 +32,16 @@ export function AuditReportList({ audits, onExport }: AuditReportListProps) {
                 {audit.score != null ? ` · Score ${audit.score}%` : ''}
               </Text>
             </View>
-            <TouchableOpacity
-              testID={`report-download-${audit.id}`}
-              style={styles.download}
-              onPress={() => onExport(audit)}
-            >
-              <Download size={16} color="#2563EB" />
-              <Text style={styles.downloadText}>PDF</Text>
-            </TouchableOpacity>
+            {onExport && (
+              <TouchableOpacity
+                testID={`report-download-${audit.id}`}
+                style={styles.download}
+                onPress={() => onExport(audit)}
+              >
+                <Download size={16} color="#2563EB" />
+                <Text style={styles.downloadText}>PDF</Text>
+              </TouchableOpacity>
+            )}
           </View>
         ))}
         {audits.length === 0 && (
