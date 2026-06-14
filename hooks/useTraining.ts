@@ -9,6 +9,7 @@ import {
   calculateReadingProgress,
   uniqueChapterIds,
 } from '../features/training/progress';
+import { isQuizPassed } from '../features/training/quizEngine';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import {
@@ -276,14 +277,19 @@ export function useTraining() {
     return { data };
   };
 
-  const completeQuiz = async (courseId: string, score: number) => {
+  const completeQuiz = async (
+    courseId: string,
+    score: number,
+    failedCritical = false,
+  ) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
 
     const course = courses.find((c) => c.id === courseId);
     if (!course) return { error: 'Cours non trouvé' };
 
-    // Passing score is fixed at 70%
-    const passed = score >= 70;
+    // Validation alignée sur le moteur de quiz : seuil propre au module
+    // (min_score) et échec bloquant en cas de question critique ratée.
+    const passed = isQuizPassed(score, failedCritical, course.min_score ?? 70);
     const existingProgress = progress.find(
       (item) => item.training_id === courseId,
     );

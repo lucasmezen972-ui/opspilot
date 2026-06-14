@@ -42,7 +42,11 @@ type Props = {
     chapterId: string,
     totalChapters: number,
   ) => Promise<OperationResult>;
-  onCompleteQuiz: (courseId: string, score: number) => Promise<OperationResult>;
+  onCompleteQuiz: (
+    courseId: string,
+    score: number,
+    failedCritical: boolean,
+  ) => Promise<OperationResult>;
   onGenerateCertificate?: (courseId: string, score: number) => void;
 };
 
@@ -122,6 +126,8 @@ export function TrainingCourseModal({
     [questions],
   );
   const sessionQuestions = quizSession?.questions ?? [];
+  const minScore = course?.min_score ?? 70;
+  const passed = isQuizPassed(score ?? 0, failedCritical, minScore);
   const currentChapter = sortedChapters[chapterIndex];
   const currentQuestion = sessionQuestions[questionIndex];
   const allChaptersRead =
@@ -174,7 +180,7 @@ export function TrainingCourseModal({
       answers,
     );
     setSaving(true);
-    const result = await onCompleteQuiz(course.id, finalScore);
+    const result = await onCompleteQuiz(course.id, finalScore, fc);
     setSaving(false);
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
@@ -305,7 +311,7 @@ export function TrainingCourseModal({
                 <Text style={styles.progressLabel}>
                   Question {questionIndex + 1} sur {sessionQuestions.length}
                 </Text>
-                <Text style={styles.progressLabel}>70 % requis</Text>
+                <Text style={styles.progressLabel}>{minScore} % requis</Text>
               </View>
               <ScrollView style={styles.body}>
                 <Text style={styles.questionText}>
@@ -412,9 +418,7 @@ export function TrainingCourseModal({
               <View
                 style={[
                   styles.scoreCircle,
-                  isQuizPassed(score, failedCritical)
-                    ? styles.scorePassed
-                    : styles.scoreFailed,
+                  passed ? styles.scorePassed : styles.scoreFailed,
                 ]}
               >
                 <Text style={styles.scoreText} testID="training-quiz-score">
@@ -422,18 +426,16 @@ export function TrainingCourseModal({
                 </Text>
               </View>
               <Text style={styles.resultTitle}>
-                {isQuizPassed(score, failedCritical)
-                  ? 'Formation validée !'
-                  : 'Évaluation à retravailler'}
+                {passed ? 'Formation validée !' : 'Évaluation à retravailler'}
               </Text>
               <Text style={styles.resultText}>
-                {isQuizPassed(score, failedCritical)
+                {passed
                   ? `Vous gagnez ${course.xp_reward} XP.`
                   : failedCritical
                     ? 'Une question critique a été ratée. Relisez les procédures obligatoires.'
-                    : "Relisez les chapitres puis retentez l'évaluation. Un score de 70 % est requis."}
+                    : `Relisez les chapitres puis retentez l'évaluation. Un score de ${minScore} % est requis.`}
               </Text>
-              {isQuizPassed(score, failedCritical) && onGenerateCertificate && (
+              {passed && onGenerateCertificate && (
                 <TouchableOpacity
                   testID="training-certificate-btn"
                   style={styles.certificateButton}
