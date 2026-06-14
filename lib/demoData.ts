@@ -1086,158 +1086,457 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
 }
 
 export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
-  const questions: Record<string, [string, string[], number][]> = {
-    'demo-training-1': [
-      [
-        'Quel est le rôle principal de HACCP ?',
-        ['Décorer les locaux', 'Maîtriser les dangers', 'Fixer les prix'],
-        1,
-      ],
-      [
-        'Quand faut-il se laver les mains ?',
-        ['Après une manipulation contaminante', 'Une fois par jour', 'Jamais'],
-        0,
-      ],
-      [
-        'Comment éviter une contamination croisée ?',
-        [
-          'Mélanger les outils',
-          'Séparer le matériel',
-          'Ignorer les allergènes',
-        ],
-        1,
-      ],
-      [
-        'Que faire d’un produit douteux ?',
-        ['Le vendre', 'L’isoler', 'Changer son étiquette'],
-        1,
-      ],
-      [
-        'Quel élément assure la traçabilité ?',
-        ['Le numéro de lot', 'La météo', 'Le planning'],
-        0,
-      ],
-    ],
-    'demo-training-2': [
-      [
-        'Une DLC dépassée impose de…',
-        ['Retirer le produit', 'Le promouvoir', 'Le réétiqueter'],
-        0,
-      ],
-      [
-        'FEFO signifie…',
-        [
-          'Premier expiré, premier sorti',
-          'Dernier entré, premier sorti',
-          'Aucun contrôle',
-        ],
-        0,
-      ],
-      [
-        'Où placer les dates courtes ?',
-        ['Devant', 'Derrière', 'Sans règle'],
-        0,
-      ],
-      [
-        'Que faut-il enregistrer ?',
-        ['Les anomalies', 'La météo', 'La musique'],
-        0,
-      ],
-      [
-        'Un produit expiré en rayon doit être…',
-        ['Isolé immédiatement', 'Vendu rapidement', 'Caché'],
-        0,
-      ],
-    ],
-    'demo-training-3': [
-      [
-        'Le froid détruit-il tous les microbes ?',
-        ['Oui', 'Non', 'Uniquement la nuit'],
-        1,
-      ],
-      [
-        'Que contrôler à la réception ?',
-        ['La température', 'La couleur du camion', 'Le prix'],
-        0,
-      ],
-      [
-        'Pourquoi ne pas surcharger un meuble ?',
-        [
-          'Pour laisser circuler l’air',
-          'Pour réduire la lumière',
-          'Pour gagner du temps',
-        ],
-        0,
-      ],
-      [
-        'Que noter lors d’une rupture ?',
-        ['Température et durée', 'Couleur du produit', 'Nom des clients'],
-        0,
-      ],
-      [
-        'Qui décide du sort du lot ?',
-        ['Le responsable', 'Un client', 'Personne'],
-        0,
-      ],
-    ],
-    'demo-training-4': [
-      [
-        'Quel geste crée un bon contact ?',
-        ['Saluer le client', 'Éviter le regard', 'Continuer sa discussion'],
-        0,
-      ],
-      [
-        'Pourquoi reformuler ?',
-        ['Vérifier la compréhension', 'Interrompre', 'Contester'],
-        0,
-      ],
-      [
-        'Une solution claire précise…',
-        ['Action et délai', 'Uniquement les limites', 'Rien'],
-        0,
-      ],
-      [
-        'Comment clore une réclamation ?',
-        ['Vérifier la satisfaction', 'Partir', 'Supprimer la trace'],
-        0,
-      ],
-      [
-        'Pourquoi tracer les problèmes récurrents ?',
-        [
-          'Pour améliorer les opérations',
-          'Pour ralentir',
-          'Pour éviter de répondre',
-        ],
-        0,
-      ],
-    ],
-  };
-
-  const base = Object.entries(questions).flatMap(([trainingId, entries]) =>
-    entries.map(([question, options, correctIndex], index) => ({
-      id: `${trainingId}-quiz-${index + 1}`,
-      training_id: trainingId,
-      question,
-      options,
-      correct_index: correctIndex,
-      sort_order: index + 1,
-      difficulty: 'easy' as TrainingQuizQuestion['difficulty'],
-      question_type: 'qcm_single' as TrainingQuizQuestion['question_type'],
-      is_critical: false,
-      created_at: days(-30),
-      updated_at: days(-7),
-    })),
-  );
-
-  // Modules 5 et 6 avec niveaux de difficulté et questions critiques
+  // Banques de questions par module : la difficulté et les questions critiques
+  // alimentent le moteur anti-triche, qui tire 8 questions par tentative.
   type RichQ = {
     q: string;
     opts: string[];
     c: number;
     d: TrainingQuizQuestion['difficulty'];
     crit?: boolean;
+    t?: TrainingQuizQuestion['question_type'];
   };
   const richModules: Record<string, RichQ[]> = {
+    'demo-training-1': [
+      {
+        q: 'Que vise la méthode HACCP ?',
+        opts: [
+          'Identifier, évaluer et maîtriser les dangers alimentaires',
+          'Décorer les locaux de vente',
+          'Fixer les prix de vente',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Combien de principes compte la méthode HACCP ?',
+        opts: ['7', '3', '12'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'La méthode HACCP est obligatoire en distribution alimentaire.',
+        opts: ['Vrai', 'Faux'],
+        c: 0,
+        d: 'easy',
+        t: 'true_false',
+      },
+      {
+        q: 'Pendant combien de temps faut-il frotter ses mains au minimum ?',
+        opts: ['Au moins 30 secondes', '5 secondes', '2 minutes complètes'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Quelle couleur de planche est dédiée à la viande crue ?',
+        opts: ['Rouge', 'Bleu', 'Vert'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Un éclat de verre dans un produit est un danger…',
+        opts: ['Physique', 'Biologique', 'Chimique'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'La salmonelle et la listeria sont des dangers…',
+        opts: ['Biologiques', 'Chimiques', 'Physiques'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'En quoi consiste la marche en avant ?',
+        opts: [
+          'Les produits avancent du sale vers le propre, sans retour en arrière',
+          'Avancer les promotions chaque matin',
+          'Un type de planning de production',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Que faire d’une coupure à la main avant de travailler ?',
+        opts: [
+          'La couvrir d’un pansement étanche et coloré',
+          'La laisser à l’air libre',
+          'Ne rien faire',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Vous tranchez du poulet cru puis, sans nettoyer le couteau, vous coupez du fromage. Quel est le risque ?',
+        opts: [
+          'Une contamination croisée, cause majeure de toxi-infection',
+          'Aucun risque, c’est plus rapide',
+          'Un meilleur rendement',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+        t: 'situation',
+      },
+      {
+        q: 'Un produit vous paraît douteux. Quelle est la bonne première action ?',
+        opts: [
+          'L’isoler en zone non conforme et alerter le responsable',
+          'Le jeter sans aucune trace',
+          'Le remettre en vente',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
+      {
+        q: 'Lors d’un contrôle officiel, une action corrective non enregistrée est considérée comme…',
+        opts: ['Non réalisée', 'Valable malgré tout', 'Facultative'],
+        c: 0,
+        d: 'hard',
+      },
+    ],
+    'demo-training-2': [
+      {
+        q: 'Que signifie la DLC ?',
+        opts: [
+          'Date Limite de Consommation, liée à la sécurité',
+          'Date de livraison au client',
+          'Durée de conservation sans limite',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'La mention « À consommer de préférence avant » correspond à…',
+        opts: [
+          'La DDM, liée à la qualité',
+          'La DLC, liée à la sécurité',
+          'Une date de promotion',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Un produit dont la DLC est dépassée doit être retiré de la vente.',
+        opts: ['Vrai', 'Faux'],
+        c: 0,
+        d: 'easy',
+        t: 'true_false',
+      },
+      {
+        q: 'Que signifie FEFO ?',
+        opts: [
+          'Premier expiré, premier sorti',
+          'Dernier entré, premier sorti',
+          'Aucun contrôle des dates',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Où placer les produits aux dates les plus courtes en rayon ?',
+        opts: ['Devant', 'Derrière', 'Peu importe'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Que signifie FIFO ?',
+        opts: [
+          'Premier entré, premier sorti',
+          'Premier expiré, premier sorti',
+          'Premier vendu, premier payé',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Quelle est la règle reine de rotation en distribution alimentaire ?',
+        opts: ['FEFO', 'FIFO strict', 'LIFO'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Un produit entamé se conserve selon…',
+        opts: [
+          'La durée après ouverture indiquée par le fabricant',
+          'La DLC d’origine uniquement',
+          'Sans aucune limite',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Que mesure le taux de démarque connue ?',
+        opts: [
+          'L’efficacité de la rotation des dates',
+          'Le chiffre d’affaires du rayon',
+          'La satisfaction client',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'En réassort, vous remplissez le rayon par-dessus l’ancien stock sans le retirer. Conséquence ?',
+        opts: [
+          'Les produits du fond périment : des pertes invisibles',
+          'Un gain de temps sans aucun risque',
+          'Une meilleure fraîcheur perçue',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Un produit retiré pour DLC dépassée peut-il réapparaître en rayon après réétiquetage ?',
+        opts: [
+          'Jamais, c’est strictement interdit',
+          'Oui si la qualité semble bonne',
+          'Oui avec une promotion',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
+      {
+        q: 'Que prévoit la loi anti-gaspillage pour les invendus alimentaires encore consommables ?',
+        opts: [
+          'Le don est prioritaire, la destruction est interdite',
+          'La destruction est libre',
+          'La vente reste obligatoire',
+        ],
+        c: 0,
+        d: 'hard',
+      },
+    ],
+    'demo-training-3': [
+      {
+        q: 'Le froid détruit tous les microbes.',
+        opts: ['Faux', 'Vrai'],
+        c: 0,
+        d: 'easy',
+        t: 'true_false',
+      },
+      {
+        q: 'Quel est l’effet du froid sur les bactéries ?',
+        opts: [
+          'Il ralentit ou bloque leur multiplication',
+          'Il les détruit toutes',
+          'Il accélère leur croissance',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Quelle est la température de conservation des surgelés ?',
+        opts: ['-18 °C ou plus froid', '0 °C', '+4 °C'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Que contrôler en priorité à la réception de produits frais ?',
+        opts: ['La température', 'La couleur du camion', 'Le prix'],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Pourquoi ne pas surcharger une enceinte froide ?',
+        opts: [
+          'Pour laisser circuler l’air froid',
+          'Pour gagner du temps',
+          'Pour réduire la lumière',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Quelle est la « zone de danger » de multiplication des bactéries ?',
+        opts: [
+          'Entre +4 °C et +63 °C',
+          'En dessous de 0 °C',
+          'Au-dessus de 100 °C',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'À partir de quelle température un surgelé est-il refusé à la réception ?',
+        opts: [
+          'Au-dessus de -15 °C',
+          'Au-dessus de -25 °C',
+          'Au-dessus de 0 °C',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'À quelle fréquence relever la température des enceintes froides ?',
+        opts: ['Au moins 2 fois par jour', 'Une fois par semaine', 'Jamais'],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Comment ranger produits crus et produits prêts à consommer ?',
+        opts: [
+          'Crus en bas, prêts à consommer en haut',
+          'Crus en haut, prêts à consommer en bas',
+          'Peu importe l’ordre',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Une enceinte tombe en panne. Quel couple détermine le sort des produits ?',
+        opts: [
+          'La température constatée ET la durée de l’incident',
+          'Uniquement la couleur du produit',
+          'Le nombre de clients présents',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'En cas de rupture de la chaîne du froid, que faire des produits concernés ?',
+        opts: [
+          'Les isoler et attendre la décision du responsable',
+          'Les remettre en vente aussitôt',
+          'Les jeter sans aucune trace',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
+      {
+        q: 'Un givre épais sur l’évaporateur…',
+        opts: [
+          'Isole le froid et fait monter la température',
+          'Améliore le refroidissement',
+          'N’a aucun effet',
+        ],
+        c: 0,
+        d: 'hard',
+      },
+    ],
+    'demo-training-4': [
+      {
+        q: 'Que désigne la règle des 4x20 ?',
+        opts: [
+          'Les 20 premiers pas, centimètres, mots et secondes',
+          'Une promotion à -20 %',
+          'Un planning de 20 heures',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Quel geste crée un bon premier contact ?',
+        opts: [
+          'Saluer le client le premier avec un sourire',
+          'Éviter son regard',
+          'Continuer sa discussion entre collègues',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Couper la parole d’un client mécontent aide à le calmer.',
+        opts: ['Faux', 'Vrai'],
+        c: 0,
+        d: 'easy',
+        t: 'true_false',
+      },
+      {
+        q: 'Pourquoi reformuler la demande du client ?',
+        opts: [
+          'Vérifier qu’on a bien compris son attente',
+          'Gagner du temps',
+          'Le contredire',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Une solution claire précise toujours…',
+        opts: [
+          'L’action concrète et le délai',
+          'Uniquement les limites',
+          'Rien de concret',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Face à un client en colère, que traite-t-on en premier ?',
+        opts: [
+          'L’émotion avant le problème',
+          'Le problème avant l’émotion',
+          'Ni l’un ni l’autre',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Quelle est une technique d’écoute active ?',
+        opts: [
+          'La reformulation et les relances',
+          'Interrompre poliment',
+          'Hausser le ton',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Un sujet dépasse votre autonomie. Que faire ?',
+        opts: [
+          'Passer la main au responsable sans promettre à sa place',
+          'Promettre quand même au client',
+          'Ignorer la demande',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Comment bien clore un échange de réclamation ?',
+        opts: [
+          'Vérifier la satisfaction et remercier du signalement',
+          'Partir sans rien dire',
+          'Effacer la trace de l’échange',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Pourquoi tracer chaque réclamation significative ?',
+        opts: [
+          'Pour détecter les problèmes récurrents et corriger la cause',
+          'Pour ralentir le service',
+          'Pour la direction uniquement',
+        ],
+        c: 0,
+        d: 'medium',
+      },
+      {
+        q: 'Pour obtenir gain de cause vite, vous promettez un remboursement intenable. Conséquence ?',
+        opts: [
+          'Une promesse non tenue détruit la confiance',
+          'Le client sera fidélisé',
+          'Aucun impact',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Des réclamations répétées sur un même rayon signalent…',
+        opts: [
+          'Une cause de fond à corriger',
+          'Un simple hasard sans importance',
+          'Un très bon fonctionnement',
+        ],
+        c: 0,
+        d: 'hard',
+      },
+    ],
     'demo-training-5': [
       {
         q: "Que faire avant d'ouvrir la caisse ?",
@@ -1371,14 +1670,15 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         correct_index: e.c,
         sort_order: index + 1,
         difficulty: e.d,
-        question_type: 'qcm_single' as TrainingQuizQuestion['question_type'],
+        question_type: (e.t ??
+          'qcm_single') as TrainingQuizQuestion['question_type'],
         is_critical: e.crit ?? false,
         created_at: days(-30),
         updated_at: days(-7),
       })),
   );
 
-  return [...base, ...richEntries];
+  return richEntries;
 }
 
 export function getDemoTrainingProgress(): UserTrainingProgress[] {

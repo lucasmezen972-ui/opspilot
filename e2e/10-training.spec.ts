@@ -29,7 +29,7 @@ test.describe('Formations réelles', () => {
 
     // Le moteur anti-triche mélange l'ordre des questions ET des options.
     // On clique toujours sur la bonne réponse via le testID stable 'training-quiz-option-correct'.
-    const questionCount = 5;
+    const questionCount = 8;
     for (let index = 0; index < questionCount; index += 1) {
       await page.getByTestId('training-quiz-option-correct').click();
       await expect(

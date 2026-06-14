@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
+import { getDemoTrainingQuizQuestions } from '../../../lib/demoData';
 import {
   createQuizSession,
   scoreQuizSession,
@@ -106,6 +107,48 @@ describe('createQuizSession', () => {
     const q = makeQuestion('q1', { question_type: 'critical' });
     const { questions } = createQuizSession([q]);
     expect(questions[0]?.is_critical).toBe(true);
+  });
+});
+
+describe('banques de quiz démo', () => {
+  const bank: QuizQuestion[] = getDemoTrainingQuizQuestions().map((q) => ({
+    ...q,
+    question_type: q.question_type ?? undefined,
+    difficulty: q.difficulty ?? undefined,
+    is_critical: q.is_critical ?? undefined,
+  }));
+  const trainingIds = [...new Set(bank.map((q) => q.training_id))];
+  const enrichedIds = [
+    'demo-training-1',
+    'demo-training-2',
+    'demo-training-3',
+    'demo-training-4',
+  ];
+
+  it('expose au moins six modules avec une banque non vide', () => {
+    expect(trainingIds.length).toBeGreaterThanOrEqual(6);
+    trainingIds.forEach((id) => {
+      const count = bank.filter((q) => q.training_id === id).length;
+      expect(count).toBeGreaterThanOrEqual(6);
+    });
+  });
+
+  it('tire exactement 8 questions par tentative pour les modules enrichis', () => {
+    enrichedIds.forEach((id) => {
+      const questions = bank.filter((q) => q.training_id === id);
+      expect(questions.length).toBeGreaterThanOrEqual(12);
+      for (let i = 0; i < 10; i += 1) {
+        expect(createQuizSession(questions).drawn).toBe(8);
+      }
+    });
+  });
+
+  it('chaque question tirée possède une bonne réponse identifiable', () => {
+    const t1 = bank.filter((q) => q.training_id === 'demo-training-1');
+    const { questions } = createQuizSession(t1);
+    questions.forEach((q) => {
+      expect(q.options[q.correctAnswerIndex]).toBeTruthy();
+    });
   });
 });
 
