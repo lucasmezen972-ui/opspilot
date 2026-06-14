@@ -76,10 +76,7 @@ export default function ProfileScreen() {
       icon: Globe,
       label: 'Langue',
       onPress: () =>
-        Alert.alert(
-          'Langue',
-          'Français est la seule langue disponible actuellement.',
-        ),
+        Alert.alert('Langue', 'OpsPilot est disponible en français.'),
     },
     {
       icon: HelpCircle,

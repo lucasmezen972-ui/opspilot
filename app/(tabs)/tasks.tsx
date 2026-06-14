@@ -43,7 +43,7 @@ export default function TasksScreen() {
     if (!result.error) {
       Alert.alert(
         'Tâche démarrée',
-        'Vous pouvez maintenant travailler sur cette tâche.',
+        'La tâche est passée en cours de traitement.',
       );
     }
   };
@@ -51,7 +51,7 @@ export default function TasksScreen() {
   const handleCompleteTask = async (taskId: string) => {
     const result = await updateTaskStatus(taskId, 'completed');
     if (!result.error) {
-      Alert.alert('Félicitations !', 'Tâche terminée avec succès !');
+      Alert.alert('Tâche clôturée', 'La tâche a été marquée comme terminée.');
     }
   };
 
@@ -69,7 +69,7 @@ export default function TasksScreen() {
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
     } else {
-      Alert.alert('Succès', 'Tâche créée avec succès !');
+      Alert.alert('Tâche créée', 'La tâche a été ajoutée au planning.');
     }
   };
 
