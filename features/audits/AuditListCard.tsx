@@ -5,6 +5,7 @@ import {
   Download,
   Play,
   CircleCheck as CheckCircle,
+  Lock,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -14,6 +15,7 @@ import {
   getAuditStatusText,
   type AuditListItem,
 } from './auditListModel';
+import { isAuditLocked } from '../governance/governanceModel';
 import { colors, shadow } from '../../shared/styles/tokens';
 
 interface AuditListCardProps {
@@ -31,6 +33,7 @@ export function AuditListCard({
   onChangeStatus,
 }: AuditListCardProps) {
   const StatusIcon = getAuditStatusIcon(audit.status);
+  const locked = isAuditLocked(audit);
   return (
     <TouchableOpacity
       testID={`audit-card-${audit.id}`}
@@ -44,21 +47,29 @@ export function AuditListCard({
             <Text style={styles.auditLocationText}>{audit.location}</Text>
           </View>
         </View>
-        <View
-          style={[
-            styles.auditStatus,
-            { backgroundColor: `${getAuditStatusColor(audit.status)}20` },
-          ]}
-        >
-          <StatusIcon size={16} color={getAuditStatusColor(audit.status)} />
-          <Text
+        <View style={styles.auditStatusGroup}>
+          {locked && (
+            <View testID={`audit-locked-${audit.id}`} style={styles.lockBadge}>
+              <Lock size={12} color={colors.textMuted} />
+              <Text style={styles.lockBadgeText}>Verrouillé</Text>
+            </View>
+          )}
+          <View
             style={[
-              styles.auditStatusText,
-              { color: getAuditStatusColor(audit.status) },
+              styles.auditStatus,
+              { backgroundColor: `${getAuditStatusColor(audit.status)}20` },
             ]}
           >
-            {getAuditStatusText(audit.status)}
-          </Text>
+            <StatusIcon size={16} color={getAuditStatusColor(audit.status)} />
+            <Text
+              style={[
+                styles.auditStatusText,
+                { color: getAuditStatusColor(audit.status) },
+              ]}
+            >
+              {getAuditStatusText(audit.status)}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -158,6 +169,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginLeft: 4,
+  },
+  auditStatusGroup: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  lockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    backgroundColor: colors.backgroundAlt,
+  },
+  lockBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textMuted,
   },
   auditStatus: {
     flexDirection: 'row',
