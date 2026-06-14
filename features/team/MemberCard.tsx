@@ -24,13 +24,13 @@ export function MemberCard({ member, isMe, showXP }: MemberCardProps) {
     <View style={styles.card}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {(member.full_name || member.email || '?').charAt(0).toUpperCase()}
+          {(member.full_name ?? member.email ?? '?').charAt(0).toUpperCase()}
         </Text>
       </View>
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <Text style={styles.name}>
-            {member.full_name || member.email}
+            {member.full_name ?? member.email}
             {isMe ? '  (moi)' : ''}
           </Text>
         </View>

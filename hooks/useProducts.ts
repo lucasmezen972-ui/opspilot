@@ -146,7 +146,7 @@ export function useProducts() {
       const data: Product = {
         id: demoId('demo-prod'),
         organization_id: profile.organization_id,
-        name: productData.name || '',
+        name: productData.name ?? '',
         barcode: productData.barcode ?? null,
         category: productData.category ?? null,
         price: productData.price ?? null,
@@ -167,7 +167,7 @@ export function useProducts() {
         .from('products')
         .insert({
           organization_id: profile.organization_id,
-          name: productData.name || '',
+          name: productData.name ?? '',
           barcode: productData.barcode ?? null,
           category: productData.category ?? null,
           price: productData.price ?? null,

@@ -89,7 +89,7 @@ function BillingScreenContent() {
       <View style={styles.header}>
         <Text style={styles.title}>Abonnement</Text>
         <Text style={styles.subtitle}>
-          {profile?.full_name || 'Mon compte'}
+          {profile?.full_name ?? 'Mon compte'}
         </Text>
       </View>
 

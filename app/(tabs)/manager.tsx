@@ -57,7 +57,7 @@ function ManagerDashboardContent() {
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard Manager</Text>
         <Text style={styles.subtitle}>
-          Bienvenue, {profile?.full_name || 'Manager'}
+          Bienvenue, {profile?.full_name ?? 'Manager'}
         </Text>
       </View>
 
@@ -98,7 +98,7 @@ function ManagerDashboardContent() {
             id: task.id,
             icon: <AlertTriangle size={16} color="#EF4444" />,
             title: task.title,
-            subtitle: `${task.location || 'Aucune localisation'} - ${
+            subtitle: `${task.location ?? 'Aucune localisation'} - ${
               task.status === 'in_progress' ? 'En cours' : 'À faire'
             }`,
           }))}
@@ -118,7 +118,7 @@ function ManagerDashboardContent() {
               />
             ),
             title: audit.title,
-            subtitle: `${audit.location || ''} ${
+            subtitle: `${audit.location ?? ''} ${
               audit.score != null ? `- Score: ${audit.score}%` : ''
             }`,
           }))}

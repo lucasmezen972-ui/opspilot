@@ -72,13 +72,13 @@ export default function AuditsScreen() {
   );
 
   const selectedTemplate =
-    templates.find((template) => template.id === selectedTemplateId) || null;
+    templates.find((template) => template.id === selectedTemplateId) ?? null;
   const professionalAudit =
-    dbAudits.find((audit) => audit.id === professionalAuditId) || null;
+    dbAudits.find((audit) => audit.id === professionalAuditId) ?? null;
   const professionalTemplate =
     templates.find(
       (template) => template.id === professionalAudit?.template_id,
-    ) || null;
+    ) ?? null;
   const professionalItems = useMemo(
     () =>
       professionalTemplate ? getItemsForTemplate(professionalTemplate.id) : [],
@@ -121,8 +121,8 @@ export default function AuditsScreen() {
 
   const handlePhotoTaken = async (
     uri: string,
-    analysis?: any,
-    annotations?: string[],
+    _analysis?: any,
+    _annotations?: string[],
   ) => {
     if (cameraAuditId) {
       await addPhotoToAudit(cameraAuditId, uri);
@@ -130,7 +130,7 @@ export default function AuditsScreen() {
   };
 
   const handleOpenCamera = (auditId?: string) => {
-    setCameraAuditId(auditId || null);
+    setCameraAuditId(auditId ?? null);
     setCameraVisible(true);
   };
 

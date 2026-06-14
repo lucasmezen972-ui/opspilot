@@ -38,9 +38,9 @@ export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
   const router = useRouter();
 
-  const displayName = profile?.full_name || 'Utilisateur';
+  const displayName = profile?.full_name ?? 'Utilisateur';
   const displayRole = getProfileRoleLabel(profile?.role);
-  const progress = computeXpProgress(profile?.level || 1, profile?.xp || 0);
+  const progress = computeXpProgress(profile?.level ?? 1, profile?.xp ?? 0);
   const stats = useMemo(() => buildProfileStats(profile), [profile]);
 
   const menuEntries: ProfileMenuEntry[] = [
@@ -117,7 +117,7 @@ export default function ProfileScreen() {
         <ProfileSummary
           name={displayName}
           role={displayRole}
-          email={profile?.email || ''}
+          email={profile?.email ?? ''}
           level={progress.level}
         />
 

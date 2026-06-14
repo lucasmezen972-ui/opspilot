@@ -33,7 +33,7 @@ export function toAuditListItems(
       ? dbAudits.map((a) => ({
           id: a.id,
           title: a.title,
-          location: a.location || '',
+          location: a.location ?? '',
           status: a.status,
           date: a.created_at
             ? new Date(a.created_at).toLocaleDateString('fr-FR')

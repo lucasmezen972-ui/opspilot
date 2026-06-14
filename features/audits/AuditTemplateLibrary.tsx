@@ -49,7 +49,7 @@ export function AuditTemplateLibrary({
               <BookOpen size={22} color="#2563EB" />
               <Text style={styles.name}>{template.name}</Text>
               <Text style={styles.meta}>
-                {template.estimated_duration || 20} min ·{' '}
+                {template.estimated_duration ?? 20} min ·{' '}
                 {getItemCount(template.id)} critères
               </Text>
             </TouchableOpacity>
