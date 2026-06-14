@@ -8,6 +8,7 @@ import type {
   CorrectiveAction,
   NotificationPreferences,
   Product,
+  Profile,
   Task,
   Training,
   TrainingChapter,
@@ -1188,45 +1189,134 @@ export interface DemoTeamMember {
   email: string;
 }
 
-export function getDemoTeamMembers(): DemoTeamMember[] {
+/**
+ * Profils complets de l'équipe démo (source de vérité unique).
+ * Sert à l'écran Équipe (useTeam) et, dérivé, à la supervision formation.
+ */
+export function getDemoTeamProfiles(): Profile[] {
+  const member = (
+    id: string,
+    fullName: string,
+    role: Profile['role'],
+    email: string,
+    level: number,
+    xp: number,
+    totalAudits: number,
+    avgScore: number,
+    completedTrainings: number,
+    activeHours: number,
+    lastActiveDays: number,
+  ): Profile => ({
+    id,
+    organization_id: DEMO_ORG_ID,
+    store_id: null,
+    email,
+    full_name: fullName,
+    phone: null,
+    avatar_url: null,
+    role,
+    department_id: null,
+    level,
+    xp,
+    total_audits: totalAudits,
+    avg_score: avgScore,
+    completed_trainings: completedTrainings,
+    active_time_hours: activeHours,
+    last_active: days(-lastActiveDays),
+    is_active: true,
+    created_at: days(-180),
+    updated_at: days(-lastActiveDays),
+  });
+
   return [
-    {
-      id: DEMO_USER_ID,
-      full_name: 'Marie Dupont',
-      role: 'manager',
-      email: 'marie.dupont@demo.fr',
-    },
-    {
-      id: 'demo-member-2',
-      full_name: 'Jean Martin',
-      role: 'employé',
-      email: 'jean.martin@demo.fr',
-    },
-    {
-      id: 'demo-member-3',
-      full_name: 'Sophie Bernard',
-      role: 'employé',
-      email: 'sophie.bernard@demo.fr',
-    },
-    {
-      id: 'demo-member-4',
-      full_name: 'Thomas Lefèvre',
-      role: 'stagiaire',
-      email: 'thomas.lefevre@demo.fr',
-    },
-    {
-      id: 'demo-member-5',
-      full_name: 'Emma Rousseau',
-      role: 'employé',
-      email: 'emma.rousseau@demo.fr',
-    },
-    {
-      id: 'demo-member-6',
-      full_name: 'Lucas Moreau',
-      role: 'employé',
-      email: 'lucas.moreau@demo.fr',
-    },
+    member(
+      DEMO_USER_ID,
+      'Marie Dupont',
+      'manager',
+      'marie.dupont@demo.fr',
+      5,
+      420,
+      12,
+      87,
+      8,
+      156,
+      0,
+    ),
+    member(
+      'demo-member-2',
+      'Jean Martin',
+      'employé',
+      'jean.martin@demo.fr',
+      4,
+      310,
+      9,
+      82,
+      5,
+      120,
+      0,
+    ),
+    member(
+      'demo-member-3',
+      'Sophie Bernard',
+      'employé',
+      'sophie.bernard@demo.fr',
+      3,
+      240,
+      7,
+      90,
+      4,
+      98,
+      1,
+    ),
+    member(
+      'demo-member-4',
+      'Thomas Lefèvre',
+      'stagiaire',
+      'thomas.lefevre@demo.fr',
+      1,
+      60,
+      2,
+      74,
+      1,
+      32,
+      2,
+    ),
+    member(
+      'demo-member-5',
+      'Emma Rousseau',
+      'employé',
+      'emma.rousseau@demo.fr',
+      5,
+      460,
+      14,
+      85,
+      7,
+      168,
+      0,
+    ),
+    member(
+      'demo-member-6',
+      'Lucas Moreau',
+      'employé',
+      'lucas.moreau@demo.fr',
+      2,
+      130,
+      4,
+      0,
+      0,
+      54,
+      6,
+    ),
   ];
+}
+
+export function getDemoTeamMembers(): DemoTeamMember[] {
+  return getDemoTeamProfiles().map((p) => ({
+    id: p.id,
+    full_name: p.full_name ?? '',
+    role: p.role as DemoTeamMember['role'],
+    email: p.email,
+  }));
 }
 
 export function getDemoOrgTrainingProgress(): UserTrainingProgress[] {
@@ -1237,6 +1327,12 @@ export function getDemoOrgTrainingProgress(): UserTrainingProgress[] {
     pct: number;
   };
   const scenarios: Record<string, Scenario[]> = {
+    [DEMO_USER_ID]: [
+      { tid: 'demo-training-1', status: 'completed', score: 90, pct: 100 },
+      { tid: 'demo-training-2', status: 'completed', score: 95, pct: 100 },
+      { tid: 'demo-training-3', status: 'completed', score: 88, pct: 100 },
+      { tid: 'demo-training-4', status: 'completed', score: 84, pct: 100 },
+    ],
     'demo-member-2': [
       { tid: 'demo-training-1', status: 'completed', score: 85, pct: 100 },
       { tid: 'demo-training-2', status: 'completed', score: 92, pct: 100 },
