@@ -102,20 +102,33 @@ function selectFromBank(
   const easyCount = Math.round(drawCount * DIFFICULTY_RATIOS.easy);
   const mediumCount = drawCount - easyCount - hardCount;
 
-  const selected: QuizQuestion[] = [
+  // Les buckets peuvent se chevaucher (une question medium/easy marquée
+  // is_critical figure aussi dans le bucket hard) : on déduplique par id pour
+  // ne jamais tirer deux fois la même question.
+  const picked = [
     ...shuffleArray(byDiff.easy).slice(0, easyCount),
     ...shuffleArray(byDiff.medium).slice(0, mediumCount),
     ...shuffleArray(byDiff.hard).slice(0, hardCount),
   ];
+  const selected: QuizQuestion[] = [];
+  const selectedIds = new Set<string>();
+  for (const q of picked) {
+    if (!selectedIds.has(q.id)) {
+      selected.push(q);
+      selectedIds.add(q.id);
+    }
+  }
 
-  const selectedIds = new Set(selected.map((q) => q.id));
   const remaining = shuffleArray(
     questions.filter((q) => !selectedIds.has(q.id)),
   );
   let ri = 0;
   while (selected.length < drawCount && ri < remaining.length) {
     const next = remaining[ri++];
-    if (next) selected.push(next);
+    if (next && !selectedIds.has(next.id)) {
+      selected.push(next);
+      selectedIds.add(next.id);
+    }
   }
 
   return shuffleArray(selected);

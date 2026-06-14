@@ -42,15 +42,6 @@ function formatMsgTime(iso?: string) {
   return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatMsgDate(iso?: string) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-  });
-}
-
 function MessageRow({
   msg,
   isMe,
