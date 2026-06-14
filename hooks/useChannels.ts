@@ -3,7 +3,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
 import { DEMO_USER_ID, demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
-import { supabase, type Channel, type ChannelMessage } from '../lib/supabase';
+import {
+  supabase,
+  type Channel,
+  type ChannelMessage,
+  type ChannelRead,
+} from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 function now() {
   return new Date().toISOString();
@@ -17,6 +23,8 @@ export function useChannels() {
   const demoMessages = useDemoCollection('channelMessages');
   const [remoteChannels, setRemoteChannels] = useState<Channel[]>([]);
   const [remoteMessages, setRemoteMessages] = useState<ChannelMessage[]>([]);
+  // Marqueurs de lecture par canal (mode connecté) : channel_id -> last_read_at.
+  const [remoteReads, setRemoteReads] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(!isLocalDemo);
 
   const channels = isLocalDemo ? demoChannels : remoteChannels;
@@ -44,12 +52,26 @@ export function useChannels() {
 
       const channelIds = (chData ?? []).map((c) => c.id as string);
       if (channelIds.length > 0) {
-        const { data: msgData } = await supabase
-          .from('channel_messages')
-          .select('*')
-          .in('channel_id', channelIds)
-          .order('created_at', { ascending: true });
-        setRemoteMessages((msgData ?? []) as ChannelMessage[]);
+        const [msgResult, readResult] = await Promise.all([
+          supabase
+            .from('channel_messages')
+            .select('*')
+            .in('channel_id', channelIds)
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('channel_reads')
+            .select('channel_id, last_read_at')
+            .eq('user_id', profile.id),
+        ]);
+        setRemoteMessages((msgResult.data ?? []) as ChannelMessage[]);
+        const reads: Record<string, string> = {};
+        for (const r of (readResult.data ?? []) as ChannelRead[]) {
+          reads[r.channel_id] = r.last_read_at;
+        }
+        setRemoteReads(reads);
+      } else {
+        setRemoteMessages([]);
+        setRemoteReads({});
       }
     } finally {
       setLoading(false);
@@ -69,28 +91,61 @@ export function useChannels() {
   );
 
   const getUnreadCount = useCallback(
-    (channelId: string) =>
-      allMessages.filter(
-        (m) =>
-          m.channel_id === channelId &&
-          !(m.read_by ?? []).includes(currentUserId),
-      ).length,
-    [allMessages, currentUserId],
+    (channelId: string) => {
+      if (isLocalDemo) {
+        return allMessages.filter(
+          (m) =>
+            m.channel_id === channelId &&
+            !(m.read_by ?? []).includes(currentUserId),
+        ).length;
+      }
+      // Mode connecté : non lus = messages d'autrui postés après le dernier
+      // accusé de lecture du canal (table channel_reads).
+      const lastRead = remoteReads[channelId];
+      return allMessages.filter((m) => {
+        if (m.channel_id !== channelId) return false;
+        if (m.user_id === currentUserId) return false;
+        if (!lastRead) return true;
+        return (m.created_at ?? '') > lastRead;
+      }).length;
+    },
+    [allMessages, currentUserId, isLocalDemo, remoteReads],
   );
 
   const markChannelRead = useCallback(
     (channelId: string) => {
-      if (!isLocalDemo) return;
-      updateDemoCollection('channelMessages', (prev) =>
-        prev.map((m) => {
-          if (m.channel_id !== channelId) return m;
-          const readBy = m.read_by ?? [];
-          if (readBy.includes(currentUserId)) return m;
-          return { ...m, read_by: [...readBy, currentUserId] };
-        }),
-      );
+      if (isLocalDemo) {
+        updateDemoCollection('channelMessages', (prev) =>
+          prev.map((m) => {
+            if (m.channel_id !== channelId) return m;
+            const readBy = m.read_by ?? [];
+            if (readBy.includes(currentUserId)) return m;
+            return { ...m, read_by: [...readBy, currentUserId] };
+          }),
+        );
+        return;
+      }
+      // Mode connecté : enregistre l'instant de lecture (upsert) et met à jour
+      // l'état local pour vider le badge immédiatement.
+      const readAt = now();
+      setRemoteReads((prev) => ({ ...prev, [channelId]: readAt }));
+      if (!profile?.id) return;
+      void supabase
+        .from('channel_reads')
+        .upsert(
+          {
+            user_id: profile.id,
+            channel_id: channelId,
+            last_read_at: readAt,
+            updated_at: readAt,
+          },
+          { onConflict: 'user_id,channel_id' },
+        )
+        .then(({ error }) => {
+          if (error) mapSupabaseError('Erreur accusé de lecture', error);
+        });
     },
-    [isLocalDemo, currentUserId],
+    [isLocalDemo, currentUserId, profile?.id],
   );
 
   const sendMessage = useCallback(
@@ -132,6 +187,9 @@ export function useChannels() {
           content: msg.content,
           message_type: msg.message_type,
           attachment_url: msg.attachment_url,
+          // L'auteur a déjà « lu » son message : évite de le compter comme
+          // non lu dans son propre badge.
+          read_by: msg.read_by,
         })
         .select()
         .single();

@@ -108,6 +108,24 @@ describe('createQuizSession', () => {
     const { questions } = createQuizSession([q]);
     expect(questions[0]?.is_critical).toBe(true);
   });
+
+  it('ne tire jamais deux fois la même question malgré le chevauchement des buckets', () => {
+    // Une question medium + critique appartient aux buckets medium ET hard.
+    const questions = [
+      ...Array.from({ length: 6 }, (_, i) =>
+        makeQuestion(`e${i}`, { difficulty: 'easy' }),
+      ),
+      ...Array.from({ length: 6 }, (_, i) =>
+        makeQuestion(`m${i}`, { difficulty: 'medium', is_critical: true }),
+      ),
+    ];
+    for (let i = 0; i < 30; i += 1) {
+      const { questions: drawn } = createQuizSession(questions, 8);
+      const ids = drawn.map((q) => q.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(drawn).toHaveLength(8);
+    }
+  });
 });
 
 describe('banques de quiz démo', () => {

@@ -1,5 +1,9 @@
 import { getDemoState } from '../../lib/demoStore';
-import { classifyIntent, OUT_OF_SCOPE_RESPONSE } from './knowledgeBase';
+import {
+  classifyIntent,
+  isOutOfScope,
+  OUT_OF_SCOPE_RESPONSE,
+} from './knowledgeBase';
 
 export type AssistantHistoryMessage = {
   role: 'user' | 'assistant';
@@ -39,6 +43,10 @@ function countLabel(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+function operationalOverview(context: OperationalContext): string {
+  return `Bonjour ! Situation actuelle : ${countLabel(context.overdueAudits, 'audit en retard', 'audits en retard')}, ${countLabel(context.criticalActions, 'action corrective critique ouverte', 'actions correctives critiques ouvertes')} et ${countLabel(context.criticalDlc, 'produit à DLC critique', 'produits à DLC critique')}. Quel sujet voulez-vous traiter ?`;
+}
+
 export function getLocalAssistantResponse(
   userMessage: string,
   context: OperationalContext,
@@ -47,7 +55,7 @@ export function getLocalAssistantResponse(
 
   switch (domain) {
     case 'greeting':
-      return `Bonjour ! Situation actuelle : ${countLabel(context.overdueAudits, 'audit en retard', 'audits en retard')}, ${countLabel(context.criticalActions, 'action corrective critique ouverte', 'actions correctives critiques ouvertes')} et ${countLabel(context.criticalDlc, 'produit à DLC critique', 'produits à DLC critique')}. Quel sujet voulez-vous traiter ?`;
+      return operationalOverview(context);
 
     case 'audit':
       return `${countLabel(context.overdueAudits, 'audit est en retard', 'audits sont en retard')}. Commencez par le plus ancien, vérifiez son échéance et assignez immédiatement les éventuelles non-conformités.`;
@@ -71,6 +79,10 @@ export function getLocalAssistantResponse(
       return "Utilisez l'onglet Messages > Canaux pour les communications officielles de votre équipe. Les annonces importantes sont épinglées en haut de chaque canal.";
 
     default:
-      return OUT_OF_SCOPE_RESPONSE;
+      // Demande non classée : refus sec uniquement si elle est manifestement
+      // hors périmètre, sinon récapitulatif opérationnel utile.
+      return isOutOfScope(userMessage)
+        ? OUT_OF_SCOPE_RESPONSE
+        : operationalOverview(context);
   }
 }

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from './useAuth';
+import { type MemberTrainingStatus } from '../features/training/trainingModel';
 import {
   getDemoOrgTrainingProgress,
   getDemoTeamMembers,
@@ -11,7 +12,6 @@ import {
   type Training,
   type UserTrainingProgress,
 } from '../lib/supabase';
-import { type MemberTrainingStatus } from '../features/training/trainingModel';
 
 interface RemoteMember {
   id: string;
@@ -20,7 +20,7 @@ interface RemoteMember {
 }
 
 function buildEntries(
-  members: Array<{ id: string; full_name: string; role: string }>,
+  members: { id: string; full_name: string; role: string }[],
   courses: Training[],
   orgProgress: UserTrainingProgress[],
 ): MemberTrainingStatus[] {
@@ -56,10 +56,16 @@ export function useTrainingSupervision() {
   const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
   const [loading, setLoading] = useState(!isLocalDemo);
 
-  const members = isLocalDemo ? getDemoTeamMembers() : remoteMembers;
-  const orgProgress = isLocalDemo
-    ? getDemoOrgTrainingProgress()
-    : remoteOrgProgress;
+  // Les sources démo sont des fonctions pures : on les mémoïse pour stabiliser
+  // l'identité des tableaux entre les rendus.
+  const members = useMemo(
+    () => (isLocalDemo ? getDemoTeamMembers() : remoteMembers),
+    [isLocalDemo, remoteMembers],
+  );
+  const orgProgress = useMemo(
+    () => (isLocalDemo ? getDemoOrgTrainingProgress() : remoteOrgProgress),
+    [isLocalDemo, remoteOrgProgress],
+  );
   const courses = isLocalDemo ? demoCourses : remoteCourses;
 
   useEffect(() => {
@@ -101,7 +107,10 @@ export function useTrainingSupervision() {
     }
   };
 
-  const entries = buildEntries(members, courses, orgProgress);
+  const entries = useMemo(
+    () => buildEntries(members, courses, orgProgress),
+    [members, courses, orgProgress],
+  );
 
   const sendReminder = (memberId: string, trainingId: string) => {
     const member = members.find((m) => m.id === memberId);

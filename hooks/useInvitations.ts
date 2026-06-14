@@ -3,13 +3,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase, type Invitation } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
+import { isManagerRole } from '../utils/roles';
 
 export function useInvitations() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
 
-  const canManage = profile?.role === 'admin' || profile?.role === 'manager';
+  const canManage = isManagerRole(profile?.role);
 
   const fetchInvitations = useCallback(async () => {
     if (!profile?.organization_id || !canManage) {

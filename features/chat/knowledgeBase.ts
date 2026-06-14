@@ -33,28 +33,13 @@ const DOMAIN_KEYWORDS: DomainKeywords[] = [
       'aide',
       'aider',
       'aide-moi',
-      'priorite',
-      'priorités',
       'situation',
       'tableau',
     ],
   },
   {
-    domain: 'audit',
-    keywords: [
-      'audit',
-      'inspection',
-      'verification',
-      'controle',
-      'contrôle',
-      'verifier',
-      'vérifier',
-      'retard',
-      'echeance',
-      'échéance',
-    ],
-  },
-  {
+    // HACCP avant audit : « contrôle de température » relève de la sécurité
+    // alimentaire, pas d'un audit générique.
     domain: 'haccp',
     keywords: [
       'haccp',
@@ -70,6 +55,21 @@ const DOMAIN_KEYWORDS: DomainKeywords[] = [
       'sécurité alimentaire',
       'ccp',
       'danger',
+    ],
+  },
+  {
+    domain: 'audit',
+    keywords: [
+      'audit',
+      'inspection',
+      'verification',
+      'controle',
+      'contrôle',
+      'verifier',
+      'vérifier',
+      'retard',
+      'echeance',
+      'échéance',
     ],
   },
   {
@@ -90,7 +90,6 @@ const DOMAIN_KEYWORDS: DomainKeywords[] = [
     domain: 'dlc',
     keywords: [
       'dlc',
-      'date',
       'péremption',
       'peremption',
       'stock',
@@ -157,6 +156,58 @@ export function classifyIntent(userMessage: string): OperationalDomain | null {
     }
   }
   return null;
+}
+
+/**
+ * Sujets clairement étrangers aux opérations terrain. Volontairement
+ * conservateur : on évite les termes ambigus (« film » étirable, « cuisine »…)
+ * qui pourraient être opérationnels.
+ */
+const OUT_OF_SCOPE_KEYWORDS = [
+  'recette',
+  'recipe',
+  'meteo',
+  'météo',
+  'temps fait',
+  'quel temps',
+  'horoscope',
+  'astrolog',
+  'politique',
+  'election',
+  'président',
+  'football',
+  'blague',
+  'cinema',
+  'cinéma',
+  'medecin',
+  'médecin',
+  'medical',
+  'médical',
+  'symptome',
+  'symptôme',
+  'maladie',
+  'juridique',
+  'avocat',
+  'impot',
+  'impôt',
+  'fiscal',
+  'bourse',
+  'bitcoin',
+  'crypto',
+  'actualite',
+  'actualité',
+];
+
+/**
+ * Indique si un message porte manifestement sur un sujet hors périmètre.
+ * Sert de garde-fou : une demande non classée mais non manifestement hors
+ * périmètre reçoit un récapitulatif opérationnel plutôt qu'un refus sec.
+ */
+export function isOutOfScope(userMessage: string): boolean {
+  const normalized = normalizeText(userMessage);
+  return OUT_OF_SCOPE_KEYWORDS.some((kw) =>
+    normalized.includes(normalizeText(kw)),
+  );
 }
 
 export const SYSTEM_PROMPT_CONSTRAINT = `

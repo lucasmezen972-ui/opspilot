@@ -34,4 +34,12 @@ describe('nextDueDate', () => {
     expect(nextDueDate('weekly', base)).toBe('2026-06-21');
     expect(nextDueDate('monthly', base)).toBe('2026-07-14');
   });
+
+  it('reste le bon jour calendaire quelle que soit l’heure locale', () => {
+    // Une date construite tard dans la journée locale ne doit pas reculer
+    // d’un jour à cause d’une conversion UTC (bug des fuseaux UTC+).
+    const local = new Date(2026, 5, 14, 23, 30, 0);
+    expect(nextDueDate('daily', local)).toBe('2026-06-15');
+    expect(nextDueDate('monthly', local)).toBe('2026-07-14');
+  });
 });

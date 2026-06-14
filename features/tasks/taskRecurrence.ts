@@ -29,5 +29,10 @@ export function nextDueDate(
   if (recurrence === 'daily') next.setDate(next.getDate() + 1);
   else if (recurrence === 'weekly') next.setDate(next.getDate() + 7);
   else if (recurrence === 'monthly') next.setMonth(next.getMonth() + 1);
-  return next.toISOString().slice(0, 10);
+  // Formatage à partir des composants locaux : passer par toISOString()
+  // reconvertit en UTC et décale d'un jour dans les fuseaux UTC+.
+  const year = next.getFullYear();
+  const month = String(next.getMonth() + 1).padStart(2, '0');
+  const day = String(next.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
