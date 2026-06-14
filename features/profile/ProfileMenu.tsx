@@ -1,7 +1,7 @@
 import { type LucideIcon, ChevronRight } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export interface ProfileMenuEntry {
   icon: LucideIcon;
@@ -52,6 +52,8 @@ const styles = StyleSheet.create({
   menu: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   item: {

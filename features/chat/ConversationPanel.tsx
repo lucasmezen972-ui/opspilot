@@ -117,6 +117,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     marginTop: 20,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
     maxHeight: 400,
   },

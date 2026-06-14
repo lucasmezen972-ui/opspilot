@@ -68,6 +68,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
     minWidth: 100,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   cardLocked: {

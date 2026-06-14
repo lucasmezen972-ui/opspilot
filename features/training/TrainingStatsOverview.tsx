@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: radius.lg,
     padding: 20,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   stats: {

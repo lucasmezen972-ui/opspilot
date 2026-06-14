@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   item: {

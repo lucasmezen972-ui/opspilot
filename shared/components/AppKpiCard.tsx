@@ -52,6 +52,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.md + 2,
     borderLeftWidth: 3,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   iconWrap: {

@@ -10,7 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import type { Product } from '../../lib/supabase';
 import { AppStatusBadge } from '../../shared/components/AppStatusBadge';
-import { type StatusLevel, shadow } from '../../shared/styles/tokens';
+import { colors, shadow, type StatusLevel } from '../../shared/styles/tokens';
 
 type StockStatus = 'ok' | 'low_stock' | 'out_of_stock';
 
@@ -115,6 +115,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   productImage: {

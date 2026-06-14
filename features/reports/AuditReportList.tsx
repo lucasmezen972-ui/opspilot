@@ -2,7 +2,7 @@ import { FileText, Download } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { Audit } from '../../lib/supabase';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 interface AuditReportListProps {
   audits: Audit[];
@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   item: {

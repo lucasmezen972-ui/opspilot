@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 
 import type { ProfileStat } from './profileModel';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 interface ProfileStatsProps {
   stats: ProfileStat[];
@@ -54,6 +54,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   icon: {

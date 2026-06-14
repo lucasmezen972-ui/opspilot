@@ -21,7 +21,7 @@ import {
 import Svg, { Path } from 'react-native-svg';
 
 import { analyzeAuditImage } from '../lib/openai';
-import { shadow } from '../shared/styles/tokens';
+import { colors, shadow } from '../shared/styles/tokens';
 
 interface CameraModalProps {
   visible: boolean;
@@ -487,6 +487,8 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 16,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   analysisTitle: {

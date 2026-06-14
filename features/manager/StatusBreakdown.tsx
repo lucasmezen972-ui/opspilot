@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export interface StatusEntry {
   label: string;
@@ -47,6 +47,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   item: {

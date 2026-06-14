@@ -124,6 +124,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   header: {

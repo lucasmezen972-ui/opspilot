@@ -83,6 +83,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: 16,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   item: {

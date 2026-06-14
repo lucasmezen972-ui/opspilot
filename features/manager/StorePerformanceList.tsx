@@ -2,7 +2,7 @@ import { Store as StoreIcon } from 'lucide-react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { getScoreChip, type StorePerformance } from './managerModel';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 interface StorePerformanceListProps {
   stores: StorePerformance[];
@@ -58,6 +58,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   iconWrapper: {

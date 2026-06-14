@@ -141,7 +141,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  title: { fontSize: 28, fontWeight: '700', color: '#111827' },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: -0.4,
+    color: '#111827',
+  },
   subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4 },
   manageButton: {
     marginHorizontal: 20,

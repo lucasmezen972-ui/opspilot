@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 
 import { getRoleColor, getRoleLabel, formatLastActive } from './teamModel';
 import type { Profile } from '../../lib/supabase';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 function RoleIcon({ role }: { role: string }) {
   if (role === 'admin') return <Crown size={14} color="#DC2626" />;
@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     ...shadow.card,
   },
   avatar: {
