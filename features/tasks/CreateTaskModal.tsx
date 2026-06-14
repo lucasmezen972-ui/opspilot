@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { getPriorityColor, getPriorityText } from './taskModel';
+import { RECURRENCE_OPTIONS, type Recurrence } from './taskRecurrence';
 import { colors, radius } from '../../shared/styles/tokens';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -18,6 +19,7 @@ export interface NewTaskDraft {
   title: string;
   description: string;
   priority: TaskPriority;
+  recurrence: Recurrence;
 }
 
 interface CreateTaskModalProps {
@@ -28,7 +30,7 @@ interface CreateTaskModalProps {
 
 const PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
-/** Modale de création d'une tâche : titre, description et priorité. */
+/** Modale de création d'une tâche : titre, description, priorité, récurrence. */
 export function CreateTaskModal({
   visible,
   onClose,
@@ -37,6 +39,7 @@ export function CreateTaskModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
+  const [recurrence, setRecurrence] = useState<Recurrence>('none');
 
   // Réinitialise le formulaire à chaque ouverture.
   useEffect(() => {
@@ -44,6 +47,7 @@ export function CreateTaskModal({
       setTitle('');
       setDescription('');
       setPriority('medium');
+      setRecurrence('none');
     }
   }, [visible]);
 
@@ -98,13 +102,42 @@ export function CreateTaskModal({
               );
             })}
           </View>
+          <Text style={styles.fieldLabel}>Récurrence</Text>
+          <View style={styles.recurrenceSelector}>
+            {RECURRENCE_OPTIONS.map((option) => {
+              const active = recurrence === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  testID={`task-recurrence-${option.value}`}
+                  style={[
+                    styles.recurrenceOption,
+                    active && styles.recurrenceOptionActive,
+                  ]}
+                  onPress={() => setRecurrence(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.recurrenceText,
+                      active && styles.recurrenceTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           <View style={styles.actions}>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelText}>Annuler</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.confirmButton}
-              onPress={() => onSubmit({ title, description, priority })}
+              onPress={() =>
+                onSubmit({ title, description, priority, recurrence })
+              }
             >
               <Text style={styles.confirmText}>Créer</Text>
             </TouchableOpacity>
@@ -172,6 +205,37 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   priorityOptionTextActive: {
+    color: '#FFFFFF',
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginBottom: 6,
+  },
+  recurrenceSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  recurrenceOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  recurrenceOptionActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  recurrenceText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  recurrenceTextActive: {
     color: '#FFFFFF',
   },
   actions: {

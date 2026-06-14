@@ -117,6 +117,7 @@ export type Task = {
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   estimated_time_minutes?: number | null;
   due_date?: string | null;
+  recurrence?: 'none' | 'daily' | 'weekly' | 'monthly';
   created_at?: string;
   updated_at?: string;
   completed_at?: string | null;
