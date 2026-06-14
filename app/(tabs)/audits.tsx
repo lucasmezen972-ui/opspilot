@@ -109,7 +109,10 @@ export default function AuditsScreen() {
       Alert.alert('Erreur', String(result.error));
     } else {
       setSelectedTemplateId(null);
-      Alert.alert('Succès', 'Audit créé avec succès !');
+      Alert.alert(
+        'Audit créé',
+        "L'audit a été ajouté à votre liste de contrôles.",
+      );
     }
   };
 

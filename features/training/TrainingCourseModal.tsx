@@ -266,7 +266,7 @@ export function TrainingCourseModal({
             <View style={styles.emptyState}>
               <Text style={styles.emptyTitle}>Contenu indisponible</Text>
               <Text style={styles.emptyText}>
-                Cette formation ne contient pas encore de chapitre.
+                Cette formation ne comporte aucun chapitre.
               </Text>
             </View>
           )}
@@ -368,7 +368,7 @@ export function TrainingCourseModal({
             <View style={styles.emptyState}>
               <Text style={styles.emptyTitle}>Évaluation indisponible</Text>
               <Text style={styles.emptyText}>
-                Cette formation ne contient pas encore de question.
+                Cette formation ne comporte aucune question d'évaluation.
               </Text>
             </View>
           )}

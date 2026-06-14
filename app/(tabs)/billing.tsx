@@ -18,7 +18,7 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { supabase } from '../../lib/supabase';
 
 const STRIPE_UNAVAILABLE =
-  "L'intégration Stripe n'est pas encore configurée. Contactez-nous à contact@opspilot.fr pour souscrire.";
+  'Pour souscrire ou faire évoluer votre offre, notre équipe commerciale vous accompagne à contact@opspilot.fr.';
 
 export default function BillingScreen() {
   return (
