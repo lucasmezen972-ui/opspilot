@@ -65,6 +65,23 @@ describe('assistant IA local', () => {
       ),
     ).toContain('Formation');
   });
+
+  it('donne un récapitulatif opérationnel pour une demande non classée mais légitime', () => {
+    const response = getLocalAssistantResponse(
+      'Résume-moi ma journée',
+      context,
+    );
+    expect(response).not.toBe(OUT_OF_SCOPE_RESPONSE);
+    expect(response).toContain('Situation actuelle');
+  });
+
+  it('route une tâche prioritaire vers le domaine tâche, pas l’accueil', () => {
+    const response = getLocalAssistantResponse(
+      'Quelle est ma tâche prioritaire ?',
+      context,
+    );
+    expect(response).toContain('onglet Tâches');
+  });
 });
 
 describe('classifyIntent', () => {
@@ -87,5 +104,16 @@ describe('classifyIntent', () => {
     expect(classifyIntent('recette de cuisine')).toBeNull();
     expect(classifyIntent('météo demain')).toBeNull();
     expect(classifyIntent('mon horoscope')).toBeNull();
+  });
+
+  it('route « contrôle de température » vers HACCP plutôt qu’audit', () => {
+    expect(classifyIntent('contrôle de température de la chambre froide')).toBe(
+      'haccp',
+    );
+    expect(classifyIntent('contrôle qualité')).toBe('audit');
+  });
+
+  it('route « tâche prioritaire » vers tache', () => {
+    expect(classifyIntent('ma tâche prioritaire du jour')).toBe('tache');
   });
 });
