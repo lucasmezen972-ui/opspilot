@@ -9,6 +9,20 @@ export interface CertificateContext {
   certificateNumber: string;
   supervisorName?: string;
   organizationName?: string;
+  /** Matricule / identifiant salarié. */
+  employeeId?: string | null;
+  /** Poste occupé. */
+  position?: string | null;
+  /** Magasin / établissement. */
+  store?: string | null;
+  /** Durée de la formation (minutes). */
+  durationMinutes?: number | null;
+  /** Version du référentiel d'évaluation. */
+  version?: string | null;
+  /** Numéro de la tentative validante. */
+  attemptNumber?: number | null;
+  /** Statut explicite de l'attestation. */
+  status?: 'validé' | 'échoué' | null;
 }
 
 /**
@@ -39,6 +53,30 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
     month: 'long',
     day: 'numeric',
   });
+  const status = ctx.status ?? 'validé';
+  const isPassed = status === 'validé';
+  const duration =
+    typeof ctx.durationMinutes === 'number'
+      ? `${ctx.durationMinutes} min`
+      : '—';
+  const detailRows: [string, string][] = [
+    ['Matricule', ctx.employeeId?.trim() || '—'],
+    ['Poste', ctx.position?.trim() || '—'],
+    ['Magasin', ctx.store?.trim() || '—'],
+    ['Catégorie', ctx.category?.trim() || '—'],
+    ['Durée', duration],
+    ['Version évaluation', ctx.version?.trim() || '—'],
+    [
+      'Tentative',
+      typeof ctx.attemptNumber === 'number' ? `N° ${ctx.attemptNumber}` : '—',
+    ],
+  ];
+  const detailsHTML = detailRows
+    .map(
+      ([label, value]) =>
+        `<div class="detail"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`,
+    )
+    .join('');
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -138,15 +176,33 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #ECFDF5;
-      border: 1.5px solid #10B981;
-      color: #065F46;
+      background: ${isPassed ? '#ECFDF5' : '#FEF2F2'};
+      border: 1.5px solid ${isPassed ? '#10B981' : '#EF4444'};
+      color: ${isPassed ? '#065F46' : '#991B1B'};
       font-size: 15px;
       font-weight: 700;
       padding: 8px 16px;
       border-radius: 8px;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
     }
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px 24px;
+      padding: 20px 0;
+      margin-bottom: 28px;
+      border-top: 1px solid #E5E7EB;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .detail { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label {
+      color: #9CA3AF;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .detail-value { color: #111827; font-size: 14px; font-weight: 600; }
     .footer {
       display: flex;
       justify-content: space-between;
@@ -201,7 +257,11 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
     </p>
 
     <div class="score-badge">
-      ✓ Score obtenu : ${ctx.score} %
+      ${isPassed ? '✓' : '✗'} ${isPassed ? 'Formation validée' : 'Formation non validée'} — Score obtenu : ${ctx.score} %
+    </div>
+
+    <div class="details">
+      ${detailsHTML}
     </div>
 
     <div class="footer">
@@ -236,6 +296,14 @@ export function openCertificate(
     score: cert.score,
     issuedAt: cert.issued_at,
     certificateNumber: cert.certificate_number,
+    employeeId: cert.employee_id,
+    position: cert.position,
+    store: cert.store_name,
+    category: cert.category,
+    durationMinutes: cert.duration_minutes,
+    version: cert.quiz_version,
+    attemptNumber: cert.attempt_number,
+    status: cert.status,
     ...ctx,
   });
 

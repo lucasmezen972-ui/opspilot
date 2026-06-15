@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from './useAuth';
-import { type MemberTrainingStatus } from '../features/training/trainingModel';
+import {
+  deriveMatricule,
+  type MemberTrainingStatus,
+} from '../features/training/trainingModel';
 import {
   getDemoOrgTrainingProgress,
   getDemoTeamMembers,
@@ -33,12 +36,13 @@ function buildEntries(
         memberId: member.id,
         memberName: member.full_name,
         memberRole: member.role,
+        matricule: deriveMatricule(member.id),
         trainingId: course.id,
         trainingTitle: course.title,
         status: prog?.status ?? 'not_started',
         score: prog?.score ?? null,
         completedAt: prog?.completed_at ?? null,
-        hasCertificate: false,
+        hasCertificate: prog?.status === 'completed',
       };
     }),
   );

@@ -244,6 +244,16 @@ export type TrainingCertificate = {
   expires_at?: string | null;
   certificate_number: string;
   created_at?: string;
+  // Champs d'identité / traçabilité (renseignés à la signature, mode démo) :
+  // optionnels pour rester compatibles avec le schéma distant existant.
+  employee_id?: string | null;
+  position?: string | null;
+  store_name?: string | null;
+  category?: string | null;
+  duration_minutes?: number | null;
+  quiz_version?: string | null;
+  attempt_number?: number | null;
+  status?: 'validé' | 'échoué' | null;
 };
 
 export type UserTrainingProgress = {

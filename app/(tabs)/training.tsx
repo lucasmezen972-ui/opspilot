@@ -11,7 +11,10 @@ import {
 
 import { TrainingAchievements } from '../../features/training/TrainingAchievements';
 import { TrainingCourseCard } from '../../features/training/TrainingCourseCard';
-import { TrainingCourseModal } from '../../features/training/TrainingCourseModal';
+import {
+  TrainingCourseModal,
+  type CertificateSubmitOptions,
+} from '../../features/training/TrainingCourseModal';
 import { TrainingLeaderboard } from '../../features/training/TrainingLeaderboard';
 import { TrainingStatsOverview } from '../../features/training/TrainingStatsOverview';
 import { TrainingSupervision } from '../../features/training/TrainingSupervision';
@@ -61,15 +64,19 @@ export default function TrainingScreen() {
   const { logEvent } = useActivityLog();
 
   // Délivrer une attestation trace la certification dans le journal de gouvernance.
-  const handleGenerateCertificate = (courseId: string, score: number) => {
+  const handleGenerateCertificate = (
+    courseId: string,
+    score: number,
+    options: CertificateSubmitOptions,
+  ) => {
     const course = dbCourses.find((c) => c.id === courseId);
     logEvent({
       action: 'training_certified',
       entityType: 'training',
       entityId: courseId,
-      label: `Formation « ${course?.title ?? 'formation'} » validée (attestation, score ${score} %).`,
+      label: `Formation « ${course?.title ?? 'formation'} » validée par ${options.fullName} (matricule ${options.employeeId}, score ${score} %).`,
     });
-    generateCertificate(courseId, score);
+    generateCertificate(courseId, score, options);
   };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
@@ -255,6 +262,7 @@ export default function TrainingScreen() {
         progress={
           selectedCourse ? getCourseProgress(selectedCourse.id) : undefined
         }
+        candidateName={profile?.full_name ?? ''}
         onClose={() => setSelectedCourseId(null)}
         onMarkChapterRead={markChapterRead}
         onCompleteQuiz={completeQuiz}

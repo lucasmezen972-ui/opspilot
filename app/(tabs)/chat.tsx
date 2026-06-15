@@ -29,6 +29,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useChannels } from '../../hooks/useChannels';
 import { useMessages } from '../../hooks/useMessages';
 import { supabase } from '../../lib/supabase';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
@@ -192,19 +193,21 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title} testID="page-messages-title">
-          Messages
-        </Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Search size={20} color="#6B7280" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Bell size={20} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <AppScreenHeader
+        title="Communication"
+        titleTestID="page-messages-title"
+        subtitle="Messagerie & canaux officiels"
+        right={
+          <>
+            <TouchableOpacity style={styles.headerButton}>
+              <Search size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton}>
+              <Bell size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </>
+        }
+      />
 
       <AppTabBar
         activeKey={activeTab}
@@ -275,26 +278,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 28,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: colors.textStrong,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
   },
   headerButton: {
     width: 40,

@@ -32,7 +32,8 @@ import {
   getProfileRoleLabel,
 } from '../../features/profile/profileModel';
 import { useAuth } from '../../hooks/useAuth';
-import { shadow } from '../../shared/styles/tokens';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
+import { colors, shadow } from '../../shared/styles/tokens';
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
@@ -99,19 +100,21 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title} testID="page-profile-title">
-          Profil
-        </Text>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => router.push('/settings')}
-          testID="profile-settings-button"
-          accessibilityLabel="Ouvrir les réglages"
-        >
-          <Settings size={20} color="#6B7280" />
-        </TouchableOpacity>
-      </View>
+      <AppScreenHeader
+        title="Profil"
+        titleTestID="page-profile-title"
+        subtitle="Compte, sécurité & préférences"
+        right={
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => router.push('/settings')}
+            testID="profile-settings-button"
+            accessibilityLabel="Ouvrir les réglages"
+          >
+            <Settings size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView style={styles.content}>
         <ProfileSummary
@@ -153,22 +156,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  title: {
-    fontSize: 28,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: '#111827',
   },
   headerButton: {
     width: 40,

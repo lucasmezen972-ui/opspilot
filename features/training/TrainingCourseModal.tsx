@@ -10,6 +10,14 @@ import {
   View,
 } from 'react-native';
 
+import {
+  CandidateIdentityStep,
+  type CandidateIdentityValues,
+} from './CandidateIdentityStep';
+import {
+  buildQuizAttemptTrace,
+  validateCandidateIdentity,
+} from './certification';
 import { uniqueChapterIds } from './progress';
 import {
   createQuizSession,
@@ -30,12 +38,24 @@ type OperationResult = {
   passed?: boolean;
 };
 
+export interface CertificateSubmitOptions {
+  fullName: string;
+  employeeId: string;
+  position: string;
+  store: string;
+  quizVersion: string;
+  attemptNumber: number;
+  status: 'validé' | 'échoué';
+}
+
 type Props = {
   visible: boolean;
   course: Training | null;
   chapters: TrainingChapter[];
   questions: TrainingQuizQuestion[];
   progress?: UserTrainingProgress;
+  /** Nom du candidat pré-rempli dans le formulaire d'identité. */
+  candidateName?: string;
   onClose: () => void;
   onMarkChapterRead: (
     courseId: string,
@@ -47,7 +67,11 @@ type Props = {
     score: number,
     failedCritical: boolean,
   ) => Promise<OperationResult>;
-  onGenerateCertificate?: (courseId: string, score: number) => void;
+  onGenerateCertificate?: (
+    courseId: string,
+    score: number,
+    options: CertificateSubmitOptions,
+  ) => void;
 };
 
 function MarkdownBody({ body }: { body: string }) {
@@ -86,12 +110,15 @@ export function TrainingCourseModal({
   chapters,
   questions,
   progress,
+  candidateName,
   onClose,
   onMarkChapterRead,
   onCompleteQuiz,
   onGenerateCertificate,
 }: Props) {
-  const [mode, setMode] = useState<'chapters' | 'quiz' | 'result'>('chapters');
+  const [mode, setMode] = useState<'chapters' | 'quiz' | 'result' | 'identity'>(
+    'chapters',
+  );
   const [chapterIndex, setChapterIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -100,6 +127,15 @@ export function TrainingCourseModal({
   const [failedCritical, setFailedCritical] = useState(false);
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
   const [saving, setSaving] = useState(false);
+  const [wasCompletedOnOpen, setWasCompletedOnOpen] = useState(false);
+
+  // Formulaire d'identité du candidat (attestation quasi-certifiante).
+  const [identityName, setIdentityName] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [position, setPosition] = useState('');
+  const [store, setStore] = useState('');
+  const [honorConfirmed, setHonorConfirmed] = useState(false);
+  const [identityErrors, setIdentityErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (!visible || !course) return;
@@ -115,6 +151,13 @@ export function TrainingCourseModal({
     setScore(null);
     setFailedCritical(false);
     setQuizSession(null);
+    setWasCompletedOnOpen(progress?.status === 'completed');
+    setIdentityName(candidateName ?? '');
+    setEmployeeId('');
+    setPosition('');
+    setStore('');
+    setHonorConfirmed(false);
+    setIdentityErrors([]);
   }, [visible, course?.id]);
 
   const sortedChapters = useMemo(
@@ -191,6 +234,48 @@ export function TrainingCourseModal({
     setMode('result');
   };
 
+  const handleIdentityChange = <K extends keyof CandidateIdentityValues>(
+    field: K,
+    value: CandidateIdentityValues[K],
+  ) => {
+    if (field === 'fullName') setIdentityName(value as string);
+    else if (field === 'employeeId') setEmployeeId(value as string);
+    else if (field === 'position') setPosition(value as string);
+    else if (field === 'store') setStore(value as string);
+    else if (field === 'honorConfirmed') setHonorConfirmed(value as boolean);
+  };
+
+  const submitIdentity = () => {
+    if (score === null || !course || !onGenerateCertificate) return;
+    const identity = {
+      fullName: identityName,
+      employeeId,
+      position,
+      store,
+    };
+    const validation = validateCandidateIdentity(identity, honorConfirmed);
+    if (!validation.valid) {
+      setIdentityErrors(validation.errors);
+      return;
+    }
+    setIdentityErrors([]);
+    const trace = buildQuizAttemptTrace({
+      questions: sessionQuestions,
+      answers,
+      attemptNumber: wasCompletedOnOpen ? 2 : 1,
+    });
+    onGenerateCertificate(course.id, score, {
+      fullName: identityName.trim(),
+      employeeId: employeeId.trim(),
+      position: position.trim(),
+      store: store.trim(),
+      quizVersion: trace.version,
+      attemptNumber: trace.attemptNumber,
+      status: 'validé',
+    });
+    onClose();
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay} testID="training-course-modal">
@@ -198,7 +283,11 @@ export function TrainingCourseModal({
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.eyebrow}>
-                {mode === 'quiz' ? 'Évaluation finale' : course.category}
+                {mode === 'quiz'
+                  ? 'Évaluation finale'
+                  : mode === 'identity'
+                    ? 'Identité du candidat'
+                    : course.category}
               </Text>
               <Text style={styles.title}>{course.title}</Text>
             </View>
@@ -439,10 +528,13 @@ export function TrainingCourseModal({
                 <TouchableOpacity
                   testID="training-certificate-btn"
                   style={styles.certificateButton}
-                  onPress={() => onGenerateCertificate(course.id, score)}
+                  onPress={() => {
+                    setIdentityErrors([]);
+                    setMode('identity');
+                  }}
                 >
                   <Text style={styles.certificateButtonText}>
-                    Télécharger l'attestation
+                    Obtenir mon attestation
                   </Text>
                 </TouchableOpacity>
               )}
@@ -454,6 +546,22 @@ export function TrainingCourseModal({
                 <Text style={styles.primaryButtonText}>Terminer</Text>
               </TouchableOpacity>
             </View>
+          )}
+
+          {mode === 'identity' && score !== null && (
+            <CandidateIdentityStep
+              values={{
+                fullName: identityName,
+                employeeId,
+                position,
+                store,
+                honorConfirmed,
+              }}
+              errors={identityErrors}
+              onChange={handleIdentityChange}
+              onBack={() => setMode('result')}
+              onSign={submitIdentity}
+            />
           )}
         </View>
       </View>
