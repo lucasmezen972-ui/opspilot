@@ -25,6 +25,7 @@ import {
   useLeaderboard,
   type LeaderboardEntry,
 } from '../../hooks/useLeaderboard';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useTraining } from '../../hooks/useTraining';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { generateTrainingContent } from '../../lib/openai';
@@ -57,6 +58,19 @@ export default function TrainingScreen() {
     entries: supervisionEntries,
     sendReminder,
   } = useTrainingSupervision();
+  const { logEvent } = useActivityLog();
+
+  // Délivrer une attestation trace la certification dans le journal de gouvernance.
+  const handleGenerateCertificate = (courseId: string, score: number) => {
+    const course = dbCourses.find((c) => c.id === courseId);
+    logEvent({
+      action: 'training_certified',
+      entityType: 'training',
+      entityId: courseId,
+      label: `Formation « ${course?.title ?? 'formation'} » validée (attestation, score ${score} %).`,
+    });
+    generateCertificate(courseId, score);
+  };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
     const progress = getCourseProgress(c.id);
@@ -244,7 +258,7 @@ export default function TrainingScreen() {
         onClose={() => setSelectedCourseId(null)}
         onMarkChapterRead={markChapterRead}
         onCompleteQuiz={completeQuiz}
-        onGenerateCertificate={generateCertificate}
+        onGenerateCertificate={handleGenerateCertificate}
       />
     </View>
   );
