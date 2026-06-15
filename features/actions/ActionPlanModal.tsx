@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 
-import { colors, radius, shadow } from '../../shared/styles/tokens';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius } from '../../shared/styles/tokens';
 
 interface ActionPlanModalProps {
   visible: boolean;
@@ -31,76 +31,58 @@ export function ActionPlanModal({
   onClose,
 }: ActionPlanModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.content} testID="action-plan-modal">
-          <View style={styles.header}>
-            <View style={styles.titleRow}>
-              <Sparkles size={18} color="#7C3AED" />
-              <Text style={styles.title}>Plan d'action correctif</Text>
-            </View>
-            <TouchableOpacity onPress={onClose} testID="action-plan-close">
-              <X size={22} color="#6B7280" />
-            </TouchableOpacity>
+    <AppModal visible={visible} onClose={onClose} testID="action-plan-modal">
+      <View>
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <Sparkles size={18} color="#7C3AED" />
+            <Text style={styles.title}>Plan d'action correctif</Text>
           </View>
+          <TouchableOpacity onPress={onClose} testID="action-plan-close">
+            <X size={22} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
 
-          <Text style={styles.subject} numberOfLines={2}>
-            {subject}
-          </Text>
+        <Text style={styles.subject} numberOfLines={2}>
+          {subject}
+        </Text>
 
-          {source && !loading && (
-            <View
+        {source && !loading && (
+          <View
+            style={[
+              styles.sourceBadge,
+              source === 'ia' ? styles.sourceIa : styles.sourceLocal,
+            ]}
+          >
+            <Text
               style={[
-                styles.sourceBadge,
-                source === 'ia' ? styles.sourceIa : styles.sourceLocal,
+                styles.sourceText,
+                source === 'ia' ? styles.sourceIaText : styles.sourceLocalText,
               ]}
             >
-              <Text
-                style={[
-                  styles.sourceText,
-                  source === 'ia'
-                    ? styles.sourceIaText
-                    : styles.sourceLocalText,
-                ]}
-              >
-                {source === 'ia' ? 'Généré par l’IA' : 'Plan proposé'}
-              </Text>
-            </View>
-          )}
+              {source === 'ia' ? 'Généré par l’IA' : 'Plan proposé'}
+            </Text>
+          </View>
+        )}
 
-          {loading ? (
-            <View style={styles.loading}>
-              <ActivityIndicator color={colors.primary} />
-              <Text style={styles.loadingText}>Génération du plan…</Text>
-            </View>
-          ) : (
-            <ScrollView style={styles.body}>
-              <Text style={styles.planText} testID="action-plan-text">
-                {planText}
-              </Text>
-            </ScrollView>
-          )}
-        </View>
+        {loading ? (
+          <View style={styles.loading}>
+            <ActivityIndicator color={colors.primary} />
+            <Text style={styles.loadingText}>Génération du plan…</Text>
+          </View>
+        ) : (
+          <ScrollView style={styles.body}>
+            <Text style={styles.planText} testID="action-plan-text">
+              {planText}
+            </Text>
+          </ScrollView>
+        )}
       </View>
-    </Modal>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  content: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: 40,
-    maxHeight: '82%',
-    ...shadow.floating,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -157,6 +139,7 @@ const styles = StyleSheet.create({
   },
   body: {
     marginTop: 2,
+    maxHeight: 380,
   },
   planText: {
     fontSize: 14,

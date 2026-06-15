@@ -12,10 +12,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import {
   type CockpitRisk,
   type CockpitSignals,
-  type RiskSeverity,
   cockpitHealth,
 } from './cockpitModel';
 import { AppKpiCard } from '../../shared/components/AppKpiCard';
+import { AppRiskBadge } from '../../shared/components/AppRiskBadge';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import {
   colors,
@@ -23,31 +23,12 @@ import {
   spacing,
   shadow,
   typography,
+  riskPalette,
 } from '../../shared/styles/tokens';
 
 type Props = {
   signals: CockpitSignals;
   risks: CockpitRisk[];
-};
-
-function severityColors(severity: RiskSeverity): { fg: string; bg: string } {
-  switch (severity) {
-    case 'critical':
-      return { fg: colors.dangerStrong, bg: colors.dangerSoft };
-    case 'high':
-      return { fg: colors.warningText, bg: colors.warningSoft };
-    case 'medium':
-      return { fg: colors.warningText, bg: colors.warningSoft };
-    default:
-      return { fg: colors.textMuted, bg: colors.backgroundAlt };
-  }
-}
-
-const SEVERITY_LABEL: Record<RiskSeverity, string> = {
-  critical: 'Critique',
-  high: 'Élevé',
-  medium: 'Moyen',
-  low: 'À suivre',
 };
 
 function scoreAccent(score: number): string {
@@ -60,7 +41,7 @@ function scoreAccent(score: number): string {
 export function ManagerCockpit({ signals, risks }: Props) {
   const health = cockpitHealth(signals.conformityScore);
   const accent = scoreAccent(signals.conformityScore);
-  const healthChip = severityColors(health.severity);
+  const healthChip = riskPalette[health.severity];
 
   return (
     <View testID="manager-cockpit" style={styles.wrap}>
@@ -149,7 +130,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
       ) : (
         <View style={styles.riskList}>
           {risks.map((risk) => {
-            const sev = severityColors(risk.severity);
+            const sev = riskPalette[risk.severity];
             return (
               <View
                 key={risk.id}
@@ -160,13 +141,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
                 <View style={styles.riskBody}>
                   <View style={styles.riskTop}>
                     <Text style={styles.riskTitle}>{risk.title}</Text>
-                    <View
-                      style={[styles.sevBadge, { backgroundColor: sev.bg }]}
-                    >
-                      <Text style={[styles.sevBadgeText, { color: sev.fg }]}>
-                        {SEVERITY_LABEL[risk.severity]}
-                      </Text>
-                    </View>
+                    <AppRiskBadge level={risk.severity} />
                   </View>
                   <Text style={styles.riskDetail}>{risk.detail}</Text>
                 </View>
@@ -264,15 +239,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.textStrong,
-  },
-  sevBadge: {
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  sevBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
   },
   riskDetail: {
     fontSize: 13,
