@@ -372,7 +372,13 @@ const RULES: RuleDefinition[] = [
   }),
   rule({
     category: 'Affichage prix / balisage',
-    keywords: pattern(['prix', '[ée]tiquette', 'balisage', 'affichage', 'promo']),
+    keywords: pattern([
+      'prix',
+      '[ée]tiquette',
+      'balisage',
+      'affichage',
+      'promo',
+    ]),
     riskLevel: 'medium',
     priority: 'high',
     deadlineHours: 24,
