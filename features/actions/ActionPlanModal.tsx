@@ -63,7 +63,9 @@ export function ActionPlanModal({
                 source === 'ia' ? styles.sourceIaText : styles.sourceLocalText,
               ]}
             >
-              {source === 'ia' ? 'Garde-fou métier + complément IA' : 'Plan proposé'}
+              {source === 'ia'
+                ? 'Garde-fou métier + complément IA'
+                : 'Plan proposé'}
             </Text>
           </View>
         )}
@@ -117,11 +119,17 @@ function StructuredPlan({ plan }: { plan: ActionPlan }) {
         <Requirement label="Commentaire" active={plan.commentRequired} />
         <Requirement label="Nom" active={plan.employeeNameRequired} />
         <Requirement label="Matricule" active={plan.employeeIdRequired} />
-        <Requirement label="Validation manager" active={plan.managerValidationRequired} />
+        <Requirement
+          label="Validation manager"
+          active={plan.managerValidationRequired}
+        />
         <Requirement label="Escalade" active={plan.escalationRequired} />
       </View>
 
-      <PlanSection title="Responsable recommandé" body={plan.recommendedAssigneeRole} />
+      <PlanSection
+        title="Responsable recommandé"
+        body={plan.recommendedAssigneeRole}
+      />
       {plan.relatedProcedure && (
         <PlanSection title="Procédure associée" body={plan.relatedProcedure} />
       )}
@@ -171,7 +179,9 @@ function ListSection({
 
 function Requirement({ label, active }: { label: string; active: boolean }) {
   return (
-    <View style={[styles.requirement, active ? styles.required : styles.optional]}>
+    <View
+      style={[styles.requirement, active ? styles.required : styles.optional]}
+    >
       <Text
         style={[
           styles.requirementText,
