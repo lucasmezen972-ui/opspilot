@@ -40,7 +40,13 @@ jest.mock('expo-status-bar', () => ({
 }));
 
 jest.mock('expo-linear-gradient', () => ({
-  LinearGradient: ({ children }: { children?: unknown }) => children ?? null,
+  LinearGradient: ({
+    children,
+    ...props
+  }: {
+    children?: React.ReactNode;
+    [key: string]: unknown;
+  }) => React.createElement('div', props, children),
 }));
 
 jest.mock('expo-constants', () => ({
@@ -97,10 +103,3 @@ jest.mock('../lib/supabase', () => ({
     })),
   },
 }));
-
-// Global test utilities
-global.console = {
-  ...console,
-  warn: jest.fn(),
-  error: jest.fn(),
-};
