@@ -17,6 +17,8 @@ import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors } from '../../shared/styles/tokens';
 import { isManagerRole } from '../../utils/roles';
 
+const heroGradientColors = [colors.primary, colors.primaryDark] as const;
+
 export default function HomeScreen() {
   const { profile } = useAuth();
   const { audits } = useAudits();
@@ -34,15 +36,17 @@ export default function HomeScreen() {
   const kpiValue = (id: string) => kpis.find((k) => k.id === id)?.value ?? 0;
   const overdue = kpiValue('audits-overdue');
   const critical = kpiValue('actions-critical');
+  const auditLabel = overdue > 1 ? 'audits' : 'audit';
+  const actionLabel = critical > 1 ? 'actions critiques' : 'action critique';
   const summary =
     overdue + critical > 0
-      ? `${overdue} audit${overdue > 1 ? 's' : ''} en retard · ${critical} action${critical > 1 ? 's' : ''} critique${critical > 1 ? 's' : ''}`
+      ? `${overdue} ${auditLabel} en retard · ${critical} ${actionLabel}`
       : 'Opérations sous contrôle aujourd’hui';
 
   return (
     <ScrollView style={styles.container}>
       <LinearGradient
-        colors={[colors.primary, colors.primaryDark]}
+        colors={heroGradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.hero}
