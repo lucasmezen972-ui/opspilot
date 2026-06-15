@@ -26,6 +26,7 @@ import {
   formatActionPlanText,
 } from '../../features/actions/actionPlan';
 import { STATUS_FLOW } from '../../features/actions/constants';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
@@ -44,6 +45,7 @@ export default function ActionsScreen() {
   } = useCorrectiveActions();
   const { session, isDemoMode } = useAuth();
   const { isEnabled } = useAppSettings();
+  const { logEvent } = useActivityLog();
   const isLocalDemo = isDemoMode && !session;
 
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
@@ -70,6 +72,14 @@ export default function ActionsScreen() {
     const next = idx >= 0 ? STATUS_FLOW[idx + 1] : undefined;
     if (next) {
       updateActionStatus(action.id, next);
+      if (next === 'done') {
+        logEvent({
+          action: 'action_resolved',
+          entityType: 'corrective_action',
+          entityId: action.id,
+          label: `Action corrective « ${action.title} » résolue.`,
+        });
+      }
     }
   };
 

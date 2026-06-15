@@ -21,7 +21,9 @@ import {
   computeStoreStats,
   getUrgentTasks,
 } from '../../features/manager/managerModel';
+import { ActivityFeed } from '../../features/governance/ActivityFeed';
 import { computeSupervisionStats } from '../../features/training/trainingModel';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useChannels } from '../../hooks/useChannels';
@@ -53,6 +55,7 @@ function ManagerDashboardContent() {
   const { actions } = useCorrectiveActions();
   const { channels, getUnreadCount } = useChannels();
   const { entries: trainingEntries } = useTrainingSupervision();
+  const { events: activityEvents } = useActivityLog();
   const [activeTab, setActiveTab] = useState<'cockpit' | 'details'>('cockpit');
 
   const stats = useMemo(
@@ -109,7 +112,10 @@ function ManagerDashboardContent() {
       />
 
       {activeTab === 'cockpit' ? (
-        <ManagerCockpit signals={cockpitSignals} risks={cockpitRisks} />
+        <>
+          <ManagerCockpit signals={cockpitSignals} risks={cockpitRisks} />
+          <ActivityFeed events={activityEvents} />
+        </>
       ) : (
         <ManagerDetails
           stats={stats}

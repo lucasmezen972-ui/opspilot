@@ -484,3 +484,21 @@ export type ChannelRead = {
   created_at?: string;
   updated_at?: string;
 };
+
+export type ActivityEventType =
+  | 'audit_completed'
+  | 'action_resolved'
+  | 'training_certified'
+  | 'export';
+
+export type ActivityEvent = {
+  id: string;
+  organization_id: string;
+  actor_id?: string | null;
+  actor_name?: string | null;
+  action: ActivityEventType;
+  entity_type: string;
+  entity_id?: string | null;
+  label: string;
+  created_at: string;
+};

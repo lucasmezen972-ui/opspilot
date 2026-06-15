@@ -24,6 +24,7 @@ import {
 } from '../../features/audits/auditListModel';
 import { AUDIT_QUESTIONS } from '../../features/audits/constants';
 import type { AuditResponseDraft } from '../../features/audits/scoring';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
@@ -51,8 +52,19 @@ export default function AuditsScreen() {
     getItemsForTemplate,
   } = useAuditTemplates();
   const { createAction, actions } = useCorrectiveActions();
+  const { logEvent } = useActivityLog();
   // Réglage back-office : création auto d'actions sur non-conformité.
   const { isEnabled } = useAppSettings();
+
+  const logAuditCompleted = (auditId: string, score: number) => {
+    const audit = dbAudits.find((a) => a.id === auditId);
+    logEvent({
+      action: 'audit_completed',
+      entityType: 'audit',
+      entityId: auditId,
+      label: `Audit « ${audit?.title ?? 'audit'} » clôturé (score ${score} %).`,
+    });
+  };
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -169,6 +181,7 @@ export default function AuditsScreen() {
       Alert.alert('Erreur', String(result.error));
       return;
     }
+    logAuditCompleted(auditId, score);
 
     // Une action corrective par non-conformité, liée à l'audit
     // (désactivable depuis le back-office : audits.auto_actions).
@@ -208,6 +221,7 @@ export default function AuditsScreen() {
       Alert.alert('Erreur', String(result.error));
       return;
     }
+    logAuditCompleted(auditId, score);
 
     let created = 0;
     const autoActions = isEnabled('audits.auto_actions');

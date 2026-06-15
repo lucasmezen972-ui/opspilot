@@ -20,6 +20,7 @@ import {
   buildReportStats,
   getCompletedAudits,
 } from '../../features/reports/reportsModel';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
@@ -35,6 +36,7 @@ export default function ReportsScreen() {
   const { audits, getAuditResponses } = useAudits();
   const { actions } = useCorrectiveActions();
   const { getItemsForTemplate } = useAuditTemplates();
+  const { logEvent } = useActivityLog();
   const canExport = can(profile?.role, 'reports.export');
 
   const completed = useMemo(() => getCompletedAudits(audits), [audits]);
@@ -45,11 +47,27 @@ export default function ReportsScreen() {
   const sites = useMemo(() => buildSiteConformity(audits), [audits]);
   const evolution = useMemo(() => buildEvolution(audits), [audits]);
 
-  const handleExportDirection = (format: 'csv' | 'xlsx') =>
-    downloadDataset(directionReportRows(sites), 'rapport-direction', format);
+  const handleExportDirection = (format: 'csv' | 'xlsx') => {
+    logEvent({
+      action: 'export',
+      entityType: 'report',
+      label: `Export du rapport direction (${format.toUpperCase()}).`,
+    });
+    return downloadDataset(
+      directionReportRows(sites),
+      'rapport-direction',
+      format,
+    );
+  };
 
   // Rapport PDF enrichi : critères détaillés + plan d'action correctif lié.
   const handleExport = async (audit: Audit) => {
+    logEvent({
+      action: 'export',
+      entityType: 'audit',
+      entityId: audit.id,
+      label: `Export du rapport d’audit « ${audit.title} ».`,
+    });
     const responses = await getAuditResponses(audit.id);
     const items = audit.template_id
       ? getItemsForTemplate(audit.template_id)
@@ -91,7 +109,14 @@ export default function ReportsScreen() {
           <TouchableOpacity
             testID="export-csv-button"
             style={styles.exportButton}
-            onPress={() => exportAuditsAsCSV(audits)}
+            onPress={() => {
+              logEvent({
+                action: 'export',
+                entityType: 'audit',
+                label: `Export CSV de ${audits.length} audit(s).`,
+              });
+              return exportAuditsAsCSV(audits);
+            }}
             disabled={audits.length === 0}
           >
             <Download size={18} color="#FFFFFF" />
