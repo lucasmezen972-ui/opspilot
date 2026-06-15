@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
@@ -13,6 +14,7 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { useProducts } from '../../hooks/useProducts';
 import { AppKpiCard } from '../../shared/components/AppKpiCard';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
+import { colors } from '../../shared/styles/tokens';
 import { isManagerRole } from '../../utils/roles';
 
 export default function HomeScreen() {
@@ -29,19 +31,38 @@ export default function HomeScreen() {
 
   const isManager = isManagerRole(profile?.role);
 
+  const kpiValue = (id: string) => kpis.find((k) => k.id === id)?.value ?? 0;
+  const overdue = kpiValue('audits-overdue');
+  const critical = kpiValue('actions-critical');
+  const summary =
+    overdue + critical > 0
+      ? `${overdue} audit${overdue > 1 ? 's' : ''} en retard · ${critical} action${critical > 1 ? 's' : ''} critique${critical > 1 ? 's' : ''}`
+      : 'Opérations sous contrôle aujourd’hui';
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>
-            Bonjour, {profile?.full_name?.split(' ')[0] ?? 'Utilisateur'} !
-          </Text>
-          <Text style={styles.subtitle}>Tableau de bord opérationnel</Text>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryDark]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}
+      >
+        <View style={styles.heroTop}>
+          <View style={styles.heroTitleBlock}>
+            <Text style={styles.greeting}>
+              Bonjour, {profile?.full_name?.split(' ')[0] ?? 'Utilisateur'} !
+            </Text>
+            <Text style={styles.subtitle}>Tableau de bord opérationnel</Text>
+          </View>
+          <View style={styles.logo}>
+            <Text style={styles.logoText}>OP</Text>
+          </View>
         </View>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>OP</Text>
+        <View style={styles.heroSummary}>
+          <View style={styles.heroDot} />
+          <Text style={styles.heroSummaryText}>{summary}</Text>
         </View>
-      </View>
+      </LinearGradient>
 
       <View style={styles.section}>
         <AppSectionHeader title="KPIs du jour" />
@@ -81,42 +102,73 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
-  header: {
+  hero: {
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  heroTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+  },
+  heroTitleBlock: {
+    flex: 1,
   },
   greeting: {
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: -0.4,
-    color: '#111827',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    color: '#FFFFFF',
   },
   subtitle: {
     fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
+    color: 'rgba(255,255,255,0.82)',
+    marginTop: 3,
   },
   logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#2563EB',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  heroSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 16,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  heroDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  heroSummaryText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '600',
   },
   section: {
     padding: 20,
+    paddingTop: 18,
     paddingBottom: 0,
   },
   kpiGrid: {
