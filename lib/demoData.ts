@@ -186,6 +186,815 @@ export function getDemoAudits(): Audit[] {
   ];
 }
 
+/**
+ * Bibliothèque de modèles d'audit prêts à l'emploi (au-delà des 3 modèles
+ * « socle » HACCP / Hygiène / Sécurité). Source unique consommée par
+ * getDemoAuditTemplates (métadonnées) et getDemoAuditTemplateItems (critères).
+ */
+type ExtraAuditTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  duration: number;
+  items: {
+    section: string;
+    question: string;
+    type: AuditTemplateItem['item_type'];
+    points: number;
+    required?: boolean;
+  }[];
+};
+
+const EXTRA_AUDIT_TEMPLATES: ExtraAuditTemplate[] = [
+  {
+    id: 'demo-template-froid',
+    name: 'Chaîne du froid',
+    description:
+      'Contrôle de la continuité du froid : enceintes, relevés de température, rangement et réaction aux ruptures.',
+    category: 'Qualité',
+    icon: 'thermometer-snowflake',
+    duration: 25,
+    items: [
+      {
+        section: 'Enceintes',
+        question:
+          'Les températures des meubles froids sont-elles dans les seuils (0 à +4 °C frais, -18 °C surgelés) ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Enceintes',
+        question:
+          'Les meubles ne sont-ils pas surchargés (circulation de l’air) ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Relevés',
+        question:
+          'Les relevés de température sont-ils consignés au moins 2 fois par jour ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Rangement',
+        question:
+          'Produits crus en bas, prêts à consommer en haut, marche en avant respectée ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Réaction',
+        question:
+          'Une procédure de rupture de froid est-elle affichée et connue de l’équipe ?',
+        type: 'yes_no',
+        points: 15,
+      },
+      {
+        section: 'Preuve',
+        question:
+          'Photographier le relevé de température ou l’afficheur de l’enceinte.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-dlc',
+    name: 'DLC / DDM & rotation',
+    description:
+      'Maîtrise des dates de consommation, rotation FEFO, retrait des produits dépassés et registre de démarque.',
+    category: 'Qualité',
+    icon: 'calendar-clock',
+    duration: 20,
+    items: [
+      {
+        section: 'Contrôle',
+        question:
+          'Le contrôle des dates est-il réalisé selon la fréquence du rayon ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Rotation',
+        question:
+          'La rotation FEFO est-elle appliquée (dates courtes devant) ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Retrait',
+        question: 'Aucun produit à DLC dépassée n’est présent en rayon ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Produits entamés',
+        question: 'Les produits entamés portent-ils une date d’ouverture ?',
+        type: 'yes_no',
+        points: 15,
+      },
+      {
+        section: 'Registre',
+        question: 'Le registre de démarque/retraits est-il tenu à jour ?',
+        type: 'score_1_5',
+        points: 10,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier un cas de date courte ou la zone de démarque.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-reception',
+    name: 'Réception marchandises',
+    description:
+      'Contrôle à quai : conformité des livraisons, températures, DLC, intégrité des emballages et traçabilité.',
+    category: 'Logistique',
+    icon: 'truck',
+    duration: 25,
+    items: [
+      {
+        section: 'Quai',
+        question:
+          'Le quai et la zone de réception sont-ils propres et dégagés ?',
+        type: 'score_1_5',
+        points: 10,
+      },
+      {
+        section: 'Contrôle',
+        question:
+          'La température des produits réfrigérés/surgelés est-elle relevée à réception ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Contrôle',
+        question: 'Les DLC restantes sont-elles suffisantes à l’acceptation ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Emballages',
+        question: 'L’intégrité des emballages et palettes est-elle vérifiée ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Traçabilité',
+        question: 'Les bons de livraison et lots sont-ils enregistrés ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Non-conformité',
+        question: 'Observations sur les refus/réserves émis à la livraison.',
+        type: 'text',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-frais',
+    name: 'Rayon frais & crémerie',
+    description:
+      'Tenue du rayon frais : propreté des meubles, fraîcheur, balisage, rotation et hygiène de manipulation.',
+    category: 'Rayon',
+    icon: 'milk',
+    duration: 20,
+    items: [
+      {
+        section: 'Meubles',
+        question:
+          'Les meubles réfrigérés sont-ils propres et sans givre excessif ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Fraîcheur',
+        question: 'Les produits présentent-ils un aspect frais et conforme ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Rotation',
+        question:
+          'La rotation est-elle assurée (pas de produits oubliés au fond) ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Balisage',
+        question: 'Le balisage prix et allergènes est-il complet et lisible ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Hygiène',
+        question: 'Le personnel respecte-t-il les règles de manipulation ?',
+        type: 'score_1_5',
+        points: 10,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier l’état général du rayon.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-fl',
+    name: 'Fruits & légumes',
+    description:
+      'Qualité et présentation du rayon fruits et légumes : fraîcheur, tri, balisage origine et propreté.',
+    category: 'Rayon',
+    icon: 'apple',
+    duration: 20,
+    items: [
+      {
+        section: 'Qualité',
+        question:
+          'Les produits sont-ils frais, triés et sans éléments abîmés ?',
+        type: 'score_1_5',
+        points: 25,
+      },
+      {
+        section: 'Tri',
+        question:
+          'Le tri des produits non vendables est-il effectué régulièrement ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Balisage',
+        question:
+          'L’origine, la variété et la catégorie sont-elles affichées ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Présentation',
+        question: 'La présentation est-elle abondante et soignée ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Propreté',
+        question: 'Le rayon et les bacs sont-ils propres ?',
+        type: 'score_1_5',
+        points: 10,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier la table fruits et légumes.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-boulangerie',
+    name: 'Boulangerie / pâtisserie',
+    description:
+      'Contrôle du fournil et de la vitrine : hygiène, cuissons, traçabilité allergènes et étiquetage.',
+    category: 'Métier',
+    icon: 'croissant',
+    duration: 25,
+    items: [
+      {
+        section: 'Hygiène',
+        question: 'Le fournil et les plans de travail sont-ils propres ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Cuisson',
+        question:
+          'Les cuissons et refroidissements respectent-ils les procédures ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Allergènes',
+        question: 'L’information allergènes est-elle disponible et à jour ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Vitrine',
+        question:
+          'La vitrine est-elle propre, attractive et correctement balisée ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Traçabilité',
+        question: 'L’étiquetage des produits (DLC, lot) est-il conforme ?',
+        type: 'yes_no',
+        points: 10,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier la vitrine ou le plan de travail.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-boucherie',
+    name: 'Boucherie',
+    description:
+      'Hygiène boucherie : chaîne du froid, séparation des viandes, nettoyage du matériel et traçabilité.',
+    category: 'Métier',
+    icon: 'beef',
+    duration: 30,
+    items: [
+      {
+        section: 'Froid',
+        question:
+          'La température du laboratoire et des vitrines est-elle conforme ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Séparation',
+        question:
+          'La séparation des viandes (espèces, cru/préparé) est-elle respectée ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Matériel',
+        question:
+          'Le nettoyage/désinfection des couteaux, planches et scies est-il assuré ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Traçabilité',
+        question:
+          'La traçabilité des viandes (origine, lot) est-elle assurée ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Tenue',
+        question: 'La tenue et l’hygiène du personnel sont-elles conformes ?',
+        type: 'score_1_5',
+        points: 5,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier la vitrine ou le laboratoire.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-poissonnerie',
+    name: 'Poissonnerie',
+    description:
+      'Fraîcheur et hygiène poissonnerie : glace, étalage, traçabilité, affichage origine et nettoyage.',
+    category: 'Métier',
+    icon: 'fish',
+    duration: 25,
+    items: [
+      {
+        section: 'Fraîcheur',
+        question:
+          'Les produits présentent-ils les critères de fraîcheur (œil, odeur, brillance) ?',
+        type: 'score_1_5',
+        points: 25,
+      },
+      {
+        section: 'Glace',
+        question:
+          'L’étal est-il suffisamment glacé et les produits maintenus au froid ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Traçabilité',
+        question:
+          'L’origine, la zone de pêche et la dénomination sont-elles affichées ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Hygiène',
+        question: 'Le nettoyage de l’étal et du matériel est-il régulier ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Tenue',
+        question: 'La tenue et l’hygiène du personnel sont-elles conformes ?',
+        type: 'score_1_5',
+        points: 5,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier l’étal réfrigéré.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-caisse',
+    name: 'Caisse & encaissement',
+    description:
+      'Contrôle des postes de caisse : fonds, procédures d’encaissement, propreté, sécurité et accueil.',
+    category: 'Caisse',
+    icon: 'credit-card',
+    duration: 20,
+    items: [
+      {
+        section: 'Ouverture',
+        question: 'Le fond de caisse est-il compté et signé à l’ouverture ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Procédures',
+        question:
+          'Les procédures d’encaissement et de rendu de monnaie sont-elles respectées ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Sécurité',
+        question:
+          'Les annulations/remboursements > seuil sont-ils validés par un responsable ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Accueil',
+        question:
+          'L’accueil client en caisse est-il conforme (salutation, sourire) ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Tenue',
+        question: 'Les postes de caisse sont-ils propres et rangés ?',
+        type: 'score_1_5',
+        points: 10,
+      },
+      {
+        section: 'Observation',
+        question: 'Remarques sur les files d’attente ou incidents constatés.',
+        type: 'text',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-prix',
+    name: 'Affichage prix & étiquetage',
+    description:
+      'Conformité de l’affichage des prix : concordance rayon/caisse, lisibilité, promotions et mentions légales.',
+    category: 'Conformité',
+    icon: 'tag',
+    duration: 20,
+    items: [
+      {
+        section: 'Concordance',
+        question: 'Les prix affichés correspondent-ils aux prix en caisse ?',
+        type: 'yes_no',
+        points: 30,
+      },
+      {
+        section: 'Lisibilité',
+        question:
+          'Les étiquettes sont-elles présentes, lisibles et bien positionnées ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Prix au litre/kilo',
+        question: 'Le prix à l’unité de mesure est-il affiché quand requis ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Promotions',
+        question:
+          'Les promotions affichées sont-elles valides et correctement balisées ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier une étiquette non conforme le cas échéant.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-ouverture',
+    name: 'Ouverture magasin',
+    description:
+      'Check-list d’ouverture : sécurité, propreté, disponibilité produits, balisage et préparation des équipes.',
+    category: 'Exploitation',
+    icon: 'sunrise',
+    duration: 15,
+    items: [
+      {
+        section: 'Sécurité',
+        question:
+          'Les issues, éclairages et systèmes de sécurité sont-ils opérationnels ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Propreté',
+        question: 'Le magasin est-il propre et prêt à accueillir les clients ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Rayons',
+        question: 'Les rayons prioritaires sont-ils réassortis et balisés ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Caisses',
+        question:
+          'Les caisses sont-elles ouvertes avec fond et personnel prêt ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Briefing',
+        question: 'Le briefing d’équipe a-t-il été réalisé ?',
+        type: 'yes_no',
+        points: 15,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-fermeture',
+    name: 'Fermeture magasin',
+    description:
+      'Check-list de fermeture : encaissements, froid, sécurité, propreté et fermeture des accès.',
+    category: 'Exploitation',
+    icon: 'moon',
+    duration: 15,
+    items: [
+      {
+        section: 'Caisses',
+        question: 'Les caisses sont-elles clôturées et les fonds sécurisés ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Froid',
+        question:
+          'Les meubles froids et chambres sont-ils fermés et conformes ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Sécurité',
+        question:
+          'Les accès, alarmes et éclairages de sécurité sont-ils activés ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Propreté',
+        question: 'Le magasin et les réserves sont-ils nettoyés et rangés ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Observation',
+        question: 'Incidents ou points à transmettre à l’équipe du lendemain.',
+        type: 'text',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-reserve',
+    name: 'Réserve & stockage',
+    description:
+      'Organisation de la réserve : rangement, marche en avant, propreté, sécurité et gestion des stocks.',
+    category: 'Logistique',
+    icon: 'warehouse',
+    duration: 20,
+    items: [
+      {
+        section: 'Rangement',
+        question: 'La réserve est-elle rangée et les allées dégagées ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Stockage',
+        question: 'Rien n’est stocké à même le sol (palettes/rayonnages) ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Rotation',
+        question:
+          'La rotation des stocks (FEFO) est-elle appliquée en réserve ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Propreté',
+        question: 'La réserve est-elle propre et sans traces de nuisibles ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Sécurité',
+        question: 'Les charges en hauteur et le matériel sont-ils sécurisés ?',
+        type: 'score_1_5',
+        points: 5,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier l’état général de la réserve.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-proprete',
+    name: 'Propreté magasin',
+    description:
+      'État de propreté général : sols, sanitaires, vitrines, mobilier et plan de nettoyage.',
+    category: 'Hygiène',
+    icon: 'broom',
+    duration: 15,
+    items: [
+      {
+        section: 'Sols',
+        question: 'Les sols de la surface de vente sont-ils propres et secs ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Sanitaires',
+        question:
+          'Les sanitaires (clients/personnel) sont-ils propres et approvisionnés ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Mobilier',
+        question: 'Le mobilier, vitres et entrées sont-ils propres ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Plan de nettoyage',
+        question: 'Le plan de nettoyage est-il affiché et émargé ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier une zone à corriger le cas échéant.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-visite',
+    name: 'Préparation visite régionale',
+    description:
+      'Pré-audit avant visite de la direction régionale : conformité globale, KPI, affichages et points sensibles.',
+    category: 'Direction',
+    icon: 'clipboard-check',
+    duration: 30,
+    items: [
+      {
+        section: 'Conformité',
+        question: 'Les non-conformités connues ont-elles été traitées ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Affichages',
+        question: 'Les affichages obligatoires sont-ils complets et à jour ?',
+        type: 'score_1_5',
+        points: 15,
+      },
+      {
+        section: 'Tenue magasin',
+        question:
+          'La tenue générale (propreté, balisage, ruptures) est-elle conforme ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Documents',
+        question:
+          'Les registres (sécurité, températures, formations) sont-ils disponibles ?',
+        type: 'yes_no',
+        points: 20,
+      },
+      {
+        section: 'Points sensibles',
+        question: 'Points de vigilance identifiés avant la visite.',
+        type: 'text',
+        points: 10,
+        required: false,
+      },
+      {
+        section: 'Preuve',
+        question: 'Photographier les zones préparées pour la visite.',
+        type: 'photo',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'demo-template-franchise',
+    name: 'Conformité franchise',
+    description:
+      'Respect du concept franchiseur : identité visuelle, gammes obligatoires, procédures et standards de service.',
+    category: 'Franchise',
+    icon: 'badge-check',
+    duration: 30,
+    items: [
+      {
+        section: 'Identité',
+        question:
+          'L’identité visuelle (enseigne, PLV, mobilier) respecte-t-elle la charte ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Gammes',
+        question: 'Les gammes et assortiments obligatoires sont-ils présents ?',
+        type: 'yes_no',
+        points: 25,
+      },
+      {
+        section: 'Procédures',
+        question:
+          'Les procédures du concept sont-elles appliquées par l’équipe ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Service',
+        question:
+          'Les standards de service client du réseau sont-ils respectés ?',
+        type: 'score_1_5',
+        points: 20,
+      },
+      {
+        section: 'Documents',
+        question:
+          'Le manuel du franchisé et les mises à jour sont-ils disponibles ?',
+        type: 'yes_no',
+        points: 5,
+      },
+      {
+        section: 'Observation',
+        question: 'Écarts au concept relevés et plan de mise en conformité.',
+        type: 'text',
+        points: 10,
+        required: false,
+      },
+    ],
+  },
+];
+
 export function getDemoAuditTemplates(): AuditTemplate[] {
   const template = (
     id: string,
@@ -233,6 +1042,9 @@ export function getDemoAuditTemplates(): AuditTemplate[] {
       'Sécurité',
       'shield-alert',
       30,
+    ),
+    ...EXTRA_AUDIT_TEMPLATES.map((t) =>
+      template(t.id, t.name, t.description, t.category, t.icon, t.duration),
     ),
   ];
 }
@@ -583,6 +1395,20 @@ export function getDemoAuditTemplateItems(): AuditTemplateItem[] {
       10,
       8,
       false,
+    ),
+    ...EXTRA_AUDIT_TEMPLATES.flatMap((tpl) =>
+      tpl.items.map((it, index) =>
+        item(
+          `${tpl.id}-item-${index + 1}`,
+          tpl.id,
+          it.section,
+          it.question,
+          it.type,
+          it.points,
+          index + 1,
+          it.required ?? true,
+        ),
+      ),
     ),
   ];
 }
