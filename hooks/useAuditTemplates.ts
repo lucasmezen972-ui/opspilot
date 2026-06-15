@@ -1,6 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from './useAuth';
+import {
+  currentTemplateVersion,
+  extractSections,
+  initialTemplateVersions,
+} from '../features/audits/auditStructureModel';
 import { useDemoCollection } from '../lib/demoStore';
 import {
   supabase,
@@ -92,11 +97,28 @@ export function useAuditTemplates() {
     [items],
   );
 
+  // Versions de modèle (v1 initiale) + sections normalisées dérivées des
+  // critères : socle de reproductibilité (table audit_template_versions / sections).
+  const versions = useMemo(
+    () => initialTemplateVersions(templates, items),
+    [templates, items],
+  );
+  const getTemplateVersion = useCallback(
+    (templateId: string) => currentTemplateVersion(versions, templateId),
+    [versions],
+  );
+  const getSectionsForTemplate = useCallback(
+    (templateId: string) => extractSections(templateId, items),
+    [items],
+  );
+
   return {
     templates,
     items,
     loading,
     getItemsForTemplate,
+    getTemplateVersion,
+    getSectionsForTemplate,
     refetch: fetchTemplates,
   };
 }
