@@ -39,6 +39,10 @@ jest.mock('expo-status-bar', () => ({
   StatusBar: () => null,
 }));
 
+jest.mock('expo-linear-gradient', () => ({
+  LinearGradient: ({ children }: { children?: unknown }) => children ?? null,
+}));
+
 jest.mock('expo-constants', () => ({
   default: {
     expoConfig: {
