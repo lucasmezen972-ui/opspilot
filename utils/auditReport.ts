@@ -21,6 +21,8 @@ export interface AuditReportContext {
   actions?: CorrectiveAction[];
   organizationName?: string;
   auditorName?: string;
+  /** Responsable validant le rapport (bloc de signature). */
+  responsibleName?: string;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -83,6 +85,61 @@ function reference(audit: Audit): string {
     .toUpperCase();
   const year = new Date(audit.created_at).getFullYear();
   return `AUD-${year}-${short}`;
+}
+
+/** Synthèse exécutive : narratif d'ouverture du rapport. */
+function synthesisSection(audit: Audit, ctx: AuditReportContext): string {
+  const verdict = conformityVerdict(audit.score);
+  const responses = ctx.responses ?? [];
+  const evaluated = responses.filter((r) => r.is_compliant != null);
+  const conform = evaluated.filter((r) => r.is_compliant === true).length;
+  const nonConform = evaluated.length - conform;
+
+  const coverage = evaluated.length
+    ? `${evaluated.length} critère(s) évalué(s), dont ${conform} conforme(s) et ${nonConform} non conforme(s).`
+    : `${audit.issues_count} non-conformité(s) relevée(s) au cours du contrôle.`;
+
+  const guidance =
+    audit.score == null
+      ? "L'audit n'a pas encore été noté."
+      : audit.score >= 80
+        ? 'Le niveau de conformité est satisfaisant ; maintenir les bonnes pratiques en place.'
+        : audit.score >= 60
+          ? 'Des écarts ont été constatés : un plan de surveillance et des actions correctives sont recommandés.'
+          : 'Le niveau de conformité est insuffisant : un plan d’action correctif immédiat est requis.';
+
+  return `
+<div class="section">
+  <h2>Synthèse</h2>
+  <p style="font-size:14px;color:#374151">
+    À l'issue du contrôle « ${esc(audit.title)} »${audit.location ? ` réalisé sur ${esc(audit.location)}` : ''},
+    le verdict de conformité est <strong style="color:${verdict.color}">${verdict.label}</strong>
+    pour un score global de <strong>${audit.score != null ? `${audit.score}%` : 'non noté'}</strong>.
+    ${esc(coverage)} ${guidance}
+  </p>
+</div>`;
+}
+
+/** Bloc de signature : auditeur et responsable validant le rapport. */
+function signatureSection(ctx: AuditReportContext): string {
+  const auditor = ctx.auditorName?.trim() || 'Auditeur';
+  const responsible = ctx.responsibleName?.trim() || 'Responsable qualité';
+  return `
+<div class="section">
+  <h2>Validation</h2>
+  <div class="sigrow">
+    <div class="sigblock">
+      <div class="sigline"></div>
+      <div class="siglabel">Auditeur</div>
+      <div class="signame">${esc(auditor)}</div>
+    </div>
+    <div class="sigblock">
+      <div class="sigline"></div>
+      <div class="siglabel">Responsable</div>
+      <div class="signame">${esc(responsible)}</div>
+    </div>
+  </div>
+</div>`;
 }
 
 /** Tableau détaillé des critères, groupés par section, si les données existent. */
@@ -258,6 +315,11 @@ export function buildAuditReportHTML(
   .tag-ok { background: #DCFCE7; color: #16A34A; }
   .tag-ko { background: #FEE2E2; color: #DC2626; }
   .tag-na { background: #F3F4F6; color: #6B7280; }
+  .sigrow { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 18px; }
+  .sigblock { flex: 1; min-width: 180px; text-align: center; }
+  .sigline { height: 2px; background: #D1D5DB; margin-bottom: 8px; }
+  .siglabel { font-size: 11.5px; color: #6B7280; text-transform: uppercase; letter-spacing: .5px; }
+  .signame { font-size: 14px; font-weight: 700; color: #111827; margin-top: 2px; }
   .footer { text-align: center; font-size: 11.5px; color: #9CA3AF; margin-top: 28px; line-height: 1.7; }
   .footer strong { color: #6B7280; }
   @media print {
@@ -309,6 +371,8 @@ export function buildAuditReportHTML(
   </div>
 </div>
 
+${synthesisSection(audit, ctx)}
+
 ${criteriaSection(ctx)}
 
 ${actionsSection(ctx)}
@@ -321,6 +385,8 @@ ${actionsSection(ctx)}
   ${audit.due_date ? `<div class="row"><span>Échéance</span><span>${frDate(audit.due_date)}</span></div>` : ''}
   ${audit.notes ? `<div class="row"><span>Notes</span><span style="max-width:60%;text-align:right">${esc(audit.notes)}</span></div>` : ''}
 </div>
+
+${signatureSection(ctx)}
 
 ${
   audit.photos?.length > 0

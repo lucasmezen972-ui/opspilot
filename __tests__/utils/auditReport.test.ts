@@ -45,6 +45,34 @@ describe('buildAuditReportHTML', () => {
     expect(html).toContain("Rapport d'audit de conformité");
   });
 
+  it('produit une synthèse exécutive avec le verdict', () => {
+    const html = buildAuditReportHTML(audit);
+    expect(html).toContain('Synthèse');
+    expect(html).toContain('verdict de conformité');
+    expect(html).toContain('plan de surveillance');
+  });
+
+  it('inclut un bloc de signature auditeur et responsable', () => {
+    const html = buildAuditReportHTML(audit, {
+      auditorName: 'Marie Dupont',
+      responsibleName: 'Paul Durand',
+    });
+    expect(html).toContain('Validation');
+    expect(html).toContain('Marie Dupont');
+    expect(html).toContain('Paul Durand');
+    expect(html).toContain('Responsable');
+  });
+
+  it('compte les critères conformes dans la synthèse', () => {
+    const responses: AuditResponse[] = [
+      { id: 'r1', audit_id: audit.id, item_id: 'i1', is_compliant: true },
+      { id: 'r2', audit_id: audit.id, item_id: 'i2', is_compliant: false },
+    ];
+    const html = buildAuditReportHTML(audit, { responses });
+    expect(html).toContain('2 critère(s) évalué(s)');
+    expect(html).toContain('1 conforme(s)');
+  });
+
   it('échappe le contenu utilisateur (anti-injection)', () => {
     const html = buildAuditReportHTML({
       ...audit,

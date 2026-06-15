@@ -79,6 +79,7 @@ export default function ReportsScreen() {
       responses,
       items,
       actions: auditActions,
+      auditorName: profile?.full_name ?? undefined,
     });
   };
 

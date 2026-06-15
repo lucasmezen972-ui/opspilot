@@ -293,6 +293,7 @@ export default function AuditsScreen() {
       responses,
       items,
       actions: auditActions,
+      auditorName: profile?.full_name ?? undefined,
     });
   };
 
