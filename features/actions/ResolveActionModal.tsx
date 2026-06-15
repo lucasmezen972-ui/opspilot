@@ -95,7 +95,10 @@ export function ResolveActionModal({
             <CheckCircle size={18} color={colors.success} />
             <Text style={styles.title}>Clôture contrôlée</Text>
           </View>
-          <TouchableOpacity onPress={handleClose} testID="action-resolution-close">
+          <TouchableOpacity
+            onPress={handleClose}
+            testID="action-resolution-close"
+          >
             <X size={22} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
@@ -165,7 +168,10 @@ export function ResolveActionModal({
             disabled={!canConfirm}
             onPress={handleConfirm}
             testID="action-resolution-confirm"
-            style={[styles.confirmButton, !canConfirm && styles.confirmDisabled]}
+            style={[
+              styles.confirmButton,
+              !canConfirm && styles.confirmDisabled,
+            ]}
           >
             <Text style={styles.confirmText}>Clôturer</Text>
           </TouchableOpacity>
