@@ -33,6 +33,7 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 
 export default function ActionsScreen() {
   const {
@@ -122,23 +123,20 @@ export default function ActionsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title} testID="page-actions-title">
-            Actions correctives
-          </Text>
-          <Text style={styles.subtitle}>
-            Suivi des non-conformités et plans d'action
-          </Text>
-        </View>
-        <TouchableOpacity
-          testID="action-create-button"
-          style={styles.addButton}
-          onPress={() => setCreateModalVisible(true)}
-        >
-          <Plus size={22} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
+      <AppScreenHeader
+        title="Plans d’action"
+        titleTestID="page-actions-title"
+        subtitle="Non-conformités & actions correctives"
+        right={
+          <TouchableOpacity
+            testID="action-create-button"
+            style={styles.addButton}
+            onPress={() => setCreateModalVisible(true)}
+          >
+            <Plus size={22} color="#FFFFFF" />
+          </TouchableOpacity>
+        }
+      />
 
       <ActionsStatsRow
         open={openCount}
@@ -201,28 +199,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  title: {
-    fontSize: 24,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
   },
   addButton: {
     width: 44,

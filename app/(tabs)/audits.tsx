@@ -37,7 +37,8 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { AuditTemplate } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
-import { shadow } from '../../shared/styles/tokens';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
+import { colors, shadow } from '../../shared/styles/tokens';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 import { isManagerRole } from '../../utils/roles';
@@ -297,26 +298,30 @@ export default function AuditsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title} testID="page-audits-title">
-          Audits
-        </Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => setShowSearch(!showSearch)}
-          >
-            <Search size={20} color={showSearch ? '#2563EB' : '#6B7280'} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => exportAuditsAsCSV(dbAudits)}
-          >
-            <Download size={20} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <AppScreenHeader
+        title="Audits"
+        titleTestID="page-audits-title"
+        subtitle="Conformité terrain & preuves"
+        right={
+          <>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => setShowSearch(!showSearch)}
+            >
+              <Search
+                size={20}
+                color={showSearch ? colors.primary : colors.textMuted}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => exportAuditsAsCSV(dbAudits)}
+            >
+              <Download size={20} color={colors.textMuted} />
+            </TouchableOpacity>
+          </>
+        }
+      />
 
       {showSearch && (
         <View style={styles.searchBar}>
@@ -430,26 +435,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  title: {
-    fontSize: 28,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
   },
   headerButton: {
     width: 40,

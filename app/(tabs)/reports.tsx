@@ -26,6 +26,8 @@ import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { Audit } from '../../lib/supabase';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
+import { colors } from '../../shared/styles/tokens';
 import { exportAuditReport } from '../../utils/auditReport';
 import { downloadDataset } from '../../utils/export';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
@@ -82,17 +84,16 @@ export default function ReportsScreen() {
 
   return (
     <ScrollView style={styles.container} testID="reports-screen">
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title} testID="page-reports-title">
-            Rapports
-          </Text>
-          <Text style={styles.subtitle}>Synthèse conformité & exports</Text>
-        </View>
-        <View style={styles.headerIcon}>
-          <FileText size={22} color="#2563EB" />
-        </View>
-      </View>
+      <AppScreenHeader
+        title="Rapports"
+        titleTestID="page-reports-title"
+        subtitle="Synthèse conformité & exports"
+        right={
+          <View style={styles.headerIcon}>
+            <FileText size={22} color={colors.primary} />
+          </View>
+        }
+      />
 
       <ReportStatsGrid stats={stats} />
 
@@ -141,27 +142,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  title: {
-    fontSize: 22,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
   },
   headerIcon: {
     width: 44,

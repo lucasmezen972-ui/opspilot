@@ -28,6 +28,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTasks } from '../../hooks/useTasks';
 import type { Task } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
+import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { colors, shadow } from '../../shared/styles/tokens';
 import { isManagerRole } from '../../utils/roles';
 
@@ -113,18 +114,20 @@ export default function TasksScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title} testID="page-tasks-title">
-          Tâches
-        </Text>
-        <TouchableOpacity
-          style={styles.headerButton}
-          accessibilityRole="button"
-          accessibilityLabel="Ouvrir les filtres"
-        >
-          <Filter size={20} color="#6B7280" />
-        </TouchableOpacity>
-      </View>
+      <AppScreenHeader
+        title="Tâches"
+        titleTestID="page-tasks-title"
+        subtitle="Exécution tracée & validée"
+        right={
+          <TouchableOpacity
+            style={styles.headerButton}
+            accessibilityRole="button"
+            accessibilityLabel="Ouvrir les filtres"
+          >
+            <Filter size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        }
+      />
 
       <TaskQuickStats stats={stats} />
 
@@ -201,27 +204,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 28,
-    letterSpacing: -0.4,
-    fontWeight: '700',
-    color: colors.textStrong,
-  },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
   },
