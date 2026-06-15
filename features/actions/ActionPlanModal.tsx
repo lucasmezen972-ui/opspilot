@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import type { ActionPlan } from './actionPlan';
 import { AppModal } from '../../shared/components/AppModal';
 import { colors, radius } from '../../shared/styles/tokens';
 
@@ -16,6 +17,7 @@ interface ActionPlanModalProps {
   subject: string;
   loading: boolean;
   planText: string | null;
+  plan?: ActionPlan | null;
   /** Origine du plan : généré par l'IA en ligne, ou proposé localement. */
   source: 'ia' | 'local' | null;
   onClose: () => void;
@@ -27,6 +29,7 @@ export function ActionPlanModal({
   subject,
   loading,
   planText,
+  plan,
   source,
   onClose,
 }: ActionPlanModalProps) {
@@ -72,14 +75,114 @@ export function ActionPlanModal({
           </View>
         ) : (
           <ScrollView style={styles.body}>
-            <Text style={styles.planText} testID="action-plan-text">
-              {planText}
-            </Text>
+            {plan && <StructuredPlan plan={plan} />}
+            {planText && !plan && (
+              <Text style={styles.planText} testID="action-plan-text">
+                {planText}
+              </Text>
+            )}
           </ScrollView>
         )}
       </View>
     </AppModal>
   );
+}
+
+function StructuredPlan({ plan }: { plan: ActionPlan }) {
+  return (
+    <View testID="action-plan-structured">
+      <View style={styles.summaryGrid}>
+        <SummaryItem label="Catégorie" value={plan.category} />
+        <SummaryItem label="Risque" value={riskLabel(plan.riskLevel)} />
+        <SummaryItem label="Deadline" value={plan.deadlineLabel} />
+      </View>
+
+      <PlanSection title="Problème constaté" body={plan.observedProblem} />
+      <PlanSection title="Cause probable" body={plan.probableCause} />
+      <PlanSection title="Action immédiate" body={plan.immediateAction} />
+      <PlanSection title="Action corrective" body={plan.correctiveAction} />
+      <PlanSection title="Action préventive" body={plan.preventiveAction} />
+
+      <ListSection title="Preuves attendues" items={plan.evidenceRequired} />
+      <ListSection title="Checklist" items={plan.checklist} numbered />
+
+      <View style={styles.requirements}>
+        <Requirement label="Photo" active={plan.photoRequired} />
+        <Requirement label="Commentaire" active={plan.commentRequired} />
+        <Requirement label="Nom" active={plan.employeeNameRequired} />
+        <Requirement label="Matricule" active={plan.employeeIdRequired} />
+        <Requirement label="Validation manager" active={plan.managerValidationRequired} />
+        <Requirement label="Escalade" active={plan.escalationRequired} />
+      </View>
+
+      <PlanSection title="Responsable recommandé" body={plan.recommendedAssigneeRole} />
+      {plan.relatedProcedure && (
+        <PlanSection title="Procédure associée" body={plan.relatedProcedure} />
+      )}
+    </View>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.summaryItem}>
+      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={styles.summaryValue}>{value}</Text>
+    </View>
+  );
+}
+
+function PlanSection({ title, body }: { title: string; body: string }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionBody}>{body}</Text>
+    </View>
+  );
+}
+
+function ListSection({
+  title,
+  items,
+  numbered = false,
+}: {
+  title: string;
+  items: string[];
+  numbered?: boolean;
+}) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {items.map((item, index) => (
+        <Text key={`${title}-${item}`} style={styles.sectionBody}>
+          {numbered ? `${index + 1}. ` : '• '}
+          {item}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+function Requirement({ label, active }: { label: string; active: boolean }) {
+  return (
+    <View style={[styles.requirement, active ? styles.required : styles.optional]}>
+      <Text
+        style={[
+          styles.requirementText,
+          active ? styles.requiredText : styles.optionalText,
+        ]}
+      >
+        {active ? 'Obligatoire' : 'Optionnel'} · {label}
+      </Text>
+    </View>
+  );
+}
+
+function riskLabel(risk: ActionPlan['riskLevel']): string {
+  if (risk === 'critical') return 'Critique';
+  if (risk === 'high') return 'Élevé';
+  if (risk === 'medium') return 'Moyen';
+  return 'À suivre';
 }
 
 const styles = StyleSheet.create({
@@ -112,22 +215,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     marginBottom: 14,
   },
-  sourceIa: {
-    backgroundColor: '#F3E8FF',
-  },
-  sourceLocal: {
-    backgroundColor: colors.backgroundAlt,
-  },
-  sourceText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  sourceIaText: {
-    color: '#7C3AED',
-  },
-  sourceLocalText: {
-    color: colors.textMuted,
-  },
+  sourceIa: { backgroundColor: '#F3E8FF' },
+  sourceLocal: { backgroundColor: colors.backgroundAlt },
+  sourceText: { fontSize: 11, fontWeight: '700' },
+  sourceIaText: { color: '#7C3AED' },
+  sourceLocalText: { color: colors.textMuted },
   loading: {
     paddingVertical: 40,
     alignItems: 'center',
@@ -139,8 +231,68 @@ const styles = StyleSheet.create({
   },
   body: {
     marginTop: 2,
-    maxHeight: 380,
+    maxHeight: 520,
   },
+  summaryGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  summaryItem: {
+    flex: 1,
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 10,
+  },
+  summaryLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  summaryValue: {
+    color: colors.textStrong,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  section: {
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    borderRadius: radius.lg,
+    padding: 12,
+    marginBottom: 10,
+    backgroundColor: colors.surface,
+  },
+  sectionTitle: {
+    color: colors.textStrong,
+    fontSize: 13,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  sectionBody: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  requirements: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 10,
+  },
+  requirement: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  required: { backgroundColor: colors.dangerSoft },
+  optional: { backgroundColor: colors.backgroundAlt },
+  requirementText: { fontSize: 11, fontWeight: '700' },
+  requiredText: { color: colors.dangerStrong },
+  optionalText: { color: colors.textMuted },
   planText: {
     fontSize: 14,
     lineHeight: 21,
