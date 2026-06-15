@@ -21,6 +21,10 @@ import {
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
 import {
+  ResolveActionModal,
+  type ResolutionEvidencePayload,
+} from '../../features/actions/ResolveActionModal';
+import {
   buildActionPlanPrompt,
   buildLocalActionPlan,
   formatActionPlanText,
@@ -56,6 +60,9 @@ export default function ActionsScreen() {
   const [planText, setPlanText] = useState<string | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [planSource, setPlanSource] = useState<'ia' | 'local' | null>(null);
+  const [resolutionAction, setResolutionAction] =
+    useState<CorrectiveAction | null>(null);
+  const [resolutionPlan, setResolutionPlan] = useState<ActionPlan | null>(null);
 
   const overdueCount = useMemo(
     () => actions.filter(isOverdue).length,
@@ -72,17 +79,29 @@ export default function ActionsScreen() {
   const advanceStatus = (action: CorrectiveAction) => {
     const idx = STATUS_FLOW.indexOf(action.status);
     const next = idx >= 0 ? STATUS_FLOW[idx + 1] : undefined;
-    if (next) {
-      updateActionStatus(action.id, next);
-      if (next === 'done') {
-        logEvent({
-          action: 'action_resolved',
-          entityType: 'corrective_action',
-          entityId: action.id,
-          label: `Action corrective « ${action.title} » résolue.`,
-        });
-      }
+    if (!next) return;
+
+    if (next === 'done') {
+      setResolutionAction(action);
+      setResolutionPlan(buildLocalActionPlan(action));
+      return;
     }
+
+    updateActionStatus(action.id, next);
+  };
+
+  const handleResolutionConfirm = (payload: ResolutionEvidencePayload) => {
+    if (!resolutionAction) return;
+    const action = resolutionAction;
+    updateActionStatus(action.id, 'done');
+    logEvent({
+      action: 'action_resolved',
+      entityType: 'corrective_action',
+      entityId: action.id,
+      label: buildResolutionLabel(action, payload),
+    });
+    setResolutionAction(null);
+    setResolutionPlan(null);
   };
 
   // Plan d'action correctif : IA en ligne si disponible, sinon plan proposé.
@@ -193,6 +212,17 @@ export default function ActionsScreen() {
         onCreate={handleCreate}
       />
 
+      <ResolveActionModal
+        visible={resolutionAction !== null}
+        action={resolutionAction}
+        plan={resolutionPlan}
+        onClose={() => {
+          setResolutionAction(null);
+          setResolutionPlan(null);
+        }}
+        onConfirm={handleResolutionConfirm}
+      />
+
       <ActionPlanModal
         visible={planAction !== null}
         subject={planAction?.title ?? ''}
@@ -208,6 +238,17 @@ export default function ActionsScreen() {
       />
     </View>
   );
+}
+
+function buildResolutionLabel(
+  action: CorrectiveAction,
+  payload: ResolutionEvidencePayload,
+): string {
+  const proof = payload.photoConfirmed ? 'preuve photo confirmée' : 'sans photo';
+  const manager = payload.managerValidated
+    ? 'validation manager confirmée'
+    : 'sans validation manager';
+  return `Action corrective « ${action.title} » résolue — ${proof}, ${manager}.`;
 }
 
 const styles = StyleSheet.create({
