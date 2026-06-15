@@ -162,7 +162,10 @@ export default function ActionsScreen() {
             <AppEmptyState
               icon={CheckCircle}
               title="Aucune action corrective ouverte"
-              description="Les non-conformités relevées en audit génèrent automatiquement un plan d'action correctif."
+              description={
+                'Les non-conformités relevées en audit génèrent automatiquement ' +
+                "un plan d'action correctif."
+              }
             />
           )}
           {actions.map((action) => (
