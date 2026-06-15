@@ -51,7 +51,9 @@ describe('generateCorrectiveActionPlan', () => {
 
   it('impose une deadline max 1h pour la chaîne du froid', () => {
     const plan = generateCorrectiveActionPlan(
-      action({ title: 'Non-conformité : température chambre froide trop élevée' }),
+      action({
+        title: 'Non-conformité : température chambre froide trop élevée',
+      }),
       fixedNow,
     );
 
