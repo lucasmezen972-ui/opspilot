@@ -22,8 +22,8 @@ import {
 } from '../../features/actions/CreateActionModal';
 import {
   buildActionPlanPrompt,
-  buildLocalActionPlan,
-  formatActionPlanText,
+  generateCorrectiveActionPlan,
+  type CorrectiveActionPlan,
 } from '../../features/actions/actionPlan';
 import { STATUS_FLOW } from '../../features/actions/constants';
 import { useActivityLog } from '../../hooks/useActivityLog';
@@ -52,6 +52,9 @@ export default function ActionsScreen() {
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [planAction, setPlanAction] = useState<CorrectiveAction | null>(null);
+  const [planObject, setPlanObject] = useState<CorrectiveActionPlan | null>(
+    null,
+  );
   const [planText, setPlanText] = useState<string | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [planSource, setPlanSource] = useState<'ia' | 'local' | null>(null);
@@ -88,16 +91,17 @@ export default function ActionsScreen() {
   const handleGeneratePlan = async (action: CorrectiveAction) => {
     setPlanAction(action);
     setPlanText(null);
+    setPlanObject(null);
     setPlanSource(null);
     setPlanLoading(true);
 
-    const localPlan = formatActionPlanText(buildLocalActionPlan(action));
+    const localPlan = generateCorrectiveActionPlan(action);
     const aiAvailable =
       !isLocalDemo && !!session && isEnabled('features.ai_assistant');
 
     if (!aiAvailable) {
       setPlanSource('local');
-      setPlanText(localPlan);
+      setPlanObject(localPlan);
       setPlanLoading(false);
       return;
     }
@@ -115,7 +119,7 @@ export default function ActionsScreen() {
       setPlanText(data.reply);
     } catch {
       setPlanSource('local');
-      setPlanText(localPlan);
+      setPlanObject(localPlan);
     } finally {
       setPlanLoading(false);
     }
@@ -187,6 +191,7 @@ export default function ActionsScreen() {
         visible={planAction !== null}
         subject={planAction?.title ?? ''}
         loading={planLoading}
+        plan={planObject}
         planText={planText}
         source={planSource}
         onClose={() => setPlanAction(null)}
