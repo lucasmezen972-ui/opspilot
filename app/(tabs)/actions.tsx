@@ -244,11 +244,16 @@ function buildResolutionLabel(
   action: CorrectiveAction,
   payload: ResolutionEvidencePayload,
 ): string {
-  const proof = payload.photoConfirmed ? 'preuve photo confirmée' : 'sans photo';
+  const proof = payload.photoConfirmed
+    ? 'preuve photo confirmée'
+    : 'sans photo';
   const manager = payload.managerValidated
     ? 'validation manager confirmée'
     : 'sans validation manager';
-  return `Action corrective « ${action.title} » résolue — ${proof}, ${manager}.`;
+  return (
+    `Action corrective « ${action.title} » résolue — ` +
+    `${proof}, ${manager}.`
+  );
 }
 
 const styles = StyleSheet.create({
