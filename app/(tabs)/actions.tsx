@@ -24,6 +24,7 @@ import {
   buildActionPlanPrompt,
   buildLocalActionPlan,
   formatActionPlanText,
+  type ActionPlan,
 } from '../../features/actions/actionPlan';
 import { STATUS_FLOW } from '../../features/actions/constants';
 import { useActivityLog } from '../../hooks/useActivityLog';
@@ -51,6 +52,7 @@ export default function ActionsScreen() {
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [planAction, setPlanAction] = useState<CorrectiveAction | null>(null);
+  const [plan, setPlan] = useState<ActionPlan | null>(null);
   const [planText, setPlanText] = useState<string | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [planSource, setPlanSource] = useState<'ia' | 'local' | null>(null);
@@ -87,16 +89,19 @@ export default function ActionsScreen() {
   const handleGeneratePlan = async (action: CorrectiveAction) => {
     setPlanAction(action);
     setPlanText(null);
+    setPlan(null);
     setPlanSource(null);
     setPlanLoading(true);
 
-    const localPlan = formatActionPlanText(buildLocalActionPlan(action));
+    const localPlan = buildLocalActionPlan(action);
+    const localPlanText = formatActionPlanText(localPlan);
+    setPlan(localPlan);
     const aiAvailable =
       !isLocalDemo && !!session && isEnabled('features.ai_assistant');
 
     if (!aiAvailable) {
       setPlanSource('local');
-      setPlanText(localPlan);
+      setPlanText(localPlanText);
       setPlanLoading(false);
       return;
     }
@@ -114,7 +119,7 @@ export default function ActionsScreen() {
       setPlanText(data.reply);
     } catch {
       setPlanSource('local');
-      setPlanText(localPlan);
+      setPlanText(localPlanText);
     } finally {
       setPlanLoading(false);
     }
@@ -189,9 +194,14 @@ export default function ActionsScreen() {
         visible={planAction !== null}
         subject={planAction?.title ?? ''}
         loading={planLoading}
+        plan={plan}
         planText={planText}
         source={planSource}
-        onClose={() => setPlanAction(null)}
+        onClose={() => {
+          setPlanAction(null);
+          setPlan(null);
+          setPlanText(null);
+        }}
       />
     </View>
   );
@@ -229,14 +239,13 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: '#2563EB',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   list: {
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
+    padding: 16,
   },
 });
