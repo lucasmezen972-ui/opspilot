@@ -20,10 +20,11 @@ import {
   CreateActionModal,
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
+import { ResolveActionModal } from '../../features/actions/ResolveActionModal';
 import {
-  ResolveActionModal,
+  buildResolutionActivityLabel,
   type ResolutionEvidencePayload,
-} from '../../features/actions/ResolveActionModal';
+} from '../../features/actions/actionResolution';
 import {
   buildActionPlanPrompt,
   buildLocalActionPlan,
@@ -98,7 +99,10 @@ export default function ActionsScreen() {
       action: 'action_resolved',
       entityType: 'corrective_action',
       entityId: action.id,
-      label: buildResolutionLabel(action, payload),
+      label: buildResolutionActivityLabel({
+        title: action.title,
+        evidence: payload,
+      }),
     });
     setResolutionAction(null);
     setResolutionPlan(null);
@@ -237,22 +241,6 @@ export default function ActionsScreen() {
         }}
       />
     </View>
-  );
-}
-
-function buildResolutionLabel(
-  action: CorrectiveAction,
-  payload: ResolutionEvidencePayload,
-): string {
-  const proof = payload.photoConfirmed
-    ? 'preuve photo confirmée'
-    : 'sans photo';
-  const manager = payload.managerValidated
-    ? 'validation manager confirmée'
-    : 'sans validation manager';
-  return (
-    `Action corrective « ${action.title} » résolue — ` +
-    `${proof}, ${manager}.`
   );
 }
 
