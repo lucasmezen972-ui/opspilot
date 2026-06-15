@@ -29,6 +29,12 @@ audits, actions correctives, produits/DLC, tâches, formations, messages.
   `audit_template_items`), exécution par sections avec réponses typées
   (`audit_responses`), photos (`audit_photos`), scoring, actions
   correctives automatiques (désactivables par flag).
+- **Plans d'action correctifs intelligents** : `features/actions/actionPlan.ts`
+  génère un plan structuré et déterministe (problème, risque, cause probable,
+  action immédiate, action corrective, prévention, preuves attendues,
+  checklist, validation/escalade). La deadline dépend du problème détecté :
+  chaîne du froid max 1 h, hygiène/DLC max 2 h, prix 24 h, facing/stock 48 h,
+  formation 7 jours. Le plan local sert de garde-fou et de repli au plan IA.
 - **Formations réelles** : chapitres (`training_chapters`) + quiz
   (`training_quiz_questions`), progression, XP/niveaux.
 - **Scan produit** : caméra réelle (mobile) / BarcodeDetector (web),

@@ -20,10 +20,16 @@ import {
   CreateActionModal,
   type NewActionPayload,
 } from '../../features/actions/CreateActionModal';
+import { ResolveActionModal } from '../../features/actions/ResolveActionModal';
+import {
+  buildResolutionActivityLabel,
+  type ResolutionEvidencePayload,
+} from '../../features/actions/actionResolution';
 import {
   buildActionPlanPrompt,
-  generateCorrectiveActionPlan,
-  type CorrectiveActionPlan,
+  buildLocalActionPlan,
+  formatActionPlanText,
+  type ActionPlan,
 } from '../../features/actions/actionPlan';
 import { STATUS_FLOW } from '../../features/actions/constants';
 import { useActivityLog } from '../../hooks/useActivityLog';
@@ -33,7 +39,6 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { CorrectiveAction } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
-import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 
 export default function ActionsScreen() {
   const {
@@ -52,12 +57,13 @@ export default function ActionsScreen() {
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [planAction, setPlanAction] = useState<CorrectiveAction | null>(null);
-  const [planObject, setPlanObject] = useState<CorrectiveActionPlan | null>(
-    null,
-  );
+  const [plan, setPlan] = useState<ActionPlan | null>(null);
   const [planText, setPlanText] = useState<string | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [planSource, setPlanSource] = useState<'ia' | 'local' | null>(null);
+  const [resolutionAction, setResolutionAction] =
+    useState<CorrectiveAction | null>(null);
+  const [resolutionPlan, setResolutionPlan] = useState<ActionPlan | null>(null);
 
   const overdueCount = useMemo(
     () => actions.filter(isOverdue).length,
@@ -74,34 +80,51 @@ export default function ActionsScreen() {
   const advanceStatus = (action: CorrectiveAction) => {
     const idx = STATUS_FLOW.indexOf(action.status);
     const next = idx >= 0 ? STATUS_FLOW[idx + 1] : undefined;
-    if (next) {
-      updateActionStatus(action.id, next);
-      if (next === 'done') {
-        logEvent({
-          action: 'action_resolved',
-          entityType: 'corrective_action',
-          entityId: action.id,
-          label: `Action corrective « ${action.title} » résolue.`,
-        });
-      }
+    if (!next) return;
+
+    if (next === 'done') {
+      setResolutionAction(action);
+      setResolutionPlan(buildLocalActionPlan(action));
+      return;
     }
+
+    updateActionStatus(action.id, next);
+  };
+
+  const handleResolutionConfirm = (payload: ResolutionEvidencePayload) => {
+    if (!resolutionAction) return;
+    const action = resolutionAction;
+    updateActionStatus(action.id, 'done');
+    logEvent({
+      action: 'action_resolved',
+      entityType: 'corrective_action',
+      entityId: action.id,
+      label: buildResolutionActivityLabel({
+        title: action.title,
+        evidence: payload,
+      }),
+    });
+    setResolutionAction(null);
+    setResolutionPlan(null);
   };
 
   // Plan d'action correctif : IA en ligne si disponible, sinon plan proposé.
   const handleGeneratePlan = async (action: CorrectiveAction) => {
     setPlanAction(action);
     setPlanText(null);
-    setPlanObject(null);
+    setPlan(null);
     setPlanSource(null);
     setPlanLoading(true);
 
-    const localPlan = generateCorrectiveActionPlan(action);
+    const localPlan = buildLocalActionPlan(action);
+    const localPlanText = formatActionPlanText(localPlan);
+    setPlan(localPlan);
     const aiAvailable =
       !isLocalDemo && !!session && isEnabled('features.ai_assistant');
 
     if (!aiAvailable) {
       setPlanSource('local');
-      setPlanObject(localPlan);
+      setPlanText(localPlanText);
       setPlanLoading(false);
       return;
     }
@@ -119,7 +142,7 @@ export default function ActionsScreen() {
       setPlanText(data.reply);
     } catch {
       setPlanSource('local');
-      setPlanObject(localPlan);
+      setPlanText(localPlanText);
     } finally {
       setPlanLoading(false);
     }
@@ -127,20 +150,23 @@ export default function ActionsScreen() {
 
   return (
     <View style={styles.container}>
-      <AppScreenHeader
-        title="Plans d’action"
-        titleTestID="page-actions-title"
-        subtitle="Non-conformités & actions correctives"
-        right={
-          <TouchableOpacity
-            testID="action-create-button"
-            style={styles.addButton}
-            onPress={() => setCreateModalVisible(true)}
-          >
-            <Plus size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-        }
-      />
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title} testID="page-actions-title">
+            Actions correctives
+          </Text>
+          <Text style={styles.subtitle}>
+            Suivi des non-conformités et plans d'action
+          </Text>
+        </View>
+        <TouchableOpacity
+          testID="action-create-button"
+          style={styles.addButton}
+          onPress={() => setCreateModalVisible(true)}
+        >
+          <Plus size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
 
       <ActionsStatsRow
         open={openCount}
@@ -159,7 +185,10 @@ export default function ActionsScreen() {
             <AppEmptyState
               icon={CheckCircle}
               title="Aucune action corrective ouverte"
-              description="Les non-conformités relevées en audit génèrent automatiquement un plan d'action correctif."
+              description={
+                'Les non-conformités relevées en audit génèrent automatiquement ' +
+                "un plan d'action correctif."
+              }
             />
           )}
           {actions.map((action) => (
@@ -187,14 +216,29 @@ export default function ActionsScreen() {
         onCreate={handleCreate}
       />
 
+      <ResolveActionModal
+        visible={resolutionAction !== null}
+        action={resolutionAction}
+        plan={resolutionPlan}
+        onClose={() => {
+          setResolutionAction(null);
+          setResolutionPlan(null);
+        }}
+        onConfirm={handleResolutionConfirm}
+      />
+
       <ActionPlanModal
         visible={planAction !== null}
         subject={planAction?.title ?? ''}
         loading={planLoading}
-        plan={planObject}
+        plan={plan}
         planText={planText}
         source={planSource}
-        onClose={() => setPlanAction(null)}
+        onClose={() => {
+          setPlanAction(null);
+          setPlan(null);
+          setPlanText(null);
+        }}
       />
     </View>
   );
@@ -205,19 +249,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  title: {
+    fontSize: 24,
+    letterSpacing: -0.4,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+  },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: '#2563EB',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   list: {
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
+    padding: 16,
   },
 });

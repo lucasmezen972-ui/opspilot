@@ -8,30 +8,28 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import { riskLevelLabel, type CorrectiveActionPlan } from './actionPlan';
+import type { ActionPlan } from './actionPlan';
 import { AppModal } from '../../shared/components/AppModal';
-import { colors, radius, riskPalette } from '../../shared/styles/tokens';
+import { colors, radius } from '../../shared/styles/tokens';
 
 interface ActionPlanModalProps {
   visible: boolean;
   subject: string;
   loading: boolean;
-  /** Plan structuré (local) : affichage premium par sections. */
-  plan: CorrectiveActionPlan | null;
-  /** Texte libre (repli IA en ligne). */
   planText: string | null;
+  plan?: ActionPlan | null;
   /** Origine du plan : généré par l'IA en ligne, ou proposé localement. */
   source: 'ia' | 'local' | null;
   onClose: () => void;
 }
 
-/** Modale affichant le plan d'action correctif (IA en ligne ou structuré local). */
+/** Modale affichant le plan d'action correctif (IA en ligne ou proposé). */
 export function ActionPlanModal({
   visible,
   subject,
   loading,
-  plan,
   planText,
+  plan,
   source,
   onClose,
 }: ActionPlanModalProps) {
@@ -65,7 +63,9 @@ export function ActionPlanModal({
                 source === 'ia' ? styles.sourceIaText : styles.sourceLocalText,
               ]}
             >
-              {source === 'ia' ? 'Généré par l’IA' : 'Plan structuré'}
+              {source === 'ia'
+                ? 'Garde-fou métier + complément IA'
+                : 'Plan proposé'}
             </Text>
           </View>
         )}
@@ -75,13 +75,20 @@ export function ActionPlanModal({
             <ActivityIndicator color={colors.primary} />
             <Text style={styles.loadingText}>Génération du plan…</Text>
           </View>
-        ) : plan ? (
-          <StructuredPlan plan={plan} />
         ) : (
           <ScrollView style={styles.body}>
-            <Text style={styles.planText} testID="action-plan-text">
-              {planText}
-            </Text>
+            {plan && <StructuredPlan plan={plan} />}
+            {planText && source === 'ia' && (
+              <View style={styles.section} testID="action-plan-ai-supplement">
+                <Text style={styles.sectionTitle}>Complément IA</Text>
+                <Text style={styles.planText}>{planText}</Text>
+              </View>
+            )}
+            {planText && !plan && (
+              <Text style={styles.planText} testID="action-plan-text">
+                {planText}
+              </Text>
+            )}
           </ScrollView>
         )}
       </View>
@@ -89,111 +96,109 @@ export function ActionPlanModal({
   );
 }
 
-function StructuredPlan({ plan }: { plan: CorrectiveActionPlan }) {
-  const risk = riskPalette[plan.riskLevel];
-  const validations = [
-    plan.photoRequired && 'Preuve photo',
-    plan.commentRequired && 'Commentaire',
-    plan.employeeNameRequired && 'Nom intervenant',
-    plan.employeeIdRequired && 'Matricule',
-    plan.managerValidationRequired && 'Validation manager',
-    plan.escalationRequired &&
-      `Escalade${plan.escalationTargetRole ? ` (${plan.escalationTargetRole})` : ''}`,
-  ].filter(Boolean) as string[];
-
+function StructuredPlan({ plan }: { plan: ActionPlan }) {
   return (
-    <ScrollView style={styles.body} testID="action-plan-structured">
-      <View style={styles.metaRow}>
-        <View style={[styles.riskBadge, { backgroundColor: risk.bg }]}>
-          <Text style={[styles.riskText, { color: risk.fg }]}>
-            Risque {riskLevelLabel(plan.riskLevel)}
-          </Text>
-        </View>
-        <View style={styles.deadlinePill}>
-          <Text style={styles.deadlineText} testID="action-plan-deadline">
-            {plan.deadlineLabel}
-          </Text>
-        </View>
+    <View testID="action-plan-structured">
+      <View style={styles.summaryGrid}>
+        <SummaryItem label="Catégorie" value={plan.category} />
+        <SummaryItem label="Risque" value={riskLabel(plan.riskLevel)} />
+        <SummaryItem label="Deadline" value={plan.deadlineLabel} />
       </View>
 
-      <Section label="Problème constaté" testID="action-plan-problem">
-        {`${plan.observedProblem} · ${plan.category}`}
-      </Section>
-      <Section label="Cause probable" testID="action-plan-cause">
-        {plan.probableCause}
-      </Section>
-      <Section label="Action immédiate" testID="action-plan-immediate">
-        {plan.immediateAction}
-      </Section>
-      <Section label="Action corrective" testID="action-plan-corrective">
-        {plan.correctiveAction}
-      </Section>
-      <Section label="Action préventive" testID="action-plan-preventive">
-        {plan.preventiveAction}
-      </Section>
+      <PlanSection title="Problème constaté" body={plan.observedProblem} />
+      <PlanSection title="Cause probable" body={plan.probableCause} />
+      <PlanSection title="Action immédiate" body={plan.immediateAction} />
+      <PlanSection title="Action corrective" body={plan.correctiveAction} />
+      <PlanSection title="Action préventive" body={plan.preventiveAction} />
 
-      <ListSection
-        label="Preuves attendues"
-        items={plan.evidenceRequired}
-        testID="action-plan-evidence"
-      />
-      <ListSection
-        label="Checklist de clôture"
-        items={plan.checklist}
-        testID="action-plan-checklist"
-      />
+      <ListSection title="Preuves attendues" items={plan.evidenceRequired} />
+      <ListSection title="Checklist" items={plan.checklist} numbered />
 
-      <Section label="Validation requise" testID="action-plan-validation">
-        {validations.length
-          ? validations.join(' · ')
-          : 'Aucune obligation spécifique'}
-      </Section>
-      <Section label="Responsable recommandé" testID="action-plan-assignee">
-        {plan.recommendedAssigneeRole}
-      </Section>
-      <Section label="Procédure liée">{plan.relatedProcedure}</Section>
-    </ScrollView>
+      <View style={styles.requirements}>
+        <Requirement label="Photo" active={plan.photoRequired} />
+        <Requirement label="Commentaire" active={plan.commentRequired} />
+        <Requirement label="Nom" active={plan.employeeNameRequired} />
+        <Requirement label="Matricule" active={plan.employeeIdRequired} />
+        <Requirement
+          label="Validation manager"
+          active={plan.managerValidationRequired}
+        />
+        <Requirement label="Escalade" active={plan.escalationRequired} />
+      </View>
+
+      <PlanSection
+        title="Responsable recommandé"
+        body={plan.recommendedAssigneeRole}
+      />
+      {plan.relatedProcedure && (
+        <PlanSection title="Procédure associée" body={plan.relatedProcedure} />
+      )}
+    </View>
   );
 }
 
-function Section({
-  label,
-  testID,
-  children,
-}: {
-  label: string;
-  testID?: string;
-  children: string;
-}) {
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.summaryItem}>
+      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={styles.summaryValue}>{value}</Text>
+    </View>
+  );
+}
+
+function PlanSection({ title, body }: { title: string; body: string }) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionLabel}>{label}</Text>
-      <Text style={styles.sectionValue} testID={testID}>
-        {children}
-      </Text>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionBody}>{body}</Text>
     </View>
   );
 }
 
 function ListSection({
-  label,
+  title,
   items,
-  testID,
+  numbered = false,
 }: {
-  label: string;
+  title: string;
   items: string[];
-  testID?: string;
+  numbered?: boolean;
 }) {
   return (
-    <View style={styles.section} testID={testID}>
-      <Text style={styles.sectionLabel}>{label}</Text>
-      {items.map((item) => (
-        <Text key={item} style={styles.listItem}>
-          • {item}
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {items.map((item, index) => (
+        <Text key={`${title}-${item}`} style={styles.sectionBody}>
+          {numbered ? `${index + 1}. ` : '• '}
+          {item}
         </Text>
       ))}
     </View>
   );
+}
+
+function Requirement({ label, active }: { label: string; active: boolean }) {
+  return (
+    <View
+      style={[styles.requirement, active ? styles.required : styles.optional]}
+    >
+      <Text
+        style={[
+          styles.requirementText,
+          active ? styles.requiredText : styles.optionalText,
+        ]}
+      >
+        {active ? 'Obligatoire' : 'Optionnel'} · {label}
+      </Text>
+    </View>
+  );
+}
+
+function riskLabel(risk: ActionPlan['riskLevel']): string {
+  if (risk === 'critical') return 'Critique';
+  if (risk === 'high') return 'Élevé';
+  if (risk === 'medium') return 'Moyen';
+  return 'À suivre';
 }
 
 const styles = StyleSheet.create({
@@ -226,22 +231,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     marginBottom: 14,
   },
-  sourceIa: {
-    backgroundColor: '#F3E8FF',
-  },
-  sourceLocal: {
-    backgroundColor: colors.backgroundAlt,
-  },
-  sourceText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  sourceIaText: {
-    color: '#7C3AED',
-  },
-  sourceLocalText: {
-    color: colors.textMuted,
-  },
+  sourceIa: { backgroundColor: '#F3E8FF' },
+  sourceLocal: { backgroundColor: colors.backgroundAlt },
+  sourceText: { fontSize: 11, fontWeight: '700' },
+  sourceIaText: { color: '#7C3AED' },
+  sourceLocalText: { color: colors.textMuted },
   loading: {
     paddingVertical: 40,
     alignItems: 'center',
@@ -253,58 +247,71 @@ const styles = StyleSheet.create({
   },
   body: {
     marginTop: 2,
-    maxHeight: 420,
+    maxHeight: 520,
   },
+  summaryGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  summaryItem: {
+    flex: 1,
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 10,
+  },
+  summaryLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  summaryValue: {
+    color: colors.textStrong,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  section: {
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    borderRadius: radius.lg,
+    padding: 12,
+    marginBottom: 10,
+    backgroundColor: colors.surface,
+  },
+  sectionTitle: {
+    color: colors.textStrong,
+    fontSize: 13,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  sectionBody: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  requirements: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 10,
+  },
+  requirement: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  required: { backgroundColor: colors.dangerSoft },
+  optional: { backgroundColor: colors.backgroundAlt },
+  requirementText: { fontSize: 11, fontWeight: '700' },
+  requiredText: { color: colors.dangerStrong },
+  optionalText: { color: colors.textMuted },
   planText: {
     fontSize: 14,
     lineHeight: 21,
-    color: colors.text,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  riskBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  riskText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  deadlinePill: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primarySoft,
-  },
-  deadlineText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primaryDark,
-  },
-  section: {
-    marginBottom: 12,
-  },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    color: colors.textFaint,
-    marginBottom: 3,
-  },
-  sectionValue: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.text,
-  },
-  listItem: {
-    fontSize: 14,
-    lineHeight: 20,
     color: colors.text,
   },
 });
