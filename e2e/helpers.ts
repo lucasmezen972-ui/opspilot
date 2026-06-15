@@ -35,12 +35,39 @@ export async function loginAsLocalDemo(page: Page) {
   await loginAsDemo(page);
 }
 
+// Onglets principaux (barre basse). Les autres modules sont accessibles via
+// le hub « Plus ».
+const PRIMARY_TABS = new Set([
+  'Accueil',
+  'Audits',
+  'Tâches',
+  'Formation',
+  'Plus',
+]);
+const MORE_SLUG: Record<string, string> = {
+  Produits: 'products',
+  Actions: 'actions',
+  Messages: 'chat',
+  Profil: 'profile',
+  Rapports: 'reports',
+  Équipe: 'team',
+};
+
 /**
- * Ouvre un onglet de la barre de navigation et attend le titre de la page
- * (testID) : échec immédiat si l'écran ne se charge pas.
+ * Ouvre une destination et attend le titre de la page (testID). Les onglets
+ * principaux sont cliqués directement ; les modules secondaires passent par le
+ * hub « Plus ».
  */
 export async function openTab(page: Page, name: string, titleTestId: string) {
-  await page.getByRole('tab', { name }).click();
+  if (PRIMARY_TABS.has(name)) {
+    await page.getByRole('tab', { name }).click();
+  } else {
+    await page.getByRole('tab', { name: 'Plus' }).click();
+    await expect(page.getByTestId('page-more-title')).toBeVisible({
+      timeout: 10_000,
+    });
+    await page.getByTestId(`more-link-${MORE_SLUG[name]}`).click();
+  }
   await expect(page.getByTestId(titleTestId)).toBeVisible({ timeout: 10_000 });
 }
 
