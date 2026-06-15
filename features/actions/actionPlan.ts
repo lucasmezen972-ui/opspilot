@@ -3,41 +3,23 @@ import type { CorrectiveAction } from '../../lib/supabase';
 export type ActionRiskLevel = 'critical' | 'high' | 'medium' | 'low';
 
 export interface ActionPlan {
-  /** Synthèse en une phrase. Conservé pour compatibilité UI/tests. */
   summary: string;
-  /** Problème observé, reformulé en langage terrain. */
   observedProblem: string;
-  /** Famille métier détectée. */
   category: string;
-  /** Niveau de risque métier. */
   riskLevel: ActionRiskLevel;
-  /** Causes probables identifiées. */
   rootCauses: string[];
-  /** Cause probable principale, exposée dans les plans détaillés. */
   probableCause: string;
-  /** Action à faire sans attendre quand le risque l'exige. */
   immediateAction: string;
-  /** Action corrective principale. */
   correctiveAction: string;
-  /** Mesure préventive pour éviter la récurrence. */
   preventiveAction: string;
-  /** Étapes correctives, dans l'ordre. Conservé pour compatibilité. */
   steps: string[];
-  /** Mesures préventives. Conservé pour compatibilité. */
   prevention: string[];
-  /** Rôle recommandé pour l'assignation. */
   recommendedAssigneeRole: string;
-  /** Priorité opérationnelle normalisée. */
   priority: CorrectiveAction['priority'];
-  /** Libellé métier clair : immédiat, max 1h, 24h… */
   deadlineLabel: string;
-  /** Date limite calculée à partir du moment de génération. */
   dueDate: string;
-  /** Délai recommandé en heures pour les cas critiques/fins. */
   recommendedDeadlineHours: number;
-  /** Délai recommandé en jours, conservé pour les anciens affichages. */
   recommendedDeadlineDays: number;
-  /** Preuves attendues à la clôture. */
   evidenceRequired: string[];
   photoRequired: boolean;
   commentRequired: boolean;
@@ -51,9 +33,8 @@ export interface ActionPlan {
 }
 
 interface RuleDefinition {
-  id: string;
   category: string;
-  match: RegExp;
+  keywords: RegExp;
   riskLevel: ActionRiskLevel;
   priority: CorrectiveAction['priority'];
   deadlineHours: number;
@@ -75,6 +56,31 @@ interface RuleDefinition {
   relatedProcedure: string | null;
 }
 
+type RuleInput = Omit<
+  RuleDefinition,
+  | 'photoRequired'
+  | 'commentRequired'
+  | 'employeeNameRequired'
+  | 'employeeIdRequired'
+  | 'managerValidationRequired'
+  | 'escalationRequired'
+  | 'escalationTargetRole'
+  | 'relatedProcedure'
+> &
+  Partial<
+    Pick<
+      RuleDefinition,
+      | 'photoRequired'
+      | 'commentRequired'
+      | 'employeeNameRequired'
+      | 'employeeIdRequired'
+      | 'managerValidationRequired'
+      | 'escalationRequired'
+      | 'escalationTargetRole'
+      | 'relatedProcedure'
+    >
+  >;
+
 const CRITICAL_EVIDENCE = [
   'Photo avant/après',
   "Commentaire d'exécution",
@@ -82,12 +88,37 @@ const CRITICAL_EVIDENCE = [
   'Validation manager',
 ];
 
+function pattern(words: string[]): RegExp {
+  return new RegExp(words.join('|'), 'i');
+}
+
+function rule(input: RuleInput): RuleDefinition {
+  return {
+    photoRequired: false,
+    commentRequired: true,
+    employeeNameRequired: false,
+    employeeIdRequired: false,
+    managerValidationRequired: false,
+    escalationRequired: false,
+    escalationTargetRole: null,
+    relatedProcedure: null,
+    ...input,
+  };
+}
+
 const RULES: RuleDefinition[] = [
-  {
-    id: 'cold-chain',
+  rule({
     category: 'Chaîne du froid',
-    match:
-      /cha[iî]ne du froid|temp[ée]rature|chambre froide|cong[ée]lateur|r[ée]frig[ée]rateur|froid positif|froid n[ée]gatif|rupture froid/i,
+    keywords: pattern([
+      'cha[iî]ne du froid',
+      'temp[ée]rature',
+      'chambre froide',
+      'cong[ée]lateur',
+      'r[ée]frig[ée]rateur',
+      'froid positif',
+      'froid n[ée]gatif',
+      'rupture froid',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 1,
@@ -109,7 +140,6 @@ const RULES: RuleDefinition[] = [
       'Validation manager',
     ],
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -123,11 +153,17 @@ const RULES: RuleDefinition[] = [
       'Joindre les preuves et faire valider.',
     ],
     relatedProcedure: 'Procédure chaîne du froid',
-  },
-  {
-    id: 'expired-date',
+  }),
+  rule({
     category: 'DLC / DDM dépassée',
-    match: /\bdlc\b|\bddm\b|p[ée]rim[ée]|p[ée]remption|date d[ée]pass[ée]e?|produit expir[ée]/i,
+    keywords: pattern([
+      '\\bdlc\\b',
+      '\\bddm\\b',
+      'p[ée]rim[ée]',
+      'p[ée]remption',
+      'date d[ée]pass[ée]e?',
+      'produit expir[ée]',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 2,
@@ -149,7 +185,6 @@ const RULES: RuleDefinition[] = [
       'Validation manager',
     ],
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -163,12 +198,19 @@ const RULES: RuleDefinition[] = [
       'Joindre photo et validation manager.',
     ],
     relatedProcedure: 'Procédure DLC / DDM',
-  },
-  {
-    id: 'hygiene',
+  }),
+  rule({
     category: 'Hygiène critique',
-    match:
-      /hygi[èe]ne|nettoyage|salissure|souillure|surface sale|d[ée]sinfection|contamination|propret[ée]/i,
+    keywords: pattern([
+      'hygi[èe]ne',
+      'nettoyage',
+      'salissure',
+      'souillure',
+      'surface sale',
+      'd[ée]sinfection',
+      'contamination',
+      'propret[ée]',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 2,
@@ -184,7 +226,6 @@ const RULES: RuleDefinition[] = [
     recommendedAssigneeRole: 'Responsable rayon / Manager',
     evidenceRequired: CRITICAL_EVIDENCE,
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -198,12 +239,18 @@ const RULES: RuleDefinition[] = [
       'Faire valider par le manager.',
     ],
     relatedProcedure: 'Plan de nettoyage et désinfection',
-  },
-  {
-    id: 'unsafe-product',
+  }),
+  rule({
     category: 'Produit impropre / abîmé',
-    match:
-      /produit ab[iî]m[ée]|produit impropre|moisissure|emballage ouvert|fuite|casse|alt[ée]r[ée]/i,
+    keywords: pattern([
+      'produit ab[iî]m[ée]',
+      'produit impropre',
+      'moisissure',
+      'emballage ouvert',
+      'fuite',
+      'casse',
+      'alt[ée]r[ée]',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 1,
@@ -224,7 +271,6 @@ const RULES: RuleDefinition[] = [
       'Validation manager si risque client',
     ],
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -238,12 +284,20 @@ const RULES: RuleDefinition[] = [
       'Joindre une photo.',
     ],
     relatedProcedure: 'Procédure retrait produit',
-  },
-  {
-    id: 'people-safety',
+  }),
+  rule({
     category: 'Sécurité client / salarié',
-    match:
-      /danger|accident|blessure|risque chute|sol glissant|obstacle|client|salari[ée]|issue bloqu[ée]e?/i,
+    keywords: pattern([
+      'danger',
+      'accident',
+      'blessure',
+      'risque chute',
+      'sol glissant',
+      'obstacle',
+      'client',
+      'salari[ée]',
+      'issue bloqu[ée]e?',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 1,
@@ -259,7 +313,6 @@ const RULES: RuleDefinition[] = [
     recommendedAssigneeRole: 'Manager / Référent sécurité',
     evidenceRequired: CRITICAL_EVIDENCE,
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -273,11 +326,17 @@ const RULES: RuleDefinition[] = [
       'Faire valider.',
     ],
     relatedProcedure: 'Procédure sécurité terrain',
-  },
-  {
-    id: 'fire-safety',
+  }),
+  rule({
     category: 'Sécurité incendie',
-    match: /incendie|extincteur|alarme|signal[ée]tique|issue de secours|[ée]vacuation/i,
+    keywords: pattern([
+      'incendie',
+      'extincteur',
+      'alarme',
+      'signal[ée]tique',
+      'issue de secours',
+      '[ée]vacuation',
+    ]),
     riskLevel: 'critical',
     priority: 'critical',
     deadlineHours: 1,
@@ -297,7 +356,6 @@ const RULES: RuleDefinition[] = [
       'Validation manager',
     ],
     photoRequired: true,
-    commentRequired: true,
     employeeNameRequired: true,
     employeeIdRequired: true,
     managerValidationRequired: true,
@@ -311,11 +369,10 @@ const RULES: RuleDefinition[] = [
       'Faire valider.',
     ],
     relatedProcedure: 'Procédure sécurité incendie',
-  },
-  {
-    id: 'price-display',
+  }),
+  rule({
     category: 'Affichage prix / balisage',
-    match: /prix|[ée]tiquette|balisage|affichage|promo|promotion/i,
+    keywords: pattern(['prix', '[ée]tiquette', 'balisage', 'affichage', 'promo']),
     riskLevel: 'medium',
     priority: 'high',
     deadlineHours: 24,
@@ -329,14 +386,11 @@ const RULES: RuleDefinition[] = [
     preventiveAction:
       'Ajouter un contrôle prix lors des changements promotionnels et en ouverture.',
     recommendedAssigneeRole: 'Responsable rayon / Employé commercial',
-    evidenceRequired: ['Photo de l’étiquette corrigée', "Commentaire d'exécution"],
+    evidenceRequired: [
+      'Photo de l’étiquette corrigée',
+      "Commentaire d'exécution",
+    ],
     photoRequired: true,
-    commentRequired: true,
-    employeeNameRequired: false,
-    employeeIdRequired: false,
-    managerValidationRequired: false,
-    escalationRequired: false,
-    escalationTargetRole: null,
     checklist: [
       'Identifier la référence.',
       'Vérifier le prix caisse/rayon.',
@@ -344,11 +398,16 @@ const RULES: RuleDefinition[] = [
       'Prendre une photo après correction.',
     ],
     relatedProcedure: 'Procédure affichage prix',
-  },
-  {
-    id: 'merchandising',
+  }),
+  rule({
     category: 'Facing / merchandising',
-    match: /facing|rayon d[ée]sordonn[ée]|pr[ée]sentation|merchandising|rupture visuelle/i,
+    keywords: pattern([
+      'facing',
+      'rayon d[ée]sordonn[ée]',
+      'pr[ée]sentation',
+      'merchandising',
+      'rupture visuelle',
+    ]),
     riskLevel: 'low',
     priority: 'medium',
     deadlineHours: 48,
@@ -364,12 +423,6 @@ const RULES: RuleDefinition[] = [
     recommendedAssigneeRole: 'Employé rayon / Manager',
     evidenceRequired: ['Photo après correction', "Commentaire d'exécution"],
     photoRequired: true,
-    commentRequired: true,
-    employeeNameRequired: false,
-    employeeIdRequired: false,
-    managerValidationRequired: false,
-    escalationRequired: false,
-    escalationTargetRole: null,
     checklist: [
       'Identifier la zone.',
       'Reprendre la présentation.',
@@ -377,11 +430,10 @@ const RULES: RuleDefinition[] = [
       'Joindre une photo après correction.',
     ],
     relatedProcedure: 'Procédure merchandising / facing',
-  },
-  {
-    id: 'stock-rotation',
+  }),
+  rule({
     category: 'Stock / rotation',
-    match: /stock|rotation|fifo|fefo|r[ée]serve|inventaire|rupture/i,
+    keywords: pattern(['stock', 'rotation', 'fifo', 'fefo', 'r[ée]serve']),
     riskLevel: 'medium',
     priority: 'medium',
     deadlineHours: 48,
@@ -392,17 +444,9 @@ const RULES: RuleDefinition[] = [
       'Contrôler les références concernées et sécuriser les produits à risque.',
     correctiveAction:
       'Réorganiser le stock selon FEFO/FIFO et mettre à jour les quantités.',
-    preventiveAction:
-      'Mettre en place un contrôle récurrent stock/rotation.',
+    preventiveAction: 'Mettre en place un contrôle récurrent stock/rotation.',
     recommendedAssigneeRole: 'Responsable rayon / Gestionnaire stock',
     evidenceRequired: ["Commentaire d'exécution", 'Photo si nécessaire'],
-    photoRequired: false,
-    commentRequired: true,
-    employeeNameRequired: false,
-    employeeIdRequired: false,
-    managerValidationRequired: false,
-    escalationRequired: false,
-    escalationTargetRole: null,
     checklist: [
       'Contrôler les références concernées.',
       'Corriger la rotation.',
@@ -410,11 +454,10 @@ const RULES: RuleDefinition[] = [
       'Documenter la correction.',
     ],
     relatedProcedure: 'Procédure stock et rotation',
-  },
-  {
-    id: 'training-gap',
+  }),
+  rule({
     category: 'Formation manquante',
-    match: /formation|habilitation|comp[ée]tence|proc[ée]dure non connue|non form[ée]/i,
+    keywords: pattern(['formation', 'habilitation', 'comp[ée]tence']),
     riskLevel: 'medium',
     priority: 'medium',
     deadlineHours: 24 * 7,
@@ -428,14 +471,11 @@ const RULES: RuleDefinition[] = [
     preventiveAction:
       'Ajouter cette formation au parcours d’intégration ou au plan de recyclage.',
     recommendedAssigneeRole: 'Manager / Superviseur formation',
-    evidenceRequired: ['Attestation de formation terminée', 'Score de validation'],
-    photoRequired: false,
-    commentRequired: true,
-    employeeNameRequired: false,
-    employeeIdRequired: false,
+    evidenceRequired: [
+      'Attestation de formation terminée',
+      'Score de validation',
+    ],
     managerValidationRequired: true,
-    escalationRequired: false,
-    escalationTargetRole: null,
     checklist: [
       'Assigner la formation.',
       'Suivre la progression.',
@@ -443,11 +483,10 @@ const RULES: RuleDefinition[] = [
       'Archiver l’attestation.',
     ],
     relatedProcedure: 'Parcours formation interne',
-  },
-  {
-    id: 'management',
+  }),
+  rule({
     category: 'Management / organisation',
-    match: /briefing|planning|recadrage|[ée]quipe|organisation|management|conflit/i,
+    keywords: pattern(['briefing', 'planning', 'recadrage', '[ée]quipe']),
     riskLevel: 'medium',
     priority: 'medium',
     deadlineHours: 24 * 5,
@@ -462,13 +501,7 @@ const RULES: RuleDefinition[] = [
       'Intégrer le sujet au briefing et au rituel de pilotage hebdomadaire.',
     recommendedAssigneeRole: 'Manager',
     evidenceRequired: ['Commentaire manager', 'Plan de suivi si nécessaire'],
-    photoRequired: false,
-    commentRequired: true,
-    employeeNameRequired: false,
-    employeeIdRequired: false,
     managerValidationRequired: true,
-    escalationRequired: false,
-    escalationTargetRole: null,
     checklist: [
       'Clarifier le problème.',
       'Réaliser un point manager.',
@@ -476,13 +509,12 @@ const RULES: RuleDefinition[] = [
       'Planifier un suivi.',
     ],
     relatedProcedure: 'Rituel management opérationnel',
-  },
+  }),
 ];
 
-const GENERIC_RULE: RuleDefinition = {
-  id: 'generic',
+const GENERIC_RULE = rule({
   category: 'Non-conformité opérationnelle',
-  match: /.*/,
+  keywords: /.*/,
   riskLevel: 'medium',
   priority: 'medium',
   deadlineHours: 48,
@@ -497,23 +529,14 @@ const GENERIC_RULE: RuleDefinition = {
     'Formaliser ou rappeler la procédure attendue et planifier un contrôle de suivi.',
   recommendedAssigneeRole: 'Manager / Responsable opérationnel',
   evidenceRequired: ["Commentaire d'exécution", 'Photo si nécessaire'],
-  photoRequired: false,
-  commentRequired: true,
-  employeeNameRequired: false,
-  employeeIdRequired: false,
-  managerValidationRequired: false,
-  escalationRequired: false,
-  escalationTargetRole: null,
   checklist: [
     'Qualifier la non-conformité.',
     'Corriger la situation.',
     'Documenter la correction.',
     'Vérifier l’efficacité.',
   ],
-  relatedProcedure: null,
-};
+});
 
-/** Retire le préfixe « Non-conformité : » d'un titre d'action. */
 function cleanTitle(title: string): string {
   return title.replace(/^non[- ]conformit[ée]\s*:\s*/i, '').trim();
 }
@@ -522,79 +545,65 @@ function addHours(date: Date, hours: number): string {
   return new Date(date.getTime() + hours * 60 * 60 * 1000).toISOString();
 }
 
-function matchesRule(rule: RuleDefinition, haystack: string): boolean {
-  rule.match.lastIndex = 0;
-  return rule.match.test(haystack);
-}
-
 function selectRule(action: CorrectiveAction): RuleDefinition {
   const haystack = `${action.title} ${action.description ?? ''}`;
-  return RULES.find((rule) => matchesRule(rule, haystack)) ?? GENERIC_RULE;
+  return RULES.find((item) => item.keywords.test(haystack)) ?? GENERIC_RULE;
 }
 
-/**
- * Génère un plan d'action correctif structuré à partir d'une action ou d'une
- * non-conformité. La logique est déterministe (mots-clés + matrice métier) :
- * elle fonctionne en démo, hors-ligne et comme garde-fou de l'IA en ligne.
- */
 export function generateCorrectiveActionPlan(
   action: CorrectiveAction,
   now = new Date(),
 ): ActionPlan {
-  const rule = selectRule(action);
+  const ruleDefinition = selectRule(action);
   const subject = cleanTitle(action.title);
-  const observedProblem = action.description?.trim() || subject;
+  const description = action.description?.trim();
+  const observedProblem = description ? description : subject;
   const priority =
-    action.priority === 'critical' || rule.priority === 'critical'
+    action.priority === 'critical' || ruleDefinition.priority === 'critical'
       ? 'critical'
-      : rule.priority;
-  const recommendedDeadlineDays = Math.max(
-    1,
-    Math.ceil(rule.deadlineHours / 24),
-  );
+      : ruleDefinition.priority;
 
   return {
-    summary: `Plan correctif pour « ${subject} » — ${rule.deadlineLabel}.`,
+    summary: `Plan correctif pour « ${subject} » — ${ruleDefinition.deadlineLabel}.`,
     observedProblem,
-    category: rule.category,
-    riskLevel: rule.riskLevel,
-    rootCauses: [rule.probableCause],
-    probableCause: rule.probableCause,
-    immediateAction: rule.immediateAction,
-    correctiveAction: rule.correctiveAction,
-    preventiveAction: rule.preventiveAction,
-    steps: [rule.immediateAction, rule.correctiveAction],
-    prevention: [rule.preventiveAction],
-    recommendedAssigneeRole: rule.recommendedAssigneeRole,
+    category: ruleDefinition.category,
+    riskLevel: ruleDefinition.riskLevel,
+    rootCauses: [ruleDefinition.probableCause],
+    probableCause: ruleDefinition.probableCause,
+    immediateAction: ruleDefinition.immediateAction,
+    correctiveAction: ruleDefinition.correctiveAction,
+    preventiveAction: ruleDefinition.preventiveAction,
+    steps: [ruleDefinition.immediateAction, ruleDefinition.correctiveAction],
+    prevention: [ruleDefinition.preventiveAction],
+    recommendedAssigneeRole: ruleDefinition.recommendedAssigneeRole,
     priority,
-    deadlineLabel: rule.deadlineLabel,
-    dueDate: addHours(now, rule.deadlineHours),
-    recommendedDeadlineHours: rule.deadlineHours,
-    recommendedDeadlineDays,
-    evidenceRequired: rule.evidenceRequired,
-    photoRequired: rule.photoRequired,
-    commentRequired: rule.commentRequired,
-    employeeNameRequired: rule.employeeNameRequired,
-    employeeIdRequired: rule.employeeIdRequired,
-    managerValidationRequired: rule.managerValidationRequired,
-    escalationRequired: rule.escalationRequired,
-    escalationTargetRole: rule.escalationTargetRole,
-    checklist: rule.checklist,
-    relatedProcedure: rule.relatedProcedure,
+    deadlineLabel: ruleDefinition.deadlineLabel,
+    dueDate: addHours(now, ruleDefinition.deadlineHours),
+    recommendedDeadlineHours: ruleDefinition.deadlineHours,
+    recommendedDeadlineDays: Math.max(
+      1,
+      Math.ceil(ruleDefinition.deadlineHours / 24),
+    ),
+    evidenceRequired: ruleDefinition.evidenceRequired,
+    photoRequired: ruleDefinition.photoRequired,
+    commentRequired: ruleDefinition.commentRequired,
+    employeeNameRequired: ruleDefinition.employeeNameRequired,
+    employeeIdRequired: ruleDefinition.employeeIdRequired,
+    managerValidationRequired: ruleDefinition.managerValidationRequired,
+    escalationRequired: ruleDefinition.escalationRequired,
+    escalationTargetRole: ruleDefinition.escalationTargetRole,
+    checklist: ruleDefinition.checklist,
+    relatedProcedure: ruleDefinition.relatedProcedure,
   };
 }
 
-/**
- * Ancien nom conservé pour compatibilité avec l'écran Actions et les tests.
- */
 export function buildLocalActionPlan(action: CorrectiveAction): ActionPlan {
   return generateCorrectiveActionPlan(action);
 }
 
-/** Met le plan en texte lisible (affichage, copie, partage). */
 export function formatActionPlanText(plan: ActionPlan): string {
   const list = (items: string[]) =>
-    items.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    items.map((item, index) => `${index + 1}. ${item}`).join('\n');
   const yesNo = (value: boolean) => (value ? 'Oui' : 'Non');
   const requiredFields = [
     plan.photoRequired ? 'photo' : null,
@@ -603,6 +612,12 @@ export function formatActionPlanText(plan: ActionPlan): string {
     plan.employeeIdRequired ? 'matricule' : null,
     plan.managerValidationRequired ? 'validation manager' : null,
   ].filter(Boolean);
+  const escalationTarget = plan.escalationTargetRole
+    ? [`Cible escalade : ${plan.escalationTargetRole}`]
+    : [];
+  const procedure = plan.relatedProcedure
+    ? [`PROCÉDURE ASSOCIÉE\n${plan.relatedProcedure}`]
+    : [];
 
   return [
     plan.summary,
@@ -626,7 +641,7 @@ export function formatActionPlanText(plan: ActionPlan): string {
     plan.preventiveAction,
     '',
     'DEADLINE',
-    `${plan.deadlineLabel} (échéance calculée : ${new Date(plan.dueDate).toLocaleString('fr-FR')})`,
+    plan.deadlineLabel,
     '',
     'RESPONSABLE RECOMMANDÉ',
     plan.recommendedAssigneeRole,
@@ -639,23 +654,22 @@ export function formatActionPlanText(plan: ActionPlan): string {
       ? requiredFields.join(', ')
       : 'Commentaire recommandé selon contexte.',
     `Escalade manager : ${yesNo(plan.escalationRequired)}`,
-    plan.escalationTargetRole ? `Cible escalade : ${plan.escalationTargetRole}` : '',
+    ...escalationTarget,
     '',
     'CHECKLIST',
     list(plan.checklist),
     '',
-    plan.relatedProcedure ? `PROCÉDURE ASSOCIÉE\n${plan.relatedProcedure}` : '',
+    ...procedure,
   ]
-    .filter((line) => line !== '')
+    .filter((line) => line.length > 0)
     .join('\n');
 }
 
-/** Invite envoyée à l'assistant IA pour générer le plan en ligne. */
 export function buildActionPlanPrompt(action: CorrectiveAction): string {
   const plan = generateCorrectiveActionPlan(action);
   return [
     "En tant qu'expert qualité/conformité en grande distribution, propose un",
-    "plan d’action correctif structuré et concret pour la non-conformité suivante.",
+    'plan d’action correctif structuré et concret pour la non-conformité suivante.',
     'Tu dois respecter STRICTEMENT la matrice métier OpsPilot ci-dessous.',
     "N'invente pas de règle légale et ne donne pas de conseil juridique définitif.",
     'Si le problème est critique, ne propose jamais une deadline longue.',
@@ -676,6 +690,6 @@ export function buildActionPlanPrompt(action: CorrectiveAction): string {
     'Action immédiate, Action corrective, Action préventive, Deadline, Preuves',
     'attendues, Checklist et Validation.',
   ]
-    .filter(Boolean)
+    .filter((line) => line.length > 0)
     .join('\n');
 }
