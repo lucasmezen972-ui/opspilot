@@ -95,6 +95,20 @@ export const shadow = {
   },
 } as const;
 
+/**
+ * Échelle de superposition (z-index). Évite les valeurs magiques et garantit
+ * un empilement cohérent : contenu < menus < éléments collants < overlays <
+ * modales < toasts.
+ */
+export const zIndex = {
+  base: 0,
+  dropdown: 10,
+  sticky: 100,
+  overlay: 1000,
+  modal: 1100,
+  toast: 1200,
+} as const;
+
 /** Couleur de premier plan + fond pour un niveau de statut/criticité. */
 export type StatusLevel = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -103,4 +117,21 @@ export const statusPalette: Record<StatusLevel, { fg: string; bg: string }> = {
   warning: { fg: colors.warningText, bg: colors.warningSoft },
   danger: { fg: colors.dangerStrong, bg: colors.dangerSoft },
   neutral: { fg: colors.textMuted, bg: colors.backgroundAlt },
+};
+
+/** Niveau de risque/criticité (priorisation terrain). */
+export type RiskLevel = 'critical' | 'high' | 'medium' | 'low';
+
+export const riskPalette: Record<
+  RiskLevel,
+  { fg: string; bg: string; label: string }
+> = {
+  critical: {
+    fg: colors.dangerStrong,
+    bg: colors.dangerSoft,
+    label: 'Critique',
+  },
+  high: { fg: colors.warningText, bg: colors.warningSoft, label: 'Élevé' },
+  medium: { fg: colors.warningText, bg: colors.warningSoft, label: 'Moyen' },
+  low: { fg: colors.textMuted, bg: colors.backgroundAlt, label: 'À suivre' },
 };

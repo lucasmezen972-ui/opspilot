@@ -1,5 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+
+import { AppErrorState } from '../shared/components/AppErrorState';
 
 interface Props {
   children: ReactNode;
@@ -19,7 +21,9 @@ export default class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[GlobalErrorBoundary] Uncaught error:', error, info);
+    if (__DEV__) {
+      console.error('[GlobalErrorBoundary] Uncaught error:', error, info);
+    }
   }
 
   handleReset = () => {
@@ -33,24 +37,18 @@ export default class GlobalErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <View testID="error-boundary-screen" style={styles.container}>
-          <Text style={styles.icon}>⚠️</Text>
-          <Text style={styles.title}>Une erreur est survenue</Text>
-          <Text style={styles.subtitle}>
-            Si le problème persiste, relancez l'application.
-          </Text>
+        <View style={styles.container}>
+          <AppErrorState
+            testID="error-boundary-screen"
+            title="Une erreur est survenue"
+            message="Si le problème persiste, relancez l'application."
+            onRetry={this.handleReset}
+          />
           {__DEV__ && this.state.error && (
             <Text style={styles.devError} testID="error-boundary-details">
               {this.state.error.message}
             </Text>
           )}
-          <TouchableOpacity
-            testID="error-boundary-retry"
-            style={styles.button}
-            onPress={this.handleReset}
-          >
-            <Text style={styles.buttonText}>Réessayer</Text>
-          </TouchableOpacity>
         </View>
       );
     }
@@ -67,24 +65,6 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: '#F8FAFC',
   },
-  icon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
   devError: {
     fontSize: 11,
     color: '#EF4444',
@@ -92,18 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
     padding: 10,
     borderRadius: 6,
-    marginBottom: 20,
+    marginTop: 12,
     maxWidth: '100%',
-  },
-  button: {
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 28,
-    paddingVertical: 13,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 15,
   },
 });

@@ -1,16 +1,10 @@
 import { X } from 'lucide-react-native';
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 
 import { PRIORITY_COLORS, PRIORITY_LABELS } from './constants';
 import type { CorrectiveAction } from '../../lib/supabase';
+import { AppInput } from '../../shared/components/AppInput';
 
 export interface NewActionPayload {
   title: string;
@@ -73,22 +67,22 @@ export function CreateActionModal({
             </TouchableOpacity>
           </View>
 
-          <TextInput
-            testID="action-create-title"
-            style={styles.input}
-            placeholder="Titre de l'action *"
-            placeholderTextColor="#9CA3AF"
-            value={title}
-            onChangeText={setTitle}
-          />
-          <TextInput
-            style={[styles.input, styles.inputMultiline]}
-            placeholder="Description"
-            placeholderTextColor="#9CA3AF"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
+          <View style={styles.field}>
+            <AppInput
+              testID="action-create-title"
+              placeholder="Titre de l'action *"
+              value={title}
+              onChangeText={setTitle}
+            />
+          </View>
+          <View style={styles.field}>
+            <AppInput
+              placeholder="Description"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
+          </View>
 
           <Text style={styles.fieldLabel}>Priorité</Text>
           <View style={styles.priorityRow}>
@@ -116,15 +110,15 @@ export function CreateActionModal({
             ))}
           </View>
 
-          <Text style={styles.fieldLabel}>Échéance (jours)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="7"
-            placeholderTextColor="#9CA3AF"
-            value={dueDays}
-            onChangeText={setDueDays}
-            keyboardType="number-pad"
-          />
+          <View style={styles.field}>
+            <AppInput
+              label="Échéance (jours)"
+              placeholder="7"
+              value={dueDays}
+              onChangeText={setDueDays}
+              keyboardType="number-pad"
+            />
+          </View>
 
           <TouchableOpacity
             style={[
@@ -167,20 +161,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111827',
   },
-  input: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
+  field: {
     marginBottom: 12,
-  },
-  inputMultiline: {
-    minHeight: 70,
-    textAlignVertical: 'top',
   },
   fieldLabel: {
     fontSize: 13,

@@ -16,6 +16,7 @@ import {
   type AuditListItem,
 } from './auditListModel';
 import { isAuditLocked } from '../governance/governanceModel';
+import { AppBadge } from '../../shared/components/AppBadge';
 import { colors, shadow } from '../../shared/styles/tokens';
 
 interface AuditListCardProps {
@@ -49,10 +50,12 @@ export function AuditListCard({
         </View>
         <View style={styles.auditStatusGroup}>
           {locked && (
-            <View testID={`audit-locked-${audit.id}`} style={styles.lockBadge}>
-              <Lock size={12} color={colors.textMuted} />
-              <Text style={styles.lockBadgeText}>Verrouillé</Text>
-            </View>
+            <AppBadge
+              testID={`audit-locked-${audit.id}`}
+              tone="neutral"
+              icon={Lock}
+              label="Verrouillé"
+            />
           )}
           <View
             style={[
@@ -173,20 +176,6 @@ const styles = StyleSheet.create({
   auditStatusGroup: {
     alignItems: 'flex-end',
     gap: 6,
-  },
-  lockBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    backgroundColor: colors.backgroundAlt,
-  },
-  lockBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textMuted,
   },
   auditStatus: {
     flexDirection: 'row',

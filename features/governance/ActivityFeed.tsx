@@ -16,8 +16,13 @@ import {
   type ActivityFilter,
 } from './governanceModel';
 import type { ActivityEvent, ActivityEventType } from '../../lib/supabase';
+import { AppCard } from '../../shared/components/AppCard';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import {
+  AppTimeline,
+  type TimelineItem,
+} from '../../shared/components/AppTimeline';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 const FILTERS: { key: ActivityFilter; label: string }[] = [
   { key: 'all', label: 'Tout' },
@@ -60,6 +65,17 @@ export function ActivityFeed({ events, limit = 8 }: Props) {
   const [filter, setFilter] = useState<ActivityFilter>('all');
   const sorted = sortActivity(filterActivity(events, filter)).slice(0, limit);
 
+  const timelineItems: TimelineItem[] = sorted.map((event) => ({
+    id: event.id,
+    testID: `activity-${event.id}`,
+    title: event.label,
+    subtitle: `${activityCategoryLabel(event.action)}${
+      event.actor_name ? ` · ${event.actor_name}` : ''
+    } · ${formatWhen(event.created_at)}`,
+    icon: ICONS[event.action] ?? Activity,
+    accent: ACCENTS[event.action] ?? colors.textMuted,
+  }));
+
   return (
     <View style={styles.wrap} testID="activity-feed">
       <AppSectionHeader title="Journal d’activité" />
@@ -90,33 +106,9 @@ export function ActivityFeed({ events, limit = 8 }: Props) {
           </Text>
         </View>
       ) : (
-        <View style={styles.list}>
-          {sorted.map((event) => {
-            const Icon = ICONS[event.action] ?? Activity;
-            const accent = ACCENTS[event.action] ?? colors.textMuted;
-            return (
-              <View
-                key={event.id}
-                style={styles.row}
-                testID={`activity-${event.id}`}
-              >
-                <View
-                  style={[styles.iconWrap, { backgroundColor: `${accent}1A` }]}
-                >
-                  <Icon size={16} color={accent} />
-                </View>
-                <View style={styles.body}>
-                  <Text style={styles.label}>{event.label}</Text>
-                  <Text style={styles.meta}>
-                    {activityCategoryLabel(event.action)}
-                    {event.actor_name ? ` · ${event.actor_name}` : ''}
-                    {` · ${formatWhen(event.created_at)}`}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
+        <AppCard style={styles.card}>
+          <AppTimeline items={timelineItems} />
+        </AppCard>
       )}
     </View>
   );
@@ -153,42 +145,8 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: colors.primary,
   },
-  list: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-    ...shadow.card,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
+  card: {
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  iconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  body: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textStrong,
-  },
-  meta: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 2,
   },
   empty: {
     flexDirection: 'row',

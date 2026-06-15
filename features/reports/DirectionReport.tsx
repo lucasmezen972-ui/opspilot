@@ -5,7 +5,9 @@ import type {
   ReportEvolution,
   SiteConformityRow,
 } from './directionReportModel';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { AppCard } from '../../shared/components/AppCard';
+import { AppTableRow } from '../../shared/components/AppTableRow';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 type Props = {
   sites: SiteConformityRow[];
@@ -36,15 +38,15 @@ export function DirectionReport({
       </View>
 
       <View style={styles.evolution}>
-        <View style={styles.evoCard}>
+        <AppCard style={styles.evoCard}>
           <Text style={styles.evoValue}>{evolution.completed30d}</Text>
           <Text style={styles.evoLabel}>Audits clôturés · 30 j</Text>
-        </View>
-        <View style={styles.evoCard}>
+        </AppCard>
+        <AppCard style={styles.evoCard}>
           <Text style={styles.evoValue}>{evolution.completed90d}</Text>
           <Text style={styles.evoLabel}>Audits clôturés · 90 j</Text>
-        </View>
-        <View style={styles.evoCard}>
+        </AppCard>
+        <AppCard style={styles.evoCard}>
           <Text
             style={[
               styles.evoValue,
@@ -56,44 +58,40 @@ export function DirectionReport({
               : '—'}
           </Text>
           <Text style={styles.evoLabel}>Conformité · 30 j</Text>
-        </View>
+        </AppCard>
       </View>
 
       <View style={styles.table}>
-        <View style={[styles.row, styles.rowHead]}>
-          <Text style={[styles.cell, styles.cellSite, styles.cellHead]}>
-            Site
-          </Text>
-          <Text style={[styles.cell, styles.cellHead]}>Audits</Text>
-          <Text style={[styles.cell, styles.cellHead]}>Conf.</Text>
-          <Text style={[styles.cell, styles.cellHead]}>NC</Text>
-        </View>
-        {sites.map((site) => (
-          <View
+        <AppTableRow
+          header
+          cells={[
+            { content: 'Site', flex: 2.4, align: 'left' },
+            { content: 'Audits' },
+            { content: 'Conf.' },
+            { content: 'NC' },
+          ]}
+        />
+        {sites.map((site, index) => (
+          <AppTableRow
             key={site.site}
-            style={styles.row}
             testID={`direction-site-${site.site}`}
-          >
-            <Text style={[styles.cell, styles.cellSite]} numberOfLines={1}>
-              {site.site}
-            </Text>
-            <Text style={styles.cell}>
-              {site.completed}/{site.audits}
-            </Text>
-            <Text
-              style={[styles.cell, { color: conformityColor(site.conformity) }]}
-            >
-              {site.conformity != null ? `${site.conformity}%` : '—'}
-            </Text>
-            <Text style={styles.cell}>{site.nonConformities}</Text>
-          </View>
+            last={index === sites.length - 1}
+            cells={[
+              { content: site.site, flex: 2.4, align: 'left' },
+              { content: `${site.completed}/${site.audits}` },
+              {
+                content: site.conformity != null ? `${site.conformity}%` : '—',
+                color: conformityColor(site.conformity),
+              },
+              { content: site.nonConformities },
+            ]}
+          />
         ))}
         {sites.length === 0 && (
-          <View style={styles.row}>
-            <Text style={[styles.cell, styles.empty]}>
-              Aucun audit à reporter.
-            </Text>
-          </View>
+          <AppTableRow
+            last
+            cells={[{ content: 'Aucun audit à reporter.', align: 'center' }]}
+          />
         )}
       </View>
 
@@ -144,12 +142,7 @@ const styles = StyleSheet.create({
   },
   evoCard: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
-    ...shadow.card,
   },
   evoValue: {
     fontSize: 22,
@@ -167,40 +160,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
-    ...shadow.card,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
-  rowHead: {
-    backgroundColor: colors.backgroundAlt,
-  },
-  cell: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.text,
-    textAlign: 'right',
-  },
-  cellSite: {
-    flex: 2.4,
-    textAlign: 'left',
-    fontWeight: '600',
-    color: colors.textStrong,
-  },
-  cellHead: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.textMuted,
-  },
-  empty: {
-    flex: 1,
-    textAlign: 'center',
-    color: colors.textMuted,
   },
   exports: {
     flexDirection: 'row',
