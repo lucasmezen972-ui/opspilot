@@ -12,33 +12,34 @@ import {
   Users,
   CreditCard,
   FileText,
+  LayoutGrid,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
 import AnnouncementBanner from '../../components/AnnouncementBanner';
-import { useAppSettings } from '../../hooks/useAppSettings';
-import { useAuth } from '../../hooks/useAuth';
-import { isManagerRole } from '../../utils/roles';
+import { colors, shadow } from '../../shared/styles/tokens';
 
+/**
+ * Navigation principale épurée : 5 onglets essentiels en barre basse
+ * (Accueil, Audits, Tâches, Formation, Plus). Les modules secondaires
+ * (Produits, Actions, Rapports, Communication, Équipe, Cockpit, Abonnement,
+ * Profil) restent routables et sont regroupés dans le hub « Plus ».
+ */
 export default function TabLayout() {
-  const { profile } = useAuth();
-  // Modules activables/désactivables depuis le back-office superadmin.
-  const { isEnabled } = useAppSettings();
-
   return (
     <>
       <AnnouncementBanner />
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: '#2563EB',
-          tabBarInactiveTintColor: '#6B7280',
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textMuted,
           tabBarStyle: styles.tabBar,
           tabBarLabelStyle: styles.tabBarLabel,
           tabBarItemStyle: styles.tabBarItem,
-          tabBarActiveBackgroundColor: '#EEF2FF',
         }}
       >
+        {/* ── Onglets principaux (barre basse) ── */}
         <Tabs.Screen
           name="index"
           options={{
@@ -56,15 +57,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="products"
-          options={{
-            title: 'Produits',
-            tabBarIcon: ({ size, color }) => (
-              <Package size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="tasks"
           options={{
             title: 'Tâches',
@@ -74,80 +66,48 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="actions"
-          options={{
-            title: 'Actions',
-            tabBarIcon: ({ size, color }) => (
-              <Wrench size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="reports"
-          options={{
-            title: 'Rapports',
-            tabBarIcon: ({ size, color }) => (
-              <FileText size={size} color={color} />
-            ),
-            href: isEnabled('features.reports') ? '/reports' : null,
-          }}
-        />
-        <Tabs.Screen
           name="training"
           options={{
             title: 'Formation',
             tabBarIcon: ({ size, color }) => (
               <GraduationCap size={size} color={color} />
             ),
-            href: isEnabled('features.training') ? '/training' : null,
           }}
         />
         <Tabs.Screen
-          name="chat"
+          name="more"
           options={{
-            title: 'Messages',
+            title: 'Plus',
             tabBarIcon: ({ size, color }) => (
-              <MessageCircle size={size} color={color} />
+              <LayoutGrid size={size} color={color} />
             ),
           }}
+        />
+
+        {/* ── Modules secondaires : routables, hors barre (hub « Plus ») ── */}
+        <Tabs.Screen
+          name="products"
+          options={{ href: null, title: 'Produits' }}
         />
         <Tabs.Screen
-          name="team"
-          options={{
-            title: 'Équipe',
-            tabBarIcon: ({ size, color }) => (
-              <Users size={size} color={color} />
-            ),
-            href: isManagerRole(profile?.role) ? '/team' : null,
-          }}
+          name="actions"
+          options={{ href: null, title: 'Actions' }}
         />
+        <Tabs.Screen
+          name="reports"
+          options={{ href: null, title: 'Rapports' }}
+        />
+        <Tabs.Screen name="chat" options={{ href: null, title: 'Messages' }} />
+        <Tabs.Screen name="team" options={{ href: null, title: 'Équipe' }} />
         <Tabs.Screen
           name="manager"
-          options={{
-            title: 'Manager',
-            tabBarIcon: ({ size, color }) => (
-              <LayoutDashboard size={size} color={color} />
-            ),
-            href: isManagerRole(profile?.role) ? '/manager' : null,
-          }}
+          options={{ href: null, title: 'Manager' }}
         />
         <Tabs.Screen
           name="billing"
-          options={{
-            title: 'Abonnement',
-            tabBarIcon: ({ size, color }) => (
-              <CreditCard size={size} color={color} />
-            ),
-            href: profile?.role === 'admin' ? '/billing' : null,
-          }}
+          options={{ href: null, title: 'Abonnement' }}
         />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profil',
-            tabBarIcon: ({ size, color }) => <User size={size} color={color} />,
-          }}
-        />
+        <Tabs.Screen name="profile" options={{ href: null, title: 'Profil' }} />
       </Tabs>
     </>
   );
@@ -155,19 +115,20 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 8,
-    paddingBottom: 8,
-    height: 72,
+    borderTopColor: colors.border,
+    height: 76,
+    paddingTop: 10,
+    paddingBottom: 12,
+    ...shadow.card,
   },
   tabBarItem: {
-    borderRadius: 8,
-    marginHorizontal: 4,
+    paddingVertical: 2,
   },
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
+    letterSpacing: 0.1,
   },
 });
