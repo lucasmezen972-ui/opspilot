@@ -10,6 +10,11 @@ import {
 } from 'react-native';
 
 import type { ActionPlan } from './actionPlan';
+import {
+  canResolveAction,
+  getMissingResolutionRequirements,
+  type ResolutionEvidencePayload,
+} from './actionResolution';
 import type { CorrectiveAction } from '../../lib/supabase';
 import { AppModal } from '../../shared/components/AppModal';
 import { colors, radius } from '../../shared/styles/tokens';
@@ -20,14 +25,6 @@ interface ResolveActionModalProps {
   plan: ActionPlan | null;
   onClose: () => void;
   onConfirm: (payload: ResolutionEvidencePayload) => void;
-}
-
-export interface ResolutionEvidencePayload {
-  comment: string;
-  employeeName: string;
-  employeeId: string;
-  photoConfirmed: boolean;
-  managerValidated: boolean;
 }
 
 const initialEvidence: ResolutionEvidencePayload = {
@@ -47,26 +44,11 @@ export function ResolveActionModal({
 }: ResolveActionModalProps) {
   const [evidence, setEvidence] = useState(initialEvidence);
 
-  const missingRequirements = useMemo(() => {
-    if (!plan) return [];
-    return [
-      plan.commentRequired && evidence.comment.trim().length === 0
-        ? 'commentaire'
-        : null,
-      plan.employeeNameRequired && evidence.employeeName.trim().length === 0
-        ? 'nom exécutant'
-        : null,
-      plan.employeeIdRequired && evidence.employeeId.trim().length === 0
-        ? 'matricule'
-        : null,
-      plan.photoRequired && !evidence.photoConfirmed ? 'preuve photo' : null,
-      plan.managerValidationRequired && !evidence.managerValidated
-        ? 'validation manager'
-        : null,
-    ].filter((item): item is string => item !== null);
-  }, [evidence, plan]);
-
-  const canConfirm = missingRequirements.length === 0;
+  const missingRequirements = useMemo(
+    () => getMissingResolutionRequirements(plan, evidence),
+    [evidence, plan],
+  );
+  const canConfirm = canResolveAction(plan, evidence);
 
   const updateEvidence = (patch: Partial<ResolutionEvidencePayload>) => {
     setEvidence((current) => ({ ...current, ...patch }));
