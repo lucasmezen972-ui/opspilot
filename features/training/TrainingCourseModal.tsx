@@ -1,10 +1,4 @@
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  PenLine,
-  X,
-} from 'lucide-react-native';
+import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -12,11 +6,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import {
+  CandidateIdentityStep,
+  type CandidateIdentityValues,
+} from './CandidateIdentityStep';
 import {
   buildQuizAttemptTrace,
   validateCandidateIdentity,
@@ -237,8 +234,19 @@ export function TrainingCourseModal({
     setMode('result');
   };
 
+  const handleIdentityChange = <K extends keyof CandidateIdentityValues>(
+    field: K,
+    value: CandidateIdentityValues[K],
+  ) => {
+    if (field === 'fullName') setIdentityName(value as string);
+    else if (field === 'employeeId') setEmployeeId(value as string);
+    else if (field === 'position') setPosition(value as string);
+    else if (field === 'store') setStore(value as string);
+    else if (field === 'honorConfirmed') setHonorConfirmed(value as boolean);
+  };
+
   const submitIdentity = () => {
-    if (score === null || !onGenerateCertificate) return;
+    if (score === null || !course || !onGenerateCertificate) return;
     const identity = {
       fullName: identityName,
       employeeId,
@@ -541,133 +549,23 @@ export function TrainingCourseModal({
           )}
 
           {mode === 'identity' && score !== null && (
-            <>
-              <ScrollView
-                style={styles.body}
-                testID="training-identity-form"
-                keyboardShouldPersistTaps="handled"
-              >
-                <Text style={styles.identityIntro}>
-                  Confirmez votre identité pour délivrer une attestation
-                  nominative et traçable.
-                </Text>
-
-                <IdentityField
-                  label="Nom complet"
-                  value={identityName}
-                  onChangeText={setIdentityName}
-                  placeholder="Prénom et nom"
-                  testID="training-identity-name"
-                />
-                <IdentityField
-                  label="Matricule"
-                  value={employeeId}
-                  onChangeText={setEmployeeId}
-                  placeholder="Ex. M-1042"
-                  testID="training-identity-matricule"
-                />
-                <IdentityField
-                  label="Poste"
-                  value={position}
-                  onChangeText={setPosition}
-                  placeholder="Ex. Responsable de rayon"
-                  testID="training-identity-position"
-                />
-                <IdentityField
-                  label="Magasin"
-                  value={store}
-                  onChangeText={setStore}
-                  placeholder="Ex. Magasin Lyon Part-Dieu"
-                  testID="training-identity-store"
-                />
-
-                <TouchableOpacity
-                  style={styles.honorRow}
-                  testID="training-identity-honor"
-                  onPress={() => setHonorConfirmed((current) => !current)}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: honorConfirmed }}
-                >
-                  <View
-                    style={[
-                      styles.checkbox,
-                      honorConfirmed && styles.checkboxChecked,
-                    ]}
-                  >
-                    {honorConfirmed && <Check size={14} color="#FFFFFF" />}
-                  </View>
-                  <Text style={styles.honorText}>
-                    Je certifie sur l'honneur être la personne nommée ci-dessus
-                    et avoir passé cette évaluation moi-même.
-                  </Text>
-                </TouchableOpacity>
-
-                {identityErrors.length > 0 && (
-                  <View
-                    style={styles.identityErrors}
-                    testID="training-identity-errors"
-                  >
-                    {identityErrors.map((error) => (
-                      <Text key={error} style={styles.identityErrorText}>
-                        • {error}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-              </ScrollView>
-
-              <View style={styles.footer}>
-                <TouchableOpacity
-                  style={styles.secondaryButton}
-                  onPress={() => setMode('result')}
-                >
-                  <ChevronLeft size={18} color="#2563EB" />
-                  <Text style={styles.secondaryButtonText}>Retour</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  testID="training-certificate-sign"
-                  style={styles.primaryButton}
-                  onPress={submitIdentity}
-                >
-                  <PenLine size={18} color="#FFFFFF" />
-                  <Text style={styles.primaryButtonText}>
-                    Valider et signer
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </>
+            <CandidateIdentityStep
+              values={{
+                fullName: identityName,
+                employeeId,
+                position,
+                store,
+                honorConfirmed,
+              }}
+              errors={identityErrors}
+              onChange={handleIdentityChange}
+              onBack={() => setMode('result')}
+              onSign={submitIdentity}
+            />
           )}
         </View>
       </View>
     </Modal>
-  );
-}
-
-function IdentityField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  testID,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder: string;
-  testID: string;
-}) {
-  return (
-    <View style={styles.identityField}>
-      <Text style={styles.identityLabel}>{label}</Text>
-      <TextInput
-        style={styles.identityInput}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
-        testID={testID}
-      />
-    </View>
   );
 }
 
@@ -883,70 +781,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 440,
     marginBottom: 24,
-  },
-  identityIntro: {
-    color: '#374151',
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 18,
-  },
-  identityField: {
-    marginBottom: 14,
-  },
-  identityLabel: {
-    color: '#6B7280',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 6,
-  },
-  identityInput: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
-  },
-  honorRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    marginTop: 6,
-    marginBottom: 8,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: '#9CA3AF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  checkboxChecked: {
-    backgroundColor: '#2563EB',
-    borderColor: '#2563EB',
-  },
-  honorText: {
-    flex: 1,
-    color: '#374151',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  identityErrors: {
-    marginTop: 8,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: '#FEF2F2',
-  },
-  identityErrorText: {
-    color: '#991B1B',
-    fontSize: 13,
-    lineHeight: 19,
   },
 });
