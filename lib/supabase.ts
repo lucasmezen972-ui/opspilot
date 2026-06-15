@@ -58,6 +58,7 @@ export type Audit = {
   organization_id: string;
   store_id?: string | null;
   template_id?: string | null;
+  template_version?: number | null;
   auditor_id: string;
   title: string;
   description?: string | null;
@@ -386,6 +387,24 @@ export type AuditSignature = {
   signer_name: string;
   signer_role: 'auditor' | 'manager';
   signed_at: string;
+};
+
+export type AuditSection = {
+  id: string;
+  organization_id: string;
+  template_id: string;
+  name: string;
+  sort_order: number;
+};
+
+export type AuditTemplateVersion = {
+  id: string;
+  organization_id: string;
+  template_id: string;
+  version: number;
+  name: string;
+  item_count: number;
+  created_at: string;
 };
 
 /** Alias historique gardé pour les imports existants. */

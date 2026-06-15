@@ -60,6 +60,8 @@ export default function AuditsScreen() {
     templates,
     loading: templatesLoading,
     getItemsForTemplate,
+    getTemplateVersion,
+    getSectionsForTemplate,
   } = useAuditTemplates();
   const { createAction, actions } = useCorrectiveActions();
   const { logEvent } = useActivityLog();
@@ -135,6 +137,10 @@ export default function AuditsScreen() {
       location: 'Magasin principal',
       status: 'pending',
       template_id: selectedTemplateId,
+      // Fige la version du modèle utilisée (reproductibilité du référentiel).
+      template_version: selectedTemplateId
+        ? getTemplateVersion(selectedTemplateId)
+        : null,
     });
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
@@ -353,6 +359,10 @@ export default function AuditsScreen() {
           onToggle={() => setShowTemplates(!showTemplates)}
           onSelectTemplate={(template) => handleCreateAudit(template)}
           getItemCount={(templateId) => getItemsForTemplate(templateId).length}
+          getVersion={getTemplateVersion}
+          getSectionCount={(templateId) =>
+            getSectionsForTemplate(templateId).length
+          }
         />
 
         {loading && audits.length === 0 && (

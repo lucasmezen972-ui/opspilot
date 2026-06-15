@@ -10,6 +10,8 @@ interface AuditTemplateLibraryProps {
   onToggle: () => void;
   onSelectTemplate: (template: AuditTemplate) => void;
   getItemCount: (templateId: string) => number;
+  getVersion?: (templateId: string) => number;
+  getSectionCount?: (templateId: string) => number;
 }
 
 /**
@@ -23,6 +25,8 @@ export function AuditTemplateLibrary({
   onToggle,
   onSelectTemplate,
   getItemCount,
+  getVersion,
+  getSectionCount,
 }: AuditTemplateLibraryProps) {
   return (
     <View>
@@ -49,7 +53,11 @@ export function AuditTemplateLibrary({
               <BookOpen size={22} color="#2563EB" />
               <Text style={styles.name}>{template.name}</Text>
               <Text style={styles.meta}>
+                v{getVersion?.(template.id) ?? 1} ·{' '}
                 {template.estimated_duration ?? 20} min ·{' '}
+                {getSectionCount
+                  ? `${getSectionCount(template.id)} sections · `
+                  : ''}
                 {getItemCount(template.id)} critères
               </Text>
             </TouchableOpacity>

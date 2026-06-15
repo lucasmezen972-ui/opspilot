@@ -88,6 +88,7 @@ export function useAudits() {
         organization_id: profile.organization_id,
         store_id: profile.store_id ?? null,
         template_id: auditData.template_id ?? null,
+        template_version: auditData.template_version ?? null,
         auditor_id: user.id,
         title: auditData.title ?? '',
         description: auditData.description ?? null,
