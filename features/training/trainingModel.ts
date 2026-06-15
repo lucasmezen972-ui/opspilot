@@ -91,12 +91,28 @@ export interface MemberTrainingStatus {
   memberId: string;
   memberName: string;
   memberRole: string;
+  matricule: string;
   trainingId: string;
   trainingTitle: string;
   status: 'not_started' | 'in_progress' | 'completed';
   score: number | null;
   completedAt: string | null;
   hasCertificate: boolean;
+}
+
+/**
+ * Matricule salarié déterministe dérivé de l'identifiant interne.
+ *
+ * En mode démo (et tant que les profils distants ne portent pas de matricule
+ * propre), on synthétise un identifiant stable et lisible afin que la
+ * supervision affiche toujours un matricule cohérent d'un rendu à l'autre.
+ */
+export function deriveMatricule(memberId: string): string {
+  let hash = 0;
+  for (let i = 0; i < memberId.length; i += 1) {
+    hash = (hash * 31 + memberId.charCodeAt(i)) % 10000;
+  }
+  return `M-${String(hash).padStart(4, '0')}`;
 }
 
 export interface SupervisionStats {

@@ -1,4 +1,4 @@
-import { Bell, Download, Users } from 'lucide-react-native';
+import { Bell, Download, FileCheck2, Users } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   Alert,
@@ -25,6 +25,17 @@ interface Props {
     memberId: string,
     trainingId: string,
   ) => { memberName: string; trainingTitle: string };
+}
+
+function formatValidationDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 function MemberInitials({ name }: { name: string }) {
@@ -62,11 +73,12 @@ function StatusBadge({ status }: { status: MemberTrainingStatus['status'] }) {
 
 function exportCSV(entries: MemberTrainingStatus[]) {
   if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-  const header = 'Nom,Rôle,Formation,Statut,Score,Date de validation\n';
+  const header =
+    'Nom,Matricule,Rôle,Formation,Statut,Score,Attestation,Date de validation\n';
   const rows = entries
     .map(
       (e) =>
-        `"${e.memberName}","${e.memberRole}","${e.trainingTitle}","${getTrainingStatusText(e.status)}",${e.score ?? ''},${e.completedAt ?? ''}`,
+        `"${e.memberName}","${e.matricule}","${e.memberRole}","${e.trainingTitle}","${getTrainingStatusText(e.status)}",${e.score ?? ''},${e.hasCertificate ? 'Oui' : 'Non'},${e.completedAt ?? ''}`,
     )
     .join('\n');
   const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' });
@@ -216,7 +228,23 @@ export function TrainingSupervision({
                 <MemberInitials name={entry.memberName} />
                 <View style={styles.memberInfo}>
                   <Text style={styles.memberName}>{entry.memberName}</Text>
-                  <Text style={styles.memberRole}>{entry.memberRole}</Text>
+                  <Text style={styles.memberRole}>
+                    {entry.memberRole} · {entry.matricule}
+                  </Text>
+                  {entry.hasCertificate && (
+                    <View style={styles.certLine}>
+                      <FileCheck2 size={11} color="#10B981" />
+                      <Text
+                        style={styles.certLineText}
+                        testID={`training-supervision-cert-${entry.memberId}-${entry.trainingId}`}
+                      >
+                        Attestation délivrée
+                        {formatValidationDate(entry.completedAt)
+                          ? ` · ${formatValidationDate(entry.completedAt)}`
+                          : ''}
+                      </Text>
+                    </View>
+                  )}
                 </View>
                 <View style={styles.memberRight}>
                   <StatusBadge status={entry.status} />
@@ -416,6 +444,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     marginTop: 1,
+  },
+  certLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
+  certLineText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#10B981',
   },
   memberRight: {
     alignItems: 'flex-end',
