@@ -22,12 +22,17 @@ import {
   toAuditListItems,
   getAuditCounts,
 } from '../../features/audits/auditListModel';
+import {
+  hasRoleSigned,
+  type SignableRole,
+} from '../../features/audits/auditSignatureModel';
 import { AUDIT_QUESTIONS } from '../../features/audits/constants';
 import type { AuditResponseDraft } from '../../features/audits/scoring';
 import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
+import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import type { AuditTemplate } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
@@ -35,6 +40,7 @@ import { AppLoadingState } from '../../shared/components/AppLoadingState';
 import { shadow } from '../../shared/styles/tokens';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
+import { isManagerRole } from '../../utils/roles';
 
 export default function AuditsScreen() {
   const {
@@ -45,7 +51,11 @@ export default function AuditsScreen() {
     completeAudit,
     addPhotoToAudit,
     getAuditResponses,
+    getSignaturesForAudit,
+    signAudit,
   } = useAudits();
+  const { profile } = useAuth();
+  const isManager = isManagerRole(profile?.role);
   const {
     templates,
     loading: templatesLoading,
@@ -64,6 +74,12 @@ export default function AuditsScreen() {
       entityId: auditId,
       label: `Audit « ${audit?.title ?? 'audit'} » clôturé (score ${score} %).`,
     });
+  };
+
+  // L'auditeur signe en tant qu'« auditor », un responsable en tant que « manager ».
+  const signRole: SignableRole = isManager ? 'manager' : 'auditor';
+  const handleSignAudit = (auditId: string) => {
+    void signAudit(auditId, profile?.full_name ?? 'Signataire', signRole);
   };
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);
@@ -345,15 +361,23 @@ export default function AuditsScreen() {
             label="Chargement des audits..."
           />
         )}
-        {audits.map((audit) => (
-          <AuditListCard
-            key={audit.id}
-            audit={audit}
-            onOpenCamera={handleOpenCamera}
-            onExportReport={handleExportReport}
-            onChangeStatus={handleStatusChange}
-          />
-        ))}
+        {audits.map((audit) => {
+          const sigs = getSignaturesForAudit(audit.id);
+          return (
+            <AuditListCard
+              key={audit.id}
+              audit={audit}
+              signatures={sigs}
+              canSign={
+                audit.status === 'completed' && !hasRoleSigned(sigs, signRole)
+              }
+              onOpenCamera={handleOpenCamera}
+              onExportReport={handleExportReport}
+              onChangeStatus={handleStatusChange}
+              onSign={handleSignAudit}
+            />
+          );
+        })}
       </ScrollView>
 
       {/* Floating Action Button */}

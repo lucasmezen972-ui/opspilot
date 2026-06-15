@@ -2,6 +2,7 @@ import type {
   ActivityEvent,
   Audit,
   AuditResponse,
+  AuditSignature,
   AuditTemplate,
   AuditTemplateItem,
   Channel,
@@ -1415,6 +1416,21 @@ export function getDemoAuditTemplateItems(): AuditTemplateItem[] {
 
 export function getDemoAuditResponses(): AuditResponse[] {
   return [];
+}
+
+/** Signatures d'audit démo : un audit clôturé signé par l'auditeur. */
+export function getDemoAuditSignatures(): AuditSignature[] {
+  return [
+    {
+      id: 'demo-audit-sig-1',
+      organization_id: DEMO_ORG_ID,
+      audit_id: 'demo-audit-1',
+      signer_id: DEMO_USER_ID,
+      signer_name: 'Marie Dupont',
+      signer_role: 'auditor',
+      signed_at: days(-5),
+    },
+  ];
 }
 
 export function getDemoProducts(): Product[] {

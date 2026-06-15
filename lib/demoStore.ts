@@ -5,6 +5,7 @@ import {
   getDemoAudits,
   getDemoActions,
   getDemoAuditResponses,
+  getDemoAuditSignatures,
   getDemoAuditTemplateItems,
   getDemoAuditTemplates,
   getDemoChannelMessages,
@@ -22,6 +23,7 @@ import type {
   ActivityEvent,
   Audit,
   AuditResponse,
+  AuditSignature,
   AuditTemplate,
   AuditTemplateItem,
   Channel,
@@ -52,6 +54,7 @@ export interface DemoState {
   auditTemplates: AuditTemplate[];
   auditTemplateItems: AuditTemplateItem[];
   auditResponses: AuditResponse[];
+  auditSignatures: AuditSignature[];
   actions: CorrectiveAction[];
   products: Product[];
   tasks: Task[];
@@ -72,6 +75,7 @@ function seed(): DemoState {
     auditTemplates: getDemoAuditTemplates(),
     auditTemplateItems: getDemoAuditTemplateItems(),
     auditResponses: getDemoAuditResponses(),
+    auditSignatures: getDemoAuditSignatures(),
     actions: getDemoActions(),
     products: getDemoProducts(),
     tasks: getDemoTasks(),

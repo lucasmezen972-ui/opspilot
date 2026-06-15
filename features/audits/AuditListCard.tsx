@@ -6,6 +6,7 @@ import {
   Play,
   CircleCheck as CheckCircle,
   Lock,
+  PenLine,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -15,26 +16,35 @@ import {
   getAuditStatusText,
   type AuditListItem,
 } from './auditListModel';
+import { signatureSummary } from './auditSignatureModel';
 import { isAuditLocked } from '../governance/governanceModel';
+import type { AuditSignature } from '../../lib/supabase';
 import { AppBadge } from '../../shared/components/AppBadge';
 import { colors, shadow } from '../../shared/styles/tokens';
 
 interface AuditListCardProps {
   audit: AuditListItem;
+  signatures?: AuditSignature[];
+  canSign?: boolean;
   onOpenCamera: (auditId: string) => void;
   onExportReport: (auditId: string) => void;
   onChangeStatus: (auditId: string, status: string) => void;
+  onSign?: (auditId: string) => void;
 }
 
 /** Carte d'un audit dans la liste : titre, lieu, statut, score, actions. */
 export function AuditListCard({
   audit,
+  signatures = [],
+  canSign = false,
   onOpenCamera,
   onExportReport,
   onChangeStatus,
+  onSign,
 }: AuditListCardProps) {
   const StatusIcon = getAuditStatusIcon(audit.status);
   const locked = isAuditLocked(audit);
+  const signed = signatures.length > 0;
   return (
     <TouchableOpacity
       testID={`audit-card-${audit.id}`}
@@ -90,6 +100,32 @@ export function AuditListCard({
           </View>
         )}
       </View>
+
+      {(signed || canSign) && (
+        <View
+          style={styles.signatureBlock}
+          testID={`audit-signature-${audit.id}`}
+        >
+          {signed && (
+            <View style={styles.signatureRow}>
+              <PenLine size={13} color={colors.textMuted} />
+              <Text style={styles.signatureText}>
+                {signatureSummary(signatures)}
+              </Text>
+            </View>
+          )}
+          {canSign && onSign && (
+            <TouchableOpacity
+              testID={`audit-sign-${audit.id}`}
+              style={styles.signButton}
+              onPress={() => onSign(audit.id)}
+            >
+              <PenLine size={14} color={colors.primary} />
+              <Text style={styles.signButtonText}>Signer l’audit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       <View style={styles.auditActions}>
         <TouchableOpacity
@@ -218,6 +254,39 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#D97706',
     marginLeft: 4,
+  },
+  signatureBlock: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    gap: 8,
+  },
+  signatureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  signatureText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  signButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  signButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
   },
   auditActions: {
     flexDirection: 'row',

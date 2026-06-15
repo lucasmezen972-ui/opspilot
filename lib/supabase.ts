@@ -378,6 +378,16 @@ export type AuditResponse = {
   created_at?: string;
 };
 
+export type AuditSignature = {
+  id: string;
+  organization_id: string;
+  audit_id: string;
+  signer_id?: string | null;
+  signer_name: string;
+  signer_role: 'auditor' | 'manager';
+  signed_at: string;
+};
+
 /** Alias historique gardé pour les imports existants. */
 export type AuditItem = AuditTemplateItem;
 
