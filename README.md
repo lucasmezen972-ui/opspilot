@@ -37,9 +37,10 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 - Scanner de code-barres (ajout/vérification produits).
 - Annotation des photos (flèches, texte, etc.).
 - Mode hors-ligne avec synchronisation au retour réseau.
-- Génération de rapports PDF.
+- Génération de rapports PDF (synthèse exécutive, détail par critère, plan d'action, bloc de signature).
+- Plans d'action correctifs intelligents : l'échéance et les exigences de preuve sont déduites du problème détecté (chaîne du froid, hygiène, DLC, sécurité…).
 - Gamification (badges, score, classement).
-- Formation interactive (micro-cours + quiz).
+- Formation interactive (micro-cours + quiz anti-triche) avec attestations quasi-certifiantes nominatives.
 - Filtres avancés (catégorie, date, magasin).
 
 ---
@@ -122,9 +123,15 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 - Modèles personnalisés.
 - Checklists interactives.
-- Scoring automatique.
-- Rapports PDF.
+- Scoring automatique et conformité par section.
+- Rapports PDF professionnels : synthèse exécutive, détail des critères, plan d'action correctif et double bloc de signature (auditeur / responsable).
 - Historique d’audits.
+
+### Actions correctives
+
+- Génération d'un plan correctif structuré à partir du problème observé.
+- Échéance dérivée de la criticité réelle : chaîne du froid `1 h`, hygiène critique / DLC `2 h`, sécurité immédiate, affichage prix `24 h`, etc.
+- Exigences de preuve adaptées (photo, commentaire, identité du salarié, validation manager, escalade) selon le risque détecté.
 
 ### Produits / stock
 
@@ -135,10 +142,11 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### Formation
 
-- Parcours par compétences.
-- Quiz de validation.
-- Progression personnalisée.
-- Récompenses liées à l’apprentissage.
+- Parcours par compétences (chapitres + quiz).
+- Quiz anti-triche : mélange des questions et des options, questions critiques, seuil de réussite, traçabilité des réponses (version d'évaluation, tentative, date).
+- Attestation quasi-certifiante : le candidat confirme son identité (nom, matricule, poste, magasin) et signe sur l'honneur ; le certificat porte score, statut validé/échoué, durée, version et numéro unique.
+- Supervision : le responsable suit nom, matricule, formation, score, date et statut de l'attestation, avec export CSV.
+- Progression personnalisée et récompenses liées à l’apprentissage.
 
 ---
 
