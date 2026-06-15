@@ -5,9 +5,11 @@ import {
   Flag,
   ChevronRight,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
+import { buildLocalActionPlan } from './actionPlan';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from './constants';
 import type { CorrectiveAction } from '../../lib/supabase';
 
@@ -26,6 +28,9 @@ export function ActionCard({
   onAdvance,
   onGeneratePlan,
 }: ActionCardProps) {
+  const plan = buildLocalActionPlan(action);
+  const requirements = getRequirementLabels(plan);
+
   return (
     <View
       testID={`action-card-${action.id}`}
@@ -65,11 +70,31 @@ export function ActionCard({
         </Text>
       )}
 
+      {!compact && (
+        <View
+          style={styles.executionPanel}
+          testID={`action-execution-${action.id}`}
+        >
+          <View style={styles.executionHeader}>
+            <ShieldCheck size={13} color="#2563EB" />
+            <Text style={styles.executionTitle}>{plan.category}</Text>
+          </View>
+          <Text style={styles.executionDeadline}>{plan.deadlineLabel}</Text>
+          {requirements.length > 0 && (
+            <Text style={styles.executionRequirements} numberOfLines={2}>
+              {requirements.join(' · ')}
+            </Text>
+          )}
+        </View>
+      )}
+
       <View style={styles.cardFooter}>
         {!!action.due_date && (
           <View style={styles.dueDate}>
             <Calendar size={14} color={overdue ? '#DC2626' : '#6B7280'} />
-            <Text style={[styles.dueDateText, overdue && { color: '#DC2626' }]}>
+            <Text
+              style={[styles.dueDateText, overdue && { color: '#DC2626' }]}
+            >
               {new Date(action.due_date).toLocaleDateString('fr-FR')}
             </Text>
           </View>
@@ -104,6 +129,17 @@ export function ActionCard({
       </View>
     </View>
   );
+}
+
+function getRequirementLabels(plan: ReturnType<typeof buildLocalActionPlan>) {
+  return [
+    plan.photoRequired ? 'Preuve photo' : null,
+    plan.commentRequired ? 'Commentaire' : null,
+    plan.employeeNameRequired ? 'Nom exécutant' : null,
+    plan.employeeIdRequired ? 'Matricule' : null,
+    plan.managerValidationRequired ? 'Validation manager' : null,
+    plan.escalationRequired ? 'Escalade' : null,
+  ].filter((item): item is string => item !== null);
 }
 
 const styles = StyleSheet.create({
@@ -155,6 +191,36 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B7280',
     marginTop: 4,
+  },
+  executionPanel: {
+    marginTop: 10,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  executionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 4,
+  },
+  executionTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#1D4ED8',
+  },
+  executionDeadline: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  executionRequirements: {
+    marginTop: 3,
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 16,
   },
   cardFooter: {
     flexDirection: 'row',
