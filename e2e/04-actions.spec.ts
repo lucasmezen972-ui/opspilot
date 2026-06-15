@@ -18,9 +18,7 @@ test.describe('Actions correctives', () => {
   }) => {
     expect(await readCount(page, 'actions-count-open')).toBe(2);
     expect(await readCount(page, 'actions-count-inprogress')).toBe(1);
-    await expect(
-      page.getByTestId('action-card-demo-action-1'),
-    ).toBeVisible();
+    await expect(page.getByTestId('action-card-demo-action-1')).toBeVisible();
   });
 
   test('créer une action met à jour la liste et les compteurs', async ({
