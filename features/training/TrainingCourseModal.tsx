@@ -1,4 +1,10 @@
-import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react-native';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  PenLine,
+  X,
+} from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -6,10 +12,15 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import {
+  buildQuizAttemptTrace,
+  validateCandidateIdentity,
+} from './certification';
 import { uniqueChapterIds } from './progress';
 import {
   createQuizSession,
@@ -30,12 +41,24 @@ type OperationResult = {
   passed?: boolean;
 };
 
+export interface CertificateSubmitOptions {
+  fullName: string;
+  employeeId: string;
+  position: string;
+  store: string;
+  quizVersion: string;
+  attemptNumber: number;
+  status: 'validé' | 'échoué';
+}
+
 type Props = {
   visible: boolean;
   course: Training | null;
   chapters: TrainingChapter[];
   questions: TrainingQuizQuestion[];
   progress?: UserTrainingProgress;
+  /** Nom du candidat pré-rempli dans le formulaire d'identité. */
+  candidateName?: string;
   onClose: () => void;
   onMarkChapterRead: (
     courseId: string,
@@ -47,7 +70,11 @@ type Props = {
     score: number,
     failedCritical: boolean,
   ) => Promise<OperationResult>;
-  onGenerateCertificate?: (courseId: string, score: number) => void;
+  onGenerateCertificate?: (
+    courseId: string,
+    score: number,
+    options: CertificateSubmitOptions,
+  ) => void;
 };
 
 function MarkdownBody({ body }: { body: string }) {
@@ -86,12 +113,15 @@ export function TrainingCourseModal({
   chapters,
   questions,
   progress,
+  candidateName,
   onClose,
   onMarkChapterRead,
   onCompleteQuiz,
   onGenerateCertificate,
 }: Props) {
-  const [mode, setMode] = useState<'chapters' | 'quiz' | 'result'>('chapters');
+  const [mode, setMode] = useState<'chapters' | 'quiz' | 'result' | 'identity'>(
+    'chapters',
+  );
   const [chapterIndex, setChapterIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -100,6 +130,15 @@ export function TrainingCourseModal({
   const [failedCritical, setFailedCritical] = useState(false);
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
   const [saving, setSaving] = useState(false);
+  const [wasCompletedOnOpen, setWasCompletedOnOpen] = useState(false);
+
+  // Formulaire d'identité du candidat (attestation quasi-certifiante).
+  const [identityName, setIdentityName] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [position, setPosition] = useState('');
+  const [store, setStore] = useState('');
+  const [honorConfirmed, setHonorConfirmed] = useState(false);
+  const [identityErrors, setIdentityErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (!visible || !course) return;
@@ -115,6 +154,13 @@ export function TrainingCourseModal({
     setScore(null);
     setFailedCritical(false);
     setQuizSession(null);
+    setWasCompletedOnOpen(progress?.status === 'completed');
+    setIdentityName(candidateName ?? '');
+    setEmployeeId('');
+    setPosition('');
+    setStore('');
+    setHonorConfirmed(false);
+    setIdentityErrors([]);
   }, [visible, course?.id]);
 
   const sortedChapters = useMemo(
@@ -191,6 +237,37 @@ export function TrainingCourseModal({
     setMode('result');
   };
 
+  const submitIdentity = () => {
+    if (score === null || !onGenerateCertificate) return;
+    const identity = {
+      fullName: identityName,
+      employeeId,
+      position,
+      store,
+    };
+    const validation = validateCandidateIdentity(identity, honorConfirmed);
+    if (!validation.valid) {
+      setIdentityErrors(validation.errors);
+      return;
+    }
+    setIdentityErrors([]);
+    const trace = buildQuizAttemptTrace({
+      questions: sessionQuestions,
+      answers,
+      attemptNumber: wasCompletedOnOpen ? 2 : 1,
+    });
+    onGenerateCertificate(course.id, score, {
+      fullName: identityName.trim(),
+      employeeId: employeeId.trim(),
+      position: position.trim(),
+      store: store.trim(),
+      quizVersion: trace.version,
+      attemptNumber: trace.attemptNumber,
+      status: 'validé',
+    });
+    onClose();
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay} testID="training-course-modal">
@@ -198,7 +275,11 @@ export function TrainingCourseModal({
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.eyebrow}>
-                {mode === 'quiz' ? 'Évaluation finale' : course.category}
+                {mode === 'quiz'
+                  ? 'Évaluation finale'
+                  : mode === 'identity'
+                    ? 'Identité du candidat'
+                    : course.category}
               </Text>
               <Text style={styles.title}>{course.title}</Text>
             </View>
@@ -439,10 +520,13 @@ export function TrainingCourseModal({
                 <TouchableOpacity
                   testID="training-certificate-btn"
                   style={styles.certificateButton}
-                  onPress={() => onGenerateCertificate(course.id, score)}
+                  onPress={() => {
+                    setIdentityErrors([]);
+                    setMode('identity');
+                  }}
                 >
                   <Text style={styles.certificateButtonText}>
-                    Télécharger l'attestation
+                    Obtenir mon attestation
                   </Text>
                 </TouchableOpacity>
               )}
@@ -455,9 +539,135 @@ export function TrainingCourseModal({
               </TouchableOpacity>
             </View>
           )}
+
+          {mode === 'identity' && score !== null && (
+            <>
+              <ScrollView
+                style={styles.body}
+                testID="training-identity-form"
+                keyboardShouldPersistTaps="handled"
+              >
+                <Text style={styles.identityIntro}>
+                  Confirmez votre identité pour délivrer une attestation
+                  nominative et traçable.
+                </Text>
+
+                <IdentityField
+                  label="Nom complet"
+                  value={identityName}
+                  onChangeText={setIdentityName}
+                  placeholder="Prénom et nom"
+                  testID="training-identity-name"
+                />
+                <IdentityField
+                  label="Matricule"
+                  value={employeeId}
+                  onChangeText={setEmployeeId}
+                  placeholder="Ex. M-1042"
+                  testID="training-identity-matricule"
+                />
+                <IdentityField
+                  label="Poste"
+                  value={position}
+                  onChangeText={setPosition}
+                  placeholder="Ex. Responsable de rayon"
+                  testID="training-identity-position"
+                />
+                <IdentityField
+                  label="Magasin"
+                  value={store}
+                  onChangeText={setStore}
+                  placeholder="Ex. Magasin Lyon Part-Dieu"
+                  testID="training-identity-store"
+                />
+
+                <TouchableOpacity
+                  style={styles.honorRow}
+                  testID="training-identity-honor"
+                  onPress={() => setHonorConfirmed((current) => !current)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: honorConfirmed }}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      honorConfirmed && styles.checkboxChecked,
+                    ]}
+                  >
+                    {honorConfirmed && <Check size={14} color="#FFFFFF" />}
+                  </View>
+                  <Text style={styles.honorText}>
+                    Je certifie sur l'honneur être la personne nommée ci-dessus
+                    et avoir passé cette évaluation moi-même.
+                  </Text>
+                </TouchableOpacity>
+
+                {identityErrors.length > 0 && (
+                  <View
+                    style={styles.identityErrors}
+                    testID="training-identity-errors"
+                  >
+                    {identityErrors.map((error) => (
+                      <Text key={error} style={styles.identityErrorText}>
+                        • {error}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
+
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.secondaryButton}
+                  onPress={() => setMode('result')}
+                >
+                  <ChevronLeft size={18} color="#2563EB" />
+                  <Text style={styles.secondaryButtonText}>Retour</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  testID="training-certificate-sign"
+                  style={styles.primaryButton}
+                  onPress={submitIdentity}
+                >
+                  <PenLine size={18} color="#FFFFFF" />
+                  <Text style={styles.primaryButtonText}>
+                    Valider et signer
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Modal>
+  );
+}
+
+function IdentityField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  testID,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  testID: string;
+}) {
+  return (
+    <View style={styles.identityField}>
+      <Text style={styles.identityLabel}>{label}</Text>
+      <TextInput
+        style={styles.identityInput}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="#9CA3AF"
+        testID={testID}
+      />
+    </View>
   );
 }
 
@@ -673,5 +883,70 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 440,
     marginBottom: 24,
+  },
+  identityIntro: {
+    color: '#374151',
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 18,
+  },
+  identityField: {
+    marginBottom: 14,
+  },
+  identityLabel: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 6,
+  },
+  identityInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#111827',
+    backgroundColor: '#FFFFFF',
+  },
+  honorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginTop: 6,
+    marginBottom: 8,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#9CA3AF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  checkboxChecked: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  honorText: {
+    flex: 1,
+    color: '#374151',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  identityErrors: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: '#FEF2F2',
+  },
+  identityErrorText: {
+    color: '#991B1B',
+    fontSize: 13,
+    lineHeight: 19,
   },
 });

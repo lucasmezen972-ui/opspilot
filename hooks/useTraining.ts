@@ -22,6 +22,17 @@ import {
 } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
+/** Identité confirmée + traçabilité passées à la génération d'attestation. */
+export interface CertificateOptions {
+  fullName?: string;
+  employeeId?: string;
+  position?: string;
+  store?: string;
+  quizVersion?: string;
+  attemptNumber?: number;
+  status?: 'validé' | 'échoué';
+}
+
 export function useTraining() {
   const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
   const [remoteChapters, setRemoteChapters] = useState<TrainingChapter[]>([]);
@@ -443,8 +454,14 @@ export function useTraining() {
 
   /**
    * Génère (ou récupère) le certificat d'un cours validé et l'ouvre.
+   * `options` porte l'identité confirmée du candidat et la traçabilité de
+   * l'évaluation (version, tentative) pour une attestation quasi-certifiante.
    */
-  const generateCertificate = async (courseId: string, score: number) => {
+  const generateCertificate = async (
+    courseId: string,
+    score: number,
+    options?: CertificateOptions,
+  ) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
     const course = courses.find((c) => c.id === courseId);
     if (!course) return { error: 'Cours non trouvé' };
@@ -453,6 +470,7 @@ export function useTraining() {
     if (existing) {
       openCertificate(existing, {
         category: course.category,
+        durationMinutes: course.duration_minutes,
         organizationName: undefined,
       });
       return { data: existing };
@@ -465,13 +483,22 @@ export function useTraining() {
       user_id: profile.id,
       training_id: courseId,
       organization_id: profile.organization_id ?? '',
-      full_name: profile.full_name ?? profile.email,
+      full_name:
+        options?.fullName?.trim() || profile.full_name || profile.email,
       training_title: course.title,
       score,
       issued_at: now,
       expires_at: null,
       certificate_number: certNumber,
       created_at: now,
+      employee_id: options?.employeeId ?? null,
+      position: options?.position ?? null,
+      store_name: options?.store ?? null,
+      category: course.category ?? null,
+      duration_minutes: course.duration_minutes ?? null,
+      quiz_version: options?.quizVersion ?? null,
+      attempt_number: options?.attemptNumber ?? null,
+      status: options?.status ?? 'validé',
     };
 
     if (isLocalDemo) {
@@ -524,8 +551,17 @@ export function useTraining() {
       }
 
       setRemoteCertificates((prev) => [...prev, data as TrainingCertificate]);
+      // Les colonnes d'identité/traçabilité peuvent ne pas exister côté base :
+      // on alimente l'attestation depuis les valeurs confirmées en mémoire.
       openCertificate(data as TrainingCertificate, {
         category: course.category,
+        employeeId: cert.employee_id,
+        position: cert.position,
+        store: cert.store_name,
+        durationMinutes: cert.duration_minutes,
+        version: cert.quiz_version,
+        attemptNumber: cert.attempt_number,
+        status: cert.status,
       });
       return { data };
     } catch (error) {
