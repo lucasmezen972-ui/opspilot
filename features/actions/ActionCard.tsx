@@ -92,9 +92,7 @@ export function ActionCard({
         {!!action.due_date && (
           <View style={styles.dueDate}>
             <Calendar size={14} color={overdue ? '#DC2626' : '#6B7280'} />
-            <Text
-              style={[styles.dueDateText, overdue && { color: '#DC2626' }]}
-            >
+            <Text style={[styles.dueDateText, overdue && { color: '#DC2626' }]}>
               {new Date(action.due_date).toLocaleDateString('fr-FR')}
             </Text>
           </View>
