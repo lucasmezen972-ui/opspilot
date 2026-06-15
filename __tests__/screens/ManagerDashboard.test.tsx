@@ -87,6 +87,8 @@ describe('ManagerDashboard', () => {
       loading: false,
       createTask: vi.fn(),
       updateTaskStatus: vi.fn(),
+      completeTask: vi.fn(),
+      validateTask: vi.fn(),
       getMyTasks: vi.fn(),
       getTasksByStatus: vi.fn(),
       getTasksByPriority: vi.fn(),

@@ -14,6 +14,7 @@ import {
   type NewTaskDraft,
 } from '../../features/tasks/CreateTaskModal';
 import { TaskCard } from '../../features/tasks/TaskCard';
+import { TaskCompletionModal } from '../../features/tasks/TaskCompletionModal';
 import { TaskFilters } from '../../features/tasks/TaskFilters';
 import { TaskQuickStats } from '../../features/tasks/TaskQuickStats';
 import {
@@ -22,16 +23,28 @@ import {
   getEmptyFilterText,
   type TaskFilter,
 } from '../../features/tasks/taskModel';
+import type { TaskCompletionInput } from '../../features/tasks/taskTraceability';
 import { useAuth } from '../../hooks/useAuth';
 import { useTasks } from '../../hooks/useTasks';
+import type { Task } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
 import { colors, shadow } from '../../shared/styles/tokens';
+import { isManagerRole } from '../../utils/roles';
 
 export default function TasksScreen() {
-  const { tasks, loading, updateTaskStatus, createTask } = useTasks();
+  const {
+    tasks,
+    loading,
+    updateTaskStatus,
+    completeTask,
+    validateTask,
+    createTask,
+  } = useTasks();
   const { profile } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState<TaskFilter>('all');
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [completionTask, setCompletionTask] = useState<Task | null>(null);
+  const isManager = isManagerRole(profile?.role);
 
   const filteredTasks = useMemo(
     () => filterTasks(tasks, selectedFilter, profile?.id),
@@ -49,10 +62,33 @@ export default function TasksScreen() {
     }
   };
 
-  const handleCompleteTask = async (taskId: string) => {
-    const result = await updateTaskStatus(taskId, 'completed');
+  const handleCompleteTask = (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) setCompletionTask(task);
+  };
+
+  const handleConfirmCompletion = async (input: TaskCompletionInput) => {
+    if (!completionTask) return;
+    const result = await completeTask(completionTask.id, input);
+    setCompletionTask(null);
     if (!result.error) {
-      Alert.alert('Tâche clôturée', 'La tâche a été marquée comme terminée.');
+      Alert.alert(
+        'Tâche tracée',
+        'Clôture enregistrée avec preuve d’exécution.',
+      );
+    }
+  };
+
+  const handleValidateTask = async (taskId: string) => {
+    const result = await validateTask(
+      taskId,
+      profile?.full_name ?? 'Responsable',
+    );
+    if (!result.error) {
+      Alert.alert(
+        'Tâche validée',
+        'La réalisation a été contrôlée et validée.',
+      );
     }
   };
 
@@ -126,8 +162,10 @@ export default function TasksScreen() {
           <TaskCard
             task={task}
             currentUserId={profile?.id}
+            canValidate={isManager}
             onStart={handleStartTask}
             onComplete={handleCompleteTask}
+            onValidate={handleValidateTask}
           />
         )}
       />
@@ -145,6 +183,14 @@ export default function TasksScreen() {
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
         onSubmit={handleConfirmCreateTask}
+      />
+
+      <TaskCompletionModal
+        visible={completionTask !== null}
+        task={completionTask}
+        defaultName={profile?.full_name ?? ''}
+        onClose={() => setCompletionTask(null)}
+        onConfirm={handleConfirmCompletion}
       />
     </View>
   );

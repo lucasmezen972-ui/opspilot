@@ -17,14 +17,17 @@ import {
   getTaskStatusText,
 } from './taskModel';
 import { isRecurring, recurrenceLabel } from './taskRecurrence';
+import { executionProofSummary, isTaskValidated } from './taskTraceability';
 import type { Task } from '../../lib/supabase';
 import { colors, radius, shadow } from '../../shared/styles/tokens';
 
 interface TaskCardProps {
   task: Task;
   currentUserId?: string;
+  canValidate?: boolean;
   onStart: (taskId: string) => void;
   onComplete: (taskId: string) => void;
+  onValidate?: (taskId: string) => void;
 }
 
 function statusIcon(status: string) {
@@ -42,12 +45,16 @@ function statusIcon(status: string) {
 export function TaskCard({
   task,
   currentUserId,
+  canValidate = false,
   onStart,
   onComplete,
+  onValidate,
 }: TaskCardProps) {
   const StatusIcon = statusIcon(task.status);
   const priorityColor = getPriorityColor(task.priority);
   const statusColor = getTaskStatusColor(task.status);
+  const proof = executionProofSummary(task);
+  const validated = isTaskValidated(task);
 
   return (
     <TouchableOpacity
@@ -120,6 +127,37 @@ export function TaskCard({
           </Text>
         </View>
       </View>
+
+      {task.status === 'completed' && proof !== '' && (
+        <View style={styles.proof} testID={`task-proof-${task.id}`}>
+          <Text style={styles.proofLabel}>Preuve d’exécution</Text>
+          <Text style={styles.proofText}>{proof}</Text>
+          {task.completion_comment ? (
+            <Text style={styles.proofComment}>
+              « {task.completion_comment} »
+            </Text>
+          ) : null}
+          {validated ? (
+            <View style={styles.validatedBadge}>
+              <CheckCircle size={12} color={colors.successText} />
+              <Text style={styles.validatedText}>
+                Validé
+                {task.validated_by_name ? ` · ${task.validated_by_name}` : ''}
+              </Text>
+            </View>
+          ) : canValidate && onValidate ? (
+            <TouchableOpacity
+              testID={`task-validate-${task.id}`}
+              style={styles.validateButton}
+              onPress={() => onValidate(task.id)}
+            >
+              <Text style={styles.validateButtonText}>
+                Valider la réalisation
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      )}
 
       {task.status !== 'completed' && (
         <View style={styles.actions}>
@@ -232,6 +270,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     marginLeft: 8,
+  },
+  proof: {
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: radius.md,
+    padding: 12,
+    gap: 4,
+  },
+  proofLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  proofText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textStrong,
+  },
+  proofComment: {
+    fontSize: 12,
+    color: colors.textMuted,
+    fontStyle: 'italic',
+  },
+  validatedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  validatedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.successText,
+  },
+  validateButton: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+  },
+  validateButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primary,
   },
   actions: {
     flexDirection: 'row',
