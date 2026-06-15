@@ -1,4 +1,5 @@
 import type {
+  ActivityEvent,
   Audit,
   AuditResponse,
   AuditTemplate,
@@ -2128,6 +2129,63 @@ export function getDemoChannelMessages(): ChannelMessage[] {
       read_by: [DEMO_USER_ID],
       created_at: days(0),
     },
+  ];
+}
+
+/** Journal d'activité de gouvernance (preuves d'exécution tracées). */
+export function getDemoActivityLog(): ActivityEvent[] {
+  const event = (
+    id: string,
+    action: ActivityEvent['action'],
+    entityType: string,
+    label: string,
+    actorName: string,
+    daysAgo: number,
+  ): ActivityEvent => ({
+    id,
+    organization_id: DEMO_ORG_ID,
+    actor_id: DEMO_USER_ID,
+    actor_name: actorName,
+    action,
+    entity_type: entityType,
+    entity_id: null,
+    label,
+    created_at: days(daysAgo),
+  });
+
+  return [
+    event(
+      'demo-activity-1',
+      'audit_completed',
+      'audit',
+      'Audit « Contrôle hygiène rayon frais » clôturé (score 92 %).',
+      'Marie Dupont',
+      -1,
+    ),
+    event(
+      'demo-activity-2',
+      'action_resolved',
+      'corrective_action',
+      'Action corrective « Mettre à jour l’affichage allergènes » résolue.',
+      'Emma Rousseau',
+      -2,
+    ),
+    event(
+      'demo-activity-3',
+      'training_certified',
+      'training',
+      'Formation « Hygiène et sécurité alimentaire (HACCP) » validée.',
+      'Jean Martin',
+      -3,
+    ),
+    event(
+      'demo-activity-4',
+      'export',
+      'report',
+      'Export du rapport direction (Excel).',
+      'Marie Dupont',
+      -4,
+    ),
   ];
 }
 

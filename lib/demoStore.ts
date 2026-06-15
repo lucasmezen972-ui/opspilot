@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import {
+  getDemoActivityLog,
   getDemoAudits,
   getDemoActions,
   getDemoAuditResponses,
@@ -18,6 +19,7 @@ import {
   type DemoSettings,
 } from './demoData';
 import type {
+  ActivityEvent,
   Audit,
   AuditResponse,
   AuditTemplate,
@@ -60,6 +62,7 @@ export interface DemoState {
   trainingCertificates: TrainingCertificate[];
   channels: Channel[];
   channelMessages: ChannelMessage[];
+  activityLog: ActivityEvent[];
   settings: DemoSettings;
 }
 
@@ -79,6 +82,7 @@ function seed(): DemoState {
     trainingCertificates: [],
     channels: getDemoChannels(),
     channelMessages: getDemoChannelMessages(),
+    activityLog: getDemoActivityLog(),
     settings: getDemoSettings(),
   };
 }

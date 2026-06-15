@@ -1,3 +1,5 @@
+import type { ActivityEvent, ActivityEventType } from '../../lib/supabase';
+
 /**
  * Gouvernance & preuves d'exécution.
  *
@@ -17,4 +19,20 @@ export function isTrainingCertified(
   progress: { status: string } | null | undefined,
 ): boolean {
   return progress?.status === 'completed';
+}
+
+export const ACTIVITY_LABELS: Record<ActivityEventType, string> = {
+  audit_completed: 'Audit clôturé',
+  action_resolved: 'Action corrective résolue',
+  training_certified: 'Formation validée',
+  export: 'Export',
+};
+
+export function activityCategoryLabel(action: ActivityEventType): string {
+  return ACTIVITY_LABELS[action] ?? 'Activité';
+}
+
+/** Trie les événements de gouvernance du plus récent au plus ancien. */
+export function sortActivity(events: ActivityEvent[]): ActivityEvent[] {
+  return [...events].sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
