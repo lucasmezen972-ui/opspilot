@@ -63,7 +63,7 @@ export function ActionPlanModal({
                 source === 'ia' ? styles.sourceIaText : styles.sourceLocalText,
               ]}
             >
-              {source === 'ia' ? 'Généré par l’IA' : 'Plan proposé'}
+              {source === 'ia' ? 'Garde-fou métier + complément IA' : 'Plan proposé'}
             </Text>
           </View>
         )}
@@ -76,6 +76,12 @@ export function ActionPlanModal({
         ) : (
           <ScrollView style={styles.body}>
             {plan && <StructuredPlan plan={plan} />}
+            {planText && source === 'ia' && (
+              <View style={styles.section} testID="action-plan-ai-supplement">
+                <Text style={styles.sectionTitle}>Complément IA</Text>
+                <Text style={styles.planText}>{planText}</Text>
+              </View>
+            )}
             {planText && !plan && (
               <Text style={styles.planText} testID="action-plan-text">
                 {planText}
