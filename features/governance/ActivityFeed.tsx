@@ -6,12 +6,26 @@ import {
   Activity,
 } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { View, Text, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-import { activityCategoryLabel, sortActivity } from './governanceModel';
+import {
+  activityCategoryLabel,
+  filterActivity,
+  sortActivity,
+  type ActivityFilter,
+} from './governanceModel';
 import type { ActivityEvent, ActivityEventType } from '../../lib/supabase';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+
+const FILTERS: { key: ActivityFilter; label: string }[] = [
+  { key: 'all', label: 'Tout' },
+  { key: 'audit_completed', label: 'Audits' },
+  { key: 'action_resolved', label: 'Actions' },
+  { key: 'training_certified', label: 'Formations' },
+  { key: 'export', label: 'Exports' },
+];
 
 const ICONS: Record<ActivityEventType, LucideIcon> = {
   audit_completed: ClipboardCheck,
@@ -43,16 +57,36 @@ type Props = {
 
 /** Fil d'activité de gouvernance (preuves d'exécution tracées). */
 export function ActivityFeed({ events, limit = 8 }: Props) {
-  const sorted = sortActivity(events).slice(0, limit);
+  const [filter, setFilter] = useState<ActivityFilter>('all');
+  const sorted = sortActivity(filterActivity(events, filter)).slice(0, limit);
 
   return (
     <View style={styles.wrap} testID="activity-feed">
       <AppSectionHeader title="Journal d’activité" />
+      <View style={styles.filters}>
+        {FILTERS.map((item) => {
+          const active = item.key === filter;
+          return (
+            <TouchableOpacity
+              key={item.key}
+              testID={`activity-filter-${item.key}`}
+              style={[styles.chip, active && styles.chipActive]}
+              onPress={() => setFilter(item.key)}
+            >
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
       {sorted.length === 0 ? (
         <View style={styles.empty}>
           <Activity size={20} color={colors.textMuted} />
           <Text style={styles.emptyText}>
-            Les actions tracées apparaîtront ici.
+            {filter === 'all'
+              ? 'Les actions tracées apparaîtront ici.'
+              : 'Aucune action tracée pour ce filtre.'}
           </Text>
         </View>
       ) : (
@@ -92,6 +126,32 @@ const styles = StyleSheet.create({
   wrap: {
     padding: spacing.xl,
     paddingTop: 0,
+  },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  chip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  chipActive: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+  chipTextActive: {
+    color: colors.primary,
   },
   list: {
     backgroundColor: colors.surface,

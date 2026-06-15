@@ -36,3 +36,14 @@ export function activityCategoryLabel(action: ActivityEventType): string {
 export function sortActivity(events: ActivityEvent[]): ActivityEvent[] {
   return [...events].sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
+
+export type ActivityFilter = ActivityEventType | 'all';
+
+/** Filtre les événements par type (« all » = aucun filtre). */
+export function filterActivity(
+  events: ActivityEvent[],
+  filter: ActivityFilter,
+): ActivityEvent[] {
+  if (filter === 'all') return events;
+  return events.filter((event) => event.action === filter);
+}
