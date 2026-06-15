@@ -1,14 +1,23 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { signaturesForAudit } from '../features/audits/auditSignatureModel';
 import type { AuditResponseDraft } from '../features/audits/scoring';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
-import { supabase, type Audit, type AuditResponse } from '../lib/supabase';
+import {
+  supabase,
+  type Audit,
+  type AuditResponse,
+  type AuditSignature,
+} from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useAudits() {
   const [remoteAudits, setRemoteAudits] = useState<Audit[]>([]);
+  const [remoteSignatures, setRemoteSignatures] = useState<AuditSignature[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const { user, profile, isDemoMode, session } = useAuth();
 
@@ -16,6 +25,8 @@ export function useAudits() {
   const isLocalDemo = isDemoMode && !session;
   const demoAudits = useDemoCollection('audits');
   const demoResponses = useDemoCollection('auditResponses');
+  const demoSignatures = useDemoCollection('auditSignatures');
+  const signatures = isLocalDemo ? demoSignatures : remoteSignatures;
   const audits = isLocalDemo ? demoAudits : remoteAudits;
   const setAudits = isLocalDemo
     ? (updater: (prev: Audit[]) => Audit[]) =>
@@ -48,6 +59,12 @@ export function useAudits() {
       }
 
       setRemoteAudits(data || []);
+
+      const { data: sigData } = await supabase
+        .from('audit_signatures')
+        .select('*')
+        .eq('organization_id', profile.organization_id);
+      setRemoteSignatures((sigData ?? []) as AuditSignature[]);
     } catch (error) {
       mapSupabaseError('Erreur fetchAudits', error);
     } finally {
@@ -365,14 +382,76 @@ export function useAudits() {
     [isLocalDemo, demoResponses],
   );
 
+  const getSignaturesForAudit = useCallback(
+    (auditId: string) => signaturesForAudit(signatures, auditId),
+    [signatures],
+  );
+
+  /** Sign-off d'un audit clôturé (auditeur ou responsable), une fois par rôle. */
+  const signAudit = async (
+    auditId: string,
+    signerName: string,
+    signerRole: AuditSignature['signer_role'],
+  ) => {
+    if (
+      signaturesForAudit(signatures, auditId).some(
+        (s) => s.signer_role === signerRole,
+      )
+    ) {
+      return { data: null, error: null };
+    }
+    const now = new Date().toISOString();
+    const signature: AuditSignature = {
+      id: demoId('audit-sig'),
+      organization_id: profile?.organization_id ?? '',
+      audit_id: auditId,
+      signer_id: profile?.id ?? null,
+      signer_name: signerName,
+      signer_role: signerRole,
+      signed_at: now,
+    };
+
+    if (isLocalDemo) {
+      updateDemoCollection('auditSignatures', (prev) => [...prev, signature]);
+      return { data: signature, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('audit_signatures')
+        .insert({
+          organization_id: signature.organization_id,
+          audit_id: auditId,
+          signer_id: signature.signer_id,
+          signer_name: signerName,
+          signer_role: signerRole,
+        })
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur signature', error),
+        };
+      }
+      setRemoteSignatures((prev) => [...prev, data as AuditSignature]);
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: mapSupabaseError('Erreur signAudit', error) };
+    }
+  };
+
   return {
     audits,
     loading,
+    signatures,
     createAudit,
     updateAuditStatus,
     completeAudit,
     addPhotoToAudit,
     getAuditResponses,
+    getSignaturesForAudit,
+    signAudit,
     refetch: fetchAudits,
   };
 }

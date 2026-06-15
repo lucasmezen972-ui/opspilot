@@ -64,6 +64,9 @@ describe('ManagerDashboard', () => {
       completeAudit: vi.fn(),
       addPhotoToAudit: vi.fn(),
       getAuditResponses: vi.fn(),
+      signatures: [],
+      getSignaturesForAudit: vi.fn(() => []),
+      signAudit: vi.fn(),
       refetch: vi.fn(),
     });
 

@@ -93,15 +93,14 @@ export function BarcodeScannerModal({
       return;
     }
 
+    // BarcodeDetector natif si disponible, sinon repli @zxing/browser (voir
+    // plus bas) : le scan caméra fonctionne ainsi sur tous les navigateurs
+    // (Firefox, Safari…), la saisie manuelle restant toujours disponible.
     const Detector = (
       window as typeof window & {
         BarcodeDetector?: BarcodeDetectorConstructor;
       }
     ).BarcodeDetector;
-    if (!Detector) {
-      setWebStatus('unsupported');
-      return;
-    }
 
     setWebStatus('starting');
     try {
@@ -127,32 +126,53 @@ export function BarcodeScannerModal({
       host.replaceChildren(video);
       await video.play();
 
-      const detector = new Detector({ formats: BARCODE_FORMATS });
-      let stopped = false;
-      let timer: ReturnType<typeof setTimeout> | null = null;
-      const scanFrame = async () => {
-        if (stopped || detected) return;
-        try {
-          const results = await detector.detect(video);
-          const barcode = results.find((result) => result.rawValue)?.rawValue;
-          if (barcode) {
-            await submitBarcode(barcode);
-            return;
+      if (Detector) {
+        const detector = new Detector({ formats: BARCODE_FORMATS });
+        let stopped = false;
+        let timer: ReturnType<typeof setTimeout> | null = null;
+        const scanFrame = async () => {
+          if (stopped || detected) return;
+          try {
+            const results = await detector.detect(video);
+            const barcode = results.find((result) => result.rawValue)?.rawValue;
+            if (barcode) {
+              await submitBarcode(barcode);
+              return;
+            }
+          } catch {
+            // Une image sans code détectable est normale : poursuivre le scan.
           }
-        } catch {
-          // Une image sans code détectable est normale : poursuivre le scan.
-        }
-        timer = setTimeout(scanFrame, 250);
-      };
+          timer = setTimeout(scanFrame, 250);
+        };
 
-      cleanupWebCameraRef.current = () => {
-        stopped = true;
-        if (timer) clearTimeout(timer);
-        stream.getTracks().forEach((track) => track.stop());
-        video.remove();
-      };
-      setWebStatus('active');
-      scanFrame().catch(() => setWebStatus('denied'));
+        cleanupWebCameraRef.current = () => {
+          stopped = true;
+          if (timer) clearTimeout(timer);
+          stream.getTracks().forEach((track) => track.stop());
+          video.remove();
+        };
+        setWebStatus('active');
+        scanFrame().catch(() => setWebStatus('denied'));
+      } else {
+        // Repli @zxing/browser pour les navigateurs sans BarcodeDetector.
+        // Import dynamique : la librairie n'est chargée que sur web, à la demande.
+        const { BrowserMultiFormatReader } = await import('@zxing/browser');
+        const reader = new BrowserMultiFormatReader();
+        const controls = await reader.decodeFromVideoElement(
+          video,
+          (result) => {
+            const text = result?.getText();
+            if (text) void submitBarcode(text);
+          },
+        );
+
+        cleanupWebCameraRef.current = () => {
+          controls.stop();
+          stream.getTracks().forEach((track) => track.stop());
+          video.remove();
+        };
+        setWebStatus('active');
+      }
     } catch {
       setWebStatus('denied');
     }
@@ -217,7 +237,7 @@ export function BarcodeScannerModal({
                     </Text>
                     <Text style={styles.fallbackText}>
                       {webStatus === 'unsupported'
-                        ? 'Ce navigateur ne propose pas BarcodeDetector. Utilisez la saisie manuelle.'
+                        ? 'Ce navigateur ne donne pas accès à la caméra. Utilisez la saisie manuelle.'
                         : webStatus === 'denied'
                           ? 'Autorisez la caméra dans le navigateur ou saisissez le code manuellement.'
                           : 'Activez la caméra pour détecter automatiquement un code-barres.'}
