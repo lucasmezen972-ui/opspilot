@@ -51,8 +51,18 @@ test.describe('Actions correctives', () => {
       String(inProgressBefore + 1),
     );
 
-    // Résoudre (in_progress → done)
+    // Résoudre : la clôture contrôlée exige désormais les preuves métier.
     await page.getByTestId('action-advance-demo-action-1').click();
+    await expect(page.getByTestId('action-resolution-modal')).toBeVisible();
+    await page
+      .getByPlaceholder('Décris ce qui a été corrigé et vérifié.')
+      .fill('Action corrigée et contrôlée en rayon.');
+    await page.getByPlaceholder('Nom et prénom').fill('Marie Dupont');
+    await page.getByPlaceholder('Matricule ou identifiant interne').fill('M1234');
+    await page.getByText('Preuve photo jointe').click();
+    await page.getByText('Validation manager obtenue').click();
+    await page.getByTestId('action-resolution-confirm').click();
+
     await expect(page.getByTestId('actions-count-inprogress')).toHaveText(
       String(inProgressBefore),
     );
