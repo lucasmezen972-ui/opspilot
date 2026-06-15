@@ -61,7 +61,9 @@ describe('getMissingResolutionRequirements', () => {
       managerValidated: true,
     });
 
-    expect(getMissingResolutionRequirements(plan, completeEvidence)).toEqual([]);
+    expect(getMissingResolutionRequirements(plan, completeEvidence)).toEqual(
+      [],
+    );
     expect(canResolveAction(plan, completeEvidence)).toBe(true);
   });
 
