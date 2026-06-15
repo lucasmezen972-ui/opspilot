@@ -122,7 +122,19 @@ export type Task = {
   recurrence?: 'none' | 'daily' | 'weekly' | 'monthly';
   created_at?: string;
   updated_at?: string;
+  // Traçabilité d'exécution (preuve de qui a fait quoi, quand).
+  started_at?: string | null;
   completed_at?: string | null;
+  ended_at?: string | null;
+  duration_minutes?: number | null;
+  completed_by_name?: string | null;
+  completed_by_matricule?: string | null;
+  completion_comment?: string | null;
+  proof_photo_url?: string | null;
+  // Validation manager.
+  validated_by?: string | null;
+  validated_by_name?: string | null;
+  validated_at?: string | null;
 };
 
 export type CorrectiveAction = {

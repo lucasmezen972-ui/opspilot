@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import {
+  computeDurationMinutes,
+  type TaskCompletionInput,
+} from '../features/tasks/taskTraceability';
 import { isRecurring, nextDueDate } from '../features/tasks/taskRecurrence';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
@@ -196,6 +200,109 @@ export function useTasks() {
     }
   };
 
+  /** Clôture traçable : nom + matricule de l'exécutant, durée, preuve. */
+  const completeTask = async (id: string, input: TaskCompletionInput) => {
+    const now = new Date().toISOString();
+    const task = tasks.find((t) => t.id === id);
+    const updates: Partial<Task> = {
+      status: 'completed',
+      completed_at: now,
+      ended_at: now,
+      duration_minutes: computeDurationMinutes(task?.started_at ?? null, now),
+      completed_by_name: input.executantName.trim(),
+      completed_by_matricule: input.matricule.trim(),
+      completion_comment: input.comment?.trim() || null,
+      proof_photo_url: input.proofPhotoUrl ?? null,
+      updated_at: now,
+    };
+
+    if (isLocalDemo) {
+      let updated: Task | null = null;
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t.id !== id) return t;
+          updated = { ...t, ...updates } as Task;
+          return updated;
+        }),
+      );
+      await spawnNextOccurrence(id);
+      return { data: updated, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return { data: null, error: mapSupabaseError('Erreur clôture', error) };
+      }
+      setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
+      await spawnNextOccurrence(id);
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur completeTask', error),
+      };
+    }
+  };
+
+  /** Validation manager d'une tâche clôturée (preuve de contrôle). */
+  const validateTask = async (id: string, validatorName: string) => {
+    const now = new Date().toISOString();
+    const updates: Partial<Task> = {
+      validated_by: profile?.id ?? null,
+      validated_by_name: validatorName,
+      validated_at: now,
+      updated_at: now,
+    };
+
+    if (isLocalDemo) {
+      let updated: Task | null = null;
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t.id !== id) return t;
+          updated = { ...t, ...updates } as Task;
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur validation', error),
+        };
+      }
+      setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
+      if (profile?.organization_id) {
+        await supabase.from('task_validations').insert({
+          organization_id: profile.organization_id,
+          task_id: id,
+          validated_by: profile.id,
+          validator_name: validatorName,
+        });
+      }
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur validateTask', error),
+      };
+    }
+  };
+
   const getMyTasks = useCallback(() => {
     return tasks.filter((t) => t.assigned_to === user?.id);
   }, [tasks, user?.id]);
@@ -219,6 +326,8 @@ export function useTasks() {
     loading,
     createTask,
     updateTaskStatus,
+    completeTask,
+    validateTask,
     getMyTasks,
     getTasksByStatus,
     getTasksByPriority,
