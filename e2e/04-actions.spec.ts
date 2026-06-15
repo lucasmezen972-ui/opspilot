@@ -58,7 +58,9 @@ test.describe('Actions correctives', () => {
       .getByPlaceholder('Décris ce qui a été corrigé et vérifié.')
       .fill('Action corrigée et contrôlée en rayon.');
     await page.getByPlaceholder('Nom et prénom').fill('Marie Dupont');
-    await page.getByPlaceholder('Matricule ou identifiant interne').fill('M1234');
+    await page
+      .getByPlaceholder('Matricule ou identifiant interne')
+      .fill('M1234');
     await page.getByText('Preuve photo jointe').click();
     await page.getByText('Validation manager obtenue').click();
     await page.getByTestId('action-resolution-confirm').click();
