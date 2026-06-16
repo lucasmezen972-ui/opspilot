@@ -13,6 +13,7 @@ import {
   CreditCard,
   FileText,
   LayoutGrid,
+  Rocket,
 } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 
@@ -106,6 +107,16 @@ export default function TabLayout() {
         <Tabs.Screen
           name="billing"
           options={{ href: null, title: 'Abonnement' }}
+        />
+        <Tabs.Screen
+          name="commercial"
+          options={{
+            href: null,
+            title: 'Offre commerciale',
+            tabBarIcon: ({ size, color }) => (
+              <Rocket size={size} color={color} />
+            ),
+          }}
         />
         <Tabs.Screen
           name="backoffice"
