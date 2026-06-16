@@ -115,8 +115,9 @@ export function getDemoAudits(): Audit[] {
       ...base,
       id: 'demo-audit-4',
       auditor_id: DEMO_USER_ID,
-      title: 'Contrôle affichage prix',
-      description: 'Cohérence étiquettes / caisse',
+      title: 'Contrôle terrain — surface de vente',
+      description:
+        'Tournée de contrôle libre : conformité, propreté et sécurité',
       location: 'Surface de vente',
       status: 'in_progress',
       score: null,
@@ -132,6 +133,7 @@ export function getDemoAudits(): Audit[] {
     {
       ...base,
       id: 'demo-audit-5',
+      template_id: 'demo-template-securite',
       auditor_id: DEMO_USER_ID,
       title: 'Audit sécurité incendie',
       description: 'Extincteurs, issues de secours, BAES',
@@ -150,9 +152,10 @@ export function getDemoAudits(): Audit[] {
     {
       ...base,
       id: 'demo-audit-6',
+      template_id: 'demo-template-parking',
       auditor_id: DEMO_USER_ID,
       title: 'Tournée propreté parking',
-      description: 'Chariots, poubelles, signalétique',
+      description: 'Chariots, poubelles, signalétique extérieure',
       location: 'Extérieur',
       status: 'pending',
       score: null,
@@ -994,6 +997,111 @@ const EXTRA_AUDIT_TEMPLATES: ExtraAuditTemplate[] = [
       },
     ],
   },
+  {
+    id: 'demo-template-parking',
+    name: 'Parking / extérieur magasin',
+    description:
+      'Tournée extérieure du point de vente : propreté du parking, chariots, ' +
+      'déchets, sécurité des accès et signalétique. Référentiel dédié à ' +
+      "l'extérieur, sans aucun critère rayon, froid ou DLC.",
+    category: 'Extérieur',
+    icon: 'car',
+    duration: 20,
+    items: [
+      {
+        section: 'Propreté extérieure',
+        question:
+          'Le parking et les allées sont-ils propres (absence de déchets au sol) ?',
+        type: 'yes_no',
+        points: 12,
+      },
+      {
+        section: 'Propreté extérieure',
+        question:
+          'Les chariots sont-ils rangés (aucun chariot abandonné sur le parking) ?',
+        type: 'yes_no',
+        points: 10,
+      },
+      {
+        section: 'Propreté extérieure',
+        question:
+          'Les poubelles et conteneurs extérieurs sont-ils vidés et non débordants ?',
+        type: 'yes_no',
+        points: 10,
+      },
+      {
+        section: 'Propreté extérieure',
+        question:
+          "L'entrée du magasin (sas, vitres, paillasson) est-elle propre et accueillante ?",
+        type: 'yes_no',
+        points: 8,
+      },
+      {
+        section: 'Propreté extérieure',
+        question: 'Évaluer la propreté générale de la zone extérieure.',
+        type: 'score_1_5',
+        points: 8,
+      },
+      {
+        section: 'Sécurité & accès',
+        question:
+          'Les places PMR sont-elles dégagées et correctement matérialisées ?',
+        type: 'yes_no',
+        points: 12,
+      },
+      {
+        section: 'Sécurité & accès',
+        question:
+          'Les accès pompiers et issues de secours extérieures sont-ils dégagés ?',
+        type: 'yes_no',
+        points: 12,
+      },
+      {
+        section: 'Sécurité & accès',
+        question:
+          'Le marquage au sol (places, circulation, passages piétons) est-il lisible ?',
+        type: 'yes_no',
+        points: 8,
+      },
+      {
+        section: 'Sécurité & accès',
+        question:
+          'Le cheminement piéton vers l’entrée est-il sécurisé et sans obstacle ?',
+        type: 'yes_no',
+        points: 8,
+      },
+      {
+        section: 'Signalétique & éclairage',
+        question:
+          "L'éclairage extérieur est-il fonctionnel (aucun point lumineux hors service) ?",
+        type: 'yes_no',
+        points: 8,
+      },
+      {
+        section: 'Signalétique & éclairage',
+        question:
+          'La signalétique extérieure (enseigne, totem, directions) est-elle en bon état et lisible ?',
+        type: 'yes_no',
+        points: 6,
+      },
+      {
+        section: 'Preuve & observations',
+        question:
+          "Photographier la zone extérieure contrôlée comme preuve d'audit.",
+        type: 'photo',
+        points: 6,
+        required: false,
+      },
+      {
+        section: 'Preuve & observations',
+        question:
+          'Observations complémentaires et anomalies relevées à l’extérieur.',
+        type: 'text',
+        points: 6,
+        required: false,
+      },
+    ],
+  },
 ];
 
 export function getDemoAuditTemplates(): AuditTemplate[] {
@@ -1764,7 +1872,7 @@ export function getDemoTrainings(): Training[] {
       'Hygiène et sécurité alimentaire (HACCP)',
       'Hygiène',
       'beginner',
-      35,
+      75,
       50,
     ),
     t(
@@ -1772,7 +1880,7 @@ export function getDemoTrainings(): Training[] {
       'Gestion des DLC et rotation des stocks',
       'Qualité',
       'beginner',
-      25,
+      55,
       30,
     ),
     t(
@@ -1780,7 +1888,7 @@ export function getDemoTrainings(): Training[] {
       'Chaîne du froid : bonnes pratiques',
       'Qualité',
       'intermediate',
-      30,
+      60,
       40,
     ),
     t(
@@ -1788,7 +1896,7 @@ export function getDemoTrainings(): Training[] {
       'Accueil client et gestion des réclamations',
       'Relation client',
       'intermediate',
-      40,
+      70,
       60,
     ),
     t(
@@ -1796,7 +1904,7 @@ export function getDemoTrainings(): Training[] {
       'Procédures de caisse et sécurité des encaissements',
       'Caisse',
       'beginner',
-      20,
+      50,
       40,
     ),
     t(
@@ -1804,7 +1912,7 @@ export function getDemoTrainings(): Training[] {
       "Management de proximité et animation d'équipe",
       'Management',
       'advanced',
-      45,
+      80,
       80,
       75,
     ),
@@ -1830,6 +1938,18 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
         'Tracer, réagir et enregistrer',
         "# Objectif pédagogique\n\nSavoir réagir face à un produit douteux et assurer la traçabilité.\n\n# La traçabilité\n\nElle permet de retrouver l'origine et le parcours d'un produit. Chaque lot est identifié par un numéro qui doit être conservé jusqu'à la fin de vie du produit.\n\n# Conduite à tenir face à un produit douteux\n\n1. Isoler immédiatement le produit (zone identifiée \"non conforme\")\n2. Ne pas le remettre en vente ni le jeter sans décision\n3. Noter le constat : référence, lot, date, anomalie\n4. Alerter le responsable\n5. Appliquer et enregistrer l'action corrective\n\n# Les enregistrements obligatoires\n\n- Relevés de température (réception, enceintes froides)\n- Plan de nettoyage et désinfection signé\n- Suivi des non-conformités et actions correctives\n\n# À retenir\n\nUne action non enregistrée est considérée comme non réalisée lors d'un contrôle officiel.",
       ],
+      [
+        'Maîtriser le froid et les points critiques (CCP)',
+        "# Objectif pédagogique\n\nIdentifier les points de maîtrise essentiels (CCP) et savoir réagir à un dépassement de seuil.\n\n# Qu'est-ce qu'un CCP ?\n\nUn Point Critique de Maîtrise (Critical Control Point) est une étape où une perte de contrôle entraîne un danger pour le consommateur. En grande distribution alimentaire, les CCP les plus fréquents sont :\n\n- La réception (température des produits livrés)\n- Le stockage au froid (enceintes positives et négatives)\n- La cuisson et le refroidissement (rayon traiteur)\n- L'exposition en rayon réfrigéré\n\n# Les seuils à connaître\n\n- Réception frais : conforme jusqu'à +4 °C\n- Surgelés : -18 °C, refus au-delà de -15 °C\n- Refroidissement rapide : passer de +63 °C à +10 °C en moins de 2 heures\n\n# La surveillance\n\nChaque CCP est surveillé (relevé de température, contrôle visuel) à une fréquence définie, et chaque relevé est enregistré.\n\n# Procédure pas-à-pas en cas de dépassement\n\n1. Constater et noter la température réelle et l'heure\n2. Isoler les produits concernés en zone « non conforme »\n3. Alerter le responsable\n4. Appliquer la décision (maintien, démarque, destruction)\n5. Enregistrer l'action corrective et sa vérification\n\n# À retenir\n\nUn CCP sans seuil défini, sans surveillance ou sans enregistrement n'est pas maîtrisé : c'est la première remarque d'un contrôle officiel.",
+      ],
+      [
+        'Nettoyage, désinfection et lutte contre les nuisibles',
+        "# Objectif pédagogique\n\nGarantir un environnement propre et maîtriser le risque nuisibles.\n\n# Nettoyer puis désinfecter : deux étapes distinctes\n\n- Nettoyer enlève les salissures visibles (détergent)\n- Désinfecter détruit les micro-organismes (désinfectant, temps de contact respecté)\n\nOn ne désinfecte jamais efficacement une surface sale : l'ordre compte.\n\n# Le plan de nettoyage et de désinfection (PND)\n\nIl précise, pour chaque zone et équipement : QUOI nettoyer, QUAND, COMMENT, AVEC QUOI et PAR QUI. Il est affiché, suivi et signé.\n\n# Le protocole TACT\n\nL'efficacité d'un nettoyage repose sur 4 facteurs : Température, Action mécanique, Concentration du produit, Temps de contact. Réduire l'un oblige à renforcer un autre.\n\n# Lutte contre les nuisibles\n\n- Aucune denrée à même le sol, locaux maintenus fermés\n- Postes de surveillance (appâts, pièges) contrôlés et tracés\n- Tout indice (déjections, emballages rongés) signalé immédiatement\n\n# Erreur fréquente\n\nUtiliser un produit désinfectant sans respecter le temps de contact indiqué sur l'étiquette : la surface paraît propre mais reste contaminée.\n\n# À retenir\n\nUn plan de nettoyage non enregistré équivaut, lors d'un contrôle, à un nettoyage non réalisé.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer les réflexes par des mises en situation et connaître les points que le manager vérifie.\n\n# Mini-situation 1\n\nÀ la réception, le camion affiche +9 °C pour des yaourts. Bonne conduite : refuser le lot, le noter sur le bon de livraison, prévenir le responsable et le fournisseur, enregistrer le contrôle.\n\n# Mini-situation 2\n\nUn collaborateur tranche du jambon puis, avec le même couteau non nettoyé, prépare une salade. Risque : contamination croisée. Bonne conduite : arrêter, nettoyer et désinfecter le matériel, rappeler la règle de la marche en avant.\n\n# Mini-situation 3\n\nUne enceinte froide affiche +8 °C depuis une durée inconnue. Bonne conduite : ne rien remettre en vente, relever température et durée, isoler les produits, alerter le responsable, documenter l'incident.\n\n# Erreurs fréquentes à bannir\n\n- Stocker un produit cru au-dessus d'un produit prêt à consommer\n- Réétiqueter ou remettre en rayon un produit retiré pour DLC dépassée\n- Oublier de tracer un relevé ou une action corrective\n- Désinfecter une surface encore sale\n\n# Points de contrôle du manager\n\n- Les relevés de température sont-ils complets et signés ?\n- Le plan de nettoyage est-il à jour et appliqué ?\n- Les non-conformités ont-elles une action corrective tracée ?\n- Le personnel connaît-il la conduite face à un produit douteux ?\n\n# Checklist opérationnelle\n\n1. Tenue et hygiène des mains conformes\n2. Marche en avant respectée\n3. Températures relevées et enregistrées\n4. Séparation cru / cuit / allergènes\n5. Plan de nettoyage signé\n6. Produits non conformes isolés et tracés\n\n# Résumé final\n\nLa sécurité alimentaire repose sur trois piliers : des gestes maîtrisés, des températures surveillées et tout enregistré. Ce qui n'est pas écrit n'existe pas pour un contrôle.",
+      ],
     ],
     'demo-training-2': [
       [
@@ -1847,6 +1967,14 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
       [
         'Traiter une anomalie et lutter contre le gaspillage',
         "# Objectif pédagogique\n\nRéagir correctement face à un produit non conforme et valoriser l'invendu.\n\n# Procédure de retrait\n\n1. Retirer immédiatement le produit du rayon\n2. L'isoler dans la zone non conforme identifiée\n3. Enregistrer : référence, lot, date, quantité, motif\n4. Décider du devenir : destruction, retour fournisseur, don\n\n# Lutte anti-gaspillage\n\nAvant la péremption, plusieurs leviers existent :\n\n- Promotion \"date courte\" (-30 à -50 %)\n- Don aux associations habilitées (obligation légale au-delà d'une surface)\n- Transformation par le rayon traiteur quand c'est autorisé\n\n# Cadre réglementaire\n\nLa loi anti-gaspillage interdit la destruction des invendus alimentaires encore consommables pour les surfaces concernées : le don devient prioritaire.\n\n# À retenir\n\nUn produit retiré pour DLC dépassée ne doit JAMAIS réapparaître en rayon, ni être réétiqueté.",
+      ],
+      [
+        'Démarque, anti-gaspillage et indicateurs',
+        "# Objectif pédagogique\n\nPiloter les pertes et transformer l'invendu en levier, pas en gâchis.\n\n# Comprendre la démarque\n\n- Démarque connue : pertes identifiées et enregistrées (DLC dépassée, casse, retrait)\n- Démarque inconnue : écart de stock non expliqué (vol, erreur de caisse, erreur de réception)\n\nUne rotation maîtrisée fait baisser la démarque connue d'origine « dates ».\n\n# Les leviers anti-gaspillage avant péremption\n\n1. Promotion « date courte » (-30 à -50 %) dès J-2 / J-1\n2. Don aux associations habilitées (obligation légale au-delà d'une surface)\n3. Transformation par le rayon traiteur lorsque c'est autorisé\n\n# Cadre réglementaire\n\nLa loi anti-gaspillage interdit de détruire des invendus alimentaires encore consommables pour les surfaces concernées : le don devient prioritaire sur la destruction.\n\n# Les indicateurs à suivre\n\n- Taux de démarque (en % du chiffre d'affaires du rayon)\n- Nombre de retraits DLC par jour\n- Part de l'invendu valorisé (promo + don) vs détruit\n\n# Erreur fréquente\n\nLancer la promotion « date courte » trop tard, le jour de la péremption : le produit n'a plus le temps d'être écoulé.\n\n# À retenir\n\nUn taux de démarque qui grimpe est un signal : il pointe presque toujours un problème de commande ou de rotation en amont.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer la routine des dates par la pratique et connaître les vérifications du manager.\n\n# Mini-situation 1\n\nLors du réassort, un collaborateur pose les nouveaux yaourts devant les anciens. Conséquence : les produits du fond périment. Bonne conduite : retirer l'ancien stock, placer le neuf derrière (FEFO), remettre les dates courtes devant.\n\n# Mini-situation 2\n\nUn pot de sauce entamé en rayon traiteur porte une DLC d'origine lointaine. Bonne conduite : appliquer la durée « après ouverture » indiquée par le fabricant, étiquetée avec la date d'ouverture, prioritaire sur la DLC d'origine.\n\n# Mini-situation 3\n\nUn produit est retrouvé périmé en rayon en pleine journée. Bonne conduite : le retirer immédiatement, l'isoler en zone non conforme, enregistrer le retrait, et renforcer le contrôle de la référence concernée.\n\n# Erreurs fréquentes à bannir\n\n- Confondre DLC (sécurité, retrait obligatoire) et DDM (qualité)\n- Remplir le rayon « par-dessus » sans retirer l'ancien stock\n- Réétiqueter ou remettre en rayon un produit retiré pour DLC dépassée\n- Oublier de consigner les retraits dans le registre de démarque\n\n# Points de contrôle du manager\n\n- La routine de contrôle des dates est-elle faite à la bonne fréquence selon le rayon ?\n- Les produits à date courte sont-ils en promotion ou retirés à temps ?\n- Le registre de démarque est-il tenu et cohérent ?\n- Le FEFO est-il appliqué en rayon ET en réserve ?\n\n# Checklist opérationnelle\n\n1. Contrôle des dates fait selon la fréquence du rayon\n2. Produits J0 / J+1 traités (promo ou retrait)\n3. FEFO appliqué au réassort\n4. Produits entamés étiquetés (date d'ouverture)\n5. Retraits isolés et enregistrés\n6. Aucun produit périmé en rayon\n\n# Résumé final\n\nDistinguer les dates, faire tourner les stocks (FEFO) et tracer chaque retrait : c'est la combinaison qui réduit les pertes tout en protégeant le client.",
       ],
     ],
     'demo-training-3': [
@@ -1866,6 +1994,14 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
         'Réagir à une rupture de la chaîne du froid',
         "# Objectif pédagogique\n\nSavoir quoi faire quand le froid n'est plus assuré.\n\n# Détecter la rupture\n\n- Alarme de l'enceinte\n- Température relevée hors seuil\n- Panne électrique ou de groupe froid\n- Porte restée ouverte\n\n# Les bons réflexes\n\n1. Ne pas remettre les produits en vente sans décision\n2. Noter la température constatée ET la durée de l'incident\n3. Isoler les lots concernés en zone identifiée\n4. Alerter immédiatement le responsable\n\n# La décision sur le devenir des produits\n\nElle dépend du couple température / durée : un produit frais à +8 °C pendant 30 minutes n'a pas le même sort qu'à +12 °C pendant 4 heures. Seul le responsable, sur la base des relevés, tranche entre maintien, démarque ou destruction.\n\n# Documenter l'incident\n\nChaque rupture fait l'objet d'une fiche : date, enceinte, cause, durée, température, produits concernés, décision. C'est essentiel en cas de contrôle ou de rappel.\n\n# À retenir\n\nDans le doute, on protège le consommateur : un produit dont l'historique de froid n'est pas maîtrisé ne doit pas être vendu.",
       ],
+      [
+        'Le froid en rayon et la rupture de charge',
+        "# Objectif pédagogique\n\nMaintenir le froid sur la dernière ligne droite : le meuble de vente et le transfert réserve → rayon.\n\n# Le meuble réfrigéré de vente\n\nC'est le maillon le plus exposé : portes ouvertes, lumière, passage clients. Bonnes pratiques :\n\n- Respecter la ligne de chargement (limite de gerbage)\n- Ne jamais masquer les grilles de ventilation\n- Garder les produits sous la ligne de froid\n- Refermer rideaux et portes la nuit\n\n# La rupture de charge\n\nC'est le moment où le produit quitte une enceinte froide pour une autre (réception → chambre froide → rayon). Chaque transfert doit être rapide : on ne laisse jamais une palette de frais attendre à température ambiante.\n\n# La règle des temps courts\n\nLors du réassort du rayon frais, on sort la marchandise par petites quantités et on la met en place sans délai. Une palette entière laissée en surface de vente, c'est une rupture de froid en cours.\n\n# Surveillance du rayon\n\n- Contrôle visuel des températures affichées par le meuble\n- Réaction immédiate en cas d'alarme ou de dérive\n- Relevé consigné aux fréquences définies\n\n# Erreur fréquente\n\nSurcharger le meuble au-dessus de la ligne de froid pour « gagner de la place » : les produits du haut ne sont plus tenus en température.\n\n# À retenir\n\nLe froid se perd vite et se rattrape mal : sur la dernière ligne droite, c'est la rapidité d'exécution qui protège le produit.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer les réflexes du froid par la pratique et connaître les vérifications du manager.\n\n# Mini-situation 1\n\nÀ la réception, des surgelés présentent du givre et des produits agglomérés. Bonne conduite : refuser le lot (signe de décongélation/recongélation), le noter, prévenir responsable et fournisseur, enregistrer le contrôle.\n\n# Mini-situation 2\n\nUne chambre froide est en panne depuis une durée inconnue, elle affiche +10 °C. Bonne conduite : ne rien remettre en vente, relever température ET durée, isoler les lots, alerter le responsable, documenter l'incident (fiche dédiée).\n\n# Mini-situation 3\n\nUne palette de produits frais attend depuis 40 minutes en surface de vente pendant le réassort. Bonne conduite : la remettre au froid immédiatement, ne sortir que de petites quantités, signaler le mode opératoire à corriger.\n\n# Erreurs fréquentes à bannir\n\n- Surcharger un meuble ou une chambre froide (l'air froid ne circule plus)\n- Mesurer la température sans thermomètre désinfecté\n- Décider seul du sort de produits après une rupture de froid\n- Oublier de tracer un relevé ou un incident\n\n# Points de contrôle du manager\n\n- Les relevés de température (réception, enceintes, meubles) sont-ils complets et signés ?\n- Les seuils de refus à la réception sont-ils connus et appliqués ?\n- Les ruptures de froid font-elles l'objet d'une fiche d'incident ?\n- Le dégivrage et l'entretien des enceintes sont-ils planifiés ?\n\n# Checklist opérationnelle\n\n1. Température contrôlée à la réception et enregistrée\n2. Enceintes non surchargées, portes fermées\n3. Relevés enceintes au moins 2 fois par jour\n4. Meubles de vente sous la ligne de froid\n5. Réassort par petites quantités (temps courts)\n6. Tout incident de froid isolé, décidé par le responsable, documenté\n\n# Résumé final\n\nLe froid ne tue pas les bactéries, il les ralentit. Maîtriser chaque maillon — réception, stockage, rayon — et tout enregistrer : c'est la continuité de la chaîne qui protège le consommateur.",
+      ],
     ],
     'demo-training-4': [
       [
@@ -1883,6 +2019,14 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
       [
         'Clore, tracer et capitaliser',
         "# Objectif pédagogique\n\nTerminer l'échange et faire progresser le magasin.\n\n# Bien clore l'échange\n\n1. Vérifier que le client est satisfait de la solution\n2. Le remercier pour son signalement\n3. Conclure positivement\n\n# Tracer la réclamation\n\nChaque réclamation significative est enregistrée : nature, produit ou rayon concerné, solution apportée. Sans trace, l'information se perd et le problème se répète.\n\n# Détecter les problèmes récurrents\n\nDes réclamations qui se répètent sur un même rayon ou un même produit signalent une cause de fond :\n\n- Rupture fréquente\n- Problème qualité fournisseur\n- Affichage prix erroné\n\n# La boucle d'amélioration\n\n1. Tracer les réclamations\n2. Analyser les récurrences en réunion\n3. Lancer une action corrective\n4. Vérifier la disparition du problème\n\n# À retenir\n\nLe client qui réclame est un allié : il signale gratuitement un dysfonctionnement que dix autres clients subissent en silence.",
+      ],
+      [
+        'Gérer un client difficile sans monter en tension',
+        "# Objectif pédagogique\n\nDésamorcer un conflit et garder la maîtrise de l'échange.\n\n# Comprendre la colère du client\n\nUn client agressif n'attaque presque jamais la personne : il exprime une frustration (attente, produit défectueux, prix erroné). Ne le prenez pas personnellement.\n\n# La méthode en 4 temps\n\n1. Accuser réception de l'émotion (« je comprends que ce soit agaçant »)\n2. Isoler si possible (s'écarter de la file, baisser l'audience)\n3. Questionner sur les faits (« que s'est-il passé exactement ? »)\n4. Proposer une étape concrète et un délai\n\n# Les phrases qui apaisent / qui enveniment\n\n- Apaise : « Voici ce que je peux faire tout de suite… »\n- Envenime : « Ce n'est pas mon rayon » / « Vous auriez dû… »\n\n# Gérer sa propre posture\n\n- Ton calme et débit posé\n- Ne pas se justifier à l'excès, ne pas couper la parole\n- Savoir passer la main au responsable sans le vivre comme un échec\n\n# La limite à poser\n\nFace à des insultes ou menaces, on reste courtois mais ferme, on appelle le responsable, et en cas de danger on applique la procédure de sécurité du magasin.\n\n# À retenir\n\nOn traite l'émotion AVANT le problème : un client qui se sent entendu redevient raisonnable.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer les bons réflexes d'accueil par la pratique et connaître les vérifications du manager.\n\n# Mini-situation 1\n\nUn client signale un prix en caisse différent de l'étiquette du rayon. Bonne conduite : s'excuser du désagrément, appliquer le prix le plus favorable selon la politique magasin, faire corriger l'étiquette, tracer la réclamation pour éviter la récidive.\n\n# Mini-situation 2\n\nUn client mécontent hausse le ton dans la file. Bonne conduite : reconnaître l'émotion, l'inviter à s'écarter pour traiter sa demande, questionner les faits, proposer une solution concrète avec un délai.\n\n# Mini-situation 3\n\nUn client demande un remboursement hors de votre périmètre. Bonne conduite : ne rien promettre à la place du responsable, expliquer l'étape suivante, transmettre la demande avec les éléments.\n\n# Erreurs fréquentes à bannir\n\n- Continuer une conversation entre collègues quand un client approche\n- Se justifier à l'excès ou rejeter la faute sur un autre service\n- Promettre ce qu'on ne pourra pas tenir\n- Ne pas tracer une réclamation significative\n\n# Points de contrôle du manager\n\n- L'équipe salue-t-elle et se rend-elle disponible (règle des 4x20) ?\n- Les réclamations sont-elles tracées et analysées en réunion ?\n- Les récurrences (rupture, qualité, prix) déclenchent-elles une action corrective ?\n- Les collaborateurs connaissent-ils leur périmètre d'autonomie ?\n\n# Checklist opérationnelle\n\n1. Client salué le premier, regard et sourire\n2. Écoute active, reformulation de la demande\n3. Émotion traitée avant le problème\n4. Solution claire : action + délai + qui s'en charge\n5. Réclamation significative tracée\n6. Récurrences remontées au manager\n\n# Résumé final\n\nUn client bien accueilli pardonne un imprévu ; un client qui réclame signale gratuitement un problème que d'autres subissent en silence. Écouter, résoudre, tracer : la boucle qui fidélise.",
       ],
     ],
     'demo-training-5': [
@@ -1902,6 +2046,14 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
         'Sécurité et vigilance anti-fraude',
         "# Faux billets\n\nUtilisez le stylo détecteur ou UV pour tout billet de 50 € et plus.\n\n# Techniques de fraude courantes\n\n- Confusion sur le rendu de monnaie\n- Retrait rapide après paiement CB\n- Faux avoirs ou bons périmés\n\n# Conduite à tenir\n\nNe jamais céder à la pression. Appeler le responsable pour toute situation anormale. En cas d'agression : activez l'alarme discrète, mémorisez les traits, ne résistez pas.",
       ],
+      [
+        'Relation client en caisse et moyens de paiement',
+        "# Objectif pédagogique\n\nAllier rapidité, exactitude et qualité d'accueil au passage en caisse.\n\n# La caisse est une vitrine\n\nC'est souvent le dernier contact du client avec le magasin : il en garde une impression forte. Saluer, regarder, remercier comptent autant que la vitesse.\n\n# Maîtriser les moyens de paiement\n\n- Espèces : annoncer le montant, compter le rendu à voix haute\n- CB / sans contact : attendre l'approbation avant de rendre la marchandise\n- Chèque : date, montant en lettres, pièce d'identité\n- Titres (restaurant, vacances) : vérifier la validité et les règles de rendu\n\n# Les gestes anti-erreur\n\n1. Scanner chaque article (pas de double scan, pas d'oubli)\n2. Vérifier les quantités sur les lots\n3. Contrôler les réductions et bons appliqués\n4. Annoncer le total clairement\n\n# Files d'attente et fluidité\n\n- Ouvrir / fermer une caisse selon l'affluence\n- Appeler du renfort avant la saturation\n- Garder son calme aux heures de pointe\n\n# À retenir\n\nUne caisse juste et accueillante sécurise le chiffre ET l'image du magasin. La précipitation est la première cause d'écart.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer les procédures de caisse par la pratique et connaître les vérifications du manager.\n\n# Mini-situation 1\n\nUn client conteste son rendu de monnaie. Bonne conduite : ne jamais rouvrir le tiroir seul, rester courtois, appeler le responsable qui procédera à la vérification (comptage / contrôle).\n\n# Mini-situation 2\n\nUn billet de 50 € paraît douteux. Bonne conduite : le vérifier au stylo détecteur / UV, et en cas de doute persistant, refuser le billet poliment et prévenir le responsable.\n\n# Mini-situation 3\n\nÀ la clôture, un écart de 18 € apparaît. Bonne conduite : recompter, vérifier les opérations sensibles (annulations, rendus), consigner l'écart et alerter le responsable pour investigation (tranche 5–50 €).\n\n# Erreurs fréquentes à bannir\n\n- Utiliser le code / la session d'un collègue\n- Valider une annulation > 50 € sans accord d'un responsable\n- Ouvrir le tiroir sur pression d'un client\n- Quitter sa caisse sans la verrouiller\n\n# Points de contrôle du manager\n\n- Chaque caissier s'authentifie-t-il avec ses propres identifiants ?\n- Les fonds d'ouverture / clôture sont-ils comptés devant témoin et signés ?\n- Les écarts sont-ils tracés et traités selon les seuils ?\n- Les procédures anti-fraude (faux billets, avoirs) sont-elles connues ?\n\n# Checklist opérationnelle\n\n1. Ouverture : fond compté devant témoin, équipement vérifié\n2. Authentification personnelle (jamais le code d'un collègue)\n3. Encaissement : moyen de paiement vérifié, rendu compté à voix haute\n4. Annulations / remboursements validés selon les seuils\n5. Clôture : comptage, comparaison au théorique, fiche remplie\n6. Remise en coffre sous enveloppe scellée devant témoin\n\n# Résumé final\n\nProcédures respectées, identifiants personnels, écarts tracés : la caisse protège à la fois l'argent du magasin et le collaborateur. La rigueur prime sur la vitesse.",
+      ],
     ],
     'demo-training-6': [
       [
@@ -1919,6 +2071,14 @@ export function getDemoTrainingChapters(): TrainingChapter[] {
       [
         'Planification et gestion des aléas',
         "# Planification du planning\n\n- Anticiper les pics d'activité (promotions, fêtes, livraisons)\n- Respecter les 11h de repos entre deux services\n- Afficher le planning 2 semaines à l'avance minimum\n\n# Délégation efficace\n\nDéléguer = confier une mission avec les moyens et l'autorité. Faire reformuler la mission par le collaborateur.\n\n# Gestion des aléas\n\n- Absence imprévue : liste remplaçants + réorganisation immédiate\n- Rupture de stock : alerte responsable + affichage rayon\n- Incident client : prise en charge + rapport sous 24h",
+      ],
+      [
+        'Piloter la performance et les rituels d’équipe',
+        "# Objectif pédagogique\n\nInstaller des rituels simples qui alignent l'équipe sur les résultats du rayon.\n\n# Manager par les indicateurs\n\nUn manager de proximité suit quelques indicateurs clés et les partage : chiffre du rayon, taux de démarque, scores d'audit, ruptures, réclamations. On ne pilote bien que ce que l'on mesure et que l'équipe comprend.\n\n# Les rituels qui structurent\n\n- Brief quotidien (5 min) : priorités du jour, points de vigilance\n- Réunion hebdomadaire de rayon (15 min) : résultats, objectifs, parole à l'équipe\n- Point mensuel individuel : progression, difficultés, reconnaissance\n\n# Fixer des objectifs SMART\n\nUn objectif utile est Spécifique, Mesurable, Atteignable, Réaliste et Temporel. « Réduire la démarque du rayon frais de 8 % à 5 % d'ici la fin du mois » est exploitable ; « faire mieux » ne l'est pas.\n\n# De la non-conformité à l'action\n\nUn écart constaté (audit, réclamation récurrente) se traduit en action corrective : responsable désigné, échéance, vérification. Le manager boucle la démarche en contrôlant la résolution.\n\n# Reconnaître et faire grandir\n\n- Valoriser les réussites en public, recadrer en privé\n- Confier des missions responsabilisantes\n- Proposer formations et évolutions\n\n# À retenir\n\nDes rituels courts mais réguliers valent mieux que de longues réunions occasionnelles : la constance crée la performance.",
+      ],
+      [
+        'Cas pratiques, erreurs fréquentes et points de contrôle manager',
+        "# Objectif pédagogique\n\nAncrer les réflexes de management par la pratique et savoir s'auto-contrôler.\n\n# Mini-situation 1\n\nUn collaborateur expérimenté est démotivé depuis deux semaines. Bonne conduite : entretien individuel à l'écart, écouter (70 % du temps de parole), identifier la cause, co-construire une action concrète, fixer un point de suivi.\n\n# Mini-situation 2\n\nDeux collaborateurs sont en conflit ouvert sur le rayon. Bonne conduite : recevoir chacun séparément, puis organiser une réunion commune cadrée, aboutir à une solution formalisée et suivie.\n\n# Mini-situation 3\n\nUne absence imprévue désorganise le planning un samedi. Bonne conduite : activer la liste des remplaçants, réorganiser les priorités du jour, informer l'équipe, et tracer pour anticiper la prochaine fois.\n\n# Erreurs fréquentes à bannir\n\n- Recadrer un collaborateur en public\n- Déléguer une tâche sans donner les moyens ni l'autorité\n- Fixer des objectifs flous, non mesurables\n- Laisser un conflit s'installer sans le traiter\n\n# Points d'auto-contrôle du manager\n\n- Mes briefs et réunions ont-ils lieu régulièrement ?\n- Mes objectifs sont-ils SMART et partagés ?\n- Les écarts débouchent-ils sur des actions correctives suivies ?\n- Le planning respecte-t-il le repos et l'anticipation des pics ?\n\n# Checklist opérationnelle\n\n1. Brief quotidien tenu (priorités + vigilance)\n2. Réunion hebdo de rayon réalisée\n3. Points individuels mensuels planifiés\n4. Objectifs SMART fixés et suivis\n5. Conflits traités (individuel puis commun, formalisé)\n6. Écarts transformés en actions correctives vérifiées\n\n# Résumé final\n\nLe manager de proximité aligne l'équipe par des rituels réguliers, des objectifs clairs et un suivi des écarts. Reconnaître en public, recadrer en privé, et toujours boucler l'action : voilà la proximité qui performe.",
       ],
     ],
   };
@@ -2045,6 +2205,17 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         c: 0,
         d: 'hard',
       },
+      {
+        q: 'Un client signale un cheveu dans un produit du rayon traiteur. Quelle est la bonne première action ?',
+        opts: [
+          'Retirer et isoler le produit, tracer l’incident et alerter le responsable',
+          'Le remettre en rayon discrètement',
+          'Ne rien faire, le cas est rare',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
     ],
     'demo-training-2': [
       {
@@ -2158,6 +2329,17 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         c: 0,
         d: 'hard',
       },
+      {
+        q: 'En pleine journée, vous trouvez un yaourt périmé en rayon. Quelle est la bonne conduite ?',
+        opts: [
+          'Le retirer, l’isoler en zone non conforme et enregistrer le retrait',
+          'Le laisser, un client finira par le voir',
+          'Le replacer au fond du rayon',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
     ],
     'demo-training-3': [
       {
@@ -2266,6 +2448,17 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         ],
         c: 0,
         d: 'hard',
+      },
+      {
+        q: 'Une palette de produits frais attend depuis 40 min en surface de vente pendant le réassort. Que faire ?',
+        opts: [
+          'La remettre au froid et ne sortir que de petites quantités',
+          'La laisser, le rayon est presque terminé',
+          'Accélérer le réassort sans la remettre au froid',
+        ],
+        c: 0,
+        d: 'medium',
+        t: 'situation',
       },
     ],
     'demo-training-4': [
@@ -2387,6 +2580,28 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         c: 0,
         d: 'hard',
       },
+      {
+        q: 'Un client hausse le ton dans la file d’attente. Quelle réaction adopter ?',
+        opts: [
+          'Reconnaître l’émotion et l’inviter à s’écarter pour traiter sa demande',
+          'Hausser le ton à votre tour',
+          'L’ignorer jusqu’à ce qu’il parte',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Un client devient menaçant et agressif. Quelle est la priorité ?',
+        opts: [
+          'Rester courtois mais ferme, appeler le responsable et appliquer la procédure de sécurité',
+          'Répondre sur le même ton',
+          'Céder à toutes les exigences pour avoir la paix',
+        ],
+        c: 0,
+        d: 'hard',
+        crit: true,
+      },
     ],
     'demo-training-5': [
       {
@@ -2446,6 +2661,48 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         opts: ['150 €', '50 €', '500 €', '1 000 €'],
         c: 0,
         d: 'easy',
+      },
+      {
+        q: 'Un client conteste son rendu de monnaie. Quelle est la bonne conduite ?',
+        opts: [
+          'Ne pas rouvrir le tiroir seul et appeler le responsable pour vérification',
+          'Rouvrir le tiroir et rendre la différence demandée',
+          'Refuser de discuter avec le client',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'À la clôture, vous constatez un écart de 18 €. Quelle conduite adopter ?',
+        opts: [
+          'Recompter, vérifier les opérations sensibles, consigner et alerter le responsable',
+          'Combler l’écart de votre poche',
+          'Ignorer l’écart, le montant est faible',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Comment rendre la monnaie en espèces de façon fiable ?',
+        opts: [
+          'Compter le rendu à voix haute',
+          'Rendre sans compter pour aller plus vite',
+          'Laisser le client se servir dans le tiroir',
+        ],
+        c: 0,
+        d: 'easy',
+      },
+      {
+        q: 'Avec quels identifiants ouvrir sa session de caisse ?',
+        opts: [
+          'Toujours ses propres identifiants',
+          'Ceux d’un collègue disponible',
+          'Un code partagé par toute l’équipe',
+        ],
+        c: 0,
+        d: 'medium',
       },
     ],
     'demo-training-6': [
@@ -2508,6 +2765,38 @@ export function getDemoTrainingQuizQuestions(): TrainingQuizQuestion[] {
         c: 0,
         d: 'hard',
       },
+      {
+        q: 'Un collaborateur expérimenté est démotivé depuis deux semaines. Quelle approche privilégier ?',
+        opts: [
+          'Un entretien individuel pour écouter et co-construire une action',
+          'Le recadrer devant toute l’équipe',
+          'Attendre que la situation passe d’elle-même',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Une absence imprévue désorganise le planning du samedi. Que faire ?',
+        opts: [
+          'Activer la liste des remplaçants et réorganiser les priorités du jour',
+          'Fermer le rayon sans prévenir',
+          'Laisser l’équipe se débrouiller seule',
+        ],
+        c: 0,
+        d: 'hard',
+        t: 'situation',
+      },
+      {
+        q: 'Qu’est-ce qu’un objectif SMART ?',
+        opts: [
+          'Spécifique, Mesurable, Atteignable, Réaliste et Temporel',
+          'Un objectif vague mais ambitieux',
+          'Un objectif fixé par la seule direction',
+        ],
+        c: 0,
+        d: 'medium',
+      },
     ],
   };
 
@@ -2545,6 +2834,9 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
         'demo-training-1-chapter-2',
         'demo-training-1-chapter-3',
         'demo-training-1-chapter-4',
+        'demo-training-1-chapter-5',
+        'demo-training-1-chapter-6',
+        'demo-training-1-chapter-7',
       ],
       score: 90,
       started_at: days(-10),
@@ -2563,6 +2855,8 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
         'demo-training-2-chapter-2',
         'demo-training-2-chapter-3',
         'demo-training-2-chapter-4',
+        'demo-training-2-chapter-5',
+        'demo-training-2-chapter-6',
       ],
       score: 95,
       started_at: days(-8),
@@ -2581,6 +2875,8 @@ export function getDemoTrainingProgress(): UserTrainingProgress[] {
         'demo-training-4-chapter-2',
         'demo-training-4-chapter-3',
         'demo-training-4-chapter-4',
+        'demo-training-4-chapter-5',
+        'demo-training-4-chapter-6',
       ],
       score: 84,
       started_at: days(-6),

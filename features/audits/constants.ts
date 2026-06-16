@@ -1,10 +1,13 @@
-// Questionnaire de clôture : chaque réponse « Non conforme » baisse le score
-// et crée automatiquement une action corrective liée à l'audit.
+// Questionnaire de clôture d'un AUDIT LIBRE (audit sans référentiel/template
+// rattaché). Volontairement NEUTRE et transverse : il ne fait référence à aucun
+// métier précis (ni rayon, ni DLC, ni froid). Les audits métier passent, eux,
+// par leur template dédié (ProfessionalAuditModal). Chaque réponse « Non
+// conforme » baisse le score et crée automatiquement une action corrective.
 export const AUDIT_QUESTIONS = [
-  'Les zones de stockage sont propres et rangées',
-  'Les températures des frigos/congélateurs sont conformes',
-  'Les DLC des produits en rayon sont valides',
-  'Le personnel respecte les règles d’hygiène (tenue, lavage des mains)',
-  'Les allées et issues de secours sont dégagées',
-  'L’affichage obligatoire (prix, allergènes) est à jour',
+  'Le point contrôlé est conforme aux exigences attendues',
+  'La zone contrôlée est propre et correctement rangée',
+  'Aucun risque de sécurité immédiat n’est constaté',
+  'Aucune anomalie nécessitant une intervention n’est relevée',
+  'Les éléments de preuve (photo, relevé) sont disponibles si nécessaire',
+  'Les consignes et l’affichage applicables à la zone sont respectés',
 ] as const;
