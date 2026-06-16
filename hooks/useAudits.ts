@@ -3,6 +3,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { signaturesForAudit } from '../features/audits/auditSignatureModel';
 import type { AuditResponseDraft } from '../features/audits/scoring';
+import {
+  isUploadableEvidenceUri,
+  uploadEvidencePhoto,
+} from '../features/evidence/evidenceUpload';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import {
@@ -259,12 +263,35 @@ export function useAudits() {
     }
 
     try {
+      // Production : téléverse les preuves photo locales dans le bucket privé
+      // « evidence » (cloisonné par organisation) et remplace l'URI locale par
+      // le chemin de stockage persistant. Best-effort, ne bloque pas la clôture.
+      let responsesToSave = responses;
+      const orgId = profile?.organization_id;
+      if (orgId) {
+        responsesToSave = await Promise.all(
+          responses.map(async (response) => {
+            if (!isUploadableEvidenceUri(response.photo_url)) return response;
+            const storagePath = await uploadEvidencePhoto({
+              organizationId: orgId,
+              entityType: 'audit',
+              entityId: id,
+              uri: response.photo_url as string,
+              uploadedBy: user?.id ?? null,
+            });
+            return storagePath
+              ? { ...response, photo_url: storagePath }
+              : response;
+          }),
+        );
+      }
+
       let savedResponses: AuditResponse[] = [];
-      if (responses.length > 0) {
+      if (responsesToSave.length > 0) {
         const { data: responseData, error: responseError } = await supabase
           .from('audit_responses')
           .upsert(
-            responses.map((response) => ({
+            responsesToSave.map((response) => ({
               audit_id: id,
               item_id: response.item_id,
               value: response.value,

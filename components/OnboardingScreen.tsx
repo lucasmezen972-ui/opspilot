@@ -76,28 +76,14 @@ export default function OnboardingScreen() {
   };
 
   const persistConfiguration = async () => {
-    // Best-effort : enregistre secteur + modules dans les réglages de l'org et
-    // le nom du premier manager. N'empêche jamais la fin de l'onboarding.
+    // Best-effort : enregistre secteur + modules (RPC dédiée, fusion settings)
+    // et le nom du premier manager. N'empêche jamais la fin de l'onboarding.
     if (!user) return;
     try {
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', user.id)
-        .maybeSingle();
-      const orgId = prof?.organization_id;
-      if (orgId) {
-        await supabase
-          .from('organizations')
-          .update({
-            settings: {
-              sector,
-              modules,
-              onboarded: true,
-            },
-          })
-          .eq('id', orgId);
-      }
+      await supabase.rpc('apply_onboarding_configuration', {
+        p_sector: sector,
+        p_modules: modules,
+      });
       if (managerName.trim()) {
         await supabase
           .from('profiles')

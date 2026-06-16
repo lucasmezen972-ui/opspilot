@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { ClientOrganization } from '../features/backoffice/backofficeModel';
 import { normalizeOrganizationPortfolio } from '../features/backoffice/organizationPortfolio';
@@ -17,6 +17,9 @@ const PORTFOLIO_RPC = ['superadmin', 'organizations'].join('_');
 export function useOrganizationPortfolio(enabled: boolean) {
   const [organizations, setOrganizations] = useState<ClientOrganization[]>([]);
   const [status, setStatus] = useState<OrganizationPortfolioStatus>('idle');
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const refetch = useCallback(() => setReloadKey((key) => key + 1), []);
 
   useEffect(() => {
     let alive = true;
@@ -53,7 +56,7 @@ export function useOrganizationPortfolio(enabled: boolean) {
     return () => {
       alive = false;
     };
-  }, [enabled]);
+  }, [enabled, reloadKey]);
 
-  return { organizations, status };
+  return { organizations, status, refetch };
 }

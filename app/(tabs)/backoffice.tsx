@@ -1,10 +1,12 @@
 import {
   Activity,
+  Ban,
   Building2,
   ChevronRight,
   ClipboardList,
   GraduationCap,
   Mail,
+  Power,
   Store,
   TriangleAlert,
   Users,
@@ -13,6 +15,7 @@ import {
 import { useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Linking,
   Modal,
   ScrollView,
@@ -30,15 +33,21 @@ import {
   orgStatusMeta,
   summarizeOrganizations,
   type ClientOrganization,
+  type OrgStatus,
 } from '../../features/backoffice/backofficeModel';
 import { useAuth } from '../../hooks/useAuth';
 import { useOrganizationPortfolio } from '../../hooks/useOrganizationPortfolio';
 import { getDemoClientOrganizations } from '../../lib/demoData';
+import { supabase } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, shadow, spacing } from '../../shared/styles/tokens';
 import { can } from '../../utils/permissions';
+
+const SET_STATUS_RPC = ['superadmin', 'set', 'organization', 'status'].join(
+  '_',
+);
 
 const SUPPORT_MAILTO =
   'mailto:contact@tradikom.com?subject=Back-office OpsPilot — pilotage multi-organisations';
@@ -62,10 +71,10 @@ export default function BackofficeScreen() {
 
 function BackofficeContent({ isDemo }: { isDemo: boolean }) {
   const portfolio = useOrganizationPortfolio(!isDemo);
-  const demoOrganizations = useMemo<ClientOrganization[]>(
-    () => getDemoClientOrganizations(),
-    [],
-  );
+  // En démo, le portefeuille est mutable localement (suspendre / réactiver).
+  const [demoOrganizations, setDemoOrganizations] = useState<
+    ClientOrganization[]
+  >(() => getDemoClientOrganizations());
   const organizations = isDemo ? demoOrganizations : portfolio.organizations;
   const summary = useMemo(
     () => summarizeOrganizations(organizations),
@@ -79,6 +88,36 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
   const selected = organizations.find((org) => org.id === selectedId) ?? null;
 
   const contactSupport = () => Linking.openURL(SUPPORT_MAILTO);
+
+  // Suspendre / réactiver : mutation locale en démo, RPC superadmin en prod.
+  const setOrgStatus = async (orgId: string, status: OrgStatus) => {
+    if (isDemo) {
+      setDemoOrganizations((prev) =>
+        prev.map((org) => (org.id === orgId ? { ...org, status } : org)),
+      );
+      return;
+    }
+    try {
+      const { error } = await supabase.rpc(SET_STATUS_RPC, {
+        p_org_id: orgId,
+        p_status: status,
+      });
+      if (error) {
+        Alert.alert(
+          'Action impossible',
+          'Le changement de statut n’a pas pu être enregistré.',
+        );
+        return;
+      }
+      setSelectedId(null);
+      portfolio.refetch();
+    } catch {
+      Alert.alert(
+        'Action impossible',
+        'Le changement de statut n’a pas pu être enregistré.',
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -117,6 +156,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
         org={selected}
         onClose={() => setSelectedId(null)}
         onContactSupport={contactSupport}
+        onSetStatus={setOrgStatus}
       />
     </View>
   );
@@ -126,7 +166,9 @@ function LoadingState() {
   return (
     <View style={styles.centered}>
       <ActivityIndicator color={colors.primary} />
-      <Text style={styles.centeredText}>Chargement du portefeuille client…</Text>
+      <Text style={styles.centeredText}>
+        Chargement du portefeuille client…
+      </Text>
     </View>
   );
 }
@@ -207,10 +249,7 @@ function PortfolioList({
                 { borderLeftColor: severityColor(alert.severity) },
               ]}
             >
-              <TriangleAlert
-                size={16}
-                color={severityColor(alert.severity)}
-              />
+              <TriangleAlert size={16} color={severityColor(alert.severity)} />
               <View style={styles.alertBody}>
                 <Text style={styles.alertTitle}>{alert.title}</Text>
                 <Text style={styles.alertDetail}>{alert.detail}</Text>
@@ -290,7 +329,7 @@ function OrgCard({
           </Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-          <Text style={[styles.statusText, { color: status.color }]}> 
+          <Text style={[styles.statusText, { color: status.color }]}>
             {status.label}
           </Text>
         </View>
@@ -359,14 +398,18 @@ function OrgDetailModal({
   org,
   onClose,
   onContactSupport,
+  onSetStatus,
 }: {
   org: ClientOrganization | null;
   onClose: () => void;
   onContactSupport: () => void;
+  onSetStatus: (orgId: string, status: OrgStatus) => void;
 }) {
   if (!org) return null;
   const status = orgStatusMeta(org.status);
   const config = orgConfigStatus(org);
+  const isSuspended = org.status === 'suspended';
+  const nextStatus: OrgStatus = isSuspended ? 'active' : 'suspended';
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -389,7 +432,7 @@ function OrgDetailModal({
 
           <ScrollView contentContainerStyle={styles.modalBody}>
             <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-              <Text style={[styles.statusText, { color: status.color }]}> 
+              <Text style={[styles.statusText, { color: status.color }]}>
                 {status.label}
               </Text>
             </View>
@@ -471,7 +514,9 @@ function OrgDetailModal({
                   <ClipboardList size={14} color={colors.textMuted} />
                   <Text style={styles.lineText}>
                     {audit.title}
-                    {audit.score !== null ? ` · ${audit.score}%` : ' · en cours'}
+                    {audit.score !== null
+                      ? ` · ${audit.score}%`
+                      : ' · en cours'}
                   </Text>
                 </View>
               ))}
@@ -492,6 +537,37 @@ function OrgDetailModal({
                 </View>
               ))}
             </DetailSection>
+
+            <TouchableOpacity
+              testID="backoffice-detail-toggle-status"
+              style={[
+                styles.statusActionButton,
+                isSuspended
+                  ? styles.statusActionReactivate
+                  : styles.statusActionSuspend,
+              ]}
+              onPress={() => onSetStatus(org.id, nextStatus)}
+            >
+              {isSuspended ? (
+                <Power size={18} color={colors.successText} />
+              ) : (
+                <Ban size={18} color={colors.dangerStrong} />
+              )}
+              <Text
+                style={[
+                  styles.statusActionText,
+                  {
+                    color: isSuspended
+                      ? colors.successText
+                      : colors.dangerStrong,
+                  },
+                ]}
+              >
+                {isSuspended
+                  ? 'Réactiver l’organisation'
+                  : 'Suspendre l’organisation'}
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               testID="backoffice-detail-support"
@@ -624,6 +700,25 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   primaryCtaText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  statusActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    paddingVertical: 13,
+    marginTop: spacing.lg,
+  },
+  statusActionSuspend: {
+    borderColor: colors.dangerSoft,
+    backgroundColor: colors.dangerSoft,
+  },
+  statusActionReactivate: {
+    borderColor: colors.successSoft,
+    backgroundColor: colors.successSoft,
+  },
+  statusActionText: { fontSize: 15, fontWeight: '700' },
   summaryRow: { flexDirection: 'row', gap: spacing.sm },
   summaryTile: {
     flex: 1,
