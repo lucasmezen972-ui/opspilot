@@ -18,7 +18,9 @@ function asNumber(value: unknown): number {
 }
 
 function asStatus(value: unknown): OrgStatus {
-  return STATUSES.includes(value as OrgStatus) ? (value as OrgStatus) : 'active';
+  return STATUSES.includes(value as OrgStatus)
+    ? (value as OrgStatus)
+    : 'active';
 }
 
 function asPriority(value: unknown): ActionPriority {

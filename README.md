@@ -158,11 +158,17 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - Détail d'une organisation : résumé opérationnel, magasins rattachés, utilisateurs/rôles, modules actifs, abonnement, derniers audits et actions, alertes superadmin et état de configuration.
 - Alertes priorisées (comptes suspendus, actions critiques, clients inactifs) et action « Contacter le support » (aucun bouton mort).
 - Accessible aux rôles habilités (`backoffice.access`) et pleinement peuplé en mode démo.
+- **Suspendre / réactiver une organisation** : mutation locale en démo, RPC superadmin tracée (`admin_audit_log`) en production. Portefeuille production alimenté par la RPC `superadmin_organizations()`.
 
 ### Onboarding client
 
 - Parcours guidé : création de l'organisation, choix du secteur (supermarché, supérette, franchise, magasin spécialisé, restauration), activation des modules cohérents avec le secteur, premier magasin et premier manager.
 - Écran final « configuration opérationnelle » et score de complétude, avec une base de départ adaptée au secteur.
+- Configuration (secteur + modules) **persistée** via la RPC `apply_onboarding_configuration` (fusion dans `organizations.settings`).
+
+### Stockage des preuves
+
+- Bucket privé `evidence` cloisonné par organisation (policies RLS sur `storage.objects`, chemin `<organization_id>/<entité>/<id>/<fichier>`). Helpers de chemin purs et testés.
 
 ---
 
