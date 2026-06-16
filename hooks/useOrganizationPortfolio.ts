@@ -29,10 +29,10 @@ export function useOrganizationPortfolio(enabled: boolean) {
       };
     }
 
-    setStatus('loading');
-    void supabase
-      .rpc(PORTFOLIO_RPC)
-      .then(({ data, error }) => {
+    async function loadPortfolio() {
+      setStatus('loading');
+      try {
+        const { data, error } = await supabase.rpc(PORTFOLIO_RPC);
         if (!alive) return;
         if (error) {
           setOrganizations([]);
@@ -41,12 +41,14 @@ export function useOrganizationPortfolio(enabled: boolean) {
         }
         setOrganizations(normalizeOrganizationPortfolio(data));
         setStatus('ready');
-      })
-      .catch(() => {
+      } catch {
         if (!alive) return;
         setOrganizations([]);
         setStatus('error');
-      });
+      }
+    }
+
+    void loadPortfolio();
 
     return () => {
       alive = false;
