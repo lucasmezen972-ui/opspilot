@@ -107,6 +107,10 @@ export default function TabLayout() {
           name="billing"
           options={{ href: null, title: 'Abonnement' }}
         />
+        <Tabs.Screen
+          name="backoffice"
+          options={{ href: null, title: 'Back-office' }}
+        />
         <Tabs.Screen name="profile" options={{ href: null, title: 'Profil' }} />
       </Tabs>
     </>

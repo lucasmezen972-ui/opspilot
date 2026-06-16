@@ -86,7 +86,7 @@ export default function ProfileScreen() {
       onPress: () =>
         Alert.alert(
           'Support',
-          'Pour toute question, contactez support@opspilot.com',
+          'Pour toute question, contactez contact@tradikom.com',
         ),
     },
   ];
