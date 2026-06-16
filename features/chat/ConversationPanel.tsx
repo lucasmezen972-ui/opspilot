@@ -11,6 +11,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 
 import { MessageBubble } from './MessageBubble';
@@ -66,13 +67,37 @@ export function ConversationPanel({
           </View>
         </View>
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              Alert.alert(
+                'Appel',
+                'Les appels vocaux seront bientôt disponibles.',
+              )
+            }
+          >
             <Phone size={18} color="#6B7280" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              Alert.alert(
+                'Vidéo',
+                'Les appels vidéo seront bientôt disponibles.',
+              )
+            }
+          >
             <Video size={18} color="#6B7280" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() =>
+              Alert.alert(
+                'Options',
+                'Les options de conversation seront bientôt disponibles.',
+              )
+            }
+          >
             <MoreVertical size={18} color="#6B7280" />
           </TouchableOpacity>
         </View>

@@ -73,7 +73,7 @@ export function useTraining() {
   }, [profile?.organization_id, profile?.id, isLocalDemo]);
 
   const fetchTrainingData = async () => {
-    if (isLocalDemo || !profile?.organization_id) {
+    if (isLocalDemo || !profile?.organization_id || !profile.id) {
       setLoading(false);
       return;
     }
