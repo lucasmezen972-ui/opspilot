@@ -17,6 +17,7 @@ import type {
   TrainingQuizQuestion,
   UserTrainingProgress,
 } from './supabase';
+import type { ClientOrganization } from '../features/backoffice/backofficeModel';
 
 /**
  * Données de démonstration en mémoire.
@@ -3354,4 +3355,193 @@ export function getDemoActivityLog(): ActivityEvent[] {
 /** Génère un identifiant local unique pour les créations en mode démo. */
 export function demoId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}`;
+}
+
+/**
+ * Organisations clientes de démonstration pour le back-office superadmin.
+ * Couvre volontairement plusieurs statuts (active / démo / suspendue), plusieurs
+ * plans et plusieurs niveaux d'usage, avec un détail complet (magasins, rôles,
+ * derniers audits et actions) pour ne jamais afficher d'écran vide.
+ */
+export function getDemoClientOrganizations(): ClientOrganization[] {
+  return [
+    {
+      id: 'demo-org-central',
+      name: 'Supermarché Central',
+      status: 'active',
+      plan: 'business',
+      sector: 'Supermarché',
+      createdAt: days(-420),
+      users: 48,
+      stores: 4,
+      audits: 312,
+      openActions: 7,
+      criticalActions: 1,
+      completedTrainings: 186,
+      lastActivityAt: days(0),
+      activeModules: [
+        'audits',
+        'actions',
+        'trainings',
+        'products',
+        'reports',
+        'messaging',
+      ],
+      storeList: [
+        'Central Paris 15e',
+        'Central Lyon Part-Dieu',
+        'Central Lille Centre',
+        'Central Nantes Atlantis',
+      ],
+      roleBreakdown: [
+        { role: 'admin', count: 2 },
+        { role: 'manager', count: 6 },
+        { role: 'employé', count: 38 },
+        { role: 'stagiaire', count: 2 },
+      ],
+      recentAudits: [
+        { title: 'HACCP cuisine centrale', score: 94, status: 'completed' },
+        { title: 'Chaîne du froid réserve', score: 88, status: 'completed' },
+        { title: 'Tournée propreté parking', score: null, status: 'pending' },
+      ],
+      recentActions: [
+        {
+          title: 'Remplacer un joint de chambre froide',
+          priority: 'critical',
+          status: 'in_progress',
+        },
+        {
+          title: 'Recaler l’affichage prix promo',
+          priority: 'medium',
+          status: 'open',
+        },
+      ],
+    },
+    {
+      id: 'demo-org-proxi',
+      name: 'Proxi Market',
+      status: 'demo',
+      plan: 'trial',
+      sector: 'Supérette / proximité',
+      createdAt: days(-12),
+      users: 5,
+      stores: 1,
+      audits: 9,
+      openActions: 2,
+      criticalActions: 0,
+      completedTrainings: 6,
+      lastActivityAt: days(-1),
+      activeModules: [
+        'audits',
+        'actions',
+        'trainings',
+        'products',
+        'messaging',
+      ],
+      storeList: ['Proxi Market Bordeaux Chartrons'],
+      roleBreakdown: [
+        { role: 'admin', count: 1 },
+        { role: 'manager', count: 1 },
+        { role: 'employé', count: 3 },
+      ],
+      recentAudits: [
+        { title: 'Hygiène générale', score: 81, status: 'completed' },
+        { title: 'DLC crèmerie', score: null, status: 'in_progress' },
+      ],
+      recentActions: [
+        {
+          title: 'Compléter la signalétique allergènes',
+          priority: 'medium',
+          status: 'open',
+        },
+      ],
+    },
+    {
+      id: 'demo-org-franchise',
+      name: 'Franchise BioFrais',
+      status: 'active',
+      plan: 'enterprise',
+      sector: 'Franchise alimentaire',
+      createdAt: days(-690),
+      users: 132,
+      stores: 11,
+      audits: 1043,
+      openActions: 19,
+      criticalActions: 0,
+      completedTrainings: 512,
+      lastActivityAt: days(0),
+      activeModules: [
+        'audits',
+        'actions',
+        'trainings',
+        'products',
+        'reports',
+        'messaging',
+      ],
+      storeList: [
+        'BioFrais Toulouse',
+        'BioFrais Montpellier',
+        'BioFrais Marseille Prado',
+        '+ 8 autres magasins',
+      ],
+      roleBreakdown: [
+        { role: 'admin', count: 4 },
+        { role: 'manager', count: 14 },
+        { role: 'employé', count: 110 },
+        { role: 'stagiaire', count: 4 },
+      ],
+      recentAudits: [
+        { title: 'Conformité franchise', score: 91, status: 'completed' },
+        {
+          title: 'Préparation visite régionale',
+          score: 86,
+          status: 'completed',
+        },
+      ],
+      recentActions: [
+        {
+          title: 'Harmoniser l’implantation rayon vrac',
+          priority: 'high',
+          status: 'open',
+        },
+      ],
+    },
+    {
+      id: 'demo-org-resto',
+      name: 'Le Comptoir Traiteur',
+      status: 'suspended',
+      plan: 'essential',
+      sector: 'Restauration / traiteur',
+      createdAt: days(-240),
+      users: 14,
+      stores: 1,
+      audits: 64,
+      openActions: 5,
+      criticalActions: 2,
+      completedTrainings: 21,
+      lastActivityAt: days(-23),
+      activeModules: ['audits', 'actions', 'trainings', 'products'],
+      storeList: ['Le Comptoir — Strasbourg'],
+      roleBreakdown: [
+        { role: 'admin', count: 1 },
+        { role: 'manager', count: 2 },
+        { role: 'employé', count: 11 },
+      ],
+      recentAudits: [
+        { title: 'HACCP préparation chaude', score: 72, status: 'completed' },
+      ],
+      recentActions: [
+        {
+          title: 'Refroidissement rapide non conforme',
+          priority: 'critical',
+          status: 'open',
+        },
+        {
+          title: 'Tracer les températures de liaison',
+          priority: 'critical',
+          status: 'in_progress',
+        },
+      ],
+    },
+  ];
 }

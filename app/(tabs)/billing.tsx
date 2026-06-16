@@ -18,7 +18,7 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { supabase } from '../../lib/supabase';
 
 const STRIPE_UNAVAILABLE =
-  'Pour souscrire ou faire évoluer votre offre, notre équipe commerciale vous accompagne à contact@opspilot.fr.';
+  'Pour souscrire ou faire évoluer votre offre, notre équipe commerciale vous accompagne à contact@tradikom.com.';
 
 export default function BillingScreen() {
   return (
@@ -53,7 +53,7 @@ function BillingScreenContent() {
 
   const handleEnterprise = async () => {
     await Linking.openURL(
-      'mailto:contact@opspilot.fr?subject=Devis Enterprise OpsPilot',
+      'mailto:contact@tradikom.com?subject=Devis Enterprise OpsPilot',
     );
   };
 

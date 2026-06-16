@@ -152,6 +152,18 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - Supervision : le responsable suit nom, matricule, formation, score, date et statut de l'attestation, avec export CSV.
 - Progression personnalisée et récompenses liées à l’apprentissage.
 
+### Back-office superadmin
+
+- Pilotage multi-organisations : liste des clients avec statut (active / démo / suspendue), plan, secteur, nombre d'utilisateurs, magasins, audits, actions ouvertes/critiques, formations terminées et dernière activité.
+- Détail d'une organisation : résumé opérationnel, magasins rattachés, utilisateurs/rôles, modules actifs, abonnement, derniers audits et actions, alertes superadmin et état de configuration.
+- Alertes priorisées (comptes suspendus, actions critiques, clients inactifs) et action « Contacter le support » (aucun bouton mort).
+- Accessible aux rôles habilités (`backoffice.access`) et pleinement peuplé en mode démo.
+
+### Onboarding client
+
+- Parcours guidé : création de l'organisation, choix du secteur (supermarché, supérette, franchise, magasin spécialisé, restauration), activation des modules cohérents avec le secteur, premier magasin et premier manager.
+- Écran final « configuration opérationnelle » et score de complétude, avec une base de départ adaptée au secteur.
+
 ---
 
 ## 6) Compte de démonstration

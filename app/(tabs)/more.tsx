@@ -7,6 +7,7 @@ import {
   Users,
   LayoutDashboard,
   CreditCard,
+  Building2,
   User,
   ChevronRight,
   type LucideIcon,
@@ -28,6 +29,7 @@ import {
   shadow,
   typography,
 } from '../../shared/styles/tokens';
+import { can } from '../../utils/permissions';
 import { isManagerRole } from '../../utils/roles';
 
 type HubLink = {
@@ -43,10 +45,13 @@ type HubLink = {
 /** Hub « Plus » : accès à tous les modules secondaires depuis une vue épurée. */
 export default function MoreScreen() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
   const { isEnabled } = useAppSettings();
   const isManager = isManagerRole(profile?.role);
   const isAdmin = profile?.role === 'admin';
+  const isLocalDemo = isDemoMode && !session;
+  // Back-office superadmin : visible pour les rôles habilités et en démo (vitrine).
+  const canBackoffice = isLocalDemo || can(profile?.role, 'backoffice.access');
 
   const links: HubLink[] = [
     {
@@ -120,6 +125,17 @@ export default function MoreScreen() {
       href: '/billing',
       accent: colors.textMuted,
       accentSoft: colors.backgroundAlt,
+    });
+  }
+  if (canBackoffice) {
+    links.push({
+      slug: 'backoffice',
+      label: 'Back-office',
+      description: 'Organisations clientes & pilotage',
+      icon: Building2,
+      href: '/backoffice',
+      accent: colors.primaryDark,
+      accentSoft: colors.primarySoft,
     });
   }
   links.push({

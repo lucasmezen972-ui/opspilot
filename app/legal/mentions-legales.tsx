@@ -20,7 +20,7 @@ export default function LegalNoticeScreen() {
               </Text>
               <Text style={legalStyles.paragraph}>
                 Nom du service : OpsPilot{'\n'}
-                Contact : contact@opspilot.fr
+                Contact : contact@tradikom.com
               </Text>
             </>
           ),
@@ -47,12 +47,12 @@ export default function LegalNoticeScreen() {
         {
           title: '5. Données personnelles',
           content:
-            'Les traitements de données personnelles sont décrits dans la politique de confidentialité. Les demandes peuvent être adressées à privacy@opspilot.fr.',
+            'Les traitements de données personnelles sont décrits dans la politique de confidentialité. Les demandes peuvent être adressées à contact@tradikom.com.',
         },
         {
           title: '6. Contact',
           content:
-            'Contact général : contact@opspilot.fr. Questions relatives à la protection des données : privacy@opspilot.fr.',
+            'Contact général : contact@tradikom.com. Questions relatives à la protection des données : contact@tradikom.com.',
         },
       ]}
     />

@@ -59,7 +59,7 @@ export default function PrivacyPolicyScreen() {
                 Vous pouvez demander l’accès, la rectification, l’effacement, la
                 limitation ou la portabilité de vos données, et vous opposer à
                 certains traitements. Adressez d’abord votre demande à votre
-                organisation ou à privacy@opspilot.fr. Une preuve d’identité
+                organisation ou à contact@tradikom.com. Une preuve d’identité
                 pourra être demandée en cas de doute raisonnable.
               </Text>
               <Text
@@ -84,7 +84,7 @@ export default function PrivacyPolicyScreen() {
         {
           title: '9. Contact',
           content:
-            'Questions et demandes relatives aux données : privacy@opspilot.fr. Support général : contact@opspilot.fr.',
+            'Questions et demandes relatives aux données : contact@tradikom.com. Support général : contact@tradikom.com.',
         },
       ]}
     />

@@ -227,7 +227,7 @@ export function AboutCard({
     <SettingsCard
       icon={<ExternalLink size={20} color="#475569" />}
       title="À propos et documents légaux"
-      description="OpsPilot v1.0.0 · Support : support@opspilot.com"
+      description="OpsPilot v1.0.0 · Support : contact@tradikom.com"
     >
       <LegalLink
         label="Politique de confidentialité"

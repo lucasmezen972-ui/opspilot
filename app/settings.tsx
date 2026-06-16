@@ -234,7 +234,7 @@ export default function SettingsScreen() {
             onPrivacy={() => router.push('/legal/confidentialite')}
             onTerms={() => router.push('/legal/cgu')}
             onLegal={() => router.push('/legal/mentions-legales')}
-            onSupport={() => Linking.openURL('mailto:support@opspilot.com')}
+            onSupport={() => Linking.openURL('mailto:contact@tradikom.com')}
           />
         </ScrollView>
       </View>

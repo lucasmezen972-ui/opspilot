@@ -67,7 +67,7 @@ export default function LegalPage({
             </View>
           ))}
           <TouchableOpacity
-            onPress={() => Linking.openURL('mailto:privacy@opspilot.fr')}
+            onPress={() => Linking.openURL('mailto:contact@tradikom.com')}
             style={styles.contactButton}
             accessibilityRole="link"
           >
