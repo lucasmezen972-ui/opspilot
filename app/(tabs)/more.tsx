@@ -10,6 +10,7 @@ import {
   Building2,
   User,
   ChevronRight,
+  Rocket,
   type LucideIcon,
 } from 'lucide-react-native';
 import {
@@ -125,6 +126,17 @@ export default function MoreScreen() {
       href: '/billing',
       accent: colors.textMuted,
       accentSoft: colors.backgroundAlt,
+    });
+  }
+  if (isAdmin || canBackoffice) {
+    links.push({
+      slug: 'commercial',
+      label: 'Offre commerciale',
+      description: 'Démo, tarifs & conversion client',
+      icon: Rocket,
+      href: '/commercial',
+      accent: colors.primary,
+      accentSoft: colors.primarySoft,
     });
   }
   if (canBackoffice) {
