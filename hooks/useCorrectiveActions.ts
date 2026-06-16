@@ -125,6 +125,7 @@ export function useCorrectiveActions() {
   const updateActionStatus = async (
     id: string,
     status: CorrectiveAction['status'],
+    extra?: Partial<CorrectiveAction>,
   ) => {
     try {
       const updates: Record<string, any> = {
@@ -133,6 +134,10 @@ export function useCorrectiveActions() {
       };
       if (status === 'done') {
         updates.resolved_at = new Date().toISOString();
+      }
+      // Preuves de clôture contrôlée (commentaire, exécutant, photo, validation).
+      if (extra) {
+        Object.assign(updates, extra);
       }
 
       if (isLocalDemo) {

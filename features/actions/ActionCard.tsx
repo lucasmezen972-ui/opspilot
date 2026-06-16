@@ -88,6 +88,30 @@ export function ActionCard({
         </View>
       )}
 
+      {action.status === 'done' && hasResolutionEvidence(action) && (
+        <View
+          style={styles.resolutionPanel}
+          testID={`action-resolution-summary-${action.id}`}
+        >
+          <View style={styles.resolutionHeader}>
+            <CheckCircle size={13} color="#10B981" />
+            <Text style={styles.resolutionTitle}>
+              {resolutionHeadline(action)}
+            </Text>
+          </View>
+          {!!action.resolution_comment && (
+            <Text style={styles.resolutionComment} numberOfLines={2}>
+              {action.resolution_comment}
+            </Text>
+          )}
+          {resolutionBadges(action).length > 0 && (
+            <Text style={styles.resolutionMeta}>
+              {resolutionBadges(action).join(' · ')}
+            </Text>
+          )}
+        </View>
+      )}
+
       <View style={styles.cardFooter}>
         {!!action.due_date && (
           <View style={styles.dueDate}>
@@ -127,6 +151,34 @@ export function ActionCard({
       </View>
     </View>
   );
+}
+
+function hasResolutionEvidence(action: CorrectiveAction): boolean {
+  return Boolean(
+    action.resolution_comment ||
+      action.resolved_by_name ||
+      action.resolution_photo_confirmed ||
+      action.manager_validated,
+  );
+}
+
+function resolutionHeadline(action: CorrectiveAction): string {
+  const date = action.resolved_at
+    ? new Date(action.resolved_at).toLocaleDateString('fr-FR')
+    : null;
+  const base = date ? `Résolue le ${date}` : 'Résolue';
+  if (!action.resolved_by_name) return base;
+  const matricule = action.resolved_by_matricule
+    ? ` (${action.resolved_by_matricule})`
+    : '';
+  return `${base} par ${action.resolved_by_name}${matricule}`;
+}
+
+function resolutionBadges(action: CorrectiveAction): string[] {
+  return [
+    action.resolution_photo_confirmed ? 'Preuve photo' : null,
+    action.manager_validated ? 'Validation manager' : null,
+  ].filter((item): item is string => item !== null);
 }
 
 function getRequirementLabels(plan: ReturnType<typeof buildLocalActionPlan>) {
@@ -219,6 +271,37 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#64748B',
     lineHeight: 16,
+  },
+  resolutionPanel: {
+    marginTop: 10,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  resolutionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  resolutionTitle: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#047857',
+  },
+  resolutionComment: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#334155',
+    lineHeight: 16,
+  },
+  resolutionMeta: {
+    marginTop: 4,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
   },
   cardFooter: {
     flexDirection: 'row',

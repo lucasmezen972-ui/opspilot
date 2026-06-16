@@ -71,6 +71,12 @@ test.describe('Actions correctives', () => {
     await expect(page.getByTestId('action-advance-demo-action-1')).toHaveCount(
       0,
     );
+
+    // Les preuves de clôture sont persistées et résumées sur la carte.
+    const summary = page.getByTestId('action-resolution-summary-demo-action-1');
+    await expect(summary).toBeVisible();
+    await expect(summary).toContainText('Marie Dupont');
+    await expect(summary).toContainText('Validation manager');
   });
 
   test('vue Kanban affiche les trois colonnes', async ({ page }) => {

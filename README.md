@@ -134,6 +134,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 - Génération d'un plan correctif structuré à partir du problème observé.
 - Échéance dérivée de la criticité réelle : chaîne du froid `1 h`, hygiène critique / DLC `2 h`, sécurité immédiate, affichage prix `24 h`, etc.
 - Exigences de preuve adaptées (photo, commentaire, identité du salarié, validation manager, escalade) selon le risque détecté.
+- **Clôture contrôlée persistée et traçable** : les preuves (commentaire, nom et matricule de l'exécutant, preuve photo, validation manager, auteur et date de résolution) sont enregistrées sur l'action (Supabase hors démo, store local en démo) et résumées sur la carte. Le blocage est **métier, pas seulement UI** : une preuve manquante empêche la clôture, et une action exigeant une validation manager ne peut pas être clôturée seule par un employé (permission `action.validate`).
 
 ### Produits / stock
 

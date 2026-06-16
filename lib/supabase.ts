@@ -151,6 +151,15 @@ export type CorrectiveAction = {
   status: 'open' | 'in_progress' | 'done' | 'cancelled';
   due_date?: string | null;
   resolved_at?: string | null;
+  // Preuves de clôture contrôlée (persistées) : qui a résolu, avec quelles
+  // preuves et quelle validation. Voir migration action_resolution_evidence.
+  resolution_comment?: string | null;
+  resolved_by_name?: string | null;
+  resolved_by_matricule?: string | null;
+  resolution_photo_confirmed?: boolean | null;
+  manager_validated?: boolean | null;
+  resolved_by?: string | null;
+  resolver_role?: string | null;
   created_by?: string | null;
   created_at?: string;
   updated_at?: string;

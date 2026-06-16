@@ -1,6 +1,12 @@
 import { Plus, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 
 import { ActionCard } from '../../features/actions/ActionCard';
 import { ActionPlanModal } from '../../features/actions/ActionPlanModal';
@@ -17,6 +23,8 @@ import {
 import { ResolveActionModal } from '../../features/actions/ResolveActionModal';
 import {
   buildResolutionActivityLabel,
+  buildResolutionRecord,
+  isResolutionAuthorized,
   type ResolutionEvidencePayload,
 } from '../../features/actions/actionResolution';
 import {
@@ -44,7 +52,7 @@ export default function ActionsScreen() {
     isOverdue,
     getActionsByStatus,
   } = useCorrectiveActions();
-  const { session, isDemoMode } = useAuth();
+  const { session, isDemoMode, profile } = useAuth();
   const { isEnabled } = useAppSettings();
   const { logEvent } = useActivityLog();
   const isLocalDemo = isDemoMode && !session;
@@ -89,7 +97,24 @@ export default function ActionsScreen() {
   const handleResolutionConfirm = (payload: ResolutionEvidencePayload) => {
     if (!resolutionAction) return;
     const action = resolutionAction;
-    updateActionStatus(action.id, 'done');
+
+    // Garde-fou métier (au-delà de l'UI) : preuves obligatoires présentes ET
+    // droit de validation manager si l'action l'exige. Un employé ne peut pas
+    // clôturer seul une action nécessitant une validation manager.
+    if (!isResolutionAuthorized(resolutionPlan, payload, profile?.role)) {
+      Alert.alert(
+        'Validation manager requise',
+        'Cette action nécessite la validation d’un responsable habilité avant clôture.',
+      );
+      return;
+    }
+
+    // Persiste les preuves de clôture (commentaire, exécutant, photo, validation).
+    const record = buildResolutionRecord(payload, {
+      id: profile?.id ?? null,
+      role: profile?.role ?? null,
+    });
+    updateActionStatus(action.id, 'done', record);
     logEvent({
       action: 'action_resolved',
       entityType: 'corrective_action',
