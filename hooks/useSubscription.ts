@@ -7,9 +7,24 @@ import { mapSupabaseError } from '../utils/error';
 export function useSubscription() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchSubscription = useCallback(async () => {
+    if (isLocalDemo) {
+      setSubscription({
+        id: 'demo-sub',
+        organization_id: profile?.organization_id ?? '',
+        stripe_customer_id: null,
+        stripe_subscription_id: null,
+        plan: 'trial',
+        status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 14 * 86400000).toISOString(),
+        current_period_end: null,
+      });
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -34,7 +49,7 @@ export function useSubscription() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchSubscription();

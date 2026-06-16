@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { getDemoTeamProfiles } from '../lib/demoData';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
@@ -20,9 +21,15 @@ export type LeaderboardEntry = Pick<
 export function useLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const fetch = useCallback(async () => {
+    if (isLocalDemo) {
+      setEntries(getDemoTeamProfiles() as LeaderboardEntry[]);
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -48,7 +55,7 @@ export function useLeaderboard() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetch();

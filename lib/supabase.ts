@@ -326,7 +326,14 @@ export type Profile = {
   full_name?: string | null;
   phone?: string | null;
   avatar_url?: string | null;
-  role: 'admin' | 'manager' | 'employé' | 'employee' | 'stagiaire';
+  role:
+    | 'superadmin'
+    | 'support'
+    | 'admin'
+    | 'manager'
+    | 'employé'
+    | 'employee'
+    | 'stagiaire';
   department_id?: string | null;
   level: number;
   xp: number;

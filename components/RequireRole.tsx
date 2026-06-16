@@ -5,7 +5,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useAuth } from '../hooks/useAuth';
 
-type AppRole = 'admin' | 'manager' | 'employé' | 'employee' | 'stagiaire';
+type AppRole =
+  | 'superadmin'
+  | 'support'
+  | 'admin'
+  | 'manager'
+  | 'employé'
+  | 'employee'
+  | 'stagiaire';
 
 /**
  * Garde d'accès par rôle pour les écrans protégés (deep-link / URL directe).
