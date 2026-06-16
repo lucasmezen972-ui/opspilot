@@ -1,5 +1,18 @@
-import { CheckCircle2, Mail, Rocket, ShieldCheck, Store } from 'lucide-react-native';
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  CheckCircle2,
+  Mail,
+  Rocket,
+  ShieldCheck,
+  Store,
+} from 'lucide-react-native';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import {
   buildCommercialMailto,
@@ -30,10 +43,13 @@ export default function CommercialScreen() {
             <Rocket size={24} color={colors.primary} />
           </View>
           <Text style={styles.heroTitle}>
-            OpsPilot aide les magasins à prouver leur conformité, pas seulement à la déclarer.
+            OpsPilot aide les magasins à prouver leur conformité, pas seulement à
+            la déclarer.
           </Text>
           <Text style={styles.heroText}>
-            Audits contextualisés, plans d’action avec preuves, formations longues et back-office multi-sites : le parcours est prêt pour une démonstration commerciale sérieuse.
+            Audits contextualisés, plans d’action avec preuves, formations
+            longues et back-office multi-sites : le parcours est prêt pour une
+            démonstration commerciale sérieuse.
           </Text>
           <TouchableOpacity
             testID="commercial-main-cta"
@@ -58,7 +74,11 @@ export default function CommercialScreen() {
         <View style={styles.section}>
           <AppSectionHeader title="Offres vendables" />
           {COMMERCIAL_PLANS.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} onPress={() => openDemoRequest(plan.id)} />
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              onPress={() => openDemoRequest(plan.id)}
+            />
           ))}
         </View>
 
@@ -81,7 +101,9 @@ export default function CommercialScreen() {
           <View style={styles.proofBody}>
             <Text style={styles.proofTitle}>Promesse commerciale claire</Text>
             <Text style={styles.proofText}>
-              Aucun faux bouton de paiement : la conversion passe par une demande de démo ou de devis à contact@tradikom.com tant que l’activation Stripe/back-end n’est pas contractualisée.
+              Aucun faux bouton de paiement : la conversion passe par une
+              demande de démo ou de devis à contact@tradikom.com tant que
+              l’activation Stripe/back-end n’est pas contractualisée.
             </Text>
           </View>
         </View>
@@ -90,10 +112,19 @@ export default function CommercialScreen() {
   );
 }
 
-function PlanCard({ plan, onPress }: { plan: CommercialPlan; onPress: () => void }) {
+function PlanCard({
+  plan,
+  onPress,
+}: {
+  plan: CommercialPlan;
+  onPress: () => void;
+}) {
   const isFeatured = plan.id === 'pro';
   return (
-    <View style={[styles.planCard, isFeatured ? styles.planCardFeatured : null]} testID={`commercial-plan-${plan.id}`}>
+    <View
+      style={[styles.planCard, isFeatured ? styles.planCardFeatured : null]}
+      testID={`commercial-plan-${plan.id}`}
+    >
       <View style={styles.planHeader}>
         <View style={styles.planIcon}>
           <Store size={18} color={colors.primary} />
@@ -123,7 +154,9 @@ function PlanCard({ plan, onPress }: { plan: CommercialPlan; onPress: () => void
 
       <View style={styles.highlightBlock}>
         {plan.highlights.map((highlight) => (
-          <Text key={highlight} style={styles.highlightText}>• {highlight}</Text>
+          <Text key={highlight} style={styles.highlightText}>
+            • {highlight}
+          </Text>
         ))}
       </View>
 
@@ -132,7 +165,12 @@ function PlanCard({ plan, onPress }: { plan: CommercialPlan; onPress: () => void
         style={[styles.planCta, isFeatured ? styles.planCtaFeatured : null]}
         onPress={onPress}
       >
-        <Text style={[styles.planCtaText, isFeatured ? styles.planCtaTextFeatured : null]}>
+        <Text
+          style={[
+            styles.planCtaText,
+            isFeatured ? styles.planCtaTextFeatured : null,
+          ]}
+        >
           {plan.cta}
         </Text>
       </TouchableOpacity>
@@ -160,8 +198,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
-  heroTitle: { fontSize: 24, fontWeight: '800', color: colors.textStrong, letterSpacing: -0.4 },
-  heroText: { fontSize: 14, color: colors.textMuted, lineHeight: 21, marginTop: spacing.sm },
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.textStrong,
+    letterSpacing: -0.4,
+  },
+  heroText: {
+    fontSize: 14,
+    color: colors.textMuted,
+    lineHeight: 21,
+    marginTop: spacing.sm,
+  },
   primaryCta: {
     marginTop: spacing.lg,
     backgroundColor: colors.primary,
@@ -183,8 +231,18 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   kpiValue: { fontSize: 20, fontWeight: '800', color: colors.primary },
-  kpiLabel: { fontSize: 12, fontWeight: '700', color: colors.textStrong, marginTop: 2 },
-  kpiDetail: { fontSize: 10, color: colors.textMuted, marginTop: 4, lineHeight: 14 },
+  kpiLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textStrong,
+    marginTop: 2,
+  },
+  kpiDetail: {
+    fontSize: 10,
+    color: colors.textMuted,
+    marginTop: 4,
+    lineHeight: 14,
+  },
   section: { marginTop: spacing.xl },
   planCard: {
     backgroundColor: colors.surface,
@@ -215,8 +273,18 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   badgeText: { fontSize: 11, color: colors.primaryDark, fontWeight: '800' },
-  price: { fontSize: 22, fontWeight: '800', color: colors.textStrong, marginTop: spacing.md },
-  planDescription: { fontSize: 13, color: colors.textMuted, lineHeight: 19, marginTop: 4 },
+  price: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.textStrong,
+    marginTop: spacing.md,
+  },
+  planDescription: {
+    fontSize: 13,
+    color: colors.textMuted,
+    lineHeight: 19,
+    marginTop: 4,
+  },
   listBlock: { marginTop: spacing.md, gap: 7 },
   listRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   listText: { flex: 1, fontSize: 13, color: colors.text },
@@ -262,5 +330,10 @@ const styles = StyleSheet.create({
   },
   proofBody: { flex: 1 },
   proofTitle: { fontSize: 14, fontWeight: '800', color: colors.textStrong },
-  proofText: { fontSize: 12, color: colors.text, lineHeight: 18, marginTop: 4 },
+  proofText: {
+    fontSize: 12,
+    color: colors.text,
+    lineHeight: 18,
+    marginTop: 4,
+  },
 });
