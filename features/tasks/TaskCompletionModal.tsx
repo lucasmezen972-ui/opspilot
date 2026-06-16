@@ -1,14 +1,14 @@
 import { Camera, Check } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { isCompletionValid } from './taskTraceability';
+import type { TaskCompletionInput } from './taskTraceability';
 import CameraModal from '../../components/CameraModal';
 import type { Task } from '../../lib/supabase';
 import { AppInput } from '../../shared/components/AppInput';
 import { AppModal } from '../../shared/components/AppModal';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
-import type { TaskCompletionInput } from './taskTraceability';
 
 type Props = {
   visible: boolean;

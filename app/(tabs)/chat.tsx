@@ -229,7 +229,7 @@ export default function ChatScreen() {
               canModerate={isManager}
               onBack={() => setActiveChannelId(null)}
               onSend={(content, type) =>
-                void sendChannelMessage(activeChannel.id, content, type)
+                sendChannelMessage(activeChannel.id, content, type)
               }
               onTogglePin={togglePin}
               onDelete={deleteMessage}

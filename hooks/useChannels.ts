@@ -35,7 +35,7 @@ export function useChannels() {
   useEffect(() => {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
-    void fetchData();
+    fetchData();
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchData = async () => {
@@ -130,7 +130,7 @@ export function useChannels() {
       const readAt = now();
       setRemoteReads((prev) => ({ ...prev, [channelId]: readAt }));
       if (!profile?.id) return;
-      void supabase
+      supabase
         .from('channel_reads')
         .upsert(
           {

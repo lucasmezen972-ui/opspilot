@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import {
+  isUploadableEvidenceUri,
+  uploadEvidencePhoto,
+} from '../../../features/evidence/evidenceUpload';
+
 const uploadMock = vi.fn();
 const insertMock = vi.fn();
 
@@ -9,11 +14,6 @@ vi.mock('../../../lib/supabase', () => ({
     from: () => ({ insert: insertMock }),
   },
 }));
-
-import {
-  isUploadableEvidenceUri,
-  uploadEvidencePhoto,
-} from '../../../features/evidence/evidenceUpload';
 
 beforeEach(() => {
   uploadMock.mockReset();

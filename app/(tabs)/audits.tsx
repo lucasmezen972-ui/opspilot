@@ -2,7 +2,6 @@ import { Search, Plus, Camera, X, Download } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -82,7 +81,7 @@ export default function AuditsScreen() {
   // L'auditeur signe en tant qu'« auditor », un responsable en tant que « manager ».
   const signRole: SignableRole = isManager ? 'manager' : 'auditor';
   const handleSignAudit = (auditId: string) => {
-    void signAudit(auditId, profile?.full_name ?? 'Signataire', signRole);
+    signAudit(auditId, profile?.full_name ?? 'Signataire', signRole);
   };
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);

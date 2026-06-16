@@ -27,7 +27,7 @@ import { colors, radius, shadow, spacing } from '../../shared/styles/tokens';
 
 export default function CommercialScreen() {
   const openDemoRequest = (planId?: CommercialPlan['id']) => {
-    void Linking.openURL(buildCommercialMailto(planId));
+    Linking.openURL(buildCommercialMailto(planId));
   };
 
   return (
@@ -43,8 +43,8 @@ export default function CommercialScreen() {
             <Rocket size={24} color={colors.primary} />
           </View>
           <Text style={styles.heroTitle}>
-            OpsPilot aide les magasins à prouver leur conformité, pas seulement à
-            la déclarer.
+            OpsPilot aide les magasins à prouver leur conformité, pas seulement
+            à la déclarer.
           </Text>
           <Text style={styles.heroText}>
             Audits contextualisés, plans d’action avec preuves, formations
@@ -318,7 +318,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNumberText: { fontWeight: '800', color: colors.primaryDark, fontSize: 12 },
+  stepNumberText: {
+    fontWeight: '800',
+    color: colors.primaryDark,
+    fontSize: 12,
+  },
   stepText: { flex: 1, fontSize: 13, color: colors.text, lineHeight: 18 },
   proofCard: {
     marginTop: spacing.xl,
