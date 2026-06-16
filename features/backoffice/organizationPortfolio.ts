@@ -5,6 +5,8 @@ const PRIORITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 type Payload = Record<string, unknown>;
 
+type ActionPriority = ClientOrganization['recentActions'][number]['priority'];
+
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' && value.trim().length > 0
     ? value
@@ -17,6 +19,12 @@ function asNumber(value: unknown): number {
 
 function asStatus(value: unknown): OrgStatus {
   return STATUSES.includes(value as OrgStatus) ? (value as OrgStatus) : 'active';
+}
+
+function asPriority(value: unknown): ActionPriority {
+  return PRIORITIES.includes(value as ActionPriority)
+    ? (value as ActionPriority)
+    : 'medium';
 }
 
 function asStringArray(value: unknown): string[] {
@@ -54,12 +62,9 @@ function asRecentActions(value: unknown): ClientOrganization['recentActions'] {
   if (!Array.isArray(value)) return [];
   return value.map((item) => {
     const payload = item as Payload;
-    const priority = PRIORITIES.includes(payload.priority as any)
-      ? (payload.priority as ClientOrganization['recentActions'][number]['priority'])
-      : 'medium';
     return {
       title: asString(payload.title, 'Action corrective'),
-      priority,
+      priority: asPriority(payload.priority),
       status: asString(payload.status, 'open'),
     };
   });
