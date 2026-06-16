@@ -43,9 +43,19 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     name: 'Starter',
     price: '299 € / mois',
     target: '1 magasin',
-    description: 'Pour lancer les audits, actions correctives et formations dans un point de vente.',
-    limits: ['1 magasin', '15 utilisateurs', 'Audits et actions illimités', 'Support e-mail'],
-    highlights: ['Audit parking / HACCP / DLC', 'Preuves de clôture', 'Attestations formation'],
+    description:
+      'Pour lancer les audits, actions correctives et formations dans un point de vente.',
+    limits: [
+      '1 magasin',
+      '15 utilisateurs',
+      'Audits et actions illimités',
+      'Support e-mail',
+    ],
+    highlights: [
+      'Audit parking / HACCP / DLC',
+      'Preuves de clôture',
+      'Attestations formation',
+    ],
     cta: 'Demander une démo Starter',
   },
   {
@@ -53,9 +63,19 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     name: 'Pro',
     price: '799 € / mois',
     target: 'jusqu’à 5 magasins',
-    description: 'Pour piloter plusieurs sites avec reporting direction et supervision formation.',
-    limits: ['5 magasins', '75 utilisateurs', 'Rapports PDF/CSV', 'Support prioritaire'],
-    highlights: ['Back-office multi-organisations', 'KPIs conformité', 'Plans d’action centralisés'],
+    description:
+      'Pour piloter plusieurs sites avec reporting direction et supervision formation.',
+    limits: [
+      '5 magasins',
+      '75 utilisateurs',
+      'Rapports PDF/CSV',
+      'Support prioritaire',
+    ],
+    highlights: [
+      'Back-office multi-organisations',
+      'KPIs conformité',
+      'Plans d’action centralisés',
+    ],
     cta: 'Demander une démo Pro',
   },
   {
@@ -63,9 +83,19 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     name: 'Franchise',
     price: 'Sur devis',
     target: 'réseau multi-sites',
-    description: 'Pour réseaux, franchises ou directions régionales avec accompagnement dédié.',
-    limits: ['Magasins illimités', 'Utilisateurs illimités', 'Onboarding accompagné', 'SLA sur devis'],
-    highlights: ['Déploiement réseau', 'Modèles métier personnalisés', 'Support direction'],
+    description:
+      'Pour réseaux, franchises ou directions régionales avec accompagnement dédié.',
+    limits: [
+      'Magasins illimités',
+      'Utilisateurs illimités',
+      'Onboarding accompagné',
+      'SLA sur devis',
+    ],
+    highlights: [
+      'Déploiement réseau',
+      'Modèles métier personnalisés',
+      'Support direction',
+    ],
     cta: 'Demander un devis Franchise',
   },
 ];
@@ -104,6 +134,8 @@ export function hasNoDeadCommercialCta(plans = COMMERCIAL_PLANS): boolean {
   return plans.every(
     (plan) =>
       plan.cta.trim().length > 0 &&
-      buildCommercialMailto(plan.id).startsWith(`mailto:${COMMERCIAL_CONTACT_EMAIL}`),
+      buildCommercialMailto(plan.id).startsWith(
+        `mailto:${COMMERCIAL_CONTACT_EMAIL}`,
+      ),
   );
 }
