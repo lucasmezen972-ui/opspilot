@@ -43,6 +43,8 @@ import { can } from '../../utils/permissions';
 const SUPPORT_MAILTO =
   'mailto:contact@tradikom.com?subject=Back-office OpsPilot — pilotage multi-organisations';
 
+type IconComponent = typeof Users;
+
 export default function BackofficeScreen() {
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
@@ -75,6 +77,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = organizations.find((org) => org.id === selectedId) ?? null;
+
   const contactSupport = () => Linking.openURL(SUPPORT_MAILTO);
 
   return (
@@ -95,89 +98,19 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
       />
 
       {!isDemo && portfolio.status === 'loading' ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.primary} />
-          <Text style={styles.centeredText}>Chargement du portefeuille client…</Text>
-        </View>
+        <LoadingState />
       ) : organizations.length === 0 ? (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <AppEmptyState
-            icon={Building2}
-            title={emptyTitle(portfolio.status)}
-            description={emptyDescription(portfolio.status)}
-          />
-          <TouchableOpacity
-            testID="backoffice-activation-support"
-            style={styles.primaryCta}
-            onPress={contactSupport}
-          >
-            <Mail size={18} color="#FFFFFF" />
-            <Text style={styles.primaryCtaText}>Contacter le support</Text>
-          </TouchableOpacity>
-        </ScrollView>
+        <EmptyPortfolioState
+          status={portfolio.status}
+          onContactSupport={contactSupport}
+        />
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.summaryRow}>
-            <SummaryTile
-              testID="backoffice-summary-orgs"
-              value={summary.totalOrganizations}
-              label="Organisations"
-            />
-            <SummaryTile
-              testID="backoffice-summary-active"
-              value={summary.activeCount}
-              label="Actives"
-              tint={colors.successText}
-            />
-            <SummaryTile
-              testID="backoffice-summary-suspended"
-              value={summary.suspendedCount}
-              label="Suspendues"
-              tint={colors.dangerStrong}
-            />
-            <SummaryTile
-              testID="backoffice-summary-users"
-              value={summary.totalUsers}
-              label="Utilisateurs"
-            />
-          </View>
-
-          {alerts.length > 0 && (
-            <View style={styles.section}>
-              <AppSectionHeader title="Alertes superadmin" />
-              {alerts.map((alert) => (
-                <View
-                  key={alert.id}
-                  testID={`backoffice-alert-${alert.id}`}
-                  style={[
-                    styles.alertCard,
-                    { borderLeftColor: severityColor(alert.severity) },
-                  ]}
-                >
-                  <TriangleAlert
-                    size={16}
-                    color={severityColor(alert.severity)}
-                  />
-                  <View style={styles.alertBody}>
-                    <Text style={styles.alertTitle}>{alert.title}</Text>
-                    <Text style={styles.alertDetail}>{alert.detail}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          )}
-
-          <View style={styles.section}>
-            <AppSectionHeader title="Organisations clientes" />
-            {organizations.map((org) => (
-              <OrgCard
-                key={org.id}
-                org={org}
-                onDetail={() => setSelectedId(org.id)}
-              />
-            ))}
-          </View>
-        </ScrollView>
+        <PortfolioList
+          organizations={organizations}
+          summary={summary}
+          alerts={alerts}
+          onSelect={setSelectedId}
+        />
       )}
 
       <OrgDetailModal
@@ -186,6 +119,114 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
         onContactSupport={contactSupport}
       />
     </View>
+  );
+}
+
+function LoadingState() {
+  return (
+    <View style={styles.centered}>
+      <ActivityIndicator color={colors.primary} />
+      <Text style={styles.centeredText}>Chargement du portefeuille client…</Text>
+    </View>
+  );
+}
+
+function EmptyPortfolioState({
+  status,
+  onContactSupport,
+}: {
+  status: string;
+  onContactSupport: () => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <AppEmptyState
+        icon={Building2}
+        title={emptyTitle(status)}
+        description={emptyDescription(status)}
+      />
+      <TouchableOpacity
+        testID="backoffice-activation-support"
+        style={styles.primaryCta}
+        onPress={onContactSupport}
+      >
+        <Mail size={18} color="#FFFFFF" />
+        <Text style={styles.primaryCtaText}>Contacter le support</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+function PortfolioList({
+  organizations,
+  summary,
+  alerts,
+  onSelect,
+}: {
+  organizations: ClientOrganization[];
+  summary: ReturnType<typeof summarizeOrganizations>;
+  alerts: ReturnType<typeof buildSuperadminAlerts>;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.summaryRow}>
+        <SummaryTile
+          testID="backoffice-summary-orgs"
+          value={summary.totalOrganizations}
+          label="Organisations"
+        />
+        <SummaryTile
+          testID="backoffice-summary-active"
+          value={summary.activeCount}
+          label="Actives"
+          tint={colors.successText}
+        />
+        <SummaryTile
+          testID="backoffice-summary-suspended"
+          value={summary.suspendedCount}
+          label="Suspendues"
+          tint={colors.dangerStrong}
+        />
+        <SummaryTile
+          testID="backoffice-summary-users"
+          value={summary.totalUsers}
+          label="Utilisateurs"
+        />
+      </View>
+
+      {alerts.length > 0 && (
+        <View style={styles.section}>
+          <AppSectionHeader title="Alertes superadmin" />
+          {alerts.map((alert) => (
+            <View
+              key={alert.id}
+              testID={`backoffice-alert-${alert.id}`}
+              style={[
+                styles.alertCard,
+                { borderLeftColor: severityColor(alert.severity) },
+              ]}
+            >
+              <TriangleAlert
+                size={16}
+                color={severityColor(alert.severity)}
+              />
+              <View style={styles.alertBody}>
+                <Text style={styles.alertTitle}>{alert.title}</Text>
+                <Text style={styles.alertDetail}>{alert.detail}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <AppSectionHeader title="Organisations clientes" />
+        {organizations.map((org) => (
+          <OrgCard key={org.id} org={org} onDetail={() => onSelect(org.id)} />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -248,12 +289,13 @@ function OrgCard({
             {org.sector} · {planLabel(org.plan)}
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}> 
+        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
           <Text style={[styles.statusText, { color: status.color }]}> 
             {status.label}
           </Text>
         </View>
       </View>
+
       <View style={styles.orgStats}>
         <OrgStat icon={Users} value={org.users} label="util." />
         <OrgStat icon={Store} value={org.stores} label="mag." />
@@ -270,6 +312,7 @@ function OrgCard({
           label="form."
         />
       </View>
+
       <View style={styles.orgFooter}>
         <View style={styles.orgActivity}>
           <Activity size={13} color={colors.textMuted} />
@@ -296,7 +339,7 @@ function OrgStat({
   label,
   tint,
 }: {
-  icon: typeof Users;
+  icon: IconComponent;
   value: number;
   label: string;
   tint?: string;
@@ -343,12 +386,14 @@ function OrgDetailModal({
               <X size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
+
           <ScrollView contentContainerStyle={styles.modalBody}>
-            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}> 
+            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
               <Text style={[styles.statusText, { color: status.color }]}> 
                 {status.label}
               </Text>
             </View>
+
             <DetailSection title="Résumé opérationnel">
               <View style={styles.detailGrid}>
                 <DetailKpi value={org.users} label="Utilisateurs" />
@@ -368,6 +413,7 @@ function OrgDetailModal({
                 />
               </View>
             </DetailSection>
+
             <DetailSection title="État de configuration">
               <View style={styles.configRow}>
                 <Text style={styles.configLabel}>{config.label}</Text>
@@ -379,6 +425,7 @@ function OrgDetailModal({
                 />
               </View>
             </DetailSection>
+
             <DetailSection title="Abonnement">
               <Text style={styles.lineText}>
                 Plan {planLabel(org.plan)} · client depuis le{' '}
@@ -388,30 +435,36 @@ function OrgDetailModal({
                 Dernière activité : {formatLastActivity(org.lastActivityAt)}
               </Text>
             </DetailSection>
+
             <DetailList
               title={`Magasins rattachés (${org.stores})`}
               icon={Store}
               items={org.storeList}
             />
+
             <DetailSection title="Utilisateurs / rôles">
-              {org.roleBreakdown.map((r) => (
-                <View key={r.role} style={styles.lineRow}>
+              {org.roleBreakdown.map((role) => (
+                <View key={role.role} style={styles.lineRow}>
                   <Users size={14} color={colors.textMuted} />
                   <Text style={styles.lineText}>
-                    {capitalize(r.role)} · {r.count}
+                    {capitalize(role.role)} · {role.count}
                   </Text>
                 </View>
               ))}
             </DetailSection>
+
             <DetailSection title="Modules actifs">
               <View style={styles.chipsRow}>
-                {org.activeModules.map((m) => (
-                  <View key={m} style={styles.moduleChip}>
-                    <Text style={styles.moduleChipText}>{moduleLabel(m)}</Text>
+                {org.activeModules.map((moduleId) => (
+                  <View key={moduleId} style={styles.moduleChip}>
+                    <Text style={styles.moduleChipText}>
+                      {moduleLabel(moduleId)}
+                    </Text>
                   </View>
                 ))}
               </View>
             </DetailSection>
+
             <DetailSection title="Derniers audits">
               {org.recentAudits.map((audit) => (
                 <View key={audit.title} style={styles.lineRow}>
@@ -423,6 +476,7 @@ function OrgDetailModal({
                 </View>
               ))}
             </DetailSection>
+
             <DetailSection title="Dernières actions correctives">
               {org.recentActions.map((action) => (
                 <View key={action.title} style={styles.lineRow}>
@@ -438,6 +492,7 @@ function OrgDetailModal({
                 </View>
               ))}
             </DetailSection>
+
             <TouchableOpacity
               testID="backoffice-detail-support"
               style={styles.primaryCta}
@@ -459,7 +514,7 @@ function DetailList({
   items,
 }: {
   title: string;
-  icon: typeof Store;
+  icon: IconComponent;
   items: string[];
 }) {
   return (
@@ -543,7 +598,12 @@ function capitalize(value: string): string {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   scrollContent: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
   centeredText: { fontSize: 13, color: colors.textMuted },
   supportButton: {
     width: 44,
