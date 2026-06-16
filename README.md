@@ -121,9 +121,11 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### Audits
 
-- Modèles personnalisés.
-- Checklists interactives.
+- **Audits contextualisés par métier / zone** : chaque audit s'appuie sur un référentiel adapté à son contexte (HACCP, hygiène, sécurité incendie, chaîne du froid, réception, **parking / extérieur magasin**, etc.). Un audit extérieur ne contient que des critères extérieurs (propreté parking, chariots, déchets, places PMR, accès secours, éclairage, signalétique) — jamais de questions rayon, DLC ou froid.
+- Audit libre neutre pour les contrôles ponctuels sans référentiel dédié (conformité, propreté, sécurité, anomalie, preuve), sans vocabulaire métier incohérent.
+- Checklists interactives, critères pondérés, preuve photo.
 - Scoring automatique et conformité par section.
+- Génération automatique d'actions correctives sur non-conformité.
 - Rapports PDF professionnels : synthèse exécutive, détail des critères, plan d'action correctif et double bloc de signature (auditeur / responsable).
 - Historique d’audits.
 
@@ -142,7 +144,8 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### Formation
 
-- Parcours par compétences (chapitres + quiz).
+- **Parcours quasi-certifiants longs et scénarisés** : chaque module prioritaire (HACCP, DLC/rotation, chaîne du froid, caisse, accueil client, management de proximité) compte au moins 6 chapitres concrets (procédures pas-à-pas, erreurs fréquentes, mini-situations terrain, points de contrôle manager, checklist opérationnelle, résumé final) pour une durée affichée crédible de 45 à 90 minutes.
+- Quiz renforcés : 8 à 14 questions par module, dont au moins 2 cas pratiques (mises en situation) et des questions critiques.
 - Quiz anti-triche : mélange des questions et des options, questions critiques, seuil de réussite, traçabilité des réponses (version d'évaluation, tentative, date).
 - Attestation quasi-certifiante : le candidat confirme son identité (nom, matricule, poste, magasin) et signe sur l'honneur ; le certificat porte score, statut validé/échoué, durée, version et numéro unique.
 - Supervision : le responsable suit nom, matricule, formation, score, date et statut de l'attestation, avec export CSV.
@@ -160,11 +163,13 @@ Pour les démos sans comptes réels, utiliser le compte de test dédié document
 
 ## 7) Données d’exemple incluses
 
-- Employés : Marie Dupont, Pierre Martin, Jean Leroy.
-- Audits : rayon frais, sécurité, hygiène.
+La démo est conçue comme une **histoire client cohérente, prête pour une présentation commerciale** (supermarchés, franchises) : un magasin avec des audits contextualisés, des actions correctives issues de vraies non-conformités, des formations longues et crédibles, des attestations sérieuses et des rapports PDF exploitables par un manager. Elle fonctionne entièrement hors-ligne, sans dépendre d'un Supabase réel.
+
+- Employés : Marie Dupont (manager) et son équipe.
+- Audits : contrôle hygiène rayon frais, chambre froide, DLC boulangerie, **audit HACCP professionnel structuré**, sécurité incendie, **tournée parking / extérieur** et contrôle terrain libre.
 - Produits : références supermarché + codes-barres.
 - Tâches : opérations courantes magasin.
-- Formation : modules sectoriels.
+- Formation : 6 parcours quasi-certifiants scénarisés (HACCP, DLC/rotation, chaîne du froid, accueil client, caisse, management).
 
 ---
 

@@ -41,14 +41,14 @@ export function QuestionnaireModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent} testID="audit-questionnaire">
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Questionnaire d'audit</Text>
+            <Text style={styles.modalTitle}>Audit libre</Text>
             <TouchableOpacity onPress={onClose}>
               <X size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
           <Text style={styles.questionnaireHint}>
-            Évaluez chaque point : une non-conformité crée automatiquement une
-            action corrective.
+            Contrôle générique de la zone : évaluez chaque point. Une
+            non-conformité crée automatiquement une action corrective.
           </Text>
           <ScrollView style={styles.questionList}>
             {AUDIT_QUESTIONS.map((q, i) => (

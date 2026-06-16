@@ -89,7 +89,7 @@ test.describe('Gestion des audits', () => {
     await expect(
       page
         .getByText(
-          'Non-conformité : Les zones de stockage sont propres et rangées',
+          'Non-conformité : Le point contrôlé est conforme aux exigences attendues',
         )
         .first(),
     ).toBeVisible({ timeout: 10_000 });
