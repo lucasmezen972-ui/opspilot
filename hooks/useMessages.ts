@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
-import {
-  DEMO_ORG_ID,
-  DEMO_USER_ID,
-} from '../lib/demoData';
+import { DEMO_ORG_ID, DEMO_USER_ID } from '../lib/demoData';
 import { supabase, type Message, type Conversation } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
