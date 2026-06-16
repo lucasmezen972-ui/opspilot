@@ -1,25 +1,25 @@
 import {
-  Building2,
-  Users,
-  Store,
-  ClipboardList,
-  TriangleAlert,
-  ChevronRight,
-  X,
-  Mail,
   Activity,
+  Building2,
+  ChevronRight,
+  ClipboardList,
   GraduationCap,
-  CalendarDays,
+  Mail,
+  Store,
+  TriangleAlert,
+  Users,
+  X,
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
+  ActivityIndicator,
   Linking,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import RequireRole from '../../components/RequireRole';
@@ -32,6 +32,7 @@ import {
   type ClientOrganization,
 } from '../../features/backoffice/backofficeModel';
 import { useAuth } from '../../hooks/useAuth';
+import { useOrganizationPortfolio } from '../../hooks/useOrganizationPortfolio';
 import { getDemoClientOrganizations } from '../../lib/demoData';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
@@ -49,7 +50,7 @@ export default function BackofficeScreen() {
   if (isLocalDemo || can(profile?.role, 'backoffice.access')) {
     return <BackofficeContent isDemo={isLocalDemo} />;
   }
-  // Accès réservé : réutilise la garde testée (écran « Accès non autorisé »).
+
   return (
     <RequireRole roles={['admin']}>
       <BackofficeContent isDemo={false} />
@@ -58,12 +59,12 @@ export default function BackofficeScreen() {
 }
 
 function BackofficeContent({ isDemo }: { isDemo: boolean }) {
-  // En démo : jeu complet de clients. En production, le pilotage multi-
-  // organisations se branche sur l'instance du client (voir CTA support).
-  const organizations = useMemo<ClientOrganization[]>(
-    () => (isDemo ? getDemoClientOrganizations() : []),
-    [isDemo],
+  const portfolio = useOrganizationPortfolio(!isDemo);
+  const demoOrganizations = useMemo<ClientOrganization[]>(
+    () => getDemoClientOrganizations(),
+    [],
   );
+  const organizations = isDemo ? demoOrganizations : portfolio.organizations;
   const summary = useMemo(
     () => summarizeOrganizations(organizations),
     [organizations],
@@ -73,8 +74,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
     [organizations],
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = organizations.find((o) => o.id === selectedId) ?? null;
-
+  const selected = organizations.find((org) => org.id === selectedId) ?? null;
   const contactSupport = () => Linking.openURL(SUPPORT_MAILTO);
 
   return (
@@ -94,15 +94,17 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
         }
       />
 
-      {organizations.length === 0 ? (
+      {!isDemo && portfolio.status === 'loading' ? (
+        <View style={styles.centered}>
+          <ActivityIndicator color={colors.primary} />
+          <Text style={styles.centeredText}>Chargement du portefeuille client…</Text>
+        </View>
+      ) : organizations.length === 0 ? (
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <AppEmptyState
             icon={Building2}
-            title="Pilotage multi-organisations à activer"
-            description={
-              'Le back-office superadmin se connecte à votre instance pour ' +
-              'lister vos organisations clientes. Notre équipe l’active avec vous.'
-            }
+            title={emptyTitle(portfolio.status)}
+            description={emptyDescription(portfolio.status)}
           />
           <TouchableOpacity
             testID="backoffice-activation-support"
@@ -110,7 +112,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
             onPress={contactSupport}
           >
             <Mail size={18} color="#FFFFFF" />
-            <Text style={styles.primaryCtaText}>Demander l’activation</Text>
+            <Text style={styles.primaryCtaText}>Contacter le support</Text>
           </TouchableOpacity>
         </ScrollView>
       ) : (
@@ -187,6 +189,27 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
   );
 }
 
+function emptyTitle(status: string): string {
+  if (status === 'forbidden') return 'Accès back-office refusé';
+  if (status === 'unavailable' || status === 'error') {
+    return 'Back-office production à activer';
+  }
+  return 'Aucune organisation trouvée';
+}
+
+function emptyDescription(status: string): string {
+  if (status === 'forbidden') {
+    return 'Votre rôle ne permet pas de consulter le portefeuille client multi-organisations.';
+  }
+  if (status === 'unavailable' || status === 'error') {
+    return (
+      'La source de portefeuille client doit être déployée sur Supabase. ' +
+      'Le mode démo reste complet, et notre équipe peut activer la prod.'
+    );
+  }
+  return 'Le portefeuille client ne contient pas encore d’organisation exploitable.';
+}
+
 function SummaryTile({
   value,
   label,
@@ -225,13 +248,12 @@ function OrgCard({
             {org.sector} · {planLabel(org.plan)}
           </Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-          <Text style={[styles.statusText, { color: status.color }]}>
+        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}> 
+          <Text style={[styles.statusText, { color: status.color }]}> 
             {status.label}
           </Text>
         </View>
       </View>
-
       <View style={styles.orgStats}>
         <OrgStat icon={Users} value={org.users} label="util." />
         <OrgStat icon={Store} value={org.stores} label="mag." />
@@ -248,7 +270,6 @@ function OrgCard({
           label="form."
         />
       </View>
-
       <View style={styles.orgFooter}>
         <View style={styles.orgActivity}>
           <Activity size={13} color={colors.textMuted} />
@@ -322,14 +343,12 @@ function OrgDetailModal({
               <X size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
-
           <ScrollView contentContainerStyle={styles.modalBody}>
-            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-              <Text style={[styles.statusText, { color: status.color }]}>
+            <View style={[styles.statusBadge, { backgroundColor: status.bg }]}> 
+              <Text style={[styles.statusText, { color: status.color }]}> 
                 {status.label}
               </Text>
             </View>
-
             <DetailSection title="Résumé opérationnel">
               <View style={styles.detailGrid}>
                 <DetailKpi value={org.users} label="Utilisateurs" />
@@ -349,7 +368,6 @@ function OrgDetailModal({
                 />
               </View>
             </DetailSection>
-
             <DetailSection title="État de configuration">
               <View style={styles.configRow}>
                 <Text style={styles.configLabel}>{config.label}</Text>
@@ -361,32 +379,20 @@ function OrgDetailModal({
                 />
               </View>
             </DetailSection>
-
             <DetailSection title="Abonnement">
-              <View style={styles.lineRow}>
-                <CalendarDays size={14} color={colors.textMuted} />
-                <Text style={styles.lineText}>
-                  Plan {planLabel(org.plan)} · client depuis le{' '}
-                  {new Date(org.createdAt).toLocaleDateString('fr-FR')}
-                </Text>
-              </View>
-              <View style={styles.lineRow}>
-                <Activity size={14} color={colors.textMuted} />
-                <Text style={styles.lineText}>
-                  Dernière activité : {formatLastActivity(org.lastActivityAt)}
-                </Text>
-              </View>
+              <Text style={styles.lineText}>
+                Plan {planLabel(org.plan)} · client depuis le{' '}
+                {new Date(org.createdAt).toLocaleDateString('fr-FR')}
+              </Text>
+              <Text style={styles.lineText}>
+                Dernière activité : {formatLastActivity(org.lastActivityAt)}
+              </Text>
             </DetailSection>
-
-            <DetailSection title={`Magasins rattachés (${org.stores})`}>
-              {org.storeList.map((name) => (
-                <View key={name} style={styles.lineRow}>
-                  <Store size={14} color={colors.textMuted} />
-                  <Text style={styles.lineText}>{name}</Text>
-                </View>
-              ))}
-            </DetailSection>
-
+            <DetailList
+              title={`Magasins rattachés (${org.stores})`}
+              icon={Store}
+              items={org.storeList}
+            />
             <DetailSection title="Utilisateurs / rôles">
               {org.roleBreakdown.map((r) => (
                 <View key={r.role} style={styles.lineRow}>
@@ -397,7 +403,6 @@ function OrgDetailModal({
                 </View>
               ))}
             </DetailSection>
-
             <DetailSection title="Modules actifs">
               <View style={styles.chipsRow}>
                 {org.activeModules.map((m) => (
@@ -407,35 +412,32 @@ function OrgDetailModal({
                 ))}
               </View>
             </DetailSection>
-
             <DetailSection title="Derniers audits">
-              {org.recentAudits.map((a) => (
-                <View key={a.title} style={styles.lineRow}>
+              {org.recentAudits.map((audit) => (
+                <View key={audit.title} style={styles.lineRow}>
                   <ClipboardList size={14} color={colors.textMuted} />
                   <Text style={styles.lineText}>
-                    {a.title}
-                    {a.score !== null ? ` · ${a.score}%` : ' · en cours'}
+                    {audit.title}
+                    {audit.score !== null ? ` · ${audit.score}%` : ' · en cours'}
                   </Text>
                 </View>
               ))}
             </DetailSection>
-
             <DetailSection title="Dernières actions correctives">
-              {org.recentActions.map((a) => (
-                <View key={a.title} style={styles.lineRow}>
+              {org.recentActions.map((action) => (
+                <View key={action.title} style={styles.lineRow}>
                   <TriangleAlert
                     size={14}
                     color={
-                      a.priority === 'critical'
+                      action.priority === 'critical'
                         ? colors.dangerStrong
                         : colors.textMuted
                     }
                   />
-                  <Text style={styles.lineText}>{a.title}</Text>
+                  <Text style={styles.lineText}>{action.title}</Text>
                 </View>
               ))}
             </DetailSection>
-
             <TouchableOpacity
               testID="backoffice-detail-support"
               style={styles.primaryCta}
@@ -451,12 +453,33 @@ function OrgDetailModal({
   );
 }
 
+function DetailList({
+  title,
+  icon: Icon,
+  items,
+}: {
+  title: string;
+  icon: typeof Store;
+  items: string[];
+}) {
+  return (
+    <DetailSection title={title}>
+      {items.map((name) => (
+        <View key={name} style={styles.lineRow}>
+          <Icon size={14} color={colors.textMuted} />
+          <Text style={styles.lineText}>{name}</Text>
+        </View>
+      ))}
+    </DetailSection>
+  );
+}
+
 function DetailSection({
   title,
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <View style={styles.detailSection}>
@@ -520,6 +543,8 @@ function capitalize(value: string): string {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   scrollContent: { padding: spacing.lg, paddingBottom: spacing.xxl * 2 },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  centeredText: { fontSize: 13, color: colors.textMuted },
   supportButton: {
     width: 44,
     height: 44,
@@ -679,7 +704,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: 5,
   },
-  lineText: { flex: 1, fontSize: 13, color: colors.text },
+  lineText: { flex: 1, fontSize: 13, color: colors.text, paddingVertical: 3 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   moduleChip: {
     backgroundColor: colors.primarySoft,
