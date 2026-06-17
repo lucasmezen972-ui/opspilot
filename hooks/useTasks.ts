@@ -204,6 +204,7 @@ export function useTasks() {
   const completeTask = async (id: string, input: TaskCompletionInput) => {
     const now = new Date().toISOString();
     const task = tasks.find((t) => t.id === id);
+    const completionComment = input.comment?.trim();
     const updates: Partial<Task> = {
       status: 'completed',
       completed_at: now,
@@ -211,7 +212,10 @@ export function useTasks() {
       duration_minutes: computeDurationMinutes(task?.started_at ?? null, now),
       completed_by_name: input.executantName.trim(),
       completed_by_matricule: input.matricule.trim(),
-      completion_comment: input.comment?.trim() || null, // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing -- empty string → null
+      completion_comment:
+        completionComment && completionComment.length > 0
+          ? completionComment
+          : null,
       proof_photo_url: input.proofPhotoUrl ?? null,
       updated_at: now,
     };

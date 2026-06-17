@@ -58,7 +58,7 @@ export default function MoreScreen() {
     {
       slug: 'products',
       label: 'Produits',
-      description: 'Catalogue, scan & DLC',
+      description: 'Catalogue, scan & dates sensibles',
       icon: Package,
       href: '/products',
       accent: colors.primary,
@@ -66,8 +66,8 @@ export default function MoreScreen() {
     },
     {
       slug: 'actions',
-      label: 'Plans d’action',
-      description: 'Actions correctives & suivi',
+      label: 'Actions à sécuriser',
+      description: 'Plans correctifs, preuves & suivi',
       icon: Wrench,
       href: '/actions',
       accent: colors.warningText,
@@ -76,7 +76,7 @@ export default function MoreScreen() {
     {
       slug: 'chat',
       label: 'Communication',
-      description: 'Messagerie interne & canaux',
+      description: 'Messages officiels & canaux terrain',
       icon: MessageCircle,
       href: '/chat',
       accent: colors.primary,
@@ -88,7 +88,7 @@ export default function MoreScreen() {
     links.push({
       slug: 'reports',
       label: 'Rapports',
-      description: 'Conformité & exports direction',
+      description: 'Preuves, conformité & exports direction',
       icon: FileText,
       href: '/reports',
       accent: colors.successText,
@@ -121,7 +121,7 @@ export default function MoreScreen() {
     links.push({
       slug: 'billing',
       label: 'Abonnement',
-      description: 'Facturation & plan',
+      description: 'Plan, facturation & activation',
       icon: CreditCard,
       href: '/billing',
       accent: colors.textMuted,
@@ -131,8 +131,8 @@ export default function MoreScreen() {
   if (isAdmin || canBackoffice) {
     links.push({
       slug: 'commercial',
-      label: 'Offre commerciale',
-      description: 'Démo, tarifs & conversion client',
+      label: 'Présenter OpsPilot',
+      description: 'Démo, offres & conversion client',
       icon: Rocket,
       href: '/commercial',
       accent: colors.primary,
@@ -142,8 +142,8 @@ export default function MoreScreen() {
   if (canBackoffice) {
     links.push({
       slug: 'backoffice',
-      label: 'Back-office',
-      description: 'Organisations clientes & pilotage',
+      label: 'Pilotage clients',
+      description: 'Santé des organisations & support',
       icon: Building2,
       href: '/backoffice',
       accent: colors.primaryDark,
@@ -166,7 +166,9 @@ export default function MoreScreen() {
         <Text style={styles.title} testID="page-more-title">
           Plus
         </Text>
-        <Text style={styles.subtitle}>Tous vos modules en un coup d’œil</Text>
+        <Text style={styles.subtitle}>
+          Modules terrain, preuves et pilotage au même endroit
+        </Text>
       </View>
 
       <View style={styles.list}>

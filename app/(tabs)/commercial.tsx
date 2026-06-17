@@ -6,6 +6,7 @@ import {
   Store,
 } from 'lucide-react-native';
 import {
+  Alert,
   Linking,
   ScrollView,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
 
 import {
   buildCommercialMailto,
+  COMMERCIAL_CONTACT_EMAIL,
   COMMERCIAL_KPIS,
   COMMERCIAL_PLANS,
   SALES_STEPS,
@@ -27,15 +29,20 @@ import { colors, radius, shadow, spacing } from '../../shared/styles/tokens';
 
 export default function CommercialScreen() {
   const openDemoRequest = (planId?: CommercialPlan['id']) => {
-    Linking.openURL(buildCommercialMailto(planId));
+    Linking.openURL(buildCommercialMailto(planId)).catch(() => {
+      Alert.alert(
+        'Demande impossible',
+        `Contactez directement l’équipe OpsPilot : ${COMMERCIAL_CONTACT_EMAIL}`,
+      );
+    });
   };
 
   return (
     <View style={styles.container}>
       <AppScreenHeader
-        title="Offre commerciale"
+        title="Présenter OpsPilot"
         titleTestID="page-commercial-title"
-        subtitle="Transformer la démo OpsPilot en vente client"
+        subtitle="Une preuve terrain claire pour vendre aux réseaux et magasins"
       />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.heroCard}>
@@ -48,8 +55,8 @@ export default function CommercialScreen() {
           </Text>
           <Text style={styles.heroText}>
             Audits contextualisés, plans d’action avec preuves, formations
-            longues et back-office multi-sites : le parcours est prêt pour une
-            démonstration commerciale sérieuse.
+            longues et pilotage multi-sites : le parcours montre comment réduire
+            les oublis, sécuriser les équipes et prouver l’exécution.
           </Text>
           <TouchableOpacity
             testID="commercial-main-cta"
@@ -57,7 +64,7 @@ export default function CommercialScreen() {
             onPress={() => openDemoRequest()}
           >
             <Mail size={18} color="#FFFFFF" />
-            <Text style={styles.primaryCtaText}>Planifier une démo</Text>
+            <Text style={styles.primaryCtaText}>Demander une démo guidée</Text>
           </TouchableOpacity>
         </View>
 
@@ -72,7 +79,7 @@ export default function CommercialScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppSectionHeader title="Offres vendables" />
+          <AppSectionHeader title="Offres prêtes à vendre" />
           {COMMERCIAL_PLANS.map((plan) => (
             <PlanCard
               key={plan.id}
@@ -83,7 +90,7 @@ export default function CommercialScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppSectionHeader title="Tunnel de conversion" />
+          <AppSectionHeader title="Parcours de vente" />
           <View style={styles.stepsCard}>
             {SALES_STEPS.map((step, index) => (
               <View key={step} style={styles.stepRow}>
@@ -99,7 +106,9 @@ export default function CommercialScreen() {
         <View style={styles.proofCard}>
           <ShieldCheck size={22} color={colors.successText} />
           <View style={styles.proofBody}>
-            <Text style={styles.proofTitle}>Promesse commerciale claire</Text>
+            <Text style={styles.proofTitle}>
+              Conversion honnête et traçable
+            </Text>
             <Text style={styles.proofText}>
               Aucun faux bouton de paiement : la conversion passe par une
               demande de démo ou de devis à contact@tradikom.com tant que

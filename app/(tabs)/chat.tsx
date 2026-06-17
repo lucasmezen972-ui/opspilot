@@ -244,9 +244,18 @@ export default function ChatScreen() {
               currentUserId={currentUserId}
               canModerate={isManager}
               onBack={() => setActiveChannelId(null)}
-              onSend={(content, type) =>
-                sendChannelMessage(activeChannel.id, content, type)
-              }
+              onSend={(content, type) => {
+                sendChannelMessage(activeChannel.id, content, type).then(
+                  (result) => {
+                    if (result?.error) {
+                      Alert.alert(
+                        'Message non envoyé',
+                        'La communication interne reste disponible en mode démo.',
+                      );
+                    }
+                  },
+                );
+              }}
               onTogglePin={togglePin}
               onDelete={deleteMessage}
               onSearch={searchMessages}

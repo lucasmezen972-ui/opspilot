@@ -51,7 +51,11 @@ export function useOrganizationPortfolio(enabled: boolean) {
       }
     }
 
-    loadPortfolio();
+    loadPortfolio().catch(() => {
+      if (!alive) return;
+      setOrganizations([]);
+      setStatus('error');
+    });
 
     return () => {
       alive = false;

@@ -483,9 +483,12 @@ export function useTraining() {
       user_id: profile.id,
       training_id: courseId,
       organization_id: profile.organization_id ?? '',
-      full_name:
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty strings should fall through
-        options?.fullName?.trim() || profile.full_name || profile.email,
+      full_name: (() => {
+        const candidate = options?.fullName?.trim();
+        return candidate && candidate.length > 0
+          ? candidate
+          : (profile.full_name ?? profile.email);
+      })(),
       training_title: course.title,
       score,
       issued_at: now,

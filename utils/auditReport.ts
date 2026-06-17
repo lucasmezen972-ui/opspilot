@@ -122,10 +122,14 @@ function synthesisSection(audit: Audit, ctx: AuditReportContext): string {
 
 /** Bloc de signature : auditeur et responsable validant le rapport. */
 function signatureSection(ctx: AuditReportContext): string {
-  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- empty strings after trim should fall through to defaults */
-  const auditor = ctx.auditorName?.trim() || 'Auditeur';
-  const responsible = ctx.responsibleName?.trim() || 'Responsable qualité';
-  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
+  const auditorName = ctx.auditorName?.trim();
+  const responsibleName = ctx.responsibleName?.trim();
+  const auditor =
+    auditorName && auditorName.length > 0 ? auditorName : 'Auditeur';
+  const responsible =
+    responsibleName && responsibleName.length > 0
+      ? responsibleName
+      : 'Responsable qualité';
   return `
 <div class="section">
   <h2>Validation</h2>

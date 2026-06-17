@@ -25,7 +25,7 @@ const GREEN = '#10B981';
 const GREEN_SOFT = '#DCFCE7';
 
 /**
- * Calcule les KPIs du jour à partir des données brutes. Logique pure et
+ * Calcule les indicateurs du jour à partir des données brutes. Logique pure et
  * testable : aucune dépendance à l'UI ni aux hooks.
  */
 export function getDashboardKpis(
@@ -62,7 +62,7 @@ export function getDashboardKpis(
   return [
     {
       id: 'audits-done',
-      label: 'Audits réalisés',
+      label: 'Contrôles validés',
       value: auditsCompleted,
       accent: GREEN,
       accentSoft: GREEN_SOFT,
@@ -70,7 +70,7 @@ export function getDashboardKpis(
     },
     {
       id: 'audits-overdue',
-      label: 'Audits en retard',
+      label: 'Contrôles à rattraper',
       value: auditsOverdue,
       accent: auditsOverdue > 0 ? '#EF4444' : GREEN,
       accentSoft: auditsOverdue > 0 ? '#FEE2E2' : GREEN_SOFT,
@@ -78,7 +78,7 @@ export function getDashboardKpis(
     },
     {
       id: 'actions-open',
-      label: 'Actions ouvertes',
+      label: 'Plans à suivre',
       value: actionsOpen,
       accent: actionsOpen > 0 ? '#F59E0B' : GREEN,
       accentSoft: actionsOpen > 0 ? '#FEF3C7' : GREEN_SOFT,
@@ -86,7 +86,7 @@ export function getDashboardKpis(
     },
     {
       id: 'actions-critical',
-      label: 'Actions critiques',
+      label: 'Actions à sécuriser',
       value: actionsCritical,
       accent: actionsCritical > 0 ? '#DC2626' : GREEN,
       accentSoft: actionsCritical > 0 ? '#FEE2E2' : GREEN_SOFT,
@@ -94,7 +94,7 @@ export function getDashboardKpis(
     },
     {
       id: 'dlc-critical',
-      label: 'DLC critiques',
+      label: 'DLC à traiter',
       value: dlcCritical,
       accent: dlcCritical > 0 ? '#EF4444' : GREEN,
       accentSoft: dlcCritical > 0 ? '#FEE2E2' : GREEN_SOFT,

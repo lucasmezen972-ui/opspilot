@@ -130,8 +130,8 @@ describe('AuthScreen Component', () => {
   it('should display demo access section', () => {
     const { getByText } = render(<AuthScreen />);
 
-    expect(getByText('Accès démo instantané')).toBeTruthy();
-    expect(getByText('⚡ Connexion Démo')).toBeTruthy();
+    expect(getByText('Démo terrain guidée')).toBeTruthy();
+    expect(getByText('Lancer la démo OpsPilot')).toBeTruthy();
   });
 
   it('should call signInDemo when demo button is pressed', async () => {
@@ -139,7 +139,7 @@ describe('AuthScreen Component', () => {
 
     const { getByText } = render(<AuthScreen />);
 
-    fireEvent.click(getByText('⚡ Connexion Démo'));
+    fireEvent.click(getByText('Lancer la démo OpsPilot'));
 
     await waitFor(() => {
       expect(mockSignInDemo).toHaveBeenCalled();

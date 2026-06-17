@@ -75,7 +75,7 @@ export function useTrainingSupervision() {
   useEffect(() => {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
-    fetchOrgData();
+    fetchOrgData().catch(() => setLoading(false));
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchOrgData = async () => {

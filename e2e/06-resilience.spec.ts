@@ -17,7 +17,7 @@ test.describe('Résilience', () => {
   }) => {
     await page.reload();
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
   });
@@ -63,7 +63,7 @@ test.describe('Résilience', () => {
   }) => {
     await page.reload();
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
     await openTab(page, 'Audits', 'page-audits-title');
     await expect(

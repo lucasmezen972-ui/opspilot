@@ -36,12 +36,14 @@ export default function HomeScreen() {
   const kpiValue = (id: string) => kpis.find((k) => k.id === id)?.value ?? 0;
   const overdue = kpiValue('audits-overdue');
   const critical = kpiValue('actions-critical');
-  const auditLabel = overdue > 1 ? 'audits' : 'audit';
-  const actionLabel = critical > 1 ? 'actions critiques' : 'action critique';
+  const auditLabel =
+    overdue > 1 ? 'contrôles à rattraper' : 'contrôle à rattraper';
+  const actionLabel =
+    critical > 1 ? 'actions à sécuriser' : 'action à sécuriser';
   const summary =
     overdue + critical > 0
-      ? `${overdue} ${auditLabel} en retard · ${critical} ${actionLabel}`
-      : 'Opérations sous contrôle aujourd’hui';
+      ? `${overdue} ${auditLabel} · ${critical} ${actionLabel}`
+      : 'Terrain sous contrôle aujourd’hui';
 
   return (
     <ScrollView style={styles.container}>
@@ -56,7 +58,7 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>
               Bonjour, {profile?.full_name?.split(' ')[0] ?? 'Utilisateur'} !
             </Text>
-            <Text style={styles.subtitle}>Tableau de bord opérationnel</Text>
+            <Text style={styles.subtitle}>Carnet de bord terrain</Text>
           </View>
           <View style={styles.logo}>
             <Text style={styles.logoText}>OP</Text>
@@ -69,7 +71,7 @@ export default function HomeScreen() {
       </LinearGradient>
 
       <View style={styles.section}>
-        <AppSectionHeader title="KPIs du jour" />
+        <AppSectionHeader title="Ce qui compte aujourd’hui" />
         <View style={styles.kpiGrid}>
           {kpis.map((kpi) => (
             <AppKpiCard
@@ -104,7 +106,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   hero: {
     paddingHorizontal: 20,
@@ -163,10 +165,10 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.fieldWarm,
   },
   heroSummaryText: {
-    color: '#FFFFFF',
+    color: colors.fieldWarm,
     fontSize: 12.5,
     fontWeight: '600',
   },
