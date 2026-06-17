@@ -7,9 +7,15 @@ import { mapSupabaseError } from '../utils/error';
 export function useStores() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
 
   const fetchStores = useCallback(async () => {
+    if (isLocalDemo) {
+      setStores([]);
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) {
       setLoading(false);
       return;
@@ -35,7 +41,7 @@ export function useStores() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   useEffect(() => {
     fetchStores();

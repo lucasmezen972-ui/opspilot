@@ -1,18 +1,52 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
+import { DEMO_ORG_ID, DEMO_USER_ID } from '../lib/demoData';
 import { supabase, type Message, type Conversation } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
+
+const DEMO_CONVERSATIONS: Conversation[] = [
+  {
+    id: 'demo-conv-1',
+    organization_id: DEMO_ORG_ID,
+    name: 'Équipe magasin',
+    description: 'Discussion générale',
+    type: 'group',
+    participants: [],
+    last_message_at: new Date().toISOString(),
+    created_by: null,
+    created_at: new Date().toISOString(),
+  },
+];
+
+const DEMO_MESSAGES: Message[] = [
+  {
+    id: 'demo-msg-1',
+    conversation_id: 'demo-conv-1',
+    sender_id: DEMO_USER_ID,
+    content: 'Bienvenue sur OpsPilot ! Ceci est un message de démonstration.',
+    message_type: 'text',
+    attachments: [],
+    read_by: [],
+    created_at: new Date().toISOString(),
+  },
+];
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
   const activeConversationRef = useRef<string | null>(null);
+  const isLocalDemo = isDemoMode && !session;
 
   useEffect(() => {
+    if (isLocalDemo) {
+      setConversations(DEMO_CONVERSATIONS);
+      setLoading(false);
+      return;
+    }
     if (profile?.organization_id) {
       fetchConversations().then((convs) => {
         if (convs) fetchUnreadCounts(convs);
@@ -22,7 +56,7 @@ export function useMessages() {
         cleanup?.();
       };
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   const fetchConversations = async () => {
     if (!profile?.organization_id) return;
@@ -54,6 +88,12 @@ export function useMessages() {
 
   const fetchMessages = async (conversationId: string) => {
     activeConversationRef.current = conversationId;
+    if (isLocalDemo) {
+      setMessages(
+        DEMO_MESSAGES.filter((m) => m.conversation_id === conversationId),
+      );
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -83,6 +123,21 @@ export function useMessages() {
     messageType: Message['message_type'] = 'text',
   ) => {
     if (!profile) return { data: null, error: 'Utilisateur non connecté' };
+
+    if (isLocalDemo) {
+      const msg: Message = {
+        id: `demo-msg-${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: profile.id,
+        content,
+        message_type: messageType,
+        attachments: [],
+        read_by: [profile.id],
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, msg]);
+      return { data: msg };
+    }
 
     try {
       const { data, error } = await supabase
@@ -194,6 +249,22 @@ export function useMessages() {
   ) => {
     if (!profile?.organization_id)
       return { data: null, error: 'Organisation non définie' };
+
+    if (isLocalDemo) {
+      const conv: Conversation = {
+        id: `demo-conv-${Date.now()}`,
+        organization_id: profile.organization_id,
+        name,
+        description: null,
+        type,
+        participants,
+        last_message_at: new Date().toISOString(),
+        created_by: profile.id,
+        created_at: new Date().toISOString(),
+      };
+      setConversations((prev) => [conv, ...prev]);
+      return { data: conv };
+    }
 
     try {
       const { data, error } = await supabase
