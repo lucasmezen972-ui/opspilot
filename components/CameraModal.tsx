@@ -72,6 +72,25 @@ export default function CameraModal({
     typeof localStorage !== 'undefined' &&
     localStorage.getItem('opspilot_e2e_camera') === '1';
 
+  // Fallback web : import d'un fichier image si la caméra est indisponible /
+  // refusée. Garantit qu'un utilisateur terrain n'est jamais bloqué. Défini
+  // avant les retours anticipés (écran permission) pour rester accessible.
+  const canImport = Platform.OS === 'web';
+  const importFromFile = () => {
+    if (typeof document === 'undefined') return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      onPhotoTaken(url);
+      onClose();
+    };
+    input.click();
+  };
+
   if (visible && isE2ECameraMode) {
     return (
       <Modal visible animationType="none">
@@ -106,18 +125,29 @@ export default function CameraModal({
             Autorisation caméra requise
           </Text>
           <Text style={styles.permissionText}>
-            OpsPilot a besoin d'accéder à votre caméra pour prendre des photos
-            d'audit.
+            La caméra n'est pas disponible ou son accès a été refusé.
+            {canImport
+              ? ' Vous pouvez réessayer ou importer une photo existante.'
+              : ' Autorisez l’accès dans les réglages de votre appareil, puis réessayez.'}
           </Text>
           <TouchableOpacity
             testID="camera-permission-button"
             style={styles.permissionButton}
             onPress={requestPermission}
           >
-            <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
+            <Text style={styles.permissionButtonText}>Réessayer</Text>
           </TouchableOpacity>
+          {canImport && (
+            <TouchableOpacity
+              testID="camera-import-button"
+              style={styles.importButton}
+              onPress={importFromFile}
+            >
+              <Text style={styles.importButtonText}>Importer une photo</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelButtonText}>Annuler</Text>
+            <Text style={styles.cancelButtonText}>Fermer</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -327,6 +357,18 @@ export default function CameraModal({
           <Text style={styles.cameraHint}>
             Centrez l'élément à auditer dans le cadre
           </Text>
+
+          {canImport && (
+            <TouchableOpacity
+              testID="camera-import-button"
+              style={styles.importInline}
+              onPress={importFromFile}
+            >
+              <Text style={styles.importInlineText}>
+                Ou importer une photo existante
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
             <View style={styles.aiHint}>
@@ -607,5 +649,28 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#6B7280',
     fontSize: 16,
+  },
+  importButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    marginBottom: 12,
+  },
+  importButtonText: {
+    color: '#2563EB',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  importInline: {
+    marginTop: 4,
+    paddingVertical: 6,
+  },
+  importInlineText: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
