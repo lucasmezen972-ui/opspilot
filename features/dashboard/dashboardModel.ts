@@ -10,6 +10,8 @@ import type { Audit, CorrectiveAction, Product } from '../../lib/supabase';
 
 const DAY_MS = 86_400_000;
 
+export type DashboardRoute = '/actions' | '/audits' | '/products';
+
 /** Carte KPI du tableau de bord (déjà résolue : valeur + couleurs). */
 export interface DashboardKpi {
   id: string;
@@ -19,6 +21,17 @@ export interface DashboardKpi {
   accent: string;
   accentSoft: string;
   icon: LucideIcon;
+}
+
+export interface DashboardFieldBrief {
+  tone: 'danger' | 'warning' | 'success';
+  eyebrow: string;
+  title: string;
+  message: string;
+  proof: string;
+  actionLabel: string;
+  route: DashboardRoute;
+  trustLine: string;
 }
 
 const GREEN = '#10B981';
@@ -101,6 +114,126 @@ export function getDashboardKpis(
       icon: Package,
     },
   ];
+}
+
+function sortByDueDate<T extends { due_date?: string | null }>(
+  items: T[],
+): T[] {
+  return [...items].sort((a, b) => {
+    const aDate = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+    const bDate = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+    return aDate - bDate;
+  });
+}
+
+function buildTrustLine(audits: Audit[], actions: CorrectiveAction[]): string {
+  const completedAudits = audits.filter(
+    (audit) => audit.status === 'completed',
+  );
+  const tracedActions = actions.filter(
+    (action) =>
+      action.status === 'done' &&
+      (Boolean(action.resolution_comment?.trim()) ||
+        Boolean(action.resolved_by_name?.trim()) ||
+        Boolean(action.resolution_photo_confirmed) ||
+        Boolean(action.manager_validated)),
+  );
+
+  if (completedAudits.length === 0 && tracedActions.length === 0) {
+    return 'Démo prête : lancez un contrôle pour créer les premières preuves.';
+  }
+
+  return `${completedAudits.length} contrôle${completedAudits.length > 1 ? 's' : ''} validé${completedAudits.length > 1 ? 's' : ''} · ${tracedActions.length} action${tracedActions.length > 1 ? 's' : ''} tracée${tracedActions.length > 1 ? 's' : ''}`;
+}
+
+export function getDashboardFieldBrief(
+  audits: Audit[],
+  actions: CorrectiveAction[],
+  products: Product[],
+  now: Date,
+): DashboardFieldBrief {
+  const trustLine = buildTrustLine(audits, actions);
+  const criticalAction = sortByDueDate(
+    actions.filter(
+      (action) =>
+        action.priority === 'critical' &&
+        action.status !== 'done' &&
+        action.status !== 'cancelled',
+    ),
+  )[0];
+
+  if (criticalAction) {
+    const actionDescription = criticalAction.description?.trim();
+    return {
+      tone: 'danger',
+      eyebrow: 'À sécuriser maintenant',
+      title: criticalAction.title,
+      message:
+        actionDescription && actionDescription.length > 0
+          ? actionDescription
+          : 'Une non-conformité critique attend une prise en charge terrain.',
+      proof:
+        'Preuve attendue : commentaire de clôture, exécutant identifié et validation manager.',
+      actionLabel: 'Ouvrir les actions',
+      route: '/actions',
+      trustLine,
+    };
+  }
+
+  const overdueAudit = sortByDueDate(
+    audits.filter(
+      (audit) =>
+        (audit.status === 'pending' || audit.status === 'in_progress') &&
+        audit.due_date != null &&
+        new Date(audit.due_date) < now,
+    ),
+  )[0];
+
+  if (overdueAudit) {
+    return {
+      tone: 'warning',
+      eyebrow: 'Contrôle à reprendre',
+      title: overdueAudit.title,
+      message: overdueAudit.location
+        ? `Zone concernée : ${overdueAudit.location}. Le contrôle doit être repris avant la tournée suivante.`
+        : 'Un contrôle terrain est en retard et doit être repris avant la tournée suivante.',
+      proof:
+        'Preuve attendue : réponses complètes, commentaire si écart et photo si nécessaire.',
+      actionLabel: 'Reprendre l’audit',
+      route: '/audits',
+      trustLine,
+    };
+  }
+
+  const urgentDlc = getDlcAlerts(products, now)[0];
+
+  if (urgentDlc?.dlc) {
+    const urgency = getDlcUrgency(urgentDlc.dlc, now);
+    return {
+      tone: urgency.isExpired || urgency.isToday ? 'danger' : 'warning',
+      eyebrow: 'DLC à vérifier',
+      title: urgentDlc.name,
+      message: `${urgentDlc.name} est signalé ${urgency.label.toLowerCase()} : vérifiez le rayon, la rotation et le retrait si nécessaire.`,
+      proof:
+        'Preuve attendue : stock contrôlé, décision tracée et rayon remis au propre.',
+      actionLabel: 'Voir les produits',
+      route: '/products',
+      trustLine,
+    };
+  }
+
+  return {
+    tone: 'success',
+    eyebrow: 'Terrain maîtrisé',
+    title: 'Les priorités sensibles sont sous contrôle',
+    message:
+      'Les contrôles, actions critiques et alertes DLC ne signalent pas de blocage immédiat.',
+    proof:
+      'Rythme conseillé : garder les preuves à jour et lancer le prochain contrôle planifié.',
+    actionLabel: 'Préparer un audit',
+    route: '/audits',
+    trustLine,
+  };
 }
 
 /** Cinq produits dont la DLC tombe dans les 7 jours, du plus urgent au moins. */

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+  getDashboardFieldBrief,
   getDashboardKpis,
   getDlcAlerts,
   getDlcUrgency,
@@ -82,6 +83,63 @@ describe('getDashboardKpis', () => {
     const kpis = getDashboardKpis([], [], [], NOW);
     const overdue = kpis.find((k) => k.id === 'audits-overdue');
     expect(overdue?.accent).toBe('#10B981');
+  });
+});
+
+describe('getDashboardFieldBrief', () => {
+  it('priorise une action critique avec preuve attendue', () => {
+    const brief = getDashboardFieldBrief(
+      [audit({ id: 'a1', status: 'completed' })],
+      [
+        action({
+          id: 'c1',
+          title: 'Température chambre froide hors seuil',
+          description: 'Relever la température et isoler les produits.',
+          priority: 'critical',
+          status: 'open',
+        }),
+      ],
+      [],
+      NOW,
+    );
+
+    expect(brief.tone).toBe('danger');
+    expect(brief.route).toBe('/actions');
+    expect(brief.title).toBe('Température chambre froide hors seuil');
+    expect(brief.proof).toContain('Preuve attendue');
+  });
+
+  it('fait remonter un audit en retard avant les alertes DLC', () => {
+    const brief = getDashboardFieldBrief(
+      [
+        audit({
+          id: 'a1',
+          title: 'Tournée parking',
+          status: 'pending',
+          location: 'Extérieur magasin',
+          due_date: days(-1),
+        }),
+      ],
+      [],
+      [product({ id: 'p1', name: 'Yaourt nature', dlc: days(0) })],
+      NOW,
+    );
+
+    expect(brief.tone).toBe('warning');
+    expect(brief.route).toBe('/audits');
+    expect(brief.message).toContain('Extérieur magasin');
+  });
+
+  it('rassure lorsque le terrain ne signale pas de blocage immédiat', () => {
+    const brief = getDashboardFieldBrief(
+      [audit({ id: 'a1', status: 'completed' })],
+      [],
+      [],
+      NOW,
+    );
+
+    expect(brief.tone).toBe('success');
+    expect(brief.title).toBe('Les priorités sensibles sont sous contrôle');
   });
 });
 
