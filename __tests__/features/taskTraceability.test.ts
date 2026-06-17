@@ -4,8 +4,10 @@ import {
   canValidateTask,
   computeDurationMinutes,
   executionProofSummary,
+  hasProofPhoto,
   isCompletionValid,
   isTaskValidated,
+  taskRequiresPhoto,
 } from '../../features/tasks/taskTraceability';
 import type { Task } from '../../lib/supabase';
 
@@ -46,6 +48,42 @@ describe('isCompletionValid', () => {
     expect(isCompletionValid({ executantName: 'Marie', matricule: '  ' })).toBe(
       false,
     );
+  });
+
+  it('exige une preuve photo réelle quand la tâche la requiert', () => {
+    const base = { executantName: 'Marie', matricule: 'M-1' };
+    // Nom + matricule fournis mais aucune photo : bloqué si photo requise.
+    expect(isCompletionValid(base, true)).toBe(false);
+    expect(isCompletionValid({ ...base, proofPhotoUrl: '   ' }, true)).toBe(
+      false,
+    );
+    expect(
+      isCompletionValid({ ...base, proofPhotoUrl: 'file:///x.jpg' }, true),
+    ).toBe(true);
+    // Sans exigence de photo, nom + matricule suffisent.
+    expect(isCompletionValid(base, false)).toBe(true);
+  });
+});
+
+describe('taskRequiresPhoto', () => {
+  it('exige une photo pour les tâches urgentes ou hautes', () => {
+    expect(taskRequiresPhoto(task({ priority: 'urgent' }))).toBe(true);
+    expect(taskRequiresPhoto(task({ priority: 'high' }))).toBe(true);
+  });
+
+  it('rend la photo facultative pour les tâches courantes', () => {
+    expect(taskRequiresPhoto(task({ priority: 'medium' }))).toBe(false);
+    expect(taskRequiresPhoto(task({ priority: 'low' }))).toBe(false);
+  });
+});
+
+describe('hasProofPhoto', () => {
+  it('détecte une preuve photo réellement présente', () => {
+    expect(hasProofPhoto(task({ proof_photo_url: 'file:///x.jpg' }))).toBe(
+      true,
+    );
+    expect(hasProofPhoto(task({ proof_photo_url: null }))).toBe(false);
+    expect(hasProofPhoto(task({ proof_photo_url: '   ' }))).toBe(false);
   });
 });
 

@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import {
+  isUploadableEvidenceUri,
+  uploadEvidencePhoto,
+} from '../features/evidence/evidenceUpload';
 import { isRecurring, nextDueDate } from '../features/tasks/taskRecurrence';
 import {
   computeDurationMinutes,
@@ -234,6 +238,21 @@ export function useTasks() {
     }
 
     try {
+      // Preuve photo durable : téléverse l'URI locale dans le bucket privé
+      // « evidence » et persiste le chemin. Best-effort : conserve l'URI si
+      // l'upload échoue, ne bloque jamais la clôture.
+      const uri = input.proofPhotoUrl;
+      if (uri && isUploadableEvidenceUri(uri) && profile?.organization_id) {
+        const storagePath = await uploadEvidencePhoto({
+          organizationId: profile.organization_id,
+          entityType: 'task',
+          entityId: id,
+          uri,
+          uploadedBy: user?.id ?? null,
+        });
+        if (storagePath) updates.proof_photo_url = storagePath;
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .update(updates)

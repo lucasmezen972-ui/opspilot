@@ -1850,6 +1850,7 @@ export function getDemoTasks(): Task[] {
       completed_by_matricule: 'M-1042',
       completion_comment:
         'Accueil propre, distributeur de gel hydroalcoolique réapprovisionné.',
+      proof_photo_url: 'demo://preuve/accueil-proprete.jpg',
       created_at: days(-2),
       updated_at: days(-1),
       completed_at: days(-1),
