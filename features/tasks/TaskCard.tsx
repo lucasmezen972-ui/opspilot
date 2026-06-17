@@ -7,6 +7,7 @@ import {
   Flag,
   User,
   Repeat,
+  Camera,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -17,7 +18,11 @@ import {
   getTaskStatusText,
 } from './taskModel';
 import { isRecurring, recurrenceLabel } from './taskRecurrence';
-import { executionProofSummary, isTaskValidated } from './taskTraceability';
+import {
+  executionProofSummary,
+  hasProofPhoto,
+  isTaskValidated,
+} from './taskTraceability';
 import type { Task } from '../../lib/supabase';
 import { colors, radius, shadow } from '../../shared/styles/tokens';
 
@@ -137,6 +142,15 @@ export function TaskCard({
               « {task.completion_comment} »
             </Text>
           ) : null}
+          {hasProofPhoto(task) && (
+            <View
+              style={styles.proofPhotoRow}
+              testID={`task-proof-photo-${task.id}`}
+            >
+              <Camera size={12} color={colors.successText} />
+              <Text style={styles.proofPhotoText}>Preuve photo capturée</Text>
+            </View>
+          )}
           {validated ? (
             <View style={styles.validatedBadge}>
               <CheckCircle size={12} color={colors.successText} />
@@ -293,6 +307,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     fontStyle: 'italic',
+  },
+  proofPhotoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  proofPhotoText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.successText,
   },
   validatedBadge: {
     flexDirection: 'row',

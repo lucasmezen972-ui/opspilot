@@ -7,6 +7,19 @@ export interface TaskCompletionInput {
   proofPhotoUrl?: string | null;
 }
 
+/**
+ * Règle métier : une tâche prioritaire (urgente ou haute) exige une preuve
+ * photo réelle avant clôture. Les tâches courantes la rendent facultative.
+ */
+export function taskRequiresPhoto(task: Pick<Task, 'priority'>): boolean {
+  return task.priority === 'urgent' || task.priority === 'high';
+}
+
+/** Vrai si une preuve photo a réellement été capturée pour cette tâche. */
+export function hasProofPhoto(task: Pick<Task, 'proof_photo_url'>): boolean {
+  return Boolean(task.proof_photo_url && task.proof_photo_url.trim() !== '');
+}
+
 /** Durée d'exécution (minutes) entre début et fin, 0 si indéterminée. */
 export function computeDurationMinutes(
   startedAt: string | null | undefined,
@@ -31,9 +44,22 @@ export function canValidateTask(
   return task.status === 'completed' && !isTaskValidated(task);
 }
 
-/** La clôture exige un nom d'exécutant et un matricule (preuve nominative). */
-export function isCompletionValid(input: TaskCompletionInput): boolean {
-  return input.executantName.trim() !== '' && input.matricule.trim() !== '';
+/**
+ * La clôture exige un nom d'exécutant et un matricule (preuve nominative).
+ * Quand `photoRequired` est vrai (tâche prioritaire), une vraie preuve photo
+ * est également obligatoire.
+ */
+export function isCompletionValid(
+  input: TaskCompletionInput,
+  photoRequired = false,
+): boolean {
+  const nominative =
+    input.executantName.trim() !== '' && input.matricule.trim() !== '';
+  if (!nominative) return false;
+  if (photoRequired) {
+    return Boolean(input.proofPhotoUrl && input.proofPhotoUrl.trim() !== '');
+  }
+  return true;
 }
 
 /** Libellé court de la preuve d'exécution (réalisé par X · matricule · durée). */

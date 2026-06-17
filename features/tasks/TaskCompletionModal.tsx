@@ -2,7 +2,7 @@ import { Camera, Check } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-import { isCompletionValid } from './taskTraceability';
+import { isCompletionValid, taskRequiresPhoto } from './taskTraceability';
 import type { TaskCompletionInput } from './taskTraceability';
 import CameraModal from '../../components/CameraModal';
 import type { Task } from '../../lib/supabase';
@@ -47,7 +47,8 @@ export function TaskCompletionModal({
     comment,
     proofPhotoUrl,
   };
-  const valid = isCompletionValid(input);
+  const photoRequired = task ? taskRequiresPhoto(task) : false;
+  const valid = isCompletionValid(input, photoRequired);
 
   return (
     <AppModal
@@ -88,14 +89,36 @@ export function TaskCompletionModal({
 
       <TouchableOpacity
         testID="task-completion-photo"
-        style={styles.photoButton}
+        style={[
+          styles.photoButton,
+          proofPhotoUrl
+            ? styles.photoButtonDone
+            : photoRequired && styles.photoButtonRequired,
+        ]}
         onPress={() => setCameraVisible(true)}
       >
-        <Camera size={16} color={colors.primary} />
-        <Text style={styles.photoButtonText}>
-          {proofPhotoUrl ? 'Preuve jointe' : 'Joindre une preuve photo'}
+        <Camera
+          size={16}
+          color={proofPhotoUrl ? colors.successText : colors.primary}
+        />
+        <Text
+          style={[
+            styles.photoButtonText,
+            proofPhotoUrl && styles.photoButtonTextDone,
+          ]}
+        >
+          {proofPhotoUrl
+            ? 'Preuve photo capturée'
+            : photoRequired
+              ? 'Preuve photo obligatoire — capturer / importer'
+              : 'Joindre une preuve photo'}
         </Text>
       </TouchableOpacity>
+      {photoRequired && !proofPhotoUrl && (
+        <Text style={styles.photoHint} testID="task-completion-photo-required">
+          Cette tâche prioritaire exige une preuve photo avant clôture.
+        </Text>
+      )}
 
       <TouchableOpacity
         testID="task-completion-submit"
@@ -133,10 +156,27 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: radius.md,
   },
+  photoButtonRequired: {
+    borderWidth: 1,
+    borderColor: colors.warning,
+    backgroundColor: colors.warningSoft,
+  },
+  photoButtonDone: {
+    backgroundColor: colors.successSoft,
+  },
   photoButtonText: {
     color: colors.primary,
     fontWeight: '600',
     fontSize: 13,
+  },
+  photoButtonTextDone: {
+    color: colors.successText,
+    fontWeight: '700',
+  },
+  photoHint: {
+    color: colors.warningText,
+    fontSize: 12,
+    lineHeight: 17,
   },
   submit: {
     flexDirection: 'row',
