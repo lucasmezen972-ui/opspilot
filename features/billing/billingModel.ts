@@ -100,6 +100,20 @@ export function formatPlanName(plan: string): string {
   return plan.charAt(0).toUpperCase() + plan.slice(1);
 }
 
+export const SALES_CONTACT_EMAIL = 'contact@tradikom.com';
+
+/**
+ * URL mailto de demande d'activation : alternative claire au paiement en ligne
+ * quand Stripe n'est pas configuré sur l'instance (jamais un cul-de-sac).
+ */
+export function buildActivationMailtoUrl(planId: string): string {
+  const subject = encodeURIComponent(`Activation offre OpsPilot — ${planId}`);
+  const body = encodeURIComponent(
+    `Bonjour,\n\nNous souhaitons activer l'offre « ${planId} » pour notre organisation.\n\nMerci de nous recontacter pour finaliser la souscription.`,
+  );
+  return `mailto:${SALES_CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+}
+
 export interface PlanState {
   isCurrent: boolean;
   isDowngrade: boolean;

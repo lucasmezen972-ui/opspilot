@@ -12,13 +12,13 @@ import {
 import RequireRole from '../../components/RequireRole';
 import { CurrentPlanCard } from '../../features/billing/CurrentPlanCard';
 import { PlanCard } from '../../features/billing/PlanCard';
-import { PLANS } from '../../features/billing/billingModel';
+import {
+  PLANS,
+  buildActivationMailtoUrl,
+} from '../../features/billing/billingModel';
 import { useAuth } from '../../hooks/useAuth';
 import { useSubscription } from '../../hooks/useSubscription';
 import { supabase } from '../../lib/supabase';
-
-const STRIPE_UNAVAILABLE =
-  'Pour souscrire ou faire évoluer votre offre, notre équipe commerciale vous accompagne à contact@tradikom.com.';
 
 export default function BillingScreen() {
   return (
@@ -28,6 +28,11 @@ export default function BillingScreen() {
   );
 }
 
+/** Ouvre une demande d'activation pré-remplie (alternative claire au paiement). */
+function requestActivation(planId: string) {
+  return Linking.openURL(buildActivationMailtoUrl(planId));
+}
+
 function BillingScreenContent() {
   const { profile } = useAuth();
   const { subscription, trialDaysLeft } = useSubscription();
@@ -35,6 +40,8 @@ function BillingScreenContent() {
   const currentPlan = subscription?.plan ?? 'trial';
   const status = subscription?.status ?? 'trialing';
 
+  // Tente le paiement en ligne (Stripe) si l'instance est configurée ; sinon
+  // bascule sur une demande d'activation pré-remplie — jamais un cul-de-sac.
   const handleUpgrade = async (planId: string) => {
     try {
       const { data, error } = await supabase.functions.invoke(
@@ -42,12 +49,12 @@ function BillingScreenContent() {
         { body: { plan: planId } },
       );
       if (error || !data?.url) {
-        Alert.alert('Indisponible', STRIPE_UNAVAILABLE);
+        await requestActivation(planId);
         return;
       }
       await Linking.openURL(data.url);
     } catch {
-      Alert.alert('Indisponible', STRIPE_UNAVAILABLE);
+      await requestActivation(planId);
     }
   };
 
@@ -124,8 +131,9 @@ function BillingScreenContent() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Les paiements sont sécurisés via Stripe. Annulation possible à tout
-          moment.
+          Souscription accompagnée par notre équipe. Le paiement en ligne
+          (Stripe) est proposé lorsqu’il est activé sur votre instance ; sinon
+          nous finalisons l’activation avec vous. Sans engagement.
         </Text>
       </View>
     </ScrollView>

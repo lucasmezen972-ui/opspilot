@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 
 import {
   PLANS,
+  SALES_CONTACT_EMAIL,
+  buildActivationMailtoUrl,
   getStatusInfo,
   formatPlanName,
   getPlanState,
@@ -55,5 +57,22 @@ describe('PLANS', () => {
       'business',
       'enterprise',
     ]);
+  });
+
+  it('réserve Enterprise au devis/contact (pas de prix self-service)', () => {
+    const enterprise = PLANS.find((p) => p.id === 'enterprise');
+    expect(enterprise?.price).toBe('Sur devis');
+    expect(enterprise?.period).toBe('');
+  });
+});
+
+describe('buildActivationMailtoUrl', () => {
+  it('fournit une alternative claire (mailto pré-rempli) au paiement', () => {
+    const url = buildActivationMailtoUrl('business');
+    expect(url.startsWith(`mailto:${SALES_CONTACT_EMAIL}`)).toBe(true);
+    expect(url).toContain('subject=');
+    expect(url).toContain('business');
+    // L'adresse de contact reste la nouvelle adresse, sans secret en dur.
+    expect(SALES_CONTACT_EMAIL).toBe('contact@tradikom.com');
   });
 });
