@@ -106,14 +106,13 @@ export default function CommercialScreen() {
         <View style={styles.proofCard}>
           <ShieldCheck size={22} color={colors.successText} />
           <View style={styles.proofBody}>
-            <Text style={styles.proofTitle}>
-              Conversion honnête et traçable
-            </Text>
+            <Text style={styles.proofTitle}>Besoin d’une offre adaptée ?</Text>
             <Text style={styles.proofText}>
-              Aucun faux bouton de paiement : la conversion passe par une
-              demande de démo ou de devis à contact@tradikom.com tant que
-              l’activation Stripe/back-end n’est pas contractualisée.
+              Parlez-nous de votre magasin ou de votre réseau. Nous vous
+              proposerons une démonstration et une configuration adaptée à vos
+              priorités terrain.
             </Text>
+            <Text style={styles.proofContact}>{COMMERCIAL_CONTACT_EMAIL}</Text>
           </View>
         </View>
       </ScrollView>
@@ -348,5 +347,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 18,
     marginTop: 4,
+  },
+  proofContact: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+    marginTop: spacing.sm,
   },
 });
