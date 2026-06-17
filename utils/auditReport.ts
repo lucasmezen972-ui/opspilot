@@ -77,6 +77,15 @@ function frDate(value?: string | null): string {
   return value ? new Date(value).toLocaleDateString('fr-FR') : '—';
 }
 
+/**
+ * Une preuve photo n'est incrustable dans le rapport que si elle est
+ * directement affichable (data: ou http/https). Les chemins de stockage privé
+ * (« evidence ») ne le sont pas et ne doivent pas produire d'image cassée.
+ */
+export function isEmbeddablePhoto(url: unknown): url is string {
+  return typeof url === 'string' && /^(data:|https?:)/i.test(url.trim());
+}
+
 /** Numéro de référence court et stable dérivé de l'identifiant d'audit. */
 function reference(audit: Audit): string {
   const short = audit.id
@@ -196,17 +205,25 @@ function criteriaSection(ctx: AuditReportContext): string {
           const comment = response?.comment
             ? `<div class="crit-comment">${esc(response.comment)}</div>`
             : '';
-          const photo = response?.photo_url
-            ? '<span class="crit-photo">📎 Preuve photo</span>'
+          // Honnêteté : on incruste la vraie photo si elle est directement
+          // affichable (capture démo en data:/http) ; sinon on indique qu'une
+          // preuve est enregistrée (chemin de stockage privé non incrustable),
+          // sans laisser croire qu'elle est jointe au PDF.
+          const photoTag = response?.photo_url
+            ? '<span class="crit-photo">Preuve photo enregistrée</span>'
+            : '';
+          const photoImg = isEmbeddablePhoto(response?.photo_url)
+            ? `<img class="crit-photo-img" src="${esc(response!.photo_url as string)}" alt="Preuve photo" />`
             : '';
           return `
         <tr>
           <td>
             <div class="crit-q">${esc(item.question)}</div>
             ${comment}
+            ${photoImg}
           </td>
           <td class="crit-pts">${item.points} pts</td>
-          <td class="crit-state">${badge} ${photo}</td>
+          <td class="crit-state">${badge} ${photoTag}</td>
         </tr>`;
         })
         .join('');
@@ -317,6 +334,7 @@ export function buildAuditReportHTML(
   .crit-pts { white-space: nowrap; color: #6B7280; }
   .crit-state { white-space: nowrap; }
   .crit-photo { font-size: 11.5px; color: #6B7280; margin-left: 6px; }
+  .crit-photo-img { display:block; max-width: 160px; max-height: 160px; margin-top: 8px; border-radius: 6px; border: 1px solid #E5E7EB; }
   .tag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
   .tag-ok { background: #DCFCE7; color: #16A34A; }
   .tag-ko { background: #FEE2E2; color: #DC2626; }
@@ -399,7 +417,7 @@ ${
     ? `
 <div class="section">
   <h2>Preuves photo (${audit.photos.length})</h2>
-  <p style="font-size:13px;color:#6B7280">${audit.photos.length} preuve(s) photographique(s) jointe(s) à cet audit, conservée(s) dans le dossier de l'audit.</p>
+  <p style="font-size:13px;color:#6B7280">${audit.photos.length} preuve(s) photo enregistrée(s) pour cet audit et consultable(s) dans l'application (non incluses dans ce document).</p>
 </div>`
     : ''
 }

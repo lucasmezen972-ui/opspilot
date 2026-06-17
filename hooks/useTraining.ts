@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
 import {
   generateCertificateNumber,
+  isCertificateIdentityComplete,
   openCertificate,
 } from '../features/training/certificate';
 import {
@@ -474,6 +475,14 @@ export function useTraining() {
         organizationName: undefined,
       });
       return { data: existing };
+    }
+
+    // Garde-fou : aucune attestation sans candidat identifié (nom + matricule).
+    if (!isCertificateIdentityComplete(options)) {
+      return {
+        error:
+          'Identité du candidat requise (nom et matricule) pour délivrer une attestation.',
+      };
     }
 
     const certNumber = generateCertificateNumber(profile.id, courseId);

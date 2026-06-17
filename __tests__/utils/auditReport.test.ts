@@ -9,6 +9,7 @@ import type {
 import {
   conformityVerdict,
   buildAuditReportHTML,
+  isEmbeddablePhoto,
 } from '../../utils/auditReport';
 
 const audit: Audit = {
@@ -26,6 +27,17 @@ const audit: Audit = {
   completed_at: '2026-06-01T09:00:00Z',
   updated_at: '2026-06-01T09:00:00Z',
 };
+
+describe('isEmbeddablePhoto', () => {
+  it('n’accepte que les sources directement affichables', () => {
+    expect(isEmbeddablePhoto('data:image/png;base64,AA')).toBe(true);
+    expect(isEmbeddablePhoto('https://cdn/x.jpg')).toBe(true);
+    expect(isEmbeddablePhoto('org/audit/1/p.jpg')).toBe(false);
+    expect(isEmbeddablePhoto('file:///x.jpg')).toBe(false);
+    expect(isEmbeddablePhoto('blob:http://x')).toBe(false);
+    expect(isEmbeddablePhoto(null)).toBe(false);
+  });
+});
 
 describe('conformityVerdict', () => {
   it('classe selon le score', () => {
@@ -71,6 +83,65 @@ describe('buildAuditReportHTML', () => {
     const html = buildAuditReportHTML(audit, { responses });
     expect(html).toContain('2 critère(s) évalué(s)');
     expect(html).toContain('1 conforme(s)');
+  });
+
+  it('incruste la vraie preuve photo si elle est affichable (data:)', () => {
+    const items: AuditTemplateItem[] = [
+      {
+        id: 'i1',
+        template_id: 't',
+        section: 'Réception',
+        question: 'Température conforme ?',
+        item_type: 'yes_no',
+        is_required: true,
+        points: 10,
+        sort_order: 1,
+      },
+    ];
+    const responses: AuditResponse[] = [
+      {
+        id: 'r1',
+        audit_id: audit.id,
+        item_id: 'i1',
+        is_compliant: false,
+        photo_url: 'data:image/png;base64,AAAA',
+      },
+    ];
+    const html = buildAuditReportHTML(audit, { items, responses });
+    expect(html).toContain('<img class="crit-photo-img"');
+    expect(html).toContain('data:image/png;base64,AAAA');
+    expect(html).toContain('Preuve photo enregistrée');
+  });
+
+  it('n’incruste pas de preuve non affichable (chemin de stockage privé)', () => {
+    const items: AuditTemplateItem[] = [
+      {
+        id: 'i1',
+        template_id: 't',
+        section: 'Réception',
+        question: 'Température conforme ?',
+        item_type: 'yes_no',
+        is_required: true,
+        points: 10,
+        sort_order: 1,
+      },
+    ];
+    const responses: AuditResponse[] = [
+      {
+        id: 'r1',
+        audit_id: audit.id,
+        item_id: 'i1',
+        is_compliant: false,
+        photo_url: 'org-1/audit/demo-audit-1234abcd/123-preuve.jpg',
+      },
+    ];
+    const html = buildAuditReportHTML(audit, { items, responses });
+    // Référence honnête, sans image cassée ni fausse pièce jointe.
+    expect(html).toContain('Preuve photo enregistrée');
+    expect(html).not.toContain('<img');
+    expect(html).not.toContain(
+      'org-1/audit/demo-audit-1234abcd/123-preuve.jpg',
+    );
   });
 
   it('échappe le contenu utilisateur (anti-injection)', () => {
