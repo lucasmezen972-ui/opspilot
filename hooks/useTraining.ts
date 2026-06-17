@@ -73,7 +73,7 @@ export function useTraining() {
   }, [profile?.organization_id, profile?.id, isLocalDemo]);
 
   const fetchTrainingData = async () => {
-    if (isLocalDemo || !profile?.organization_id) {
+    if (isLocalDemo || !profile?.organization_id || !profile.id) {
       setLoading(false);
       return;
     }
@@ -484,6 +484,7 @@ export function useTraining() {
       training_id: courseId,
       organization_id: profile.organization_id ?? '',
       full_name:
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty strings should fall through
         options?.fullName?.trim() || profile.full_name || profile.email,
       training_title: course.title,
       score,

@@ -51,7 +51,7 @@ export function useOrganizationPortfolio(enabled: boolean) {
       }
     }
 
-    void loadPortfolio();
+    loadPortfolio();
 
     return () => {
       alive = false;

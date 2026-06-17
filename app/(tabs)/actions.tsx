@@ -22,17 +22,17 @@ import {
 } from '../../features/actions/CreateActionModal';
 import { ResolveActionModal } from '../../features/actions/ResolveActionModal';
 import {
-  buildResolutionActivityLabel,
-  buildResolutionRecord,
-  isResolutionAuthorized,
-  type ResolutionEvidencePayload,
-} from '../../features/actions/actionResolution';
-import {
   buildActionPlanPrompt,
   buildLocalActionPlan,
   formatActionPlanText,
   type ActionPlan,
 } from '../../features/actions/actionPlan';
+import {
+  buildResolutionActivityLabel,
+  buildResolutionRecord,
+  isResolutionAuthorized,
+  type ResolutionEvidencePayload,
+} from '../../features/actions/actionResolution';
 import { STATUS_FLOW } from '../../features/actions/constants';
 import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAppSettings } from '../../hooks/useAppSettings';

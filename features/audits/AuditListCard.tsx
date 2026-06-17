@@ -17,10 +17,10 @@ import {
   type AuditListItem,
 } from './auditListModel';
 import { signatureSummary } from './auditSignatureModel';
-import { isAuditLocked } from '../governance/governanceModel';
 import type { AuditSignature } from '../../lib/supabase';
 import { AppBadge } from '../../shared/components/AppBadge';
 import { colors, shadow } from '../../shared/styles/tokens';
+import { isAuditLocked } from '../governance/governanceModel';
 
 interface AuditListCardProps {
   audit: AuditListItem;

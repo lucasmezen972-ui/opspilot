@@ -45,6 +45,7 @@ export default function TasksScreen() {
   const [selectedFilter, setSelectedFilter] = useState<TaskFilter>('all');
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [completionTask, setCompletionTask] = useState<Task | null>(null);
+  const [showFilters, setShowFilters] = useState(true);
   const isManager = isManagerRole(profile?.role);
 
   const filteredTasks = useMemo(
@@ -55,7 +56,9 @@ export default function TasksScreen() {
 
   const handleStartTask = async (taskId: string) => {
     const result = await updateTaskStatus(taskId, 'in_progress');
-    if (!result.error) {
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
       Alert.alert(
         'Tâche démarrée',
         'La tâche est passée en cours de traitement.',
@@ -85,7 +88,9 @@ export default function TasksScreen() {
       taskId,
       profile?.full_name ?? 'Responsable',
     );
-    if (!result.error) {
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
       Alert.alert(
         'Tâche validée',
         'La réalisation a été contrôlée et validée.',
@@ -123,15 +128,21 @@ export default function TasksScreen() {
             style={styles.headerButton}
             accessibilityRole="button"
             accessibilityLabel="Ouvrir les filtres"
+            onPress={() => setShowFilters((v) => !v)}
           >
-            <Filter size={20} color={colors.textMuted} />
+            <Filter
+              size={20}
+              color={showFilters ? colors.primary : colors.textMuted}
+            />
           </TouchableOpacity>
         }
       />
 
       <TaskQuickStats stats={stats} />
 
-      <TaskFilters selected={selectedFilter} onSelect={setSelectedFilter} />
+      {showFilters && (
+        <TaskFilters selected={selectedFilter} onSelect={setSelectedFilter} />
+      )}
 
       <AppButton
         label="Nouvelle tâche"

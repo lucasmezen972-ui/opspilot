@@ -2,16 +2,8 @@ import { Tabs } from 'expo-router';
 import {
   Chrome as Home,
   ClipboardCheck,
-  Package,
   SquareCheck as CheckSquare,
   GraduationCap,
-  MessageCircle,
-  User,
-  LayoutDashboard,
-  Wrench,
-  Users,
-  CreditCard,
-  FileText,
   LayoutGrid,
   Rocket,
 } from 'lucide-react-native';

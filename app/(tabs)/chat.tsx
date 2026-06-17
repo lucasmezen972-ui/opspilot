@@ -199,10 +199,26 @@ export default function ChatScreen() {
         subtitle="Messagerie & canaux officiels"
         right={
           <>
-            <TouchableOpacity style={styles.headerButton}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() =>
+                Alert.alert(
+                  'Recherche',
+                  'La recherche de messages sera bientôt disponible.',
+                )
+              }
+            >
               <Search size={20} color={colors.textMuted} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerButton}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() =>
+                Alert.alert(
+                  'Notifications',
+                  'Les notifications seront bientôt disponibles.',
+                )
+              }
+            >
               <Bell size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </>
@@ -229,7 +245,7 @@ export default function ChatScreen() {
               canModerate={isManager}
               onBack={() => setActiveChannelId(null)}
               onSend={(content, type) =>
-                void sendChannelMessage(activeChannel.id, content, type)
+                sendChannelMessage(activeChannel.id, content, type)
               }
               onTogglePin={togglePin}
               onDelete={deleteMessage}

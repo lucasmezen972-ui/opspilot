@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
 
 import RequireRole from '../../components/RequireRole';
+import { ActivityFeed } from '../../features/governance/ActivityFeed';
 import { ManagerActivityList } from '../../features/manager/ManagerActivityList';
 import { ManagerCockpit } from '../../features/manager/ManagerCockpit';
 import { ManagerStatCards } from '../../features/manager/ManagerStatCards';
@@ -21,7 +22,6 @@ import {
   computeStoreStats,
   getUrgentTasks,
 } from '../../features/manager/managerModel';
-import { ActivityFeed } from '../../features/governance/ActivityFeed';
 import { computeSupervisionStats } from '../../features/training/trainingModel';
 import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAudits } from '../../hooks/useAudits';

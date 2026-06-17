@@ -23,12 +23,12 @@ import {
   computeStudyTime,
   type TrainingCourseView,
 } from '../../features/training/trainingModel';
+import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAuth } from '../../hooks/useAuth';
 import {
   useLeaderboard,
   type LeaderboardEntry,
 } from '../../hooks/useLeaderboard';
-import { useActivityLog } from '../../hooks/useActivityLog';
 import { useTraining } from '../../hooks/useTraining';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { generateTrainingContent } from '../../lib/openai';

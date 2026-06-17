@@ -1,9 +1,9 @@
-import { getDemoState } from '../../lib/demoStore';
 import {
   classifyIntent,
   isOutOfScope,
   OUT_OF_SCOPE_RESPONSE,
 } from './knowledgeBase';
+import { getDemoState } from '../../lib/demoStore';
 
 export type AssistantHistoryMessage = {
   role: 'user' | 'assistant';

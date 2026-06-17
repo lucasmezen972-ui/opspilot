@@ -44,7 +44,7 @@ function formatMsgTime(iso?: string) {
 
 function MessageRow({
   msg,
-  isMe,
+  isMe: _isMe,
   canModerate,
   onTogglePin,
   onDelete,

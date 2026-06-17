@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { isRecurring, nextDueDate } from '../features/tasks/taskRecurrence';
 import {
   computeDurationMinutes,
   type TaskCompletionInput,
 } from '../features/tasks/taskTraceability';
-import { isRecurring, nextDueDate } from '../features/tasks/taskRecurrence';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Task } from '../lib/supabase';
@@ -211,7 +211,7 @@ export function useTasks() {
       duration_minutes: computeDurationMinutes(task?.started_at ?? null, now),
       completed_by_name: input.executantName.trim(),
       completed_by_matricule: input.matricule.trim(),
-      completion_comment: input.comment?.trim() || null,
+      completion_comment: input.comment?.trim() || null, // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing -- empty string → null
       proof_photo_url: input.proofPhotoUrl ?? null,
       updated_at: now,
     };

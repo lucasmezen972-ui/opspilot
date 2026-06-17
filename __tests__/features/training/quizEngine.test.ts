@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
-import { getDemoTrainingQuizQuestions } from '../../../lib/demoData';
 import {
   createQuizSession,
   scoreQuizSession,
   isQuizPassed,
   type QuizQuestion,
 } from '../../../features/training/quizEngine';
+import { getDemoTrainingQuizQuestions } from '../../../lib/demoData';
 
 const makeQuestion = (
   id: string,

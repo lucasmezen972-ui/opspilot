@@ -19,7 +19,6 @@ import {
   ScrollView,
 } from 'react-native';
 
-import { useAuth } from '../hooks/AuthContext';
 import {
   SECTORS,
   ONBOARDING_MODULES,
@@ -30,6 +29,7 @@ import {
   type ModuleId,
   type OnboardingState,
 } from '../features/onboarding/onboardingModel';
+import { useAuth } from '../hooks/AuthContext';
 import { supabase } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 

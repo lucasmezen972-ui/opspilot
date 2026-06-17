@@ -31,7 +31,7 @@ export function useActivityLog() {
 
   useEffect(() => {
     if (isLocalDemo || !profile?.organization_id) return;
-    void (async () => {
+    (async () => {
       const { data } = await supabase
         .from('activity_log')
         .select('*')
@@ -87,7 +87,7 @@ export function useActivityLog() {
         created_at: now,
       };
       setRemoteEvents((prev) => [optimistic, ...prev]);
-      void supabase.from('activity_log').insert({
+      supabase.from('activity_log').insert({
         organization_id: profile.organization_id,
         actor_id: profile.id,
         action: input.action,

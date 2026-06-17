@@ -162,7 +162,7 @@ export function BarcodeScannerModal({
           video,
           (result) => {
             const text = result?.getText();
-            if (text) void submitBarcode(text);
+            if (text) submitBarcode(text);
           },
         );
 

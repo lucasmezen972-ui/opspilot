@@ -2,7 +2,6 @@ import { Plus, Scan, Search, Package, X } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,

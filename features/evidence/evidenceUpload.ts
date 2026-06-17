@@ -1,9 +1,9 @@
-import { supabase } from '../../lib/supabase';
 import {
   EVIDENCE_BUCKET,
   buildEvidenceStoragePath,
   type EvidenceEntityType,
 } from './evidenceStorage';
+import { supabase } from '../../lib/supabase';
 
 /**
  * Téléversement réel des preuves photo vers le bucket privé « evidence »

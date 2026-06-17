@@ -21,6 +21,7 @@ function avgScore(audits: Audit[]): number | null {
 export function buildSiteConformity(audits: Audit[]): SiteConformityRow[] {
   const groups = new Map<string, Audit[]>();
   for (const audit of audits) {
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string should fall through to default
     const site = audit.location?.trim() || 'Site principal';
     const bucket = groups.get(site);
     if (bucket) bucket.push(audit);
