@@ -29,7 +29,7 @@ function evidence(
     comment: '',
     employeeName: '',
     employeeId: '',
-    photoConfirmed: false,
+    proofPhotoUri: null,
     managerValidated: false,
     ...patch,
   };
@@ -59,7 +59,7 @@ describe('getMissingResolutionRequirements', () => {
       comment: 'Produits isolés, température relevée et manager prévenu.',
       employeeName: 'Marie Dupont',
       employeeId: 'M1234',
-      photoConfirmed: true,
+      proofPhotoUri: 'file:///preuve.jpg',
       managerValidated: true,
     });
 
@@ -86,7 +86,10 @@ describe('buildResolutionActivityLabel', () => {
     expect(
       buildResolutionActivityLabel({
         title: 'Température chambre froide trop élevée',
-        evidence: evidence({ photoConfirmed: true, managerValidated: true }),
+        evidence: evidence({
+          proofPhotoUri: 'file:///preuve.jpg',
+          managerValidated: true,
+        }),
       }),
     ).toContain('preuve photo confirmée, validation manager confirmée');
   });
@@ -99,7 +102,7 @@ describe('buildResolutionRecord', () => {
         comment: '  Zone nettoyée et vérifiée.  ',
         employeeName: ' Marie Dupont ',
         employeeId: '',
-        photoConfirmed: true,
+        proofPhotoUri: 'file:///preuve.jpg',
         managerValidated: false,
       }),
       { id: 'profile-1', role: 'manager' },
@@ -110,6 +113,7 @@ describe('buildResolutionRecord', () => {
       resolved_by_name: 'Marie Dupont',
       resolved_by_matricule: null,
       resolution_photo_confirmed: true,
+      resolution_photo_url: 'file:///preuve.jpg',
       manager_validated: false,
       resolved_by: 'profile-1',
       resolver_role: 'manager',
@@ -120,6 +124,47 @@ describe('buildResolutionRecord', () => {
     const record = buildResolutionRecord(evidence({ comment: 'ok' }));
     expect(record.resolved_by).toBeNull();
     expect(record.resolver_role).toBeNull();
+  });
+
+  it('ne « confirme » la preuve photo que si une vraie URI est présente', () => {
+    const sansPhoto = buildResolutionRecord(evidence({ comment: 'fait' }));
+    expect(sansPhoto.resolution_photo_confirmed).toBe(false);
+    expect(sansPhoto.resolution_photo_url).toBeNull();
+
+    const avecPhoto = buildResolutionRecord(
+      evidence({ proofPhotoUri: 'file:///x.jpg' }),
+    );
+    expect(avecPhoto.resolution_photo_confirmed).toBe(true);
+    expect(avecPhoto.resolution_photo_url).toBe('file:///x.jpg');
+  });
+});
+
+describe('intégrité de la preuve photo', () => {
+  it('une preuve photo requise exige une vraie URI, pas un simple booléen', () => {
+    const plan = generateCorrectiveActionPlan(
+      action({ title: 'Non-conformité : affichage prix incorrect' }),
+    );
+    // Commentaire fourni mais aucune photo : la clôture reste bloquée.
+    const withoutPhoto = evidence({ comment: 'Étiquette corrigée.' });
+    expect(getMissingResolutionRequirements(plan, withoutPhoto)).toContain(
+      'preuve photo',
+    );
+    expect(canResolveAction(plan, withoutPhoto)).toBe(false);
+
+    const withPhoto = evidence({
+      comment: 'Étiquette corrigée.',
+      proofPhotoUri: 'file:///preuve.jpg',
+    });
+    expect(canResolveAction(plan, withPhoto)).toBe(true);
+  });
+
+  it('le journal ne prétend pas « preuve photo confirmée » sans photo réelle', () => {
+    const label = buildResolutionActivityLabel({
+      title: 'Test',
+      evidence: evidence({ managerValidated: true }),
+    });
+    expect(label).toContain('sans photo');
+    expect(label).not.toContain('preuve photo confirmée');
   });
 });
 
@@ -133,7 +178,7 @@ describe('isResolutionAuthorized', () => {
       comment: 'Produits isolés, température relevée.',
       employeeName: 'Marie Dupont',
       employeeId: 'M-1042',
-      photoConfirmed: true,
+      proofPhotoUri: 'file:///preuve.jpg',
       managerValidated: true,
     });
 
@@ -172,7 +217,7 @@ describe('isResolutionAuthorized', () => {
     );
     const pricingEvidence = evidence({
       comment: 'Étiquette corrigée et vérifiée en caisse.',
-      photoConfirmed: true,
+      proofPhotoUri: 'file:///preuve.jpg',
     });
     expect(
       isResolutionAuthorized(pricingPlan, pricingEvidence, 'employé'),

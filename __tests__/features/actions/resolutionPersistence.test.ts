@@ -41,7 +41,7 @@ describe('persistance des preuves de clôture (mode démo)', () => {
         comment: 'Produits retirés et zone nettoyée.',
         employeeName: 'Marie Dupont',
         employeeId: 'M-1042',
-        photoConfirmed: true,
+        proofPhotoUri: 'file:///preuve.jpg',
         managerValidated: true,
       },
       { id: 'demo-user', role: 'manager' },
@@ -68,6 +68,7 @@ describe('persistance des preuves de clôture (mode démo)', () => {
     expect(stored?.resolved_by_name).toBe('Marie Dupont');
     expect(stored?.resolved_by_matricule).toBe('M-1042');
     expect(stored?.resolution_photo_confirmed).toBe(true);
+    expect(stored?.resolution_photo_url).toBe('file:///preuve.jpg');
     expect(stored?.manager_validated).toBe(true);
     expect(stored?.resolved_by).toBe('demo-user');
     expect(stored?.resolver_role).toBe('manager');

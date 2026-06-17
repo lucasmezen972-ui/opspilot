@@ -6,7 +6,8 @@ export interface ResolutionEvidencePayload {
   comment: string;
   employeeName: string;
   employeeId: string;
-  photoConfirmed: boolean;
+  /** URI réelle de la preuve photo (capture / import), ou null si absente. */
+  proofPhotoUri: string | null;
   managerValidated: boolean;
 }
 
@@ -26,6 +27,7 @@ export type ResolutionRecord = Pick<
   | 'resolved_by_name'
   | 'resolved_by_matricule'
   | 'resolution_photo_confirmed'
+  | 'resolution_photo_url'
   | 'manager_validated'
   | 'resolved_by'
   | 'resolver_role'
@@ -46,7 +48,7 @@ export function getMissingResolutionRequirements(
     plan.employeeIdRequired && evidence.employeeId.trim().length === 0
       ? 'matricule'
       : null,
-    plan.photoRequired && !evidence.photoConfirmed ? 'preuve photo' : null,
+    plan.photoRequired && !evidence.proofPhotoUri ? 'preuve photo' : null,
     plan.managerValidationRequired && !evidence.managerValidated
       ? 'validation manager'
       : null,
@@ -69,11 +71,14 @@ export function buildResolutionRecord(
   evidence: ResolutionEvidencePayload,
   resolver?: ResolutionResolver | null,
 ): ResolutionRecord {
+  const photoUri = evidence.proofPhotoUri?.trim() || null;
   return {
     resolution_comment: evidence.comment.trim() || null,
     resolved_by_name: evidence.employeeName.trim() || null,
     resolved_by_matricule: evidence.employeeId.trim() || null,
-    resolution_photo_confirmed: evidence.photoConfirmed,
+    // « confirmé » découle d'une VRAIE preuve présente, jamais d'une simple case.
+    resolution_photo_confirmed: photoUri !== null,
+    resolution_photo_url: photoUri,
     manager_validated: evidence.managerValidated,
     resolved_by: resolver?.id ?? null,
     resolver_role: resolver?.role ?? null,
@@ -105,7 +110,7 @@ export function buildResolutionActivityLabel({
   title: string;
   evidence: ResolutionEvidencePayload;
 }): string {
-  const proof = evidence.photoConfirmed
+  const proof = evidence.proofPhotoUri
     ? 'preuve photo confirmée'
     : 'sans photo';
   const manager = evidence.managerValidated

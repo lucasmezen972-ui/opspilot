@@ -1,4 +1,4 @@
-import { CheckCircle, X } from 'lucide-react-native';
+import { Camera, CheckCircle, RefreshCw, X } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
   View,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Image,
 } from 'react-native';
 
 import type { ActionPlan } from './actionPlan';
@@ -15,6 +16,7 @@ import {
   getMissingResolutionRequirements,
   type ResolutionEvidencePayload,
 } from './actionResolution';
+import CameraModal from '../../components/CameraModal';
 import type { CorrectiveAction } from '../../lib/supabase';
 import { AppModal } from '../../shared/components/AppModal';
 import { colors, radius } from '../../shared/styles/tokens';
@@ -31,7 +33,7 @@ const initialEvidence: ResolutionEvidencePayload = {
   comment: '',
   employeeName: '',
   employeeId: '',
-  photoConfirmed: false,
+  proofPhotoUri: null,
   managerValidated: false,
 };
 
@@ -43,6 +45,7 @@ export function ResolveActionModal({
   onConfirm,
 }: ResolveActionModalProps) {
   const [evidence, setEvidence] = useState(initialEvidence);
+  const [cameraVisible, setCameraVisible] = useState(false);
 
   const missingRequirements = useMemo(
     () => getMissingResolutionRequirements(plan, evidence),
@@ -56,6 +59,7 @@ export function ResolveActionModal({
 
   const handleClose = () => {
     setEvidence(initialEvidence);
+    setCameraVisible(false);
     onClose();
   };
 
@@ -120,13 +124,59 @@ export function ResolveActionModal({
             onChangeText={(employeeId) => updateEvidence({ employeeId })}
           />
 
-          <CheckRow
-            label="Preuve photo jointe"
-            active={evidence.photoConfirmed}
-            onPress={() =>
-              updateEvidence({ photoConfirmed: !evidence.photoConfirmed })
-            }
-          />
+          <View style={styles.field}>
+            <Text style={styles.label}>Preuve photo</Text>
+            {evidence.proofPhotoUri ? (
+              <View style={styles.photoCaptured} testID="action-photo-captured">
+                <Image
+                  source={{ uri: evidence.proofPhotoUri }}
+                  style={styles.photoThumb}
+                />
+                <View style={styles.photoCapturedBody}>
+                  <Text style={styles.photoCapturedText}>
+                    Preuve photo capturée
+                  </Text>
+                  <View style={styles.photoActions}>
+                    <TouchableOpacity
+                      testID="action-photo-replace"
+                      onPress={() => setCameraVisible(true)}
+                      style={styles.photoSmallButton}
+                    >
+                      <RefreshCw size={13} color={colors.primary} />
+                      <Text style={styles.photoSmallButtonText}>Remplacer</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      testID="action-photo-remove"
+                      onPress={() => updateEvidence({ proofPhotoUri: null })}
+                      style={styles.photoSmallButton}
+                    >
+                      <X size={13} color={colors.dangerStrong} />
+                      <Text
+                        style={[
+                          styles.photoSmallButtonText,
+                          { color: colors.dangerStrong },
+                        ]}
+                      >
+                        Retirer
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                testID="action-photo-capture"
+                style={styles.photoButton}
+                onPress={() => setCameraVisible(true)}
+              >
+                <Camera size={18} color={colors.primary} />
+                <Text style={styles.photoButtonText}>
+                  Joindre une preuve photo
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           <CheckRow
             label="Validation manager obtenue"
             active={evidence.managerValidated}
@@ -159,6 +209,16 @@ export function ResolveActionModal({
           </TouchableOpacity>
         </View>
       </View>
+
+      <CameraModal
+        visible={cameraVisible}
+        onClose={() => setCameraVisible(false)}
+        onPhotoTaken={(uri) => {
+          updateEvidence({ proofPhotoUri: uri });
+          setCameraVisible(false);
+        }}
+        auditType="corrective_action"
+      />
     </AppModal>
   );
 }
@@ -276,6 +336,62 @@ const styles = StyleSheet.create({
   textarea: {
     minHeight: 84,
     textAlignVertical: 'top',
+  },
+  photoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
+    borderRadius: radius.md,
+    paddingVertical: 14,
+    backgroundColor: colors.primarySoft,
+  },
+  photoButtonText: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  photoCaptured: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.successSoft,
+    backgroundColor: colors.successSoft,
+    borderRadius: radius.md,
+    padding: 10,
+  },
+  photoThumb: {
+    width: 46,
+    height: 46,
+    borderRadius: 8,
+    backgroundColor: colors.backgroundAlt,
+  },
+  photoCapturedBody: {
+    flex: 1,
+  },
+  photoCapturedText: {
+    color: colors.successText,
+    fontWeight: '800',
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  photoActions: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  photoSmallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  photoSmallButtonText: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 12,
   },
   checkRow: {
     flexDirection: 'row',

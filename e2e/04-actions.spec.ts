@@ -51,7 +51,8 @@ test.describe('Actions correctives', () => {
       String(inProgressBefore + 1),
     );
 
-    // Résoudre : la clôture contrôlée exige désormais les preuves métier.
+    // Résoudre : la clôture contrôlée exige désormais une VRAIE preuve photo.
+    await page.evaluate(() => localStorage.setItem('opspilot_e2e_camera', '1'));
     await page.getByTestId('action-advance-demo-action-1').click();
     await expect(page.getByTestId('action-resolution-modal')).toBeVisible();
     await page
@@ -61,7 +62,10 @@ test.describe('Actions correctives', () => {
     await page
       .getByPlaceholder('Matricule ou identifiant interne')
       .fill('M1234');
-    await page.getByText('Preuve photo jointe').click();
+    // Capture réelle de la preuve photo (mode caméra E2E).
+    await page.getByTestId('action-photo-capture').click();
+    await page.getByTestId('camera-e2e-photo-button').click();
+    await expect(page.getByTestId('action-photo-captured')).toBeVisible();
     await page.getByText('Validation manager obtenue').click();
     await page.getByTestId('action-resolution-confirm').click();
 

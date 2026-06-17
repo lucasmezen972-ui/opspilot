@@ -17,6 +17,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 
 import {
@@ -75,23 +76,26 @@ export default function OnboardingScreen() {
     );
   };
 
-  const persistConfiguration = async () => {
-    // Best-effort : enregistre secteur + modules (RPC dédiée, fusion settings)
-    // et le nom du premier manager. N'empêche jamais la fin de l'onboarding.
-    if (!user) return;
+  const persistConfiguration = async (): Promise<boolean> => {
+    // Best-effort mais TRANSPARENT : enregistre secteur + modules (RPC dédiée)
+    // et le nom du premier manager. Retourne false si la persistance échoue,
+    // pour informer l'utilisateur sans bloquer la fin de l'onboarding.
+    if (!user) return false;
     try {
-      await supabase.rpc('apply_onboarding_configuration', {
-        p_sector: sector,
-        p_modules: modules,
-      });
+      const { error: rpcError } = await supabase.rpc(
+        'apply_onboarding_configuration',
+        { p_sector: sector, p_modules: modules },
+      );
+      if (rpcError) return false;
       if (managerName.trim()) {
         await supabase
           .from('profiles')
           .update({ full_name: managerName.trim() })
           .eq('id', user.id);
       }
+      return true;
     } catch {
-      /* no-op : configuration best-effort */
+      return false;
     }
   };
 
@@ -109,7 +113,15 @@ export default function OnboardingScreen() {
           setError(mapSupabaseError('Erreur création organisation', rpcError));
           return;
         }
-        await persistConfiguration();
+        const configSaved = await persistConfiguration();
+        if (!configSaved) {
+          // L'organisation est créée mais la config sectorielle n'a pas été
+          // persistée : on le dit clairement, sans bloquer le démarrage.
+          Alert.alert(
+            'Configuration à finaliser',
+            'Votre organisation est créée. Le secteur et les modules n’ont pas pu être enregistrés automatiquement — vous pourrez les régler depuis les réglages.',
+          );
+        }
       } else {
         const { error: rpcError } = await supabase.rpc('accept_invitation', {
           invite_token: inviteCode.trim(),
@@ -324,8 +336,8 @@ export default function OnboardingScreen() {
               />
             )}
             <Text style={styles.hint}>
-              Tout est prêt : votre espace démarre avec une base cohérente avec
-              votre secteur.
+              Vérifiez votre configuration. Le secteur et les modules seront
+              enregistrés à la création de l’organisation.
             </Text>
           </View>
         )}

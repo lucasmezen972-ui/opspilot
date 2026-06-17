@@ -157,6 +157,8 @@ export type CorrectiveAction = {
   resolved_by_name?: string | null;
   resolved_by_matricule?: string | null;
   resolution_photo_confirmed?: boolean | null;
+  /** URI locale (démo) ou chemin de stockage « evidence » (prod) de la preuve. */
+  resolution_photo_url?: string | null;
   manager_validated?: boolean | null;
   resolved_by?: string | null;
   resolver_role?: string | null;

@@ -34,6 +34,10 @@ import {
   type ResolutionEvidencePayload,
 } from '../../features/actions/actionResolution';
 import { STATUS_FLOW } from '../../features/actions/constants';
+import {
+  isUploadableEvidenceUri,
+  uploadEvidencePhoto,
+} from '../../features/evidence/evidenceUpload';
 import { useActivityLog } from '../../hooks/useActivityLog';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
@@ -94,7 +98,9 @@ export default function ActionsScreen() {
     updateActionStatus(action.id, next);
   };
 
-  const handleResolutionConfirm = (payload: ResolutionEvidencePayload) => {
+  const handleResolutionConfirm = async (
+    payload: ResolutionEvidencePayload,
+  ) => {
     if (!resolutionAction) return;
     const action = resolutionAction;
 
@@ -109,8 +115,31 @@ export default function ActionsScreen() {
       return;
     }
 
+    // Preuve photo durable : en production, on téléverse l'URI locale dans le
+    // bucket privé « evidence » et on persiste le chemin. En démo, l'URI locale
+    // suffit (aucun réseau requis). Best-effort : un échec conserve l'URI.
+    let finalPayload = payload;
+    const uri = payload.proofPhotoUri;
+    if (
+      uri &&
+      !isLocalDemo &&
+      isUploadableEvidenceUri(uri) &&
+      profile?.organization_id
+    ) {
+      const storagePath = await uploadEvidencePhoto({
+        organizationId: profile.organization_id,
+        entityType: 'corrective_action',
+        entityId: action.id,
+        uri,
+        uploadedBy: profile.id ?? null,
+      });
+      if (storagePath) {
+        finalPayload = { ...payload, proofPhotoUri: storagePath };
+      }
+    }
+
     // Persiste les preuves de clôture (commentaire, exécutant, photo, validation).
-    const record = buildResolutionRecord(payload, {
+    const record = buildResolutionRecord(finalPayload, {
       id: profile?.id ?? null,
       role: profile?.role ?? null,
     });
@@ -121,7 +150,7 @@ export default function ActionsScreen() {
       entityId: action.id,
       label: buildResolutionActivityLabel({
         title: action.title,
-        evidence: payload,
+        evidence: finalPayload,
       }),
     });
     setResolutionAction(null);
