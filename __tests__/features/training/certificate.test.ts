@@ -3,8 +3,25 @@ import { describe, expect, it } from 'vitest';
 import {
   buildCertificateHTML,
   generateCertificateNumber,
+  isCertificateIdentityComplete,
   type CertificateContext,
 } from '../../../features/training/certificate';
+
+describe('isCertificateIdentityComplete', () => {
+  it('exige un nom complet ET un matricule réels', () => {
+    expect(
+      isCertificateIdentityComplete({ fullName: 'Marie', employeeId: 'M-1' }),
+    ).toBe(true);
+    expect(
+      isCertificateIdentityComplete({ fullName: 'Marie', employeeId: '' }),
+    ).toBe(false);
+    expect(
+      isCertificateIdentityComplete({ fullName: '   ', employeeId: 'M-1' }),
+    ).toBe(false);
+    expect(isCertificateIdentityComplete(null)).toBe(false);
+    expect(isCertificateIdentityComplete(undefined)).toBe(false);
+  });
+});
 
 const base: CertificateContext = {
   fullName: 'Jean Martin',

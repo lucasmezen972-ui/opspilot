@@ -1,5 +1,21 @@
 import type { TrainingCertificate } from '../../lib/supabase';
 
+/**
+ * Garde-fou : une attestation ne peut être délivrée sans candidat identifié.
+ * Au minimum un nom complet ET un matricule réels sont requis (au-delà du
+ * contrôle d'identité de l'UI, ce verrou empêche toute émission « anonyme »).
+ */
+export function isCertificateIdentityComplete(
+  identity:
+    | { fullName?: string | null; employeeId?: string | null }
+    | null
+    | undefined,
+): boolean {
+  const name = identity?.fullName?.trim() ?? '';
+  const matricule = identity?.employeeId?.trim() ?? '';
+  return name.length > 0 && matricule.length > 0;
+}
+
 export interface CertificateContext {
   fullName: string;
   trainingTitle: string;
