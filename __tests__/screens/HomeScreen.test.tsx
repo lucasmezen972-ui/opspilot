@@ -127,6 +127,10 @@ describe('HomeScreen', () => {
 
   it('should display KPI section', () => {
     const { getByText } = render(<HomeScreen />);
+    expect(getByText('Brief terrain du jour')).toBeTruthy();
+    expect(
+      getByText('Les priorités sensibles sont sous contrôle'),
+    ).toBeTruthy();
     expect(getByText('Ce qui compte aujourd’hui')).toBeTruthy();
     expect(getByText('Contrôles validés')).toBeTruthy();
     expect(getByText('Contrôles à rattraper')).toBeTruthy();

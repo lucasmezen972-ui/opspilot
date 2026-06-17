@@ -42,7 +42,8 @@ ou un investisseur sans donner une impression de prototype fragile.
 ## Ce qui a été rendu plus humain et premium
 
 - Accueil : bascule vers un "Carnet de bord terrain" qui met en avant ce qui
-  compte aujourd'hui plutôt que de parler en KPI abstrait.
+  compte aujourd'hui plutôt que de parler en KPI abstrait, avec un brief terrain
+  indiquant la priorité, la preuve attendue et le signal de maîtrise.
 - Auth démo : wording plus sérieux, sans emoji, orienté "démo terrain guidée".
 - Hub Plus : libellés métier plus clairs pour un manager :
   "Actions à sécuriser", "Présenter OpsPilot", "Pilotage clients".

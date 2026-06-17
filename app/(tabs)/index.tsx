@@ -3,11 +3,15 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 
 import { DashboardDlcAlerts } from '../../features/dashboard/DashboardDlcAlerts';
+import { DashboardFieldBrief } from '../../features/dashboard/DashboardFieldBrief';
 import { DashboardProgress } from '../../features/dashboard/DashboardProgress';
 import { DashboardQuickActions } from '../../features/dashboard/DashboardQuickActions';
 import { DashboardRecentAudits } from '../../features/dashboard/DashboardRecentAudits';
 import { DashboardTeamShortcuts } from '../../features/dashboard/DashboardTeamShortcuts';
-import { getDashboardKpis } from '../../features/dashboard/dashboardModel';
+import {
+  getDashboardFieldBrief,
+  getDashboardKpis,
+} from '../../features/dashboard/dashboardModel';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
@@ -28,6 +32,10 @@ export default function HomeScreen() {
   const now = useMemo(() => new Date(), []);
   const kpis = useMemo(
     () => getDashboardKpis(audits, actions, products, now),
+    [audits, actions, products, now],
+  );
+  const fieldBrief = useMemo(
+    () => getDashboardFieldBrief(audits, actions, products, now),
     [audits, actions, products, now],
   );
 
@@ -69,6 +77,8 @@ export default function HomeScreen() {
           <Text style={styles.heroSummaryText}>{summary}</Text>
         </View>
       </LinearGradient>
+
+      <DashboardFieldBrief brief={fieldBrief} />
 
       <View style={styles.section}>
         <AppSectionHeader title="Ce qui compte aujourd’hui" />
