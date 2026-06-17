@@ -16,7 +16,7 @@ export async function blockSupabase(page: Page) {
 }
 
 /**
- * Connexion via le bouton « ⚡ Connexion Démo » (testID demo-login-button).
+ * Connexion via le bouton démo (testID demo-login-button).
  * Attente STRICTE : si le dashboard n'apparaît pas, le test échoue ici.
  */
 export async function loginAsDemo(page: Page) {
@@ -25,7 +25,7 @@ export async function loginAsDemo(page: Page) {
   await expect(demoBtn).toBeVisible({ timeout: 15_000 });
   await demoBtn.click();
   await expect(
-    page.getByText('Tableau de bord opérationnel', { exact: true }),
+    page.getByText('Carnet de bord terrain', { exact: true }),
   ).toBeVisible({ timeout: 20_000 });
 }
 

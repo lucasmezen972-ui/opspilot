@@ -23,7 +23,7 @@ test.describe('Authentification démo', () => {
     await page.getByTestId('demo-login-button').click();
 
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId('kpi-audits-done')).toBeVisible({
       timeout: 10_000,
@@ -38,7 +38,7 @@ test.describe('Authentification démo', () => {
     await page.getByTestId('demo-login-button').click();
 
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
     expect(await readCount(page, 'kpi-audits-done-value')).toBeGreaterThan(0);
     expect(await readCount(page, 'kpi-actions-open-value')).toBeGreaterThan(0);

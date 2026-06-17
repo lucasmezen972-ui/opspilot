@@ -18,7 +18,7 @@ if (isNodeEnvironment) {
   try {
     const pino = require('pino');
     logger = pino({
-      level: process.env.LOG_LEVEL ?? 'info',
+      level: process.env.LOG_LEVEL ?? 'warn',
       formatters: {
         level(label: string) {
           return { level: label };
@@ -28,12 +28,16 @@ if (isNodeEnvironment) {
     });
   } catch (error) {
     // Fallback to console if pino fails to load
+    const logLevel = process.env.LOG_LEVEL ?? 'warn';
+    const levels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
+    const shouldLog = (level: keyof typeof levels) =>
+      levels[level] >= levels[logLevel as keyof typeof levels];
     logger = {
-      info: console.log.bind(console),
-      error: console.error.bind(console),
-      warn: console.warn.bind(console),
-      debug: console.log.bind(console),
-      trace: console.log.bind(console),
+      info: shouldLog('info') ? console.log.bind(console) : () => {},
+      error: shouldLog('error') ? console.error.bind(console) : () => {},
+      warn: shouldLog('warn') ? console.warn.bind(console) : () => {},
+      debug: shouldLog('debug') ? console.log.bind(console) : () => {},
+      trace: shouldLog('trace') ? console.log.bind(console) : () => {},
     };
   }
 } else {

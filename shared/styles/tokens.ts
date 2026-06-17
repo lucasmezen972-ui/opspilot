@@ -12,6 +12,15 @@ export const colors = {
   primary: '#2563EB',
   primaryDark: '#1D4ED8',
   primarySoft: '#EEF2FF',
+  primaryInk: '#172554',
+
+  // Accents humains, utilisés avec parcimonie pour éviter un rendu froid.
+  fieldWarm: '#FFFBF5',
+  fieldWarmAlt: '#FFF7ED',
+  fieldBorder: '#F1E2C6',
+  fieldAmber: '#D97706',
+  fieldCoral: '#F9735B',
+  trustGreen: '#047857',
 
   // Statuts / criticités
   success: '#10B981',

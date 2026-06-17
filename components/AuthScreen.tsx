@@ -92,7 +92,7 @@ export default function AuthScreen() {
         </View>
         <Text style={styles.title}>OpsPilot</Text>
         <Text style={styles.subtitle}>
-          Votre copilote pour des opérations terrain efficaces
+          Le carnet de bord terrain pour sécuriser audits, preuves et formations
         </Text>
       </View>
 
@@ -103,22 +103,22 @@ export default function AuthScreen() {
       {isOffline && (
         <View style={styles.offlineBanner}>
           <Text style={styles.offlineText}>
-            ⚠️ Connexion temporairement indisponible — le mode démo reste
-            accessible
+            Connexion temporairement indisponible. Le mode démo reste
+            accessible.
           </Text>
         </View>
       )}
 
       {displayError && !isOffline && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>❌ {displayError}</Text>
+          <Text style={styles.errorText}>{displayError}</Text>
         </View>
       )}
 
       <View style={styles.demoContainer}>
         <View style={styles.demoHeader}>
           <Zap size={16} color="#F59E0B" />
-          <Text style={styles.demoTitle}>Accès démo instantané</Text>
+          <Text style={styles.demoTitle}>Démo terrain guidée</Text>
           <Text style={styles.demoSubtitle}> (fonctionne hors ligne)</Text>
         </View>
         <TouchableOpacity
@@ -135,7 +135,7 @@ export default function AuthScreen() {
             <Zap size={16} color="#FFFFFF" />
           )}
           <Text style={styles.demoButtonText}>
-            {demoLoading ? 'Connexion...' : '⚡ Connexion Démo'}
+            {demoLoading ? 'Connexion...' : 'Lancer la démo OpsPilot'}
           </Text>
         </TouchableOpacity>
       </View>

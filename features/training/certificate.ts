@@ -59,20 +59,22 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
     typeof ctx.durationMinutes === 'number'
       ? `${ctx.durationMinutes} min`
       : '—';
-  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- empty strings after trim should fall through to '—' */
+  const fieldOrDash = (value?: string | null) => {
+    const trimmed = value?.trim();
+    return trimmed && trimmed.length > 0 ? trimmed : '—';
+  };
   const detailRows: [string, string][] = [
-    ['Matricule', ctx.employeeId?.trim() || '—'],
-    ['Poste', ctx.position?.trim() || '—'],
-    ['Magasin', ctx.store?.trim() || '—'],
-    ['Catégorie', ctx.category?.trim() || '—'],
+    ['Matricule', fieldOrDash(ctx.employeeId)],
+    ['Poste', fieldOrDash(ctx.position)],
+    ['Magasin', fieldOrDash(ctx.store)],
+    ['Catégorie', fieldOrDash(ctx.category)],
     ['Durée', duration],
-    ['Version évaluation', ctx.version?.trim() || '—'],
+    ['Version évaluation', fieldOrDash(ctx.version)],
     [
       'Tentative',
       typeof ctx.attemptNumber === 'number' ? `N° ${ctx.attemptNumber}` : '—',
     ],
   ];
-  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
   const detailsHTML = detailRows
     .map(
       ([label, value]) =>

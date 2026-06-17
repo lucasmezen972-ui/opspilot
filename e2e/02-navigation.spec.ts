@@ -32,7 +32,7 @@ test.describe('Navigation principale', () => {
   test('refresh navigateur — session démo conservée', async ({ page }) => {
     await page.reload();
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
   });
 });

@@ -51,7 +51,7 @@ export function useActivityLog() {
           created_at: r.created_at,
         })),
       );
-    })();
+    })().catch(() => setRemoteEvents([]));
   }, [isLocalDemo, profile?.organization_id]);
 
   const logEvent = useCallback(
@@ -87,14 +87,23 @@ export function useActivityLog() {
         created_at: now,
       };
       setRemoteEvents((prev) => [optimistic, ...prev]);
-      supabase.from('activity_log').insert({
-        organization_id: profile.organization_id,
-        actor_id: profile.id,
-        action: input.action,
-        entity_type: input.entityType,
-        entity_id: input.entityId ?? null,
-        metadata: { label: input.label, actor_name: profile.full_name },
-      });
+      supabase
+        .from('activity_log')
+        .insert({
+          organization_id: profile.organization_id,
+          actor_id: profile.id,
+          action: input.action,
+          entity_type: input.entityType,
+          entity_id: input.entityId ?? null,
+          metadata: { label: input.label, actor_name: profile.full_name },
+        })
+        .then(({ error }) => {
+          if (error) {
+            setRemoteEvents((prev) =>
+              prev.filter((event) => event.id !== optimistic.id),
+            );
+          }
+        });
     },
     [isLocalDemo, profile],
   );

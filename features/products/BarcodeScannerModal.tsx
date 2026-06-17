@@ -162,7 +162,9 @@ export function BarcodeScannerModal({
           video,
           (result) => {
             const text = result?.getText();
-            if (text) submitBarcode(text);
+            if (text) {
+              submitBarcode(text).catch(() => setWebStatus('denied'));
+            }
           },
         );
 

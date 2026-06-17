@@ -21,7 +21,7 @@ test.describe('Démo offline (B2/B3)', () => {
   test('B3 — reload conserve la session démo', async ({ page }) => {
     await page.reload();
     await expect(
-      page.getByText('Tableau de bord opérationnel', { exact: true }),
+      page.getByText('Carnet de bord terrain', { exact: true }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
   });

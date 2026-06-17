@@ -27,6 +27,14 @@ describe('commercialModel', () => {
     }
   });
 
+  it('positionne les offres sur une valeur métier claire', () => {
+    expect(COMMERCIAL_PLANS.map((plan) => plan.target)).toEqual([
+      'sécuriser 1 magasin',
+      'piloter plusieurs sites',
+      'prouver la conformité d’un réseau',
+    ]);
+  });
+
   it('génère un mailto exploitable vers contact@tradikom.com', () => {
     const mailto = buildCommercialMailto('pro');
     expect(mailto.startsWith(`mailto:${COMMERCIAL_CONTACT_EMAIL}`)).toBe(true);

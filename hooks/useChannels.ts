@@ -35,7 +35,7 @@ export function useChannels() {
   useEffect(() => {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
-    fetchData();
+    fetchData().catch(() => setLoading(false));
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchData = async () => {

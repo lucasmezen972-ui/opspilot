@@ -80,8 +80,15 @@ export default function AuditsScreen() {
 
   // L'auditeur signe en tant qu'« auditor », un responsable en tant que « manager ».
   const signRole: SignableRole = isManager ? 'manager' : 'auditor';
-  const handleSignAudit = (auditId: string) => {
-    signAudit(auditId, profile?.full_name ?? 'Signataire', signRole);
+  const handleSignAudit = async (auditId: string) => {
+    const result = await signAudit(
+      auditId,
+      profile?.full_name ?? 'Signataire',
+      signRole,
+    );
+    if (result.error) {
+      Alert.alert('Signature impossible', String(result.error));
+    }
   };
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraAuditId, setCameraAuditId] = useState<string | null>(null);

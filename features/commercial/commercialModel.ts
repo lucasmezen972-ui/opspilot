@@ -42,9 +42,9 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     id: 'starter',
     name: 'Starter',
     price: '299 € / mois',
-    target: '1 magasin',
+    target: 'sécuriser 1 magasin',
     description:
-      'Pour lancer les audits, actions correctives et formations dans un point de vente.',
+      'Pour sécuriser un point de vente avec contrôles, preuves et formations terrain.',
     limits: [
       '1 magasin',
       '15 utilisateurs',
@@ -62,9 +62,9 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     id: 'pro',
     name: 'Pro',
     price: '799 € / mois',
-    target: 'jusqu’à 5 magasins',
+    target: 'piloter plusieurs sites',
     description:
-      'Pour piloter plusieurs sites avec reporting direction et supervision formation.',
+      'Pour suivre plusieurs sites avec reporting direction et supervision formation.',
     limits: [
       '5 magasins',
       '75 utilisateurs',
@@ -82,9 +82,9 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     id: 'franchise',
     name: 'Franchise',
     price: 'Sur devis',
-    target: 'réseau multi-sites',
+    target: 'prouver la conformité d’un réseau',
     description:
-      'Pour réseaux, franchises ou directions régionales avec accompagnement dédié.',
+      'Pour réseaux, franchises et directions régionales avec accompagnement dédié.',
     limits: [
       'Magasins illimités',
       'Utilisateurs illimités',

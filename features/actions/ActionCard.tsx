@@ -154,14 +154,15 @@ export function ActionCard({
 }
 
 function hasResolutionEvidence(action: CorrectiveAction): boolean {
-  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- intentional: falsy values (empty string, false) should fall through */
-  return Boolean(
-    action.resolution_comment ||
-      action.resolved_by_name ||
-      action.resolution_photo_confirmed ||
-      action.manager_validated,
+  const hasTextEvidence = [action.resolution_comment, action.resolved_by_name]
+    .filter((value): value is string => typeof value === 'string')
+    .some((value) => value.trim().length > 0);
+
+  return (
+    hasTextEvidence ||
+    Boolean(action.resolution_photo_confirmed) ||
+    Boolean(action.manager_validated)
   );
-  /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 }
 
 function resolutionHeadline(action: CorrectiveAction): string {

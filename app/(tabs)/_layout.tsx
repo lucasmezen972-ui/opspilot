@@ -104,7 +104,7 @@ export default function TabLayout() {
           name="commercial"
           options={{
             href: null,
-            title: 'Offre commerciale',
+            title: 'Présenter OpsPilot',
             tabBarIcon: ({ size, color }) => (
               <Rocket size={size} color={color} />
             ),
@@ -112,7 +112,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="backoffice"
-          options={{ href: null, title: 'Back-office' }}
+          options={{ href: null, title: 'Pilotage clients' }}
         />
         <Tabs.Screen name="profile" options={{ href: null, title: 'Profil' }} />
       </Tabs>
