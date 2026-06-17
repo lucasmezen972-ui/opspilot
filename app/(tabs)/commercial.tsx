@@ -112,7 +112,9 @@ export default function CommercialScreen() {
               proposerons une démonstration et une configuration adaptée à vos
               priorités terrain.
             </Text>
-            <Text style={styles.proofContact}>{COMMERCIAL_CONTACT_EMAIL}</Text>
+            <Text selectable style={styles.proofContact}>
+              {COMMERCIAL_CONTACT_EMAIL}
+            </Text>
           </View>
         </View>
       </ScrollView>
