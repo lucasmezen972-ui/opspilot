@@ -44,8 +44,8 @@ export default function ProductsScreen() {
     const q = searchQuery.toLowerCase();
     return (
       p.name.toLowerCase().includes(q) ||
-      (p.barcode || '').includes(q) ||
-      (p.category || '').toLowerCase().includes(q)
+      (p.barcode ?? '').includes(q) ||
+      (p.category ?? '').toLowerCase().includes(q)
     );
   });
 
@@ -243,7 +243,7 @@ export default function ProductsScreen() {
           const status =
             product.stock_quantity === 0
               ? 'out_of_stock'
-              : product.stock_quantity <= (product.min_stock || 5)
+              : product.stock_quantity <= (product.min_stock ?? 5)
                 ? 'low_stock'
                 : 'ok';
           const StatusIcon = getStatusIcon(status);
@@ -257,7 +257,7 @@ export default function ProductsScreen() {
               <Image
                 source={{
                   uri:
-                    product.image_url ||
+                    product.image_url ??
                     'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
                 }}
                 style={styles.productImage}
@@ -285,10 +285,10 @@ export default function ProductsScreen() {
                 </View>
 
                 <Text style={styles.productCategory}>
-                  {product.category || 'Divers'}
+                  {product.category ?? 'Divers'}
                 </Text>
                 <Text style={styles.productBarcode}>
-                  Code: {product.barcode || 'N/A'}
+                  Code: {product.barcode ?? 'N/A'}
                 </Text>
 
                 <View style={styles.productDetails}>

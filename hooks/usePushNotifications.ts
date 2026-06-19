@@ -83,6 +83,8 @@ async function registerForPushNotificationsAsync(
   // expo-device cannot be imported on web, so require dynamically
   let ExpoDevice: { isDevice: boolean } | undefined;
   try {
+    // On masque `require` au bundler web (expo-device n'existe pas côté web).
+    // eslint-disable-next-line no-new-func
     const req = Function('return require')() as (name: string) => {
       isDevice: boolean;
     };

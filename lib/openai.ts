@@ -187,6 +187,8 @@ export const getChatAssistantResponse = async (
     });
 
     return (
+      // `||` volontaire : un contenu vide ('') doit aussi retomber sur le repli.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       response.choices[0]?.message?.content ||
       'Désolé, je ne peux pas répondre pour le moment.'
     );
@@ -231,6 +233,8 @@ export const generateAuditReport = async (auditData: any): Promise<string> => {
     });
 
     return (
+      // `||` volontaire : un contenu vide ('') doit aussi retomber sur le repli.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       response.choices[0]?.message?.content ||
       'Rapport en cours de génération...'
     );
