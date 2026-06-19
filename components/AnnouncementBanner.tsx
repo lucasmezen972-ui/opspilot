@@ -65,8 +65,8 @@ export default function AnnouncementBanner() {
       .select('id, title, body, level')
       .order('created_at', { ascending: false })
       .limit(3)
-      .then(({ data }) => {
-        if (data) setAnnouncements(data as Announcement[]);
+      .then(({ data, error }) => {
+        if (!error && data) setAnnouncements(data as Announcement[]);
       });
   }, [session]);
 

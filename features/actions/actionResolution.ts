@@ -71,7 +71,7 @@ export function buildResolutionRecord(
   evidence: ResolutionEvidencePayload,
   resolver?: ResolutionResolver | null,
 ): ResolutionRecord {
-  const photoUri = evidence.proofPhotoUri?.trim() || null;
+  const photoUri = evidence.proofPhotoUri?.trim() ?? null;
   return {
     resolution_comment: evidence.comment.trim() || null,
     resolved_by_name: evidence.employeeName.trim() || null,

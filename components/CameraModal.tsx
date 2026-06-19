@@ -82,7 +82,7 @@ export default function CameraModal({
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = () => {
-      const file = input.files && input.files[0];
+      const file = input.files?.[0];
       if (!file) return;
       const url = URL.createObjectURL(file);
       onPhotoTaken(url);
