@@ -39,10 +39,10 @@ export interface EvidencePathInput {
  */
 export function buildEvidenceStoragePath(input: EvidencePathInput): string {
   const { organizationId, entityType, entityId, fileName } = input;
-  if (!organizationId.trim()) {
+  if (!organizationId?.trim()) {
     throw new Error('organizationId requis pour cloisonner la preuve');
   }
-  if (!entityId.trim()) {
+  if (!entityId?.trim()) {
     throw new Error('entityId requis pour rattacher la preuve');
   }
   const ts = input.now ?? Date.now();
