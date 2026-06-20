@@ -407,7 +407,7 @@ export function useTraining() {
     if (!profile) return;
 
     try {
-      const newXP = profile.xp + xpAmount;
+      const newXP = (profile.xp ?? 0) + xpAmount;
       const newLevel = Math.floor(newXP / 100) + 1;
 
       await supabase

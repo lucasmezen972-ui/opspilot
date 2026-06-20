@@ -141,9 +141,12 @@ export function useChannels() {
           },
           { onConflict: 'user_id,channel_id' },
         )
-        .then(({ error }) => {
-          if (error) mapSupabaseError('Erreur accusé de lecture', error);
-        });
+        .then(
+          ({ error }) => {
+            if (error) mapSupabaseError('Erreur accusé de lecture', error);
+          },
+          () => {},
+        );
     },
     [isLocalDemo, currentUserId, profile?.id],
   );

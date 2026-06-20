@@ -97,13 +97,16 @@ export function useActivityLog() {
           entity_id: input.entityId ?? null,
           metadata: { label: input.label, actor_name: profile.full_name },
         })
-        .then(({ error }) => {
-          if (error) {
-            setRemoteEvents((prev) =>
-              prev.filter((event) => event.id !== optimistic.id),
-            );
-          }
-        });
+        .then(
+          ({ error }) => {
+            if (error) {
+              setRemoteEvents((prev) =>
+                prev.filter((event) => event.id !== optimistic.id),
+              );
+            }
+          },
+          () => {},
+        );
     },
     [isLocalDemo, profile],
   );
