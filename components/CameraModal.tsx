@@ -22,6 +22,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { analyzeAuditImage } from '../lib/openai';
 import { colors, shadow } from '../shared/styles/tokens';
+import { logger } from '../utils/logger';
 
 interface CameraModalProps {
   visible: boolean;
@@ -173,14 +174,14 @@ export default function CameraModal({
             const aiAnalysis = await analyzeAuditImage(photo.uri, auditType);
             setAnalysis(aiAnalysis);
           } catch (error) {
-            console.warn('Analyse IA indisponible:', error);
+            logger.warn('Analyse IA indisponible:', error);
           } finally {
             setAnalyzing(false);
           }
         }
       }
     } catch (error) {
-      console.error('Erreur prise de photo:', error);
+      logger.error('Erreur prise de photo:', error);
       Alert.alert('Erreur', 'Impossible de prendre la photo');
     }
   };

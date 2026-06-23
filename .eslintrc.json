@@ -11,6 +11,16 @@
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ]
   },
+  "overrides": [
+    {
+      "files": ["admin/**/*.js"],
+      "env": { "browser": true }
+    },
+    {
+      "files": ["public/sw.js"],
+      "env": { "serviceworker": true }
+    }
+  ],
   "ignorePatterns": [
     "supabase/functions/**",
     "node_modules/**",
