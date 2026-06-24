@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
+import { logger } from '../utils/logger';
+
 interface OfflineAudit {
   id: string;
   [key: string]: any;
@@ -48,7 +50,7 @@ export async function initOfflineDatabase() {
     }
     return { success: true, message: 'Offline storage initialized' };
   } catch (error) {
-    console.error('[Offline] Failed to initialize storage:', error);
+    logger.error('[Offline] Failed to initialize storage:', error);
     return { success: false, message: 'Storage initialization failed' };
   }
 }
@@ -64,7 +66,7 @@ export async function syncPendingData() {
     // For now return the count of pending items.
     return { success: true, synced: 0, pending: queue.length };
   } catch (error) {
-    console.error('[Offline] Sync failed:', error);
+    logger.error('[Offline] Sync failed:', error);
     return { success: false, synced: 0 };
   }
 }
@@ -81,7 +83,7 @@ export async function loadOfflineAudits(): Promise<OfflineAudit[]> {
     const stored = await getItem(STORAGE_KEYS.audits);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.warn('[Offline] Failed to load audits:', error);
+    logger.warn('[Offline] Failed to load audits:', error);
     return [];
   }
 }
@@ -90,7 +92,7 @@ export async function setOfflineAudits(audits: OfflineAudit[]): Promise<void> {
   try {
     await setItem(STORAGE_KEYS.audits, JSON.stringify(audits));
   } catch (error) {
-    console.warn('[Offline] Failed to save audits:', error);
+    logger.warn('[Offline] Failed to save audits:', error);
   }
 }
 
@@ -99,7 +101,7 @@ export async function loadOfflineTasks(): Promise<OfflineTask[]> {
     const stored = await getItem(STORAGE_KEYS.tasks);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.warn('[Offline] Failed to load tasks:', error);
+    logger.warn('[Offline] Failed to load tasks:', error);
     return [];
   }
 }
@@ -108,7 +110,7 @@ export async function setOfflineTasks(tasks: OfflineTask[]): Promise<void> {
   try {
     await setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
   } catch (error) {
-    console.warn('[Offline] Failed to save tasks:', error);
+    logger.warn('[Offline] Failed to save tasks:', error);
   }
 }
 
@@ -125,7 +127,7 @@ export async function queueAudit(audit: OfflineAudit): Promise<void> {
     });
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
-    console.warn('[Offline] Failed to queue audit:', error);
+    logger.warn('[Offline] Failed to queue audit:', error);
   }
 }
 
@@ -142,7 +144,7 @@ export async function queueTask(task: OfflineTask): Promise<void> {
     });
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
-    console.warn('[Offline] Failed to queue task:', error);
+    logger.warn('[Offline] Failed to queue task:', error);
   }
 }
 
@@ -162,7 +164,7 @@ export async function queuePhoto(
     });
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
-    console.warn('[Offline] Failed to queue photo:', error);
+    logger.warn('[Offline] Failed to queue photo:', error);
   }
 }
 

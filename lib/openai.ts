@@ -5,9 +5,22 @@ import { mapOpenAIError } from '../utils/error';
 const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 
 const openai = new OpenAI({
-  apiKey: apiKey ?? 'opspilot-openai-placeholder',
+  apiKey: apiKey || 'opspilot-openai-placeholder',
   dangerouslyAllowBrowser: true,
 });
+
+function isApiConfigured(): boolean {
+  return !!apiKey && apiKey !== 'opspilot-openai-placeholder';
+}
+
+function safeJsonParse<T>(raw: string, fallback: T): T {
+  try {
+    const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/, '');
+    return JSON.parse(cleaned) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 export interface AuditAnalysis {
   issues: {
@@ -38,6 +51,16 @@ export const analyzeAuditImage = async (
   imageUrl: string,
   auditType: string = 'general',
 ): Promise<AuditAnalysis> => {
+  if (!isApiConfigured()) {
+    return {
+      issues: [],
+      overall_score: 0,
+      summary: 'Clé API OpenAI non configurée. Analyse manuelle requise.',
+      recommendations: [
+        "Configurer EXPO_PUBLIC_OPENAI_API_KEY pour activer l'analyse IA.",
+      ],
+    };
+  }
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -78,8 +101,12 @@ export const analyzeAuditImage = async (
     const content = response.choices[0]?.message?.content;
     if (!content) throw new Error('Pas de réponse de OpenAI');
 
-    const analysis = JSON.parse(content) as AuditAnalysis;
-    return analysis;
+    return safeJsonParse<AuditAnalysis>(content, {
+      issues: [],
+      overall_score: 0,
+      summary: 'Réponse IA illisible. Analyse manuelle requise.',
+      recommendations: [],
+    });
   } catch (error) {
     const message = mapOpenAIError('Erreur analyse OpenAI', error);
     return {
@@ -102,6 +129,16 @@ export const generateTrainingContent = async (
   topic: string,
   difficulty: 'beginner' | 'intermediate' | 'advanced',
 ): Promise<TrainingContent> => {
+  if (!isApiConfigured()) {
+    return {
+      title: `Formation: ${topic}`,
+      content: 'Clé API OpenAI non configurée. Contenu indisponible.',
+      quiz_questions: [],
+      practical_tips: [
+        'Configurer EXPO_PUBLIC_OPENAI_API_KEY pour activer la génération IA.',
+      ],
+    };
+  }
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -143,7 +180,12 @@ export const generateTrainingContent = async (
     const content = response.choices[0]?.message?.content;
     if (!content) throw new Error('Pas de réponse de OpenAI');
 
-    return JSON.parse(content) as TrainingContent;
+    return safeJsonParse<TrainingContent>(content, {
+      title: `Formation: ${topic}`,
+      content: 'Réponse IA illisible.',
+      quiz_questions: [],
+      practical_tips: [],
+    });
   } catch (error) {
     const message = mapOpenAIError('Erreur génération formation OpenAI', error);
     return {
@@ -160,6 +202,9 @@ export const getChatAssistantResponse = async (
   userMessage: string,
   context: string = '',
 ): Promise<string> => {
+  if (!isApiConfigured()) {
+    return "L'assistant IA n'est pas disponible actuellement. Veuillez contacter votre responsable.";
+  }
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -197,6 +242,9 @@ export const getChatAssistantResponse = async (
 
 // Génération automatique de rapports d'audit
 export const generateAuditReport = async (auditData: any): Promise<string> => {
+  if (!isApiConfigured()) {
+    return 'Génération IA indisponible. Veuillez configurer la clé API OpenAI.';
+  }
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',

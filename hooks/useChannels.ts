@@ -35,7 +35,10 @@ export function useChannels() {
   useEffect(() => {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
-    fetchData().catch(() => setLoading(false));
+    fetchData().catch((err) => {
+      mapSupabaseError('Erreur chargement canaux', err);
+      setLoading(false);
+    });
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchData = async () => {

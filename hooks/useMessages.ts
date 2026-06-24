@@ -49,7 +49,7 @@ export function useMessages() {
     }
     if (profile?.organization_id) {
       fetchConversations().then((convs) => {
-        if (convs) fetchUnreadCounts(convs);
+        if (convs && convs.length > 0) fetchUnreadCounts(convs);
       });
       const cleanup = setupRealtimeSubscription();
       return () => {
