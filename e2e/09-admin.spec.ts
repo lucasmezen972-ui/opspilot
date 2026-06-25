@@ -21,6 +21,11 @@ test.describe('Back-office admin', () => {
   }) => {
     await blockSupabase(page);
     await page.goto('./admin/');
+    await page.waitForFunction(
+      () => document.body.dataset.appReady === '1',
+      null,
+      { timeout: 15_000 },
+    );
     await page.getByTestId('admin-login-email').fill('inconnu@exemple.com');
     await page.getByTestId('admin-login-password').fill('mauvais-mdp');
     await page.getByTestId('admin-login-submit').click();
