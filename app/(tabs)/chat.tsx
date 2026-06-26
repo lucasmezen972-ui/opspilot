@@ -1,8 +1,9 @@
-import { Bell, Search } from 'lucide-react-native';
-import { useState, useEffect } from 'react';
+import { Bell, Search, X } from 'lucide-react-native';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -74,6 +75,9 @@ export default function ChatScreen() {
   const [newMessage, setNewMessage] = useState('');
   const [localMessages, setLocalMessages] = useState<DisplayMessage[]>([]);
   const [assistantLoading, setAssistantLoading] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
   const isLocalDemo = isDemoMode && !session;
 
   // Modules pilotés depuis le back-office (assistant IA désactivable).
@@ -84,6 +88,25 @@ export default function ChatScreen() {
     getUnreadCount,
     isEnabled('features.ai_assistant'),
   );
+
+  const filteredConversations = useMemo(() => {
+    if (!searchQuery.trim()) return conversations;
+    const q = searchQuery.toLowerCase();
+    return conversations.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.lastMessage.toLowerCase().includes(q),
+    );
+  }, [conversations, searchQuery]);
+
+  const totalUnread = useMemo(() => {
+    const convUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+    const chanUnread = channels.reduce(
+      (sum, c) => sum + getChannelUnread(c.id),
+      0,
+    );
+    return convUnread + chanUnread;
+  }, [conversations, channels, getChannelUnread]);
 
   // Sélectionner la première conversation par défaut.
   useEffect(() => {
@@ -201,29 +224,108 @@ export default function ChatScreen() {
           <>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() =>
-                Alert.alert(
-                  'Recherche',
-                  'La recherche de messages sera bientôt disponible.',
-                )
-              }
+              testID="chat-search-button"
+              onPress={() => {
+                setShowSearch((v) => !v);
+                if (showSearch) setSearchQuery('');
+              }}
             >
-              <Search size={20} color={colors.textMuted} />
+              {showSearch ? (
+                <X size={20} color={colors.primary} />
+              ) : (
+                <Search size={20} color={colors.textMuted} />
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() =>
-                Alert.alert(
-                  'Notifications',
-                  'Les notifications seront bientôt disponibles.',
-                )
-              }
+              testID="chat-notif-button"
+              onPress={() => setShowNotifPanel((v) => !v)}
             >
               <Bell size={20} color={colors.textMuted} />
+              {totalUnread > 0 && (
+                <View style={styles.notifBadge}>
+                  <Text style={styles.notifBadgeText}>
+                    {totalUnread > 9 ? '9+' : totalUnread}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           </>
         }
       />
+
+      {showSearch && (
+        <View style={styles.searchBar}>
+          <Search size={16} color={colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher dans les conversations…"
+            placeholderTextColor={colors.textFaint}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+            testID="chat-search-input"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <X size={16} color={colors.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {showNotifPanel && (
+        <View style={styles.notifPanel}>
+          <Text style={styles.notifPanelTitle}>Notifications</Text>
+          {totalUnread === 0 ? (
+            <Text style={styles.notifPanelEmpty}>
+              Aucun message non lu. Vous êtes à jour !
+            </Text>
+          ) : (
+            <>
+              {conversations
+                .filter((c) => c.unread > 0)
+                .map((c) => (
+                  <TouchableOpacity
+                    key={c.id}
+                    style={styles.notifRow}
+                    onPress={() => {
+                      setSelectedConversation(c.id);
+                      setActiveTab('messages');
+                      setShowNotifPanel(false);
+                    }}
+                  >
+                    <View style={styles.notifDot} />
+                    <Text style={styles.notifRowText} numberOfLines={1}>
+                      {c.name} — {c.unread} non lu{c.unread > 1 ? 's' : ''}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              {channels
+                .filter((c) => getChannelUnread(c.id) > 0)
+                .map((c) => {
+                  const count = getChannelUnread(c.id);
+                  return (
+                    <TouchableOpacity
+                      key={c.id}
+                      style={styles.notifRow}
+                      onPress={() => {
+                        handleSelectChannel(c.id);
+                        setActiveTab('canaux');
+                        setShowNotifPanel(false);
+                      }}
+                    >
+                      <View style={styles.notifDot} />
+                      <Text style={styles.notifRowText} numberOfLines={1}>
+                        #{c.name} — {count} non lu{count > 1 ? 's' : ''}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+            </>
+          )}
+        </View>
+      )}
 
       <AppTabBar
         activeKey={activeTab}
@@ -274,7 +376,7 @@ export default function ChatScreen() {
       ) : (
         <ScrollView style={styles.conversationsList}>
           <Text style={styles.sectionTitle}>Conversations</Text>
-          {conversations.map((conversation) => (
+          {filteredConversations.map((conversation) => (
             <ConversationCard
               key={conversation.id}
               conversation={conversation}
@@ -311,6 +413,78 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.danger,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  notifBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    marginHorizontal: 16,
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.textStrong,
+    paddingVertical: 2,
+  },
+  notifPanel: {
+    backgroundColor: colors.surface,
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  notifPanelTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textStrong,
+    marginBottom: 8,
+  },
+  notifPanelEmpty: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  notifRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    gap: 8,
+  },
+  notifDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
+  },
+  notifRowText: {
+    fontSize: 13,
+    color: colors.textStrong,
+    flex: 1,
   },
   conversationsList: {
     flex: 1,
