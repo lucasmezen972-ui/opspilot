@@ -2,7 +2,7 @@
 // SPA sans build : supabase-js chargé en ESM, toutes les opérations
 // privilégiées passent par l'Edge Function admin-api (service_role côté
 // serveur, jamais dans le navigateur).
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from './vendor/supabase.js';
 
 const SUPABASE_URL = 'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
 const SUPABASE_ANON_KEY =
@@ -83,10 +83,16 @@ async function handleLogin() {
   }
   $('#login-submit').disabled = true;
   try {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error('Délai de connexion dépassé.')),
+        10_000,
+      ),
+    );
+    const { error } = await Promise.race([
+      supabase.auth.signInWithPassword({ email, password }),
+      timeout,
+    ]);
     if (error)
       throw new Error('Identifiants invalides ou réseau indisponible.');
     await maybeChallenge2fa();
@@ -1349,6 +1355,7 @@ function closeModal() {
 
 /* ── Boot ── */
 $('#login-submit').addEventListener('click', handleLogin);
+document.body.dataset.appReady = '1';
 $('#login-password').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleLogin();
 });
