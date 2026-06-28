@@ -195,7 +195,13 @@ export type Profile = {
   full_name?: string | null;
   phone?: string | null;
   avatar_url?: string | null;
-  role: 'admin' | 'manager' | 'employé' | 'employee' | 'stagiaire';
+  role:
+    | 'admin'
+    | 'manager'
+    | 'employé'
+    | 'employee'
+    | 'stagiaire'
+    | 'superadmin';
   department_id?: string | null;
   level: number;
   xp: number;

@@ -45,7 +45,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>
-            Bonjour, {profile?.full_name?.split(' ')[0] || 'Utilisateur'} !
+            Bonjour, {profile?.full_name?.split(' ')[0] ?? 'Utilisateur'} !
           </Text>
           <Text style={styles.subtitle}>
             Prêt pour une journée productive ?
@@ -60,7 +60,7 @@ export default function HomeScreen() {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <TrendingUp size={24} color="#10B981" />
-          <Text style={styles.statNumber}>{profile?.avg_score || 0}%</Text>
+          <Text style={styles.statNumber}>{profile?.avg_score ?? 0}%</Text>
           <Text style={styles.statLabel}>Score du jour</Text>
         </View>
         <View style={styles.statCard}>
@@ -228,7 +228,7 @@ export default function HomeScreen() {
             <BookOpen size={20} color="#F59E0B" />
             <Text style={styles.summaryLabel}>Formations</Text>
             <Text style={styles.summaryValue}>
-              {profile?.completed_trainings || 0}
+              {profile?.completed_trainings ?? 0}
             </Text>
           </View>
         </View>

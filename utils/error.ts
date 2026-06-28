@@ -19,6 +19,10 @@ export const mapSupabaseError = (context: string, error: unknown): string => {
       return 'Le mot de passe doit contenir au moins 6 caractères.';
     if (msg.includes('rate limit'))
       return 'Trop de tentatives. Veuillez patienter quelques minutes.';
+    if (msg.includes('Failed to fetch') || msg.includes('NetworkError'))
+      return 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+    if (msg.includes('CORS') || msg.includes('blocked'))
+      return 'Erreur réseau. Veuillez réessayer.';
     return msg;
   }
   return GENERIC_SUPABASE_ERROR;

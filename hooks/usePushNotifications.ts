@@ -83,10 +83,8 @@ async function registerForPushNotificationsAsync(
   // expo-device cannot be imported on web, so require dynamically
   let ExpoDevice: { isDevice: boolean } | undefined;
   try {
-    const req = Function('return require')() as (name: string) => {
-      isDevice: boolean;
-    };
-    ExpoDevice = req('expo-device');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    ExpoDevice = require('expo-device') as { isDevice: boolean };
   } catch {
     console.log('expo-device package not available');
     return;

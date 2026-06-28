@@ -88,7 +88,9 @@ export default function TabLayout() {
             <LayoutDashboard size={size} color={color} />
           ),
           href:
-            profile?.role === 'manager' || profile?.role === 'admin'
+            profile?.role === 'manager' ||
+            profile?.role === 'admin' ||
+            profile?.role === 'superadmin'
               ? '/manager'
               : null,
         }}

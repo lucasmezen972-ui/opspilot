@@ -187,7 +187,7 @@ export const getChatAssistantResponse = async (
     });
 
     return (
-      response.choices[0]?.message?.content ||
+      response.choices[0]?.message?.content ??
       'Désolé, je ne peux pas répondre pour le moment.'
     );
   } catch (error) {
@@ -231,7 +231,7 @@ export const generateAuditReport = async (auditData: any): Promise<string> => {
     });
 
     return (
-      response.choices[0]?.message?.content ||
+      response.choices[0]?.message?.content ??
       'Rapport en cours de génération...'
     );
   } catch (error) {

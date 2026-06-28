@@ -25,8 +25,8 @@ export default function TrainingScreen() {
   const { profile } = useAuth();
   const {
     courses: dbCourses,
-    progress,
-    loading: trainingLoading,
+    progress: _progress,
+    loading: _trainingLoading,
     startCourse,
     updateProgress,
     getCourseProgress,
@@ -205,7 +205,7 @@ export default function TrainingScreen() {
         <Text style={styles.title}>Formation</Text>
         <View style={styles.pointsBadge}>
           <Star size={16} color="#F59E0B" />
-          <Text style={styles.pointsText}>{profile?.xp || 0} XP</Text>
+          <Text style={styles.pointsText}>{profile?.xp ?? 0} XP</Text>
         </View>
       </View>
 
@@ -410,10 +410,10 @@ export default function TrainingScreen() {
                 <Text style={styles.leaderboardRankText}>1</Text>
               </View>
               <Text style={styles.leaderboardName}>
-                {profile?.full_name || 'Vous'}
+                {profile?.full_name ?? 'Vous'}
               </Text>
               <Text style={styles.leaderboardPoints}>
-                {profile?.xp || 0} XP
+                {profile?.xp ?? 0} XP
               </Text>
             </View>
             <View style={styles.leaderboardItem}>
@@ -422,7 +422,7 @@ export default function TrainingScreen() {
               </View>
               <Text style={styles.leaderboardName}>Pierre Martin</Text>
               <Text style={styles.leaderboardPoints}>
-                {Math.max(0, (profile?.xp || 0) - 50)} XP
+                {Math.max(0, (profile?.xp ?? 0) - 50)} XP
               </Text>
             </View>
             <View style={styles.leaderboardItem}>
@@ -431,7 +431,7 @@ export default function TrainingScreen() {
               </View>
               <Text style={styles.leaderboardName}>Jean Leroy</Text>
               <Text style={styles.leaderboardPoints}>
-                {Math.max(0, (profile?.xp || 0) - 100)} XP
+                {Math.max(0, (profile?.xp ?? 0) - 100)} XP
               </Text>
             </View>
           </View>

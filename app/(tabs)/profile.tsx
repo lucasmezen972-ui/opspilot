@@ -10,7 +10,6 @@ import {
   Smartphone,
   Globe,
   Star,
-  Trophy,
   Target,
   Clock,
   ChevronRight,
@@ -28,6 +27,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 
 const roleLabels: Record<string, string> = {
+  superadmin: 'Super Administrateur',
   admin: 'Administrateur',
   manager: 'Responsable Magasin',
   employé: 'Employé',
@@ -38,12 +38,12 @@ const roleLabels: Record<string, string> = {
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
 
-  const displayName = profile?.full_name || 'Utilisateur';
+  const displayName = profile?.full_name ?? 'Utilisateur';
   const displayRole = profile?.role
-    ? roleLabels[profile.role] || profile.role
+    ? (roleLabels[profile.role] ?? profile.role)
     : 'Employé';
-  const level = profile?.level || 1;
-  const xp = profile?.xp || 0;
+  const level = profile?.level ?? 1;
+  const xp = profile?.xp ?? 0;
   const xpForNextLevel = level * 100;
   const xpProgress =
     xpForNextLevel > 0 ? Math.min((xp / xpForNextLevel) * 100, 100) : 0;
@@ -52,25 +52,25 @@ export default function ProfileScreen() {
     () => [
       {
         label: 'Audits réalisés',
-        value: String(profile?.total_audits || 0),
+        value: String(profile?.total_audits ?? 0),
         icon: BarChart3,
         color: '#2563EB',
       },
       {
         label: 'Score moyen',
-        value: `${profile?.avg_score || 0}%`,
+        value: `${profile?.avg_score ?? 0}%`,
         icon: Target,
         color: '#10B981',
       },
       {
         label: 'Formations',
-        value: String(profile?.completed_trainings || 0),
+        value: String(profile?.completed_trainings ?? 0),
         icon: Award,
         color: '#F59E0B',
       },
       {
         label: 'Temps actif',
-        value: `${profile?.active_time_hours || 0}h`,
+        value: `${profile?.active_time_hours ?? 0}h`,
         icon: Clock,
         color: '#8B5CF6',
       },
@@ -104,7 +104,7 @@ export default function ProfileScreen() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{displayName}</Text>
             <Text style={styles.profileRole}>{displayRole}</Text>
-            <Text style={styles.profileLocation}>{profile?.email || ''}</Text>
+            <Text style={styles.profileLocation}>{profile?.email ?? ''}</Text>
           </View>
           <View style={styles.levelBadge}>
             <Star size={16} color="#F59E0B" />
