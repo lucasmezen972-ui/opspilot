@@ -1,7 +1,14 @@
+import { existsSync } from 'fs';
 import { defineConfig, devices } from '@playwright/test';
 
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000/opspilot/';
+
+const PRE_INSTALLED_CHROMIUM =
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const chromiumPath =
+  process.env.PLAYWRIGHT_CHROMIUM_PATH ||
+  (existsSync(PRE_INSTALLED_CHROMIUM) ? PRE_INSTALLED_CHROMIUM : undefined);
 
 export default defineConfig({
   testDir: './e2e',
@@ -21,6 +28,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
+          ...(chromiumPath ? { executablePath: chromiumPath } : {}),
           args: [
             '--use-fake-device-for-media-stream',
             '--use-fake-ui-for-media-stream',
