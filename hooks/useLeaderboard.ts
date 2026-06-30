@@ -21,6 +21,7 @@ export type LeaderboardEntry = Pick<
 export function useLeaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -36,7 +37,8 @@ export function useLeaderboard() {
     }
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('profiles')
         .select(
           'id, full_name, email, role, xp, level, completed_trainings, total_audits, avg_score',
@@ -45,13 +47,13 @@ export function useLeaderboard() {
         .order('xp', { ascending: false })
         .limit(20);
 
-      if (error) {
-        mapSupabaseError('Erreur leaderboard', error);
+      if (fetchErr) {
+        setError(mapSupabaseError('Erreur leaderboard', fetchErr));
         return;
       }
       setEntries((data as LeaderboardEntry[]) || []);
     } catch (e) {
-      mapSupabaseError('Erreur useLeaderboard', e);
+      setError(mapSupabaseError('Erreur useLeaderboard', e));
     } finally {
       setLoading(false);
     }
@@ -61,5 +63,5 @@ export function useLeaderboard() {
     fetch();
   }, [fetch]);
 
-  return { entries, loading, refetch: fetch };
+  return { entries, loading, error, refetch: fetch };
 }

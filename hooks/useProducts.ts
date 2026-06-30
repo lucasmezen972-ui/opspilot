@@ -9,6 +9,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useProducts() {
   const [remoteProducts, setRemoteProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
 
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
@@ -33,20 +34,26 @@ export function useProducts() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('products')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('name', { ascending: true });
 
-      if (error) {
-        mapSupabaseError('Erreur lors de la récupération des produits', error);
+      if (fetchErr) {
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des produits',
+            fetchErr,
+          ),
+        );
         return;
       }
 
       setRemoteProducts(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchProducts', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchProducts', err));
     } finally {
       setLoading(false);
     }
@@ -199,6 +206,7 @@ export function useProducts() {
   return {
     products,
     loading,
+    error,
     fetchProduct,
     scanProduct,
     createProduct,

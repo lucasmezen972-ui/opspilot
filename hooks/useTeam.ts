@@ -8,6 +8,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useTeam() {
   const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -25,20 +26,21 @@ export function useTeam() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('profiles')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('full_name', { ascending: true });
 
-      if (error) {
-        mapSupabaseError('Erreur récupération équipe', error);
+      if (fetchErr) {
+        setError(mapSupabaseError('Erreur récupération équipe', fetchErr));
         return;
       }
 
       setMembers(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur useTeam', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur useTeam', err));
     } finally {
       setLoading(false);
     }
@@ -86,5 +88,5 @@ export function useTeam() {
     }
   };
 
-  return { members, loading, refetch: fetchMembers, updateMemberRole };
+  return { members, loading, error, refetch: fetchMembers, updateMemberRole };
 }
