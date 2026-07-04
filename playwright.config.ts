@@ -1,7 +1,19 @@
+import { existsSync } from 'fs';
+
 import { defineConfig, devices } from '@playwright/test';
 
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000/opspilot/';
+
+function findChromium(): string | undefined {
+  if (process.env.PLAYWRIGHT_CHROMIUM_PATH)
+    return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  const candidate = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+  if (existsSync(candidate)) return candidate;
+  return undefined;
+}
+
+const executablePath = findChromium();
 
 export default defineConfig({
   testDir: './e2e',
@@ -21,6 +33,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
+          executablePath,
           args: [
             '--use-fake-device-for-media-stream',
             '--use-fake-ui-for-media-stream',
