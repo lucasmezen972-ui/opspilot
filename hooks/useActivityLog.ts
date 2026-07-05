@@ -8,6 +8,7 @@ import {
   type ActivityEvent,
   type ActivityEventType,
 } from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 export type ActivityLogInput = {
   action: ActivityEventType;
@@ -27,6 +28,7 @@ export function useActivityLog() {
 
   const demoEvents = useDemoCollection('activityLog');
   const [remoteEvents, setRemoteEvents] = useState<ActivityEvent[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const events = isLocalDemo ? demoEvents : remoteEvents;
 
   useEffect(() => {
@@ -51,7 +53,10 @@ export function useActivityLog() {
           created_at: r.created_at,
         })),
       );
-    })().catch(() => setRemoteEvents([]));
+    })().catch((err) => {
+      setError(mapSupabaseError('Erreur chargement journal', err));
+      setRemoteEvents([]);
+    });
   }, [isLocalDemo, profile?.organization_id]);
 
   const logEvent = useCallback(
@@ -105,11 +110,13 @@ export function useActivityLog() {
               );
             }
           },
-          () => {},
+          (err) => {
+            mapSupabaseError('Activity log error', err);
+          },
         );
     },
     [isLocalDemo, profile],
   );
 
-  return { events, logEvent };
+  return { events, error, logEvent };
 }

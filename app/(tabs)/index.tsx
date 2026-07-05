@@ -1,6 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 
 import { DashboardDlcAlerts } from '../../features/dashboard/DashboardDlcAlerts';
 import { DashboardFieldBrief } from '../../features/dashboard/DashboardFieldBrief';
@@ -25,9 +31,20 @@ const heroGradientColors = [colors.primary, colors.primaryDark] as const;
 
 export default function HomeScreen() {
   const { profile } = useAuth();
-  const { audits } = useAudits();
-  const { actions } = useCorrectiveActions();
-  const { products } = useProducts();
+  const { audits, loading: auditsLoading, error: auditsError } = useAudits();
+  const {
+    actions,
+    loading: actionsLoading,
+    error: actionsError,
+  } = useCorrectiveActions();
+  const {
+    products,
+    loading: productsLoading,
+    error: productsError,
+  } = useProducts();
+
+  const loading = auditsLoading || actionsLoading || productsLoading;
+  const error = auditsError ?? actionsError ?? productsError;
 
   const now = useMemo(() => new Date(), []);
   const kpis = useMemo(
@@ -79,6 +96,21 @@ export default function HomeScreen() {
       </LinearGradient>
 
       <DashboardFieldBrief brief={fieldBrief} />
+
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>
+            Certaines données n’ont pas pu être chargées. Tirez pour actualiser.
+          </Text>
+        </View>
+      )}
+
+      {loading && (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>Chargement…</Text>
+        </View>
+      )}
 
       <View style={styles.section}>
         <AppSectionHeader title="Ce qui compte aujourd’hui" />
@@ -194,5 +226,31 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 24,
+  },
+  errorBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+  },
+  loadingText: {
+    color: colors.textMuted,
+    fontSize: 13,
   },
 });

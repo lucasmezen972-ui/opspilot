@@ -9,6 +9,8 @@ import {
 import type { Profile } from '../../lib/supabase';
 
 const ROLE_LABELS: Record<string, string> = {
+  superadmin: 'Super Administrateur',
+  support: 'Support',
   admin: 'Administrateur',
   manager: 'Responsable Magasin',
   employé: 'Employé',

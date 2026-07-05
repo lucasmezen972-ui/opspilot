@@ -9,6 +9,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useCorrectiveActions() {
   const [remoteActions, setRemoteActions] = useState<CorrectiveAction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, profile, isDemoMode, session } = useAuth();
 
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
@@ -33,6 +34,7 @@ export function useCorrectiveActions() {
 
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('corrective_actions')
         .select('*')
@@ -41,13 +43,18 @@ export function useCorrectiveActions() {
         .limit(200);
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des actions', error);
+        const msg = mapSupabaseError(
+          'Erreur lors de la récupération des actions',
+          error,
+        );
+        setError(msg);
         return;
       }
 
       setRemoteActions(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchActions', error);
+    } catch (err) {
+      const msg = mapSupabaseError('Erreur fetchActions', err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -197,6 +204,7 @@ export function useCorrectiveActions() {
   return {
     actions,
     loading,
+    error,
     createAction,
     updateActionStatus,
     isOverdue,

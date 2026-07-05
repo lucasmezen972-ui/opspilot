@@ -188,7 +188,7 @@ export default function ChatScreen() {
         ...prev,
         {
           id: `ai-${Date.now()}`,
-          conversationId: 'demo-ai',
+          conversationId: selectedConversation,
           sender: 'Assistant IA OpsPilot',
           content: aiResponse,
           timestamp: formatTime(Date.now()),

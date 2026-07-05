@@ -47,6 +47,7 @@ export function useTraining() {
     TrainingCertificate[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, fetchProfile, updateProfile, isDemoMode, session } =
     useAuth();
 
@@ -81,6 +82,7 @@ export function useTraining() {
 
     try {
       setLoading(true);
+      setError(null);
 
       // Récupérer les cours
       const { data: coursesData, error: coursesError } = await supabase
@@ -90,10 +92,11 @@ export function useTraining() {
         .order('created_at', { ascending: false });
 
       if (coursesError) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération des cours',
           coursesError,
         );
+        setError(msg);
         return;
       }
 
@@ -115,17 +118,19 @@ export function useTraining() {
         ]);
 
         if (chaptersResult.error) {
-          mapSupabaseError(
+          const msg = mapSupabaseError(
             'Erreur lors de la récupération des chapitres',
             chaptersResult.error,
           );
+          setError(msg);
           return;
         }
         if (quizResult.error) {
-          mapSupabaseError(
+          const msg = mapSupabaseError(
             'Erreur lors de la récupération du quiz',
             quizResult.error,
           );
+          setError(msg);
           return;
         }
 
@@ -151,10 +156,11 @@ export function useTraining() {
       ]);
 
       if (progressResult.error) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération de la progression',
           progressResult.error,
         );
+        setError(msg);
         return;
       }
 
@@ -163,15 +169,16 @@ export function useTraining() {
       // Les certificats sont secondaires : on n'interrompt pas le chargement
       // de la formation si leur récupération échoue.
       if (certResult.error) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération des certificats',
           certResult.error,
         );
+        setError(msg);
       } else {
         setRemoteCertificates((certResult.data || []) as TrainingCertificate[]);
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchTrainingData', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchTrainingData', err));
     } finally {
       setLoading(false);
     }
@@ -589,6 +596,7 @@ export function useTraining() {
     progress,
     certificates,
     loading,
+    error,
     startCourse,
     markChapterRead,
     completeQuiz,

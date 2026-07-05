@@ -49,7 +49,7 @@ export default function MoreScreen() {
   const { profile, isDemoMode, session } = useAuth();
   const { isEnabled } = useAppSettings();
   const isManager = isManagerRole(profile?.role);
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'superadmin';
   const isLocalDemo = isDemoMode && !session;
   // Back-office superadmin : visible pour les rôles habilités et en démo (vitrine).
   const canBackoffice = isLocalDemo || can(profile?.role, 'backoffice.access');

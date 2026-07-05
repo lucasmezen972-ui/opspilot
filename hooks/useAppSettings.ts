@@ -21,6 +21,7 @@ export function isFeatureEnabled(settings: SettingsMap, key: string): boolean {
 export function useAppSettings() {
   const [settings, setSettings] = useState<SettingsMap>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -30,17 +31,22 @@ export function useAppSettings() {
       return;
     }
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('app_settings')
         .select('key, value')
         .eq('organization_id', profile.organization_id);
-      if (!error && data) {
+      if (error) {
+        setError(mapSupabaseError('Settings fetch error', error));
+        return;
+      }
+      if (data) {
         setSettings(
           Object.fromEntries(data.map((r) => [r.key, r.value ?? {}])),
         );
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchAppSettings', error);
+    } catch (err) {
+      setError(mapSupabaseError('Settings fetch error', err));
     } finally {
       setLoading(false);
     }
@@ -55,5 +61,5 @@ export function useAppSettings() {
     [settings],
   );
 
-  return { settings, loading, isEnabled, refetch: fetchSettings };
+  return { settings, loading, error, isEnabled, refetch: fetchSettings };
 }

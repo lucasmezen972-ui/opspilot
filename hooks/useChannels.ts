@@ -26,6 +26,7 @@ export function useChannels() {
   // Marqueurs de lecture par canal (mode connecté) : channel_id -> last_read_at.
   const [remoteReads, setRemoteReads] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(!isLocalDemo);
+  const [error, setError] = useState<string | null>(null);
 
   const channels = isLocalDemo ? demoChannels : remoteChannels;
   const allMessages = isLocalDemo ? demoMessages : remoteMessages;
@@ -36,7 +37,7 @@ export function useChannels() {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
     fetchData().catch((err) => {
-      mapSupabaseError('Erreur chargement canaux', err);
+      setError(mapSupabaseError('Erreur chargement canaux', err));
       setLoading(false);
     });
   }, [profile?.organization_id, isLocalDemo]);
@@ -44,13 +45,18 @@ export function useChannels() {
   const fetchData = async () => {
     if (!profile?.organization_id) return;
     setLoading(true);
+    setError(null);
     try {
-      const { data: chData } = await supabase
+      const { data: chData, error: chError } = await supabase
         .from('channels')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .eq('is_archived', false)
         .order('created_at', { ascending: true });
+      if (chError) {
+        setError(mapSupabaseError('Erreur chargement canaux', chError));
+        return;
+      }
       setRemoteChannels((chData ?? []) as Channel[]);
 
       const channelIds = (chData ?? []).map((c) => c.id as string);
@@ -66,6 +72,19 @@ export function useChannels() {
             .select('channel_id, last_read_at')
             .eq('user_id', profile.id),
         ]);
+        if (msgResult.error) {
+          setError(
+            mapSupabaseError('Erreur chargement messages', msgResult.error),
+          );
+        }
+        if (readResult.error) {
+          setError(
+            mapSupabaseError(
+              'Erreur chargement accusés de lecture',
+              readResult.error,
+            ),
+          );
+        }
         setRemoteMessages((msgResult.data ?? []) as ChannelMessage[]);
         const reads: Record<string, string> = {};
         for (const r of (readResult.data ?? []) as ChannelRead[]) {
@@ -261,6 +280,7 @@ export function useChannels() {
 
   return {
     loading,
+    error,
     channels,
     allMessages,
     getMessagesForChannel,

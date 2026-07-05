@@ -18,6 +18,7 @@ export function useAuditTemplates() {
   const [remoteTemplates, setRemoteTemplates] = useState<AuditTemplate[]>([]);
   const [remoteItems, setRemoteItems] = useState<AuditTemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
   const demoTemplates = useDemoCollection('auditTemplates');
@@ -39,6 +40,7 @@ export function useAuditTemplates() {
 
     try {
       setLoading(true);
+      setError(null);
       const { data: templateData, error: templateError } = await supabase
         .from('audit_templates')
         .select('*')
@@ -47,10 +49,11 @@ export function useAuditTemplates() {
         .order('name');
 
       if (templateError) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération des modèles',
           templateError,
         );
+        setError(msg);
         return;
       }
 
@@ -71,15 +74,17 @@ export function useAuditTemplates() {
         .order('sort_order');
 
       if (itemError) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération des critères',
           itemError,
         );
+        setError(msg);
         return;
       }
       setRemoteItems((itemData || []) as AuditTemplateItem[]);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchAuditTemplates', error);
+    } catch (err) {
+      const msg = mapSupabaseError('Erreur fetchAuditTemplates', err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -116,6 +121,7 @@ export function useAuditTemplates() {
     templates,
     items,
     loading,
+    error,
     getItemsForTemplate,
     getTemplateVersion,
     getSectionsForTemplate,

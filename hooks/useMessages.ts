@@ -37,6 +37,7 @@ export function useMessages() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const activeConversationRef = useRef<string | null>(null);
   const isLocalDemo = isDemoMode && !session;
@@ -63,6 +64,7 @@ export function useMessages() {
 
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('conversations')
         .select('*, messages(content, created_at)')
@@ -70,17 +72,19 @@ export function useMessages() {
         .order('last_message_at', { ascending: false });
 
       if (error) {
-        mapSupabaseError(
+        const msg = mapSupabaseError(
           'Erreur lors de la récupération des conversations',
           error,
         );
+        setError(msg);
         return;
       }
 
       setConversations(data || []);
       return data || [];
-    } catch (error) {
-      mapSupabaseError('Erreur fetchConversations', error);
+    } catch (err) {
+      const msg = mapSupabaseError('Erreur fetchConversations', err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -337,6 +341,7 @@ export function useMessages() {
     messages,
     conversations,
     loading,
+    error,
     fetchMessages,
     sendMessage,
     markAsRead,

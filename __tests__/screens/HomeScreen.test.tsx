@@ -89,6 +89,7 @@ describe('HomeScreen', () => {
     mockUseAudits.mockReturnValue({
       audits: [mockAudit],
       loading: false,
+      error: null,
       createAudit: vi.fn(),
       updateAuditStatus: vi.fn(),
       completeAudit: vi.fn(),
@@ -103,6 +104,7 @@ describe('HomeScreen', () => {
     mockUseCorrectiveActions.mockReturnValue({
       actions: [],
       loading: false,
+      error: null,
       createAction: vi.fn(),
       updateActionStatus: vi.fn(),
       isOverdue: vi.fn(),
@@ -113,6 +115,7 @@ describe('HomeScreen', () => {
     mockUseProducts.mockReturnValue({
       products: [],
       loading: false,
+      error: null,
       scanProduct: vi.fn(),
       updateProductStock: vi.fn(),
       createProduct: vi.fn(),
@@ -165,6 +168,7 @@ describe('HomeScreen', () => {
     mockUseAudits.mockReturnValue({
       audits: [],
       loading: false,
+      error: null,
       createAudit: vi.fn(),
       updateAuditStatus: vi.fn(),
       completeAudit: vi.fn(),

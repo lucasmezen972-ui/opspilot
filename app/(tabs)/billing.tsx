@@ -22,7 +22,7 @@ import { supabase } from '../../lib/supabase';
 
 export default function BillingScreen() {
   return (
-    <RequireRole roles={['admin']}>
+    <RequireRole roles={['admin', 'superadmin']}>
       <BillingScreenContent />
     </RequireRole>
   );

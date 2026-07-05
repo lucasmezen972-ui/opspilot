@@ -7,6 +7,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useStores() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -23,6 +24,7 @@ export function useStores() {
 
     try {
       setLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('stores')
         .select('*')
@@ -31,13 +33,13 @@ export function useStores() {
         .order('name', { ascending: true });
 
       if (error) {
-        mapSupabaseError('Erreur récupération magasins', error);
+        setError(mapSupabaseError('Erreur récupération magasins', error));
         return;
       }
 
       setStores(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur useStores', error);
+    } catch (err) {
+      setError(mapSupabaseError('Store fetch error', err));
     } finally {
       setLoading(false);
     }
@@ -47,5 +49,5 @@ export function useStores() {
     fetchStores();
   }, [fetchStores]);
 
-  return { stores, loading, refetch: fetchStores };
+  return { stores, loading, error, refetch: fetchStores };
 }
