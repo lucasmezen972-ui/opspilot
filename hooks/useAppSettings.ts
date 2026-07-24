@@ -21,6 +21,7 @@ export function isFeatureEnabled(settings: SettingsMap, key: string): boolean {
 export function useAppSettings() {
   const [settings, setSettings] = useState<SettingsMap>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -39,8 +40,8 @@ export function useAppSettings() {
           Object.fromEntries(data.map((r) => [r.key, r.value ?? {}])),
         );
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchAppSettings', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchAppSettings', err));
     } finally {
       setLoading(false);
     }
@@ -55,5 +56,5 @@ export function useAppSettings() {
     [settings],
   );
 
-  return { settings, loading, isEnabled, refetch: fetchSettings };
+  return { settings, loading, error, isEnabled, refetch: fetchSettings };
 }

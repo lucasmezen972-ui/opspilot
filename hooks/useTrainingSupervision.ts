@@ -15,6 +15,7 @@ import {
   type Training,
   type UserTrainingProgress,
 } from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 interface RemoteMember {
   id: string;
@@ -59,6 +60,7 @@ export function useTrainingSupervision() {
   >([]);
   const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
   const [loading, setLoading] = useState(!isLocalDemo);
+  const [error, setError] = useState<string | null>(null);
 
   // Les sources démo sont des fonctions pures : on les mémoïse pour stabiliser
   // l'identité des tableaux entre les rendus.
@@ -75,7 +77,10 @@ export function useTrainingSupervision() {
   useEffect(() => {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
-    fetchOrgData().catch(() => setLoading(false));
+    fetchOrgData().catch((err) => {
+      setError(mapSupabaseError('Erreur supervision formations', err));
+      setLoading(false);
+    });
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchOrgData = async () => {
@@ -127,6 +132,7 @@ export function useTrainingSupervision() {
 
   return {
     loading,
+    error,
     courses,
     entries,
     sendReminder,

@@ -18,6 +18,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useTasks() {
   const [remoteTasks, setRemoteTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, profile, isDemoMode, session } = useAuth();
 
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
@@ -42,21 +43,27 @@ export function useTasks() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('tasks')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        mapSupabaseError('Erreur lors de la récupération des tâches', error);
+      if (fetchErr) {
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des tâches',
+            fetchErr,
+          ),
+        );
         return;
       }
 
       setRemoteTasks(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchTasks', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchTasks', err));
     } finally {
       setLoading(false);
     }
@@ -347,6 +354,7 @@ export function useTasks() {
   return {
     tasks,
     loading,
+    error,
     createTask,
     updateTaskStatus,
     completeTask,

@@ -7,6 +7,7 @@ import { mapSupabaseError } from '../utils/error';
 export function useSubscription() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -32,20 +33,21 @@ export function useSubscription() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .maybeSingle();
 
-      if (error) {
-        mapSupabaseError('Erreur récupération abonnement', error);
+      if (fetchErr) {
+        setError(mapSupabaseError('Erreur récupération abonnement', fetchErr));
         return;
       }
 
       setSubscription(data);
-    } catch (error) {
-      mapSupabaseError('Erreur useSubscription', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur useSubscription', err));
     } finally {
       setLoading(false);
     }
@@ -61,5 +63,11 @@ export function useSubscription() {
     return Math.max(0, Math.ceil(diff / 86400000));
   })();
 
-  return { subscription, loading, trialDaysLeft, refetch: fetchSubscription };
+  return {
+    subscription,
+    loading,
+    error,
+    trialDaysLeft,
+    refetch: fetchSubscription,
+  };
 }

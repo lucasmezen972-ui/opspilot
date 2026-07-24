@@ -17,5 +17,5 @@ export function hasPermission(role: Role, permission: string): boolean {
  * gestion d'équipe). Source de vérité unique pour les gardes d'UI manager.
  */
 export function isManagerRole(role?: string | null): boolean {
-  return role === 'manager' || role === 'admin';
+  return role === 'manager' || role === 'admin' || role === 'superadmin';
 }
