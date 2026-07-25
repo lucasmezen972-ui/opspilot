@@ -26,6 +26,7 @@ export function useChannels() {
   // Marqueurs de lecture par canal (mode connecté) : channel_id -> last_read_at.
   const [remoteReads, setRemoteReads] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(!isLocalDemo);
+  const [error, setError] = useState<string | null>(null);
 
   const channels = isLocalDemo ? demoChannels : remoteChannels;
   const allMessages = isLocalDemo ? demoMessages : remoteMessages;
@@ -36,7 +37,7 @@ export function useChannels() {
     if (isLocalDemo) return;
     if (!profile?.organization_id) return;
     fetchData().catch((err) => {
-      mapSupabaseError('Erreur chargement canaux', err);
+      setError(mapSupabaseError('Erreur chargement canaux', err));
       setLoading(false);
     });
   }, [profile?.organization_id, isLocalDemo]);
@@ -261,6 +262,7 @@ export function useChannels() {
 
   return {
     loading,
+    error,
     channels,
     allMessages,
     getMessagesForChannel,

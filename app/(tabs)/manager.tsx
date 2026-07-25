@@ -41,7 +41,7 @@ function auditStatusColor(status: string): string {
 
 export default function ManagerDashboard() {
   return (
-    <RequireRole roles={['manager', 'admin']}>
+    <RequireRole roles={['manager', 'admin', 'superadmin']}>
       <ManagerDashboardContent />
     </RequireRole>
   );

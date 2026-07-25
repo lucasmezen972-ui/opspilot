@@ -8,6 +8,7 @@ import { isManagerRole } from '../utils/roles';
 export function useInvitations() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
@@ -25,23 +26,26 @@ export function useInvitations() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('invitations')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        mapSupabaseError(
-          'Erreur lors de la récupération des invitations',
-          error,
+      if (fetchErr) {
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des invitations',
+            fetchErr,
+          ),
         );
         return;
       }
 
       setInvitations(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchInvitations', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchInvitations', err));
     } finally {
       setLoading(false);
     }
@@ -124,6 +128,7 @@ export function useInvitations() {
   return {
     invitations,
     loading,
+    error,
     canManage,
     createInvitation,
     revokeInvitation,

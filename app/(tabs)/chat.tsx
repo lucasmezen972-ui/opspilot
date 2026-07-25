@@ -188,20 +188,20 @@ export default function ChatScreen() {
         ...prev,
         {
           id: `ai-${Date.now()}`,
-          conversationId: 'demo-ai',
+          conversationId: selectedConversation,
           sender: 'Assistant IA OpsPilot',
           content: aiResponse,
           timestamp: formatTime(Date.now()),
           isMe: false,
         },
       ]);
-    } catch (error) {
-      logger.error('Erreur assistant IA', error);
+    } catch (err) {
+      logger.error('Erreur assistant IA', err);
       setLocalMessages((prev) => [
         ...prev,
         {
           id: `ai-error-${Date.now()}`,
-          conversationId: 'demo-ai',
+          conversationId: selectedConversation,
           sender: 'Assistant IA OpsPilot',
           content:
             'Je suis temporairement indisponible. Vérifiez la connexion puis réessayez dans quelques instants.',

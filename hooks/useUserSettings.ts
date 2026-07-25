@@ -18,6 +18,7 @@ export function useUserSettings() {
   const [organizationName, setOrganizationName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSettings = useCallback(async () => {
     if (isLocalDemo) {
@@ -80,8 +81,8 @@ export function useUserSettings() {
       } else {
         setStoreName(storeResult.data?.name || '');
       }
-    } catch (error) {
-      mapSupabaseError('Erreur chargement réglages', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur chargement réglages', err));
     } finally {
       setLoading(false);
     }
@@ -196,6 +197,7 @@ export function useUserSettings() {
 
   return {
     loading,
+    error,
     isLocalDemo,
     preferences: isLocalDemo ? demoSettings.preferences : preferences,
     organizationName: isLocalDemo

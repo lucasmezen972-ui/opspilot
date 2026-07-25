@@ -1,6 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 
 import { DashboardDlcAlerts } from '../../features/dashboard/DashboardDlcAlerts';
 import { DashboardFieldBrief } from '../../features/dashboard/DashboardFieldBrief';
@@ -25,9 +31,20 @@ const heroGradientColors = [colors.primary, colors.primaryDark] as const;
 
 export default function HomeScreen() {
   const { profile } = useAuth();
-  const { audits } = useAudits();
-  const { actions } = useCorrectiveActions();
-  const { products } = useProducts();
+  const { audits, loading: auditsLoading, error: auditsError } = useAudits();
+  const {
+    actions,
+    loading: actionsLoading,
+    error: actionsError,
+  } = useCorrectiveActions();
+  const {
+    products,
+    loading: productsLoading,
+    error: productsError,
+  } = useProducts();
+
+  const isLoading = auditsLoading || actionsLoading || productsLoading;
+  const fetchError = auditsError ?? actionsError ?? productsError;
 
   const now = useMemo(() => new Date(), []);
   const kpis = useMemo(
@@ -77,6 +94,19 @@ export default function HomeScreen() {
           <Text style={styles.heroSummaryText}>{summary}</Text>
         </View>
       </LinearGradient>
+
+      {isLoading && (
+        <View style={styles.loadingBanner}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>Chargement des données…</Text>
+        </View>
+      )}
+
+      {fetchError && !isLoading && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{fetchError}</Text>
+        </View>
+      )}
 
       <DashboardFieldBrief brief={fieldBrief} />
 
@@ -194,5 +224,33 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 24,
+  },
+  loadingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 10,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  errorBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.dangerStrong,
+    fontWeight: '500',
   },
 });

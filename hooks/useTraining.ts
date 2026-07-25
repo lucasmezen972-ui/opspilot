@@ -47,6 +47,7 @@ export function useTraining() {
     TrainingCertificate[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { profile, fetchProfile, updateProfile, isDemoMode, session } =
     useAuth();
 
@@ -81,6 +82,7 @@ export function useTraining() {
 
     try {
       setLoading(true);
+      setError(null);
 
       // Récupérer les cours
       const { data: coursesData, error: coursesError } = await supabase
@@ -90,9 +92,11 @@ export function useTraining() {
         .order('created_at', { ascending: false });
 
       if (coursesError) {
-        mapSupabaseError(
-          'Erreur lors de la récupération des cours',
-          coursesError,
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des cours',
+            coursesError,
+          ),
         );
         return;
       }
@@ -170,8 +174,8 @@ export function useTraining() {
       } else {
         setRemoteCertificates((certResult.data || []) as TrainingCertificate[]);
       }
-    } catch (error) {
-      mapSupabaseError('Erreur fetchTrainingData', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchTrainingData', err));
     } finally {
       setLoading(false);
     }
@@ -589,6 +593,7 @@ export function useTraining() {
     progress,
     certificates,
     loading,
+    error,
     startCourse,
     markChapterRead,
     completeQuiz,

@@ -23,6 +23,7 @@ export function useAudits() {
     [],
   );
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, profile, isDemoMode, session } = useAuth();
 
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
@@ -50,15 +51,21 @@ export function useAudits() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('audits')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        mapSupabaseError('Erreur lors de la récupération des audits', error);
+      if (fetchErr) {
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des audits',
+            fetchErr,
+          ),
+        );
         return;
       }
 
@@ -69,8 +76,8 @@ export function useAudits() {
         .select('*')
         .eq('organization_id', profile.organization_id);
       setRemoteSignatures((sigData ?? []) as AuditSignature[]);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchAudits', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchAudits', err));
     } finally {
       setLoading(false);
     }
@@ -472,6 +479,7 @@ export function useAudits() {
   return {
     audits,
     loading,
+    error,
     signatures,
     createAudit,
     updateAuditStatus,
