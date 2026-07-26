@@ -1,8 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import { DEMO_ORG_ID } from '../lib/demoData';
 import { supabase, type Store } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
+
+const DEMO_STORES: Store[] = [
+  {
+    id: 'demo-store-001',
+    organization_id: DEMO_ORG_ID,
+    name: 'Magasin Centre-Ville',
+    address: '12 rue du Commerce',
+    city: 'Lyon',
+    postal_code: '69002',
+    country: 'FR',
+    latitude: null,
+    longitude: null,
+    manager_id: null,
+    settings: {},
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
 
 export function useStores() {
   const [stores, setStores] = useState<Store[]>([]);
@@ -13,7 +33,7 @@ export function useStores() {
 
   const fetchStores = useCallback(async () => {
     if (isLocalDemo) {
-      setStores([]);
+      setStores(DEMO_STORES);
       setLoading(false);
       return;
     }

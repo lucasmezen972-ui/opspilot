@@ -152,7 +152,7 @@ export function useUserSettings() {
     nextOrganizationName: string,
     nextStoreName: string,
   ): Promise<SaveResult> => {
-    if (profile?.role !== 'admin') {
+    if (profile?.role !== 'admin' && profile?.role !== 'superadmin') {
       return { error: 'Action réservée aux administrateurs.' };
     }
     if (isLocalDemo) {

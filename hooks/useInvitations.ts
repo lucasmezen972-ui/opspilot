@@ -63,6 +63,25 @@ export function useInvitations() {
       return { data: null, error: 'Utilisateur non connecté' };
     }
 
+    if (isLocalDemo) {
+      const demo: Invitation = {
+        id: `demo-inv-${Date.now()}`,
+        organization_id: profile.organization_id,
+        email: email.trim().toLowerCase(),
+        role,
+        store_id: profile.store_id ?? null,
+        token: `demo-token-${Date.now()}`,
+        invited_by: user.id,
+        status: 'pending',
+        expires_at: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      setInvitations((prev) => [demo, ...prev]);
+      return { data: demo, error: null };
+    }
+
     try {
       const { data, error } = await supabase
         .from('invitations')

@@ -218,7 +218,7 @@ export default function SettingsScreen() {
             isLocalDemo={isLocalDemo}
           />
 
-          {profile?.role === 'admin' ? (
+          {profile?.role === 'admin' || profile?.role === 'superadmin' ? (
             <OrganizationCard
               organizationName={nextOrganizationName}
               storeName={nextStoreName}

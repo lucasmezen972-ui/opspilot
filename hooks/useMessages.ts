@@ -111,13 +111,18 @@ export function useMessages() {
         .order('created_at', { ascending: true });
 
       if (error) {
-        mapSupabaseError('Erreur lors de la récupération des messages', error);
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des messages',
+            error,
+          ),
+        );
         return;
       }
 
       setMessages(data || []);
-    } catch (error) {
-      mapSupabaseError('Erreur fetchMessages', error);
+    } catch (err) {
+      setError(mapSupabaseError('Erreur fetchMessages', err));
     }
   };
 

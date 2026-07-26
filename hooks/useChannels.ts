@@ -228,10 +228,14 @@ export function useChannels() {
       }
       const msg = allMessages.find((m) => m.id === messageId);
       if (!msg) return;
-      await supabase
+      const { error: pinErr } = await supabase
         .from('channel_messages')
         .update({ is_pinned: !msg.is_pinned })
         .eq('id', messageId);
+      if (pinErr) {
+        setError(mapSupabaseError('Erreur épinglage message', pinErr));
+        return;
+      }
       await fetchData();
     },
     [isLocalDemo, allMessages],
@@ -245,7 +249,14 @@ export function useChannels() {
         );
         return;
       }
-      await supabase.from('channel_messages').delete().eq('id', messageId);
+      const { error: delErr } = await supabase
+        .from('channel_messages')
+        .delete()
+        .eq('id', messageId);
+      if (delErr) {
+        setError(mapSupabaseError('Erreur suppression message', delErr));
+        return;
+      }
       setRemoteMessages((prev) => prev.filter((m) => m.id !== messageId));
     },
     [isLocalDemo],

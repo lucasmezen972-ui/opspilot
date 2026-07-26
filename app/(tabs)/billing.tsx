@@ -70,7 +70,10 @@ function BillingScreenContent() {
         'create-customer-portal',
         {
           body: {
-            returnUrl: 'https://lucasmezen972-ui.github.io/opspilot/billing',
+            returnUrl:
+              typeof window !== 'undefined'
+                ? `${window.location.origin}/opspilot/billing`
+                : 'https://lucasmezen972-ui.github.io/opspilot/billing',
           },
         },
       );
