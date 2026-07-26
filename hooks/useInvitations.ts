@@ -116,6 +116,15 @@ export function useInvitations() {
   };
 
   const revokeInvitation = async (id: string) => {
+    if (isLocalDemo) {
+      setInvitations((prev) =>
+        prev.map((i) =>
+          i.id === id ? { ...i, status: 'revoked' as const } : i,
+        ),
+      );
+      return { data: null, error: null };
+    }
+
     try {
       const { data, error } = await supabase
         .from('invitations')
