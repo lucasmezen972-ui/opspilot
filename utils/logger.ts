@@ -1,4 +1,3 @@
-// Conditional logger that works in both Node.js and client environments
 interface Logger {
   info: (message: any, ...args: any[]) => void;
   error: (message: any, ...args: any[]) => void;
@@ -7,61 +6,48 @@ interface Logger {
   trace: (message: any, ...args: any[]) => void;
 }
 
-// Check if we're in a Node.js environment
 const isNodeEnvironment =
   typeof process !== 'undefined' && process.versions?.node;
 
-let logger: Logger;
+function createLogger(): Logger {
+  const logLevel = isNodeEnvironment
+    ? (process.env.LOG_LEVEL ?? 'warn')
+    : typeof __DEV__ !== 'undefined' && __DEV__
+      ? 'debug'
+      : 'warn';
 
-if (isNodeEnvironment) {
-  // Server-side: Use pino
-  try {
-    const pino = require('pino');
-    logger = pino({
-      level: process.env.LOG_LEVEL ?? 'warn',
-      formatters: {
-        level(label: string) {
-          return { level: label };
-        },
-      },
-      timestamp: pino.stdTimeFunctions.isoTime,
-    });
-  } catch (error) {
-    // Fallback to console if pino fails to load
-    const logLevel = process.env.LOG_LEVEL ?? 'warn';
-    const levels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
-    const shouldLog = (level: keyof typeof levels) =>
-      levels[level] >= levels[logLevel as keyof typeof levels];
-    logger = {
-      info: shouldLog('info') ? console.log.bind(console) : () => {},
-      error: shouldLog('error') ? console.error.bind(console) : () => {},
-      warn: shouldLog('warn') ? console.warn.bind(console) : () => {},
-      debug: shouldLog('debug') ? console.log.bind(console) : () => {},
-      trace: shouldLog('trace') ? console.log.bind(console) : () => {},
-    };
-  }
-} else {
-  // Client-side: Use console-based logger
-  // En production : seuls warn/error sortent (info/debug silencieux).
-  // En dev : tout est visible pour le débogage.
-  const logLevel = typeof __DEV__ !== 'undefined' && __DEV__ ? 'debug' : 'warn';
-  const shouldLog = (level: string) => {
-    const levels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
-    return (
-      levels[level as keyof typeof levels] >=
-      levels[logLevel as keyof typeof levels]
-    );
-  };
+  const levels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
+  const threshold = levels[logLevel as keyof typeof levels] ?? levels.warn;
+  const shouldLog = (level: keyof typeof levels) => levels[level] >= threshold;
+  const usePrefix = !isNodeEnvironment;
 
-  logger = {
-    info: shouldLog('info') ? console.log.bind(console, '[INFO]') : () => {},
-    error: shouldLog('error')
-      ? console.error.bind(console, '[ERROR]')
+  return {
+    info: shouldLog('info')
+      ? usePrefix
+        ? console.log.bind(console, '[INFO]')
+        : console.log.bind(console)
       : () => {},
-    warn: shouldLog('warn') ? console.warn.bind(console, '[WARN]') : () => {},
-    debug: shouldLog('debug') ? console.log.bind(console, '[DEBUG]') : () => {},
-    trace: shouldLog('trace') ? console.log.bind(console, '[TRACE]') : () => {},
+    error: shouldLog('error')
+      ? usePrefix
+        ? console.error.bind(console, '[ERROR]')
+        : console.error.bind(console)
+      : () => {},
+    warn: shouldLog('warn')
+      ? usePrefix
+        ? console.warn.bind(console, '[WARN]')
+        : console.warn.bind(console)
+      : () => {},
+    debug: shouldLog('debug')
+      ? usePrefix
+        ? console.log.bind(console, '[DEBUG]')
+        : console.log.bind(console)
+      : () => {},
+    trace: shouldLog('trace')
+      ? usePrefix
+        ? console.log.bind(console, '[TRACE]')
+        : console.log.bind(console)
+      : () => {},
   };
 }
 
-export { logger };
+export const logger: Logger = createLogger();

@@ -192,12 +192,21 @@ export function useMessages() {
   const markAsRead = async (messageId: string) => {
     if (!profile) return;
 
+    const message = messages.find((m) => m.id === messageId);
+    if (!message || message.read_by.includes(profile.id)) return;
+
+    const updatedReadBy = [...message.read_by, profile.id];
+
+    if (isLocalDemo) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
+        ),
+      );
+      return;
+    }
+
     try {
-      const message = messages.find((m) => m.id === messageId);
-      if (!message || message.read_by.includes(profile.id)) return;
-
-      const updatedReadBy = [...message.read_by, profile.id];
-
       const { error } = await supabase
         .from('messages')
         .update({ read_by: updatedReadBy })
@@ -305,7 +314,7 @@ export function useMessages() {
   };
 
   const fetchUnreadCounts = async (convs?: Conversation[]) => {
-    if (!profile) return;
+    if (!profile || isLocalDemo) return;
 
     try {
       const counts: Record<string, number> = {};
