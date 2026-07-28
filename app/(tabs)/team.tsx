@@ -21,7 +21,7 @@ import type { Invitation } from '../../lib/supabase';
 
 export default function TeamScreen() {
   return (
-    <RequireRole roles={['manager', 'admin']}>
+    <RequireRole roles={['manager', 'admin', 'superadmin']}>
       <TeamScreenContent />
     </RequireRole>
   );

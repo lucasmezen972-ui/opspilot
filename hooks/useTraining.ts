@@ -414,7 +414,7 @@ export function useTraining() {
       const newXP = (profile.xp ?? 0) + xpAmount;
       const newLevel = Math.floor(newXP / 100) + 1;
 
-      await supabase
+      const { error: xpErr } = await supabase
         .from('profiles')
         .update({
           xp: newXP,
@@ -423,11 +423,16 @@ export function useTraining() {
         })
         .eq('id', profile.id);
 
+      if (xpErr) {
+        setError(mapSupabaseError("Erreur lors de l'ajout d'XP", xpErr));
+        return;
+      }
+
       if (profile?.id) {
         await fetchProfile(profile.id);
       }
-    } catch (error) {
-      mapSupabaseError("Erreur lors de l'ajout d'XP", error);
+    } catch (err) {
+      setError(mapSupabaseError("Erreur lors de l'ajout d'XP", err));
     }
   };
 
