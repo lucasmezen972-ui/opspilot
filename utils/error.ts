@@ -2,9 +2,6 @@ import { logger } from './logger';
 
 const GENERIC_SUPABASE_ERROR =
   'Une erreur est survenue. Veuillez réessayer plus tard.';
-const GENERIC_OPENAI_ERROR =
-  'Le service IA est temporairement indisponible. Veuillez réessayer plus tard.';
-
 export const mapSupabaseError = (context: string, error: unknown): string => {
   logger.error(context, error);
   if (error && typeof error === 'object' && 'message' in error) {
@@ -38,23 +35,6 @@ export const mapSupabaseError = (context: string, error: unknown): string => {
   return GENERIC_SUPABASE_ERROR;
 };
 
-export const mapOpenAIError = (context: string, error: unknown): string => {
-  logger.error(context, error);
-  if (error && typeof error === 'object' && 'message' in error) {
-    const msg = (error as { message: string }).message;
-    if (/rate.?limit|429/i.test(msg))
-      return 'Trop de requêtes IA. Veuillez patienter quelques minutes.';
-    if (/auth|api.?key|401|403/i.test(msg))
-      return "Clé API IA invalide ou expirée. Contactez l'administrateur.";
-    if (/timeout|timed?\s*out|ECONNABORTED/i.test(msg))
-      return "L'IA met trop de temps à répondre. Veuillez réessayer.";
-    if (/network|fetch|ENOTFOUND|ECONNREFUSED/i.test(msg))
-      return 'Connexion au service IA impossible. Vérifiez votre réseau.';
-  }
-  return GENERIC_OPENAI_ERROR;
-};
-
 export const genericMessages = {
   supabase: GENERIC_SUPABASE_ERROR,
-  openai: GENERIC_OPENAI_ERROR,
 };

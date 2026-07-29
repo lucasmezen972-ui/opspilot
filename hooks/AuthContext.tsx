@@ -117,11 +117,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  // Miroir de isDemoMode lisible dans les closures (listener onAuthStateChange).
+  // Refs lisibles dans les closures (listener onAuthStateChange) sans dépendance.
   const demoModeRef = useRef(false);
+  const userRef = useRef<User | null>(null);
+
+  const setUserAndRef = (u: User | null) => {
+    setUser(u);
+    userRef.current = u;
+  };
 
   const enterDemo = () => {
-    setUser(DEMO_USER as User);
+    setUserAndRef(DEMO_USER as User);
     setProfile(DEMO_PROFILE);
     setSession(null); // ← session null en démo locale (sinon isLocalDemo casse, B2)
     setIsOffline(false);
@@ -161,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             enterDemo();
           } else {
             setSession(s);
-            setUser(s?.user ?? null);
+            setUserAndRef(s?.user ?? null);
             setIsOffline(false);
             if (s?.user?.id) {
               await fetchProfile(s.user.id);
@@ -189,14 +195,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!s && demoModeRef.current) {
             return;
           }
-          if (!s && user && !demoModeRef.current) {
+          if (!s && userRef.current && !demoModeRef.current) {
             setAuthError('Votre session a expiré. Reconnectez-vous.');
           }
           if (s) {
             demoModeRef.current = false;
           }
           setSession(s ?? null);
-          setUser(s?.user ?? null);
+          setUserAndRef(s?.user ?? null);
           setIsOffline(false);
           if (s?.user?.id) {
             fetchProfile(s.user.id).catch((error) => {
@@ -269,7 +275,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (result.data?.session) {
         setSession(result.data.session);
-        setUser(result.data.session.user);
+        setUserAndRef(result.data.session.user);
         setIsOffline(false);
         setIsDemoMode(false);
         demoModeRef.current = false;
@@ -322,7 +328,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setProfile(null);
       setSession(null);
-      setUser(null);
+      setUserAndRef(null);
       setIsDemoMode(false);
       demoModeRef.current = false;
       persistDemoFlag(false);
