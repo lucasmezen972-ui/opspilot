@@ -83,21 +83,13 @@ Deno.serve(async (req) => {
   try {
     switch (body.action) {
       case 'analyze_audit_image':
-        return json(
-          await analyzeAuditImage(openai, body.payload as any),
-        );
+        return json(await analyzeAuditImage(openai, body.payload as any));
       case 'generate_training_content':
-        return json(
-          await generateTrainingContent(openai, body.payload as any),
-        );
+        return json(await generateTrainingContent(openai, body.payload as any));
       case 'generate_audit_report':
-        return json(
-          await generateAuditReport(openai, body.payload as any),
-        );
+        return json(await generateAuditReport(openai, body.payload as any));
       case 'chat_assistant':
-        return json(
-          await chatAssistant(openai, body.payload as any),
-        );
+        return json(await chatAssistant(openai, body.payload as any));
       default:
         return json({ error: `Action inconnue : ${body.action}` }, 400);
     }

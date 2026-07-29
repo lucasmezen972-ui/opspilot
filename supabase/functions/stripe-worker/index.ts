@@ -74,11 +74,9 @@ Deno.serve(async (req) => {
         stripeSub.current_period_end * 1000,
       ).toISOString();
 
-      const planFromMeta =
-        (stripeSub.metadata?.plan as string) ?? 'essential';
+      const planFromMeta = (stripeSub.metadata?.plan as string) ?? 'essential';
 
-      const needsUpdate =
-        newStatus !== sub.status;
+      const needsUpdate = newStatus !== sub.status;
 
       if (needsUpdate) {
         await admin
