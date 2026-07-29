@@ -132,14 +132,6 @@ export default function TrainingScreen() {
   };
 
   const generateAICourse = async () => {
-    if (!process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-      Alert.alert(
-        'IA non disponible',
-        'Clé OpenAI manquante pour générer du contenu de formation.',
-      );
-      return;
-    }
-
     const topics = [
       'Techniques de vente cross-selling',
       'Gestion des clients difficiles',
@@ -224,18 +216,16 @@ export default function TrainingScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Formations disponibles</Text>
-              {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-                <TouchableOpacity
-                  style={styles.aiGenerateButton}
-                  onPress={generateAICourse}
-                  disabled={generatingCourse}
-                >
-                  <Sparkles size={16} color="#F59E0B" />
-                  <Text style={styles.aiGenerateButtonText}>
-                    {generatingCourse ? 'Génération...' : 'IA'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.aiGenerateButton}
+                onPress={generateAICourse}
+                disabled={generatingCourse}
+              >
+                <Sparkles size={16} color="#F59E0B" />
+                <Text style={styles.aiGenerateButtonText}>
+                  {generatingCourse ? 'Génération...' : 'IA'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {courses.map((course) => (
