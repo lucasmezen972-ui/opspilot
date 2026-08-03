@@ -63,6 +63,7 @@ export default function AnnouncementBanner() {
     supabase
       .from('announcements')
       .select('id, title, body, level')
+      .eq('is_active', true)
       .order('created_at', { ascending: false })
       .limit(3)
       .then(({ data, error }) => {
