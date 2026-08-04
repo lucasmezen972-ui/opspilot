@@ -15,7 +15,7 @@ interface ConnectedStatusProps {
 export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
   const { status } = getSupabaseConfigStatus();
 
-  let message = '⚠️ Cliquez "Connect to Supabase" en haut à droite';
+  let message = '⚠️ Configuration Supabase incomplète';
   let containerStyle = styles.disconnected;
   let textStyle = styles.disconnectedText;
   let Icon = Wifi;

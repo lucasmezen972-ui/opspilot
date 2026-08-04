@@ -55,16 +55,52 @@ export async function initOfflineDatabase() {
   }
 }
 
-export async function syncPendingData() {
+export async function syncPendingData(
+  supabaseClient?: {
+    from: (table: string) => {
+      insert: (data: Record<string, any>) => Promise<{ error: any }>;
+      upsert: (data: Record<string, any>) => Promise<{ error: any }>;
+    };
+  } | null,
+) {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];
     if (queue.length === 0) {
       return { success: true, synced: 0 };
     }
-    // Items will be synced when the app has connectivity and Supabase is reachable.
-    // For now return the count of pending items.
-    return { success: true, synced: 0, pending: queue.length };
+
+    if (!supabaseClient) {
+      return { success: true, synced: 0, pending: queue.length };
+    }
+
+    let synced = 0;
+    const remaining: QueueItem[] = [];
+
+    for (const item of queue) {
+      try {
+        const table = supabaseClient.from(item.table);
+        const { error } =
+          item.action === 'update'
+            ? await table.upsert(item.data)
+            : await table.insert(item.data);
+
+        if (error) {
+          logger.warn(
+            `[Offline] Failed to sync ${item.table}/${item.id}:`,
+            error,
+          );
+          remaining.push(item);
+        } else {
+          synced++;
+        }
+      } catch {
+        remaining.push(item);
+      }
+    }
+
+    await setItem(STORAGE_KEYS.queue, JSON.stringify(remaining));
+    return { success: true, synced, pending: remaining.length };
   } catch (error) {
     logger.error('[Offline] Sync failed:', error);
     return { success: false, synced: 0 };
