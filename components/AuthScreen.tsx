@@ -14,6 +14,7 @@ import {
 import ConnectedStatus from './ConnectedStatus';
 import { useAuth } from '../hooks/useAuth';
 import { colors, shadow } from '../shared/styles/tokens';
+import { extractErrorMessage } from '../utils/error';
 import { loginSchema } from '../utils/validation';
 
 export default function AuthScreen() {
@@ -49,13 +50,14 @@ export default function AuthScreen() {
         result = await signUp(email, password, fullName);
       }
       if (result.error) throw result.error;
-      if (!isLogin && result.data?.user && !result.data?.session) {
+      const d = result.data as Record<string, unknown> | null;
+      if (!isLogin && d?.user && !d?.session) {
         setLocalError(
           'Compte créé ! Vérifiez votre email pour confirmer votre inscription.',
         );
       }
-    } catch (e: any) {
-      setLocalError(e?.message ?? 'Erreur de connexion');
+    } catch (e) {
+      setLocalError(extractErrorMessage(e) ?? 'Erreur de connexion');
     } finally {
       setLoading(false);
     }
@@ -68,11 +70,14 @@ export default function AuthScreen() {
       const result = await signInDemo();
       if (result.error) {
         setLocalError(
-          result.error?.message ?? 'Accès démo indisponible. Réessayez.',
+          extractErrorMessage(result.error) ??
+            'Accès démo indisponible. Réessayez.',
         );
       }
-    } catch (e: any) {
-      setLocalError(e?.message ?? 'Accès démo indisponible. Réessayez.');
+    } catch (e) {
+      setLocalError(
+        extractErrorMessage(e) ?? 'Accès démo indisponible. Réessayez.',
+      );
     } finally {
       setDemoLoading(false);
     }

@@ -20,14 +20,18 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { analyzeAuditImage } from '../lib/openai';
+import { analyzeAuditImage, type AuditAnalysis } from '../lib/openai';
 import { colors, shadow } from '../shared/styles/tokens';
 import { logger } from '../utils/logger';
 
 interface CameraModalProps {
   visible: boolean;
   onClose: () => void;
-  onPhotoTaken: (uri: string, analysis?: any, annotations?: string[]) => void;
+  onPhotoTaken: (
+    uri: string,
+    analysis?: AuditAnalysis,
+    annotations?: string[],
+  ) => void;
   auditType?: string;
 }
 
@@ -41,7 +45,7 @@ export default function CameraModal({
   const [permission, requestPermission] = useCameraPermissions();
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<AuditAnalysis | null>(null);
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState('');
   const pathRef = useRef('');
@@ -185,7 +189,7 @@ export default function CameraModal({
 
   const confirmPhoto = () => {
     if (photoUri) {
-      onPhotoTaken(photoUri, analysis, paths);
+      onPhotoTaken(photoUri, analysis ?? undefined, paths);
       resetState();
       onClose();
     }
@@ -277,13 +281,11 @@ export default function CameraModal({
               {analysis.issues.length > 0 && (
                 <View style={styles.issuesList}>
                   <Text style={styles.issuesTitle}>Problèmes détectés:</Text>
-                  {analysis.issues
-                    .slice(0, 2)
-                    .map((issue: any, index: number) => (
-                      <Text key={index} style={styles.issueItem}>
-                        • {issue.description}
-                      </Text>
-                    ))}
+                  {analysis.issues.slice(0, 2).map((issue, index) => (
+                    <Text key={index} style={styles.issueItem}>
+                      • {issue.description}
+                    </Text>
+                  ))}
                 </View>
               )}
             </View>

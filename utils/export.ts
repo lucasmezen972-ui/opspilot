@@ -1,9 +1,10 @@
 import ExcelJS from 'exceljs';
 import { Platform, Share } from 'react-native';
 
-export function dataToCSV(data: any[]): string {
-  if (data.length === 0) return '';
-  const headers = Object.keys(data[0]);
+export function dataToCSV(data: Record<string, unknown>[]): string {
+  const first = data[0];
+  if (!first) return '';
+  const headers = Object.keys(first);
   const csv = [headers.join(',')];
   for (const row of data) {
     const values = headers.map((h) => {
@@ -16,12 +17,15 @@ export function dataToCSV(data: any[]): string {
   return csv.join('\n');
 }
 
-export async function dataToExcelBuffer(data: any[]): Promise<Buffer> {
+export async function dataToExcelBuffer(
+  data: Record<string, unknown>[],
+): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Data');
 
-  if (data.length > 0) {
-    worksheet.columns = Object.keys(data[0]).map((key) => ({
+  const first = data[0];
+  if (first) {
+    worksheet.columns = Object.keys(first).map((key) => ({
       header: key,
       key,
     }));

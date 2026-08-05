@@ -5,19 +5,19 @@ import { logger } from '../utils/logger';
 
 interface OfflineAudit {
   id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface OfflineTask {
   id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface QueueItem {
   id: string;
   table: string;
   action: 'insert' | 'update';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -58,8 +58,8 @@ export async function initOfflineDatabase() {
 export async function syncPendingData(
   supabaseClient?: {
     from: (table: string) => {
-      insert: (data: Record<string, any>) => Promise<{ error: any }>;
-      upsert: (data: Record<string, any>) => Promise<{ error: any }>;
+      insert: (data: Record<string, unknown>) => Promise<{ error: unknown }>;
+      upsert: (data: Record<string, unknown>) => Promise<{ error: unknown }>;
     };
   } | null,
 ) {

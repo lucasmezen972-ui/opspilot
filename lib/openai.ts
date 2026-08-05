@@ -104,7 +104,9 @@ export const getChatAssistantResponse = async (
   );
 };
 
-export const generateAuditReport = async (auditData: any): Promise<string> => {
+export const generateAuditReport = async (
+  auditData: Record<string, unknown>,
+): Promise<string> => {
   const result = await callOpenAIProxy<{ report?: string; error?: string }>(
     'generate_audit_report',
     auditData,
