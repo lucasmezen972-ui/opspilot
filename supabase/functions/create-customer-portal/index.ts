@@ -3,8 +3,10 @@
 import Stripe from 'npm:stripe@14';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
-  apiVersion: '2024-06-20',
+const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
+
+const stripe = new Stripe(STRIPE_KEY, {
+  apiVersion: '2024-11-20.acacia',
   httpClient: Stripe.createFetchHttpClient(),
 });
 
@@ -31,6 +33,9 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
+    if (!STRIPE_KEY)
+      return json({ error: 'Stripe non configuré (clé manquante)' }, 503);
+
     const authHeader = req.headers.get('Authorization') ?? '';
     const token = authHeader.replace('Bearer ', '').trim();
     if (!token) return json({ error: 'Non authentifié' }, 401);

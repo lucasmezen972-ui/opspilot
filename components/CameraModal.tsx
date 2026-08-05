@@ -167,17 +167,14 @@ export default function CameraModal({
       if (photo?.uri) {
         setPhotoUri(photo.uri);
 
-        // Analyser l'image avec OpenAI si disponible
-        if (process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-          setAnalyzing(true);
-          try {
-            const aiAnalysis = await analyzeAuditImage(photo.uri, auditType);
-            setAnalysis(aiAnalysis);
-          } catch (error) {
-            logger.warn('Analyse IA indisponible:', error);
-          } finally {
-            setAnalyzing(false);
-          }
+        setAnalyzing(true);
+        try {
+          const aiAnalysis = await analyzeAuditImage(photo.uri, auditType);
+          setAnalysis(aiAnalysis);
+        } catch (error) {
+          logger.warn('Analyse IA indisponible:', error);
+        } finally {
+          setAnalyzing(false);
         }
       }
     } catch (error) {
@@ -371,14 +368,12 @@ export default function CameraModal({
             </TouchableOpacity>
           )}
 
-          {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-            <View style={styles.aiHint}>
-              <Sparkles size={16} color="#F59E0B" />
-              <Text style={styles.aiHintText}>
-                Analyse IA automatique activée
-              </Text>
-            </View>
-          )}
+          <View style={styles.aiHint}>
+            <Sparkles size={16} color="#F59E0B" />
+            <Text style={styles.aiHintText}>
+              Analyse IA automatique activée
+            </Text>
+          </View>
         </View>
       </View>
     </Modal>

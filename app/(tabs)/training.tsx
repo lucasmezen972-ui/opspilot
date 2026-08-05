@@ -31,14 +31,23 @@ import {
 } from '../../hooks/useLeaderboard';
 import { useTraining } from '../../hooks/useTraining';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
+import { DEMO_ORG_ID, demoId } from '../../lib/demoData';
+import { updateDemoCollection } from '../../lib/demoStore';
 import { generateTrainingContent } from '../../lib/openai';
+import {
+  supabase,
+  type Training,
+  type TrainingChapter,
+  type TrainingQuizQuestion,
+} from '../../lib/supabase';
 import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
 import { isManagerRole } from '../../utils/roles';
 
 export default function TrainingScreen() {
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
+  const isLocalDemo = isDemoMode && !session;
   const { entries: leaderboard } = useLeaderboard();
   const {
     courses: dbCourses,
@@ -50,6 +59,7 @@ export default function TrainingScreen() {
     getChaptersForCourse,
     getQuizForCourse,
     getCompletedCourses,
+    refetch,
   } = useTraining();
 
   const isManager = isManagerRole(profile?.role);
@@ -132,14 +142,6 @@ export default function TrainingScreen() {
   };
 
   const generateAICourse = async () => {
-    if (!process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
-      Alert.alert(
-        'IA non disponible',
-        'Clé OpenAI manquante pour générer du contenu de formation.',
-      );
-      return;
-    }
-
     const topics = [
       'Techniques de vente cross-selling',
       'Gestion des clients difficiles',
@@ -160,9 +162,101 @@ export default function TrainingScreen() {
         randomTopic,
         randomDifficulty,
       );
+
+      if (!content.title || !content.content) {
+        Alert.alert('Erreur', 'Le contenu généré est incomplet.');
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const courseId = demoId('ai-course');
+      const orgId = profile?.organization_id ?? DEMO_ORG_ID;
+
+      const newCourse: Training = {
+        id: courseId,
+        organization_id: orgId,
+        title: content.title,
+        content: content.content,
+        category: randomTopic,
+        difficulty: randomDifficulty,
+        xp_reward:
+          randomDifficulty === 'advanced'
+            ? 50
+            : randomDifficulty === 'intermediate'
+              ? 30
+              : 20,
+        duration_minutes: 30,
+        min_score: 70,
+        ai_generated: true,
+        is_active: true,
+        created_at: now,
+        updated_at: now,
+      };
+
+      const newChapters: TrainingChapter[] = content.practical_tips.map(
+        (tip, i) => ({
+          id: demoId(`ai-ch-${i}`),
+          training_id: courseId,
+          title: `Conseil ${i + 1}`,
+          body: tip,
+          sort_order: i,
+          created_at: now,
+        }),
+      );
+
+      const newQuestions: TrainingQuizQuestion[] = content.quiz_questions.map(
+        (q, i) => ({
+          id: demoId(`ai-q-${i}`),
+          training_id: courseId,
+          question: q.question,
+          options: q.options,
+          correct_index: q.correct_answer,
+          sort_order: i,
+          is_critical: false,
+          created_at: now,
+        }),
+      );
+
+      if (isLocalDemo) {
+        updateDemoCollection('trainings', (prev) => [newCourse, ...prev]);
+        updateDemoCollection('trainingChapters', (prev) => [
+          ...prev,
+          ...newChapters,
+        ]);
+        updateDemoCollection('trainingQuizQuestions', (prev) => [
+          ...prev,
+          ...newQuestions,
+        ]);
+      } else if (profile?.organization_id) {
+        const { error: courseErr } = await supabase
+          .from('trainings')
+          .insert({
+            organization_id: orgId,
+            title: newCourse.title,
+            content: newCourse.content,
+            category: newCourse.category,
+            difficulty: newCourse.difficulty,
+            xp_reward: newCourse.xp_reward,
+            duration_minutes: newCourse.duration_minutes,
+            min_score: newCourse.min_score,
+            ai_generated: true,
+            is_active: true,
+          })
+          .select()
+          .single();
+
+        if (courseErr) {
+          Alert.alert('Erreur', 'Impossible de sauvegarder la formation.');
+          logger.error('Erreur sauvegarde formation IA', courseErr);
+          return;
+        }
+
+        await refetch();
+      }
+
       Alert.alert(
         'Formation IA générée',
-        `"${content.title}" a été généré. Rechargez pour voir les formations.`,
+        `"${content.title}" est disponible dans le catalogue.`,
       );
     } catch (error) {
       Alert.alert('Erreur', 'Impossible de générer la formation IA.');
@@ -224,18 +318,16 @@ export default function TrainingScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Formations disponibles</Text>
-              {process.env.EXPO_PUBLIC_OPENAI_API_KEY && (
-                <TouchableOpacity
-                  style={styles.aiGenerateButton}
-                  onPress={generateAICourse}
-                  disabled={generatingCourse}
-                >
-                  <Sparkles size={16} color="#F59E0B" />
-                  <Text style={styles.aiGenerateButtonText}>
-                    {generatingCourse ? 'Génération...' : 'IA'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.aiGenerateButton}
+                onPress={generateAICourse}
+                disabled={generatingCourse}
+              >
+                <Sparkles size={16} color="#F59E0B" />
+                <Text style={styles.aiGenerateButtonText}>
+                  {generatingCourse ? 'Génération...' : 'IA'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {courses.map((course) => (

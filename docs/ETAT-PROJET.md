@@ -92,11 +92,13 @@ si 2FA). Les secrets (`platform_settings` : `email_worker_token`,
   imports `npm:` — jamais esm.sh, source d'échecs CI) : `admin-api`,
   `send-transactional`, `email-worker`, `create-checkout-session`,
   `create-customer-portal`, `stripe-webhook`, `stripe-worker`,
-  `stripe-setup`, + fonction(s) IA côté produit.
+  `stripe-setup`, `openai-proxy`, `ai-assistant`.
 - **Crons (pg_cron)** : `stripe-sync-worker` (1 min),
   `trial-reminder-worker` (08:00 UTC).
 - **Secrets d'env** : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-  clé IA (selon fonction Codex). `RESEND_API_KEY`/`EMAIL_FROM` optionnels
+  `OPENAI_API_KEY` (Edge Function `openai-proxy`),
+  `ANTHROPIC_API_KEY` (Edge Function `ai-assistant`).
+  `RESEND_API_KEY`/`EMAIL_FROM` optionnels
   (la base prime s'ils sont absents).
 - **RPC onboarding** : `create_organization`, `accept_invitation`
   (jsonb, SECURITY DEFINER, authenticated). Helpers santé :
