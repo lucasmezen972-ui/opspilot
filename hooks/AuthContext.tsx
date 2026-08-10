@@ -80,6 +80,11 @@ function withTimeout<T>(
   ]);
 }
 
+interface AuthResult<T = unknown> {
+  data: T | null;
+  error: unknown;
+}
+
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
@@ -89,21 +94,16 @@ interface AuthContextValue {
   authError: string | null;
   isOffline: boolean;
   isDemoMode: boolean;
-  signIn: (
-    email: string,
-    password: string,
-  ) => Promise<{ data: any; error: any }>;
-  signInDemo: () => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signInDemo: () => Promise<AuthResult>;
   signUp: (
     email: string,
     password: string,
     fullName: string,
-  ) => Promise<{ data: any; error: any }>;
-  signOut: () => Promise<{ error: any }>;
-  updateProfile: (
-    updates: Partial<Profile>,
-  ) => Promise<{ data: any; error: any }>;
-  fetchProfile: (userId: string) => Promise<{ data: any; error: any }>;
+  ) => Promise<AuthResult>;
+  signOut: () => Promise<{ error: unknown }>;
+  updateProfile: (updates: Partial<Profile>) => Promise<AuthResult<Profile>>;
+  fetchProfile: (userId: string) => Promise<AuthResult<Profile>>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -321,22 +321,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    let signOutError: unknown = null;
     try {
       if (!isDemoMode) {
         const { error } = await supabase.auth.signOut();
-        if (error) setAuthError(mapSupabaseError('sign out error', error));
+        if (error) signOutError = error;
       }
-      setProfile(null);
-      setSession(null);
-      setUserAndRef(null);
-      setIsDemoMode(false);
-      demoModeRef.current = false;
-      persistDemoFlag(false);
-      setAuthError(null);
-      return { error: null };
-    } catch (e: any) {
-      return { error: e };
+    } catch (e) {
+      signOutError = e;
     }
+    setProfile(null);
+    setSession(null);
+    setUserAndRef(null);
+    setIsDemoMode(false);
+    demoModeRef.current = false;
+    persistDemoFlag(false);
+    if (signOutError) {
+      setAuthError(mapSupabaseError('sign out error', signOutError));
+    } else {
+      setAuthError(null);
+    }
+    return { error: signOutError };
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -355,7 +360,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       if (!error && data) setProfile(data);
       return { data, error };
-    } catch (e: any) {
+    } catch (e) {
       return { data: null, error: e };
     }
   };

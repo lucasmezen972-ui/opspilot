@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
+import type { AuditAnalysis } from '../../lib/openai';
 import { AuditFilters } from '../../features/audits/AuditFilters';
 import { AuditListCard } from '../../features/audits/AuditListCard';
 import { AuditQuickStats } from '../../features/audits/AuditQuickStats';
@@ -162,7 +163,7 @@ export default function AuditsScreen() {
 
   const handlePhotoTaken = async (
     uri: string,
-    _analysis?: any,
+    _analysis?: AuditAnalysis,
     _annotations?: string[],
   ) => {
     if (cameraAuditId) {

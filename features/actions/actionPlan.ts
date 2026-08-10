@@ -666,14 +666,12 @@ export function formatActionPlanText(plan: ActionPlan): string {
     list(plan.checklist),
     '',
     ...procedure,
-  ]
-    .filter((line) => line.length > 0)
-    .join('\n');
+  ].join('\n');
 }
 
 export function buildActionPlanPrompt(action: CorrectiveAction): string {
   const plan = generateCorrectiveActionPlan(action);
-  return [
+  const lines: (string | null)[] = [
     "En tant qu'expert qualité/conformité en grande distribution, propose un",
     'plan d’action correctif structuré et concret pour la non-conformité suivante.',
     'Tu dois respecter STRICTEMENT la matrice métier OpsPilot ci-dessous.',
@@ -681,7 +679,7 @@ export function buildActionPlanPrompt(action: CorrectiveAction): string {
     'Si le problème est critique, ne propose jamais une deadline longue.',
     '',
     `Non-conformité : ${action.title}`,
-    action.description ? `Détail : ${action.description}` : '',
+    action.description ? `Détail : ${action.description}` : null,
     `Priorité actuelle : ${action.priority}`,
     '',
     'PLAN MÉTIER À RESPECTER',
@@ -695,7 +693,6 @@ export function buildActionPlanPrompt(action: CorrectiveAction): string {
     'Réponds en français avec les sections : Problème constaté, Cause probable,',
     'Action immédiate, Action corrective, Action préventive, Deadline, Preuves',
     'attendues, Checklist et Validation.',
-  ]
-    .filter((line) => line.length > 0)
-    .join('\n');
+  ];
+  return lines.filter((line): line is string => line !== null).join('\n');
 }

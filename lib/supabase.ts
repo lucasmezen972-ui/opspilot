@@ -86,7 +86,7 @@ export type Message = {
   sender_id: string;
   content: string;
   message_type: 'text' | 'image' | 'file' | 'system';
-  attachments: any[];
+  attachments: { url: string; name?: string; type?: string }[];
   read_by: string[];
   created_at: string;
 };
@@ -285,7 +285,7 @@ export type Organization = {
   id: string;
   name: string;
   logo_url?: string | null;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   subscription_plan: 'basic' | 'pro' | 'enterprise';
   max_users: number;
   max_stores: number;
@@ -304,7 +304,7 @@ export type Store = {
   latitude?: number | null;
   longitude?: number | null;
   manager_id?: string | null;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -445,7 +445,7 @@ export type AuditPhoto = {
   image_url: string;
   comment?: string | null;
   file_size?: number | null;
-  annotations: any;
+  annotations: Record<string, unknown> | null;
   uploaded_by?: string | null;
   created_at: string;
 };
@@ -470,7 +470,7 @@ export type Notification = {
   content?: string | null;
   notification_type: 'info' | 'warning' | 'error' | 'success';
   action_url?: string | null;
-  data: any;
+  data: Record<string, unknown> | null;
   is_read: boolean;
   is_push_sent: boolean;
   created_at: string;
@@ -483,7 +483,7 @@ export type Report = {
   generated_by?: string | null;
   report_type: 'audit_summary' | 'performance' | 'compliance' | 'analytics';
   title: string;
-  data: any;
+  data: Record<string, unknown>;
   file_url?: string | null;
   date_from?: string | null;
   date_to?: string | null;
@@ -495,7 +495,7 @@ export type Badge = {
   name: string;
   description?: string | null;
   icon_url?: string | null;
-  requirements: any;
+  requirements: Record<string, unknown>;
   created_at: string;
 };
 
