@@ -21,7 +21,7 @@ function AuthGate() {
     return <Slot />;
   }
 
-  if (!ready || loading) {
+  if (!ready) {
     return (
       <View
         style={{
