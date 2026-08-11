@@ -238,7 +238,6 @@ export function useMessages() {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `organization_id=eq.${profile.organization_id}`,
         },
         (payload) => {
           const newMessage = payload.new as Message;

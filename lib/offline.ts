@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
@@ -80,10 +81,7 @@ export async function syncPendingData(
     for (const item of queue) {
       try {
         const table = supabaseClient.from(item.table);
-        const { error } =
-          item.action === 'update'
-            ? await table.upsert(item.data)
-            : await table.insert(item.data);
+        const { error } = await table.upsert(item.data);
 
         if (error) {
           logger.warn(
@@ -111,7 +109,8 @@ export async function isOnline(): Promise<boolean> {
   if (Platform.OS === 'web') {
     return navigator.onLine;
   }
-  return true;
+  const state = await NetInfo.fetch();
+  return state.isConnected ?? false;
 }
 
 export async function loadOfflineAudits(): Promise<OfflineAudit[]> {
@@ -154,13 +153,18 @@ export async function queueAudit(audit: OfflineAudit): Promise<void> {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];
-    queue.push({
+    const idx = queue.findIndex(
+      (q) => q.table === 'audits' && q.id === audit.id,
+    );
+    const item: QueueItem = {
       id: audit.id,
       table: 'audits',
       action: 'insert',
       data: audit,
       timestamp: Date.now(),
-    });
+    };
+    if (idx >= 0) queue[idx] = item;
+    else queue.push(item);
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
     logger.warn('[Offline] Failed to queue audit:', error);
@@ -171,13 +175,16 @@ export async function queueTask(task: OfflineTask): Promise<void> {
   try {
     const raw = await getItem(STORAGE_KEYS.queue);
     const queue: QueueItem[] = raw ? JSON.parse(raw) : [];
-    queue.push({
+    const idx = queue.findIndex((q) => q.table === 'tasks' && q.id === task.id);
+    const item: QueueItem = {
       id: task.id,
       table: 'tasks',
       action: 'insert',
       data: task,
       timestamp: Date.now(),
-    });
+    };
+    if (idx >= 0) queue[idx] = item;
+    else queue.push(item);
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
     logger.warn('[Offline] Failed to queue task:', error);
@@ -201,21 +208,5 @@ export async function queuePhoto(
     await setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
   } catch (error) {
     logger.warn('[Offline] Failed to queue photo:', error);
-  }
-}
-
-export function encryptData(data: string): string {
-  try {
-    return btoa(data);
-  } catch {
-    return data;
-  }
-}
-
-export function decryptData(encryptedData: string): string {
-  try {
-    return atob(encryptedData);
-  } catch {
-    return encryptedData;
   }
 }

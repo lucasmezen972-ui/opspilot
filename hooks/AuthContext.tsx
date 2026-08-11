@@ -330,6 +330,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       signOutError = e;
     }
+    if (isDemoMode) resetDemoStore();
     setProfile(null);
     setSession(null);
     setUserAndRef(null);
