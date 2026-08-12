@@ -107,7 +107,7 @@ export default function TasksScreen() {
       title,
       description: draft.description.trim() || undefined,
       priority: draft.priority,
-      location: 'Magasin principal',
+      location: null,
       recurrence: draft.recurrence,
     });
     if (result.error) {

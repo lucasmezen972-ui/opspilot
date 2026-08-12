@@ -113,7 +113,8 @@ export default function ChatScreen() {
     if (conversations.length > 0 && !selectedConversation) {
       setSelectedConversation(conversations[0]?.id ?? null);
     }
-  }, [conversations.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations.length, selectedConversation]);
 
   // Charger les messages quand on change de conversation réelle.
   useEffect(() => {

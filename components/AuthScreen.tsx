@@ -25,10 +25,12 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
   const [localError, setLocalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const { signIn, signInDemo, signUp, authError, isOffline } = useAuth();
 
   const handleAuth = async () => {
     setLocalError('');
+    setSuccessMessage('');
 
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
@@ -52,7 +54,7 @@ export default function AuthScreen() {
       if (result.error) throw result.error;
       const d = result.data as Record<string, unknown> | null;
       if (!isLogin && d?.user && !d?.session) {
-        setLocalError(
+        setSuccessMessage(
           'Compte créé ! Vérifiez votre email pour confirmer votre inscription.',
         );
       }
@@ -65,6 +67,7 @@ export default function AuthScreen() {
 
   const handleDemoLogin = async () => {
     setLocalError('');
+    setSuccessMessage('');
     setDemoLoading(true);
     try {
       const result = await signInDemo();
@@ -111,6 +114,12 @@ export default function AuthScreen() {
             Connexion temporairement indisponible. Le mode démo reste
             accessible.
           </Text>
+        </View>
+      )}
+
+      {successMessage && !isOffline && (
+        <View style={styles.successContainer}>
+          <Text style={styles.successText}>{successMessage}</Text>
         </View>
       )}
 
@@ -206,7 +215,11 @@ export default function AuthScreen() {
 
         <TouchableOpacity
           style={styles.switchButton}
-          onPress={() => setIsLogin(!isLogin)}
+          onPress={() => {
+            setIsLogin(!isLogin);
+            setLocalError('');
+            setSuccessMessage('');
+          }}
         >
           <Text style={styles.switchButtonText}>
             {isLogin
@@ -271,6 +284,20 @@ const styles = StyleSheet.create({
   },
   offlineText: {
     color: '#92400E',
+    fontSize: 13,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  successContainer: {
+    backgroundColor: '#DCFCE7',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#22C55E',
+  },
+  successText: {
+    color: '#166534',
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
