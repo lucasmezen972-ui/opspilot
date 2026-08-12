@@ -80,7 +80,11 @@ export default function ActionsScreen() {
   const inProgressCount = getActionsByStatus('in_progress').length;
 
   const handleCreate = async (payload: NewActionPayload) => {
-    await createAction(payload);
+    const result = await createAction(payload);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+      return;
+    }
     setCreateModalVisible(false);
   };
 

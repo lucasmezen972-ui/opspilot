@@ -228,7 +228,7 @@ export default function TrainingScreen() {
           ...newQuestions,
         ]);
       } else if (profile?.organization_id) {
-        const { error: courseErr } = await supabase
+        const { data: savedCourse, error: courseErr } = await supabase
           .from('trainings')
           .insert({
             organization_id: orgId,
@@ -245,10 +245,46 @@ export default function TrainingScreen() {
           .select()
           .single();
 
-        if (courseErr) {
+        if (courseErr || !savedCourse) {
           Alert.alert('Erreur', 'Impossible de sauvegarder la formation.');
           logger.error('Erreur sauvegarde formation IA', courseErr);
           return;
+        }
+
+        const realCourseId = savedCourse.id;
+
+        if (newChapters.length > 0) {
+          const { error: chapErr } = await supabase
+            .from('training_chapters')
+            .insert(
+              newChapters.map((ch) => ({
+                training_id: realCourseId,
+                title: ch.title,
+                body: ch.body,
+                sort_order: ch.sort_order,
+              })),
+            );
+          if (chapErr) {
+            logger.error('Erreur sauvegarde chapitres IA', chapErr);
+          }
+        }
+
+        if (newQuestions.length > 0) {
+          const { error: quizErr } = await supabase
+            .from('training_quiz_questions')
+            .insert(
+              newQuestions.map((q) => ({
+                training_id: realCourseId,
+                question: q.question,
+                options: q.options,
+                correct_index: q.correct_index,
+                sort_order: q.sort_order,
+                is_critical: q.is_critical,
+              })),
+            );
+          if (quizErr) {
+            logger.error('Erreur sauvegarde quiz IA', quizErr);
+          }
         }
 
         await refetch();

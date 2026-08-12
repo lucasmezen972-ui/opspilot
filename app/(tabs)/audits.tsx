@@ -142,7 +142,7 @@ export default function AuditsScreen() {
     setCreateModalVisible(false);
     const result = await createAudit({
       title,
-      location: 'Magasin principal',
+      location: null,
       status: 'pending',
       template_id: selectedTemplateId,
       // Fige la version du modèle utilisée (reproductibilité du référentiel).
@@ -167,7 +167,10 @@ export default function AuditsScreen() {
     _annotations?: string[],
   ) => {
     if (cameraAuditId) {
-      await addPhotoToAudit(cameraAuditId, uri);
+      const result = await addPhotoToAudit(cameraAuditId, uri);
+      if (result.error) {
+        Alert.alert('Erreur', String(result.error));
+      }
     }
   };
 
