@@ -238,19 +238,23 @@ export function useMessages() {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `organization_id=eq.${profile.organization_id}`,
         },
         (payload) => {
           const newMessage = payload.new as Message;
           if (
             activeConversationRef.current &&
-            newMessage.conversation_id !== activeConversationRef.current
+            newMessage.conversation_id === activeConversationRef.current
           ) {
-            return;
+            setMessages((current) => {
+              if (current.some((m) => m.id === newMessage.id)) return current;
+              return [...current, newMessage];
+            });
           }
-          setMessages((current) => {
-            if (current.some((m) => m.id === newMessage.id)) return current;
-            return [...current, newMessage];
+          setUnreadCounts((prev) => {
+            if (newMessage.sender_id === profile?.id) return prev;
+            const convId = newMessage.conversation_id;
+            if (convId === activeConversationRef.current) return prev;
+            return { ...prev, [convId]: (prev[convId] ?? 0) + 1 };
           });
         },
       )
