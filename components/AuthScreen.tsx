@@ -51,7 +51,12 @@ export default function AuthScreen() {
       } else {
         result = await signUp(email, password, fullName);
       }
-      if (result.error) throw result.error;
+      if (result.error)
+        throw new Error(
+          String(
+            (result.error as { message?: string }).message ?? 'Erreur inconnue',
+          ),
+        );
       const d = result.data as Record<string, unknown> | null;
       if (!isLogin && d?.user && !d?.session) {
         setSuccessMessage(
