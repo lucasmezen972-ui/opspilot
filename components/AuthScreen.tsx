@@ -51,7 +51,10 @@ export default function AuthScreen() {
       } else {
         result = await signUp(email, password, fullName);
       }
-      if (result.error) throw result.error;
+      if (result.error)
+        throw new Error(
+          extractErrorMessage(result.error) ?? 'Erreur de connexion',
+        );
       const d = result.data as Record<string, unknown> | null;
       if (!isLogin && d?.user && !d?.session) {
         setSuccessMessage(

@@ -37,7 +37,7 @@ export default defineConfig({
     // Pages : index de répertoire, cleanUrls, fallback SPA). `serve --single`
     // réécrivait /opspilot/admin/* vers l'index racine.
     command:
-      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && node e2e/server.mjs .playwright-site 3000',
+      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && cp -R admin .playwright-site/opspilot/admin && node e2e/server.mjs .playwright-site 3000',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

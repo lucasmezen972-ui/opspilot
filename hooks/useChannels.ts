@@ -40,6 +40,29 @@ export function useChannels() {
       setError(mapSupabaseError('Erreur chargement canaux', err));
       setLoading(false);
     });
+
+    const subscription = supabase
+      .channel('channel_messages_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'channel_messages',
+        },
+        (payload) => {
+          const msg = payload.new as ChannelMessage;
+          setRemoteMessages((prev) => {
+            if (prev.some((m) => m.id === msg.id)) return prev;
+            return [...prev, msg];
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [profile?.organization_id, isLocalDemo]);
 
   const fetchData = async () => {
