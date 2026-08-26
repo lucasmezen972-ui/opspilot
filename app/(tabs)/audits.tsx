@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
-import type { AuditAnalysis } from '../../lib/openai';
 import { AuditFilters } from '../../features/audits/AuditFilters';
 import { AuditListCard } from '../../features/audits/AuditListCard';
 import { AuditQuickStats } from '../../features/audits/AuditQuickStats';
@@ -34,6 +33,7 @@ import { useAuditTemplates } from '../../hooks/useAuditTemplates';
 import { useAudits } from '../../hooks/useAudits';
 import { useAuth } from '../../hooks/useAuth';
 import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
+import type { AuditAnalysis } from '../../lib/openai';
 import type { AuditTemplate } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';

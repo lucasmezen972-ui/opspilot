@@ -76,6 +76,7 @@ export function useProducts() {
         .from('products')
         .select('*')
         .eq('barcode', barcode)
+        .eq('organization_id', profile?.organization_id ?? '')
         .maybeSingle();
 
       if (error) {

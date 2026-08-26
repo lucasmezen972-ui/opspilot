@@ -245,7 +245,7 @@ export default function TrainingScreen() {
           .select()
           .single();
 
-        if (courseErr || !savedCourse) {
+        if (courseErr ?? !savedCourse) {
           Alert.alert('Erreur', 'Impossible de sauvegarder la formation.');
           logger.error('Erreur sauvegarde formation IA', courseErr);
           return;

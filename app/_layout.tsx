@@ -12,7 +12,7 @@ import { AuthProvider, useAuth } from '../hooks/AuthContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 function AuthGate() {
-  const { user, profile, ready, loading } = useAuth();
+  const { user, profile, ready } = useAuth();
   const segments = useSegments();
   const isPublicLegalRoute = segments[0] === 'legal';
   useFrameworkReady();
