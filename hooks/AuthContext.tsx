@@ -199,7 +199,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setAuthError('Votre session a expiré. Reconnectez-vous.');
           }
           if (s) {
+            if (demoModeRef.current) {
+              resetDemoStore();
+              persistDemoFlag(false);
+            }
             demoModeRef.current = false;
+            setIsDemoMode(false);
           }
           setSession(s ?? null);
           setUserAndRef(s?.user ?? null);

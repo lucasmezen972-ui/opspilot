@@ -119,16 +119,20 @@ export function useTraining() {
         ]);
 
         if (chaptersResult.error) {
-          mapSupabaseError(
-            'Erreur lors de la récupération des chapitres',
-            chaptersResult.error,
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération des chapitres',
+              chaptersResult.error,
+            ),
           );
           return;
         }
         if (quizResult.error) {
-          mapSupabaseError(
-            'Erreur lors de la récupération du quiz',
-            quizResult.error,
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération du quiz',
+              quizResult.error,
+            ),
           );
           return;
         }
@@ -155,9 +159,11 @@ export function useTraining() {
       ]);
 
       if (progressResult.error) {
-        mapSupabaseError(
-          'Erreur lors de la récupération de la progression',
-          progressResult.error,
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération de la progression',
+            progressResult.error,
+          ),
         );
         return;
       }
@@ -231,7 +237,7 @@ export function useTraining() {
         };
       }
 
-      setRemoteProgress([...progress, data]);
+      setRemoteProgress((prev) => [...prev, data]);
       return { data };
     } catch (error) {
       return { error: mapSupabaseError('Erreur startCourse', error) };
@@ -392,8 +398,8 @@ export function useTraining() {
         };
       }
 
-      setRemoteProgress(
-        progress.map((p) => (p.training_id === courseId ? data : p)),
+      setRemoteProgress((prev) =>
+        prev.map((p) => (p.training_id === courseId ? data : p)),
       );
 
       // Si réussi, ajouter les XP
