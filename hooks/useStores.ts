@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { DEMO_ORG_ID } from '../lib/demoData';
+import { DEMO_ORG_ID, demoId } from '../lib/demoData';
 import { supabase, type Store } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
@@ -69,5 +69,110 @@ export function useStores() {
     fetchStores();
   }, [fetchStores]);
 
-  return { stores, loading, error, refetch: fetchStores };
+  const createStore = async (storeData: Partial<Store>) => {
+    if (!profile?.organization_id) {
+      return { data: null, error: 'Utilisateur non connecté' };
+    }
+
+    if (isLocalDemo) {
+      const now = new Date().toISOString();
+      const data: Store = {
+        id: demoId('demo-store'),
+        organization_id: profile.organization_id,
+        name: storeData.name ?? '',
+        address: storeData.address ?? null,
+        city: storeData.city ?? null,
+        postal_code: storeData.postal_code ?? null,
+        country: storeData.country ?? 'FR',
+        latitude: storeData.latitude ?? null,
+        longitude: storeData.longitude ?? null,
+        manager_id: storeData.manager_id ?? null,
+        settings: storeData.settings ?? {},
+        is_active: true,
+        created_at: now,
+        updated_at: now,
+      };
+      setStores((prev) => [data, ...prev]);
+      return { data, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('stores')
+        .insert({
+          organization_id: profile.organization_id,
+          name: storeData.name ?? '',
+          address: storeData.address ?? null,
+          city: storeData.city ?? null,
+          postal_code: storeData.postal_code ?? null,
+          country: storeData.country ?? 'FR',
+          latitude: storeData.latitude ?? null,
+          longitude: storeData.longitude ?? null,
+          manager_id: storeData.manager_id ?? null,
+          settings: storeData.settings ?? {},
+        })
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur création magasin', error),
+        };
+      }
+      setStores((prev) => [data, ...prev]);
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur createStore', error),
+      };
+    }
+  };
+
+  const updateStore = async (id: string, updates: Partial<Store>) => {
+    const payload = { ...updates, updated_at: new Date().toISOString() };
+
+    if (isLocalDemo) {
+      let updated: Store | null = null;
+      setStores((prev) =>
+        prev.map((s) => {
+          if (s.id !== id) return s;
+          updated = { ...s, ...payload } as Store;
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('stores')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur mise à jour magasin', error),
+        };
+      }
+      setStores((prev) => prev.map((s) => (s.id === id ? data : s)));
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateStore', error),
+      };
+    }
+  };
+
+  return {
+    stores,
+    loading,
+    error,
+    refetch: fetchStores,
+    createStore,
+    updateStore,
+  };
 }

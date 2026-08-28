@@ -29,7 +29,7 @@ export default function TeamScreen() {
 
 function TeamScreenContent() {
   const { profile } = useAuth();
-  const { members, loading: loadingMembers } = useTeam();
+  const { members, loading: loadingMembers, deactivateMember } = useTeam();
   const {
     invitations,
     loading: loadingInvitations,
@@ -57,6 +57,25 @@ function TeamScreenContent() {
       return;
     }
     setModalVisible(false);
+  };
+
+  const handleDeactivate = (memberId: string) => {
+    const member = members.find((m) => m.id === memberId);
+    Alert.alert(
+      'Désactiver le membre',
+      `Retirer ${member?.full_name ?? member?.email ?? 'ce membre'} de l'équipe ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Désactiver',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await deactivateMember(memberId);
+            if (error) Alert.alert('Erreur', String(error));
+          },
+        },
+      ],
+    );
   };
 
   const handleRevoke = (id: string, email: string) => {
@@ -111,6 +130,7 @@ function TeamScreenContent() {
               member={member}
               isMe={member.id === profile?.id}
               showXP={canManage && member.id !== profile?.id}
+              onDeactivate={canManage ? handleDeactivate : undefined}
             />
           ))
         )}

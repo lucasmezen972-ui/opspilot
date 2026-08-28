@@ -1,5 +1,5 @@
-import { Crown, Shield, User, Clock } from 'lucide-react-native';
-import { View, Text, StyleSheet } from 'react-native';
+import { Crown, Shield, User, Clock, UserMinus } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { getRoleColor, getRoleLabel, formatLastActive } from './teamModel';
 import type { Profile } from '../../lib/supabase';
@@ -15,10 +15,15 @@ interface MemberCardProps {
   member: Profile;
   isMe: boolean;
   showXP: boolean;
+  onDeactivate?: (memberId: string) => void;
 }
 
-/** Carte d'un membre de l'équipe : avatar, identité, rôle, activité, XP. */
-export function MemberCard({ member, isMe, showXP }: MemberCardProps) {
+export function MemberCard({
+  member,
+  isMe,
+  showXP,
+  onDeactivate,
+}: MemberCardProps) {
   const roleColor = getRoleColor(member.role);
   return (
     <View style={styles.card}>
@@ -54,6 +59,14 @@ export function MemberCard({ member, isMe, showXP }: MemberCardProps) {
         <View style={styles.xp}>
           <Text style={styles.xpText}>{member.xp ?? 0} XP</Text>
         </View>
+      )}
+      {onDeactivate && !isMe && (
+        <TouchableOpacity
+          style={styles.deactivateButton}
+          onPress={() => onDeactivate(member.id)}
+        >
+          <UserMinus size={16} color="#DC2626" />
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -109,4 +122,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   xpText: { fontSize: 12, fontWeight: '600', color: '#374151' },
+  deactivateButton: {
+    padding: 8,
+    marginLeft: 4,
+  },
 });
