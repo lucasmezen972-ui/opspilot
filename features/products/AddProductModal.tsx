@@ -52,12 +52,13 @@ export function AddProductModal({
     try {
       const days = parseInt(dlcDays, 10);
       const parsedPrice = parseFloat(price.replace(',', '.'));
+      const parsedStock = parseInt(stock, 10);
       await onSubmit({
         name: name.trim(),
         category: category.trim() || null,
-        stock_quantity: parseInt(stock, 10) || 0,
-        price: Number.isFinite(parsedPrice) ? parsedPrice : null,
-        dlc: Number.isFinite(days)
+        stock_quantity: Number.isFinite(parsedStock) && parsedStock >= 0 ? parsedStock : 0,
+        price: Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : null,
+        dlc: Number.isFinite(days) && days > 0
           ? new Date(Date.now() + days * 86400000).toISOString()
           : null,
         barcode: barcode.trim() || null,

@@ -163,7 +163,12 @@ export default function TrainingScreen() {
         randomDifficulty,
       );
 
-      if (!content.title || !content.content) {
+      if (
+        !content.title ||
+        !content.content ||
+        !Array.isArray(content.practical_tips) ||
+        !Array.isArray(content.quiz_questions)
+      ) {
         Alert.alert('Erreur', 'Le contenu généré est incomplet.');
         return;
       }

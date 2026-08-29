@@ -294,7 +294,10 @@ const RULES: RuleDefinition[] = [
       'risque chute',
       'sol glissant',
       'obstacle',
-      'client',
+      'blessure client',
+      'danger client',
+      'accident client',
+      'risque client',
       'salari[ée]',
       'issue bloqu[ée]e?',
     ]),
@@ -496,7 +499,7 @@ const RULES: RuleDefinition[] = [
     riskLevel: 'medium',
     priority: 'medium',
     deadlineHours: 24 * 5,
-    deadlineLabel: 'Sous 3 à 7 jours',
+    deadlineLabel: 'Sous 5 jours',
     probableCause:
       'Consigne managériale incomplète, suivi insuffisant ou organisation de poste à clarifier.',
     immediateAction:

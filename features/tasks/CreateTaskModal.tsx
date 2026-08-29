@@ -134,7 +134,11 @@ export function CreateTaskModal({
               <Text style={styles.cancelText}>Annuler</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.confirmButton}
+              style={[
+                styles.confirmButton,
+                !title.trim() && { opacity: 0.5 },
+              ]}
+              disabled={!title.trim()}
               onPress={() =>
                 onSubmit({ title, description, priority, recurrence })
               }

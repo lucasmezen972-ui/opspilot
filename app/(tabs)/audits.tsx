@@ -128,7 +128,11 @@ export default function AuditsScreen() {
     [dbAudits, searchQuery, statusFilter],
   );
 
-  const counts = useMemo(() => getAuditCounts(audits), [audits]);
+  const allAudits = useMemo(
+    () => toAuditListItems(dbAudits, '', 'all'),
+    [dbAudits],
+  );
+  const counts = useMemo(() => getAuditCounts(allAudits), [allAudits]);
 
   const handleCreateAudit = (template?: AuditTemplate) => {
     setSelectedTemplateId(template?.id ?? null);
@@ -232,14 +236,13 @@ export default function AuditsScreen() {
       }
     }
 
-    Alert.alert(
-      'Audit terminé',
-      `Score : ${score}%${
-        created > 0
-          ? `\n${created} action${created > 1 ? 's' : ''} corrective${created > 1 ? 's' : ''} créée${created > 1 ? 's' : ''} automatiquement.`
-          : '\nAucune non-conformité détectée.'
-      }`,
-    );
+    const detail =
+      created > 0
+        ? `\n${created} action${created > 1 ? 's' : ''} corrective${created > 1 ? 's' : ''} créée${created > 1 ? 's' : ''} automatiquement.`
+        : issues > 0
+          ? `\n${issues} non-conformité${issues > 1 ? 's' : ''} détectée${issues > 1 ? 's' : ''}.`
+          : '\nAucune non-conformité détectée.';
+    Alert.alert('Audit terminé', `Score : ${score}%${detail}`);
   };
 
   const handleSubmitProfessionalAudit = async (
@@ -259,7 +262,7 @@ export default function AuditsScreen() {
     let created = 0;
     const autoActions = isEnabled('audits.auto_actions');
     for (const response of responses.filter(
-      (candidate) => autoActions && !candidate.is_compliant,
+      (candidate) => autoActions && candidate.is_compliant === false,
     )) {
       const item = professionalItems.find(
         (candidate) => candidate.id === response.item_id,
@@ -281,30 +284,33 @@ export default function AuditsScreen() {
     }
 
     setProfessionalAuditId(null);
-    Alert.alert(
-      'Audit terminé',
-      `Score : ${score}%${
-        created > 0
-          ? `\n${created} action${created > 1 ? 's' : ''} corrective${created > 1 ? 's' : ''} créée${created > 1 ? 's' : ''} automatiquement.`
-          : '\nAucune non-conformité détectée.'
-      }`,
-    );
+    const detail =
+      created > 0
+        ? `\n${created} action${created > 1 ? 's' : ''} corrective${created > 1 ? 's' : ''} créée${created > 1 ? 's' : ''} automatiquement.`
+        : issuesCount > 0
+          ? `\n${issuesCount} non-conformité${issuesCount > 1 ? 's' : ''} détectée${issuesCount > 1 ? 's' : ''}.`
+          : '\nAucune non-conformité détectée.';
+    Alert.alert('Audit terminé', `Score : ${score}%${detail}`);
   };
 
   const handleExportReport = async (auditId: string) => {
-    const fullAudit = dbAudits.find((a) => a.id === auditId);
-    if (!fullAudit) return;
-    const responses = await getAuditResponses(auditId);
-    const items = fullAudit.template_id
-      ? getItemsForTemplate(fullAudit.template_id)
-      : [];
-    const auditActions = actions.filter((a) => a.audit_id === auditId);
-    await exportAuditReport(fullAudit, {
-      responses,
-      items,
-      actions: auditActions,
-      auditorName: profile?.full_name ?? undefined,
-    });
+    try {
+      const fullAudit = dbAudits.find((a) => a.id === auditId);
+      if (!fullAudit) return;
+      const responses = await getAuditResponses(auditId);
+      const items = fullAudit.template_id
+        ? getItemsForTemplate(fullAudit.template_id)
+        : [];
+      const auditActions = actions.filter((a) => a.audit_id === auditId);
+      await exportAuditReport(fullAudit, {
+        responses,
+        items,
+        actions: auditActions,
+        auditorName: profile?.full_name ?? undefined,
+      });
+    } catch {
+      Alert.alert('Erreur', "Impossible d'exporter le rapport.");
+    }
   };
 
   return (
