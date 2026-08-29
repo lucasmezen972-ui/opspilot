@@ -56,11 +56,14 @@ export function AddProductModal({
       await onSubmit({
         name: name.trim(),
         category: category.trim() || null,
-        stock_quantity: Number.isFinite(parsedStock) && parsedStock >= 0 ? parsedStock : 0,
-        price: Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : null,
-        dlc: Number.isFinite(days) && days > 0
-          ? new Date(Date.now() + days * 86400000).toISOString()
-          : null,
+        stock_quantity:
+          Number.isFinite(parsedStock) && parsedStock >= 0 ? parsedStock : 0,
+        price:
+          Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : null,
+        dlc:
+          Number.isFinite(days) && days > 0
+            ? new Date(Date.now() + days * 86400000).toISOString()
+            : null,
         barcode: barcode.trim() || null,
       });
     } finally {

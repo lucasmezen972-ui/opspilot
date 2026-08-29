@@ -55,10 +55,7 @@ export function CreateAuditModal({
             </TouchableOpacity>
             <TouchableOpacity
               testID="audit-create-submit"
-              style={[
-                styles.confirmButton,
-                !title.trim() && { opacity: 0.5 },
-              ]}
+              style={[styles.confirmButton, !title.trim() && { opacity: 0.5 }]}
               disabled={!title.trim()}
               onPress={onConfirm}
             >
