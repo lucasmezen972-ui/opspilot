@@ -7,7 +7,9 @@ import type {
   AuditTemplateItem,
   Channel,
   ChannelMessage,
+  Conversation,
   CorrectiveAction,
+  Message,
   NotificationPreferences,
   Product,
   Profile,
@@ -3543,6 +3545,37 @@ export function getDemoClientOrganizations(): ClientOrganization[] {
           status: 'in_progress',
         },
       ],
+    },
+  ];
+}
+
+export function getDemoConversations(): Conversation[] {
+  return [
+    {
+      id: 'demo-conv-1',
+      organization_id: DEMO_ORG_ID,
+      name: 'Équipe magasin',
+      description: 'Discussion générale',
+      type: 'group',
+      participants: [],
+      last_message_at: days(0),
+      created_by: null,
+      created_at: days(-30),
+    },
+  ];
+}
+
+export function getDemoMessages(): Message[] {
+  return [
+    {
+      id: 'demo-msg-1',
+      conversation_id: 'demo-conv-1',
+      sender_id: DEMO_USER_ID,
+      content: 'Bienvenue sur OpsPilot ! Ceci est un message de démonstration.',
+      message_type: 'text',
+      attachments: [],
+      read_by: [],
+      created_at: days(0),
     },
   ];
 }
