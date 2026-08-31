@@ -1,40 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
-import { DEMO_ORG_ID, DEMO_USER_ID } from '../lib/demoData';
+import { useDemoCollection, updateDemoCollection } from '../lib/demoStore';
 import { supabase, type Message, type Conversation } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
-const DEMO_CONVERSATIONS: Conversation[] = [
-  {
-    id: 'demo-conv-1',
-    organization_id: DEMO_ORG_ID,
-    name: 'Équipe magasin',
-    description: 'Discussion générale',
-    type: 'group',
-    participants: [],
-    last_message_at: new Date().toISOString(),
-    created_by: null,
-    created_at: new Date().toISOString(),
-  },
-];
-
-const DEMO_MESSAGES: Message[] = [
-  {
-    id: 'demo-msg-1',
-    conversation_id: 'demo-conv-1',
-    sender_id: DEMO_USER_ID,
-    content: 'Bienvenue sur OpsPilot ! Ceci est un message de démonstration.',
-    message_type: 'text',
-    attachments: [],
-    read_by: [],
-    created_at: new Date().toISOString(),
-  },
-];
-
 export function useMessages() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [remoteMessages, setRemoteMessages] = useState<Message[]>([]);
+  const [remoteConversations, setRemoteConversations] = useState<
+    Conversation[]
+  >([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +17,18 @@ export function useMessages() {
   const activeConversationRef = useRef<string | null>(null);
   const isLocalDemo = isDemoMode && !session;
 
+  const demoConversations = useDemoCollection('conversations');
+  const demoMessages = useDemoCollection('messages');
+
+  const conversations = isLocalDemo ? demoConversations : remoteConversations;
+  const messages = isLocalDemo
+    ? demoMessages.filter(
+        (m) => m.conversation_id === activeConversationRef.current,
+      )
+    : remoteMessages;
+
   useEffect(() => {
     if (isLocalDemo) {
-      setConversations(DEMO_CONVERSATIONS);
       setLoading(false);
       return;
     }
@@ -81,7 +65,7 @@ export function useMessages() {
         return;
       }
 
-      setConversations(data || []);
+      setRemoteConversations(data || []);
       return data || [];
     } catch (err) {
       setError(mapSupabaseError('Erreur fetchConversations', err));
@@ -93,9 +77,6 @@ export function useMessages() {
   const fetchMessages = async (conversationId: string) => {
     activeConversationRef.current = conversationId;
     if (isLocalDemo) {
-      setMessages(
-        DEMO_MESSAGES.filter((m) => m.conversation_id === conversationId),
-      );
       return;
     }
     try {
@@ -120,7 +101,7 @@ export function useMessages() {
         return;
       }
 
-      setMessages(data || []);
+      setRemoteMessages(data || []);
     } catch (err) {
       setError(mapSupabaseError('Erreur fetchMessages', err));
     }
@@ -144,7 +125,7 @@ export function useMessages() {
         read_by: [profile.id],
         created_at: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, msg]);
+      updateDemoCollection('messages', (prev) => [...prev, msg]);
       return { data: msg };
     }
 
@@ -179,7 +160,7 @@ export function useMessages() {
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      setMessages((prev) => {
+      setRemoteMessages((prev) => {
         if (prev.some((m) => m.id === data.id)) return prev;
         return [...prev, data];
       });
@@ -192,13 +173,14 @@ export function useMessages() {
   const markAsRead = async (messageId: string) => {
     if (!profile) return;
 
-    const message = messages.find((m) => m.id === messageId);
+    const allMessages = isLocalDemo ? demoMessages : remoteMessages;
+    const message = allMessages.find((m) => m.id === messageId);
     if (!message || message.read_by.includes(profile.id)) return;
 
     const updatedReadBy = [...message.read_by, profile.id];
 
     if (isLocalDemo) {
-      setMessages((prev) =>
+      updateDemoCollection('messages', (prev) =>
         prev.map((m) =>
           m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
         ),
@@ -217,7 +199,7 @@ export function useMessages() {
         return;
       }
 
-      setMessages((prev) =>
+      setRemoteMessages((prev) =>
         prev.map((m) =>
           m.id === messageId ? { ...m, read_by: updatedReadBy } : m,
         ),
@@ -245,7 +227,7 @@ export function useMessages() {
             activeConversationRef.current &&
             newMessage.conversation_id === activeConversationRef.current
           ) {
-            setMessages((current) => {
+            setRemoteMessages((current) => {
               if (current.some((m) => m.id === newMessage.id)) return current;
               return [...current, newMessage];
             });
@@ -285,7 +267,7 @@ export function useMessages() {
         created_by: profile.id,
         created_at: new Date().toISOString(),
       };
-      setConversations((prev) => [conv, ...prev]);
+      updateDemoCollection('conversations', (prev) => [conv, ...prev]);
       return { data: conv };
     }
 
@@ -311,7 +293,7 @@ export function useMessages() {
         };
       }
 
-      setConversations((prev) => [data, ...prev]);
+      setRemoteConversations((prev) => [data, ...prev]);
       return { data };
     } catch (error) {
       return { error: mapSupabaseError('Erreur createConversation', error) };
@@ -322,7 +304,7 @@ export function useMessages() {
     if (!profile || isLocalDemo) return;
 
     try {
-      const targets = convs ?? conversations;
+      const targets = convs ?? remoteConversations;
       const results = await Promise.all(
         targets.map((conv) =>
           supabase
@@ -349,7 +331,8 @@ export function useMessages() {
     if (!profile) return 0;
 
     if (conversationId === activeConversationRef.current) {
-      return messages.filter(
+      const allMessages = isLocalDemo ? demoMessages : remoteMessages;
+      return allMessages.filter(
         (m) =>
           m.conversation_id === conversationId &&
           !m.read_by.includes(profile.id) &&

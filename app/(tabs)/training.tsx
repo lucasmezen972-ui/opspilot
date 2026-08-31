@@ -167,9 +167,14 @@ export default function TrainingScreen() {
         !content.title ||
         !content.content ||
         !Array.isArray(content.practical_tips) ||
-        !Array.isArray(content.quiz_questions)
+        !Array.isArray(content.quiz_questions) ||
+        content.practical_tips.length === 0 ||
+        content.quiz_questions.length === 0
       ) {
-        Alert.alert('Erreur', 'Le contenu généré est incomplet.');
+        Alert.alert(
+          'Erreur',
+          'La génération IA nécessite une connexion active. Contenu insuffisant.',
+        );
         return;
       }
 
