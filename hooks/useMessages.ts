@@ -238,19 +238,23 @@ export function useMessages() {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `organization_id=eq.${profile.organization_id}`,
         },
         (payload) => {
           const newMessage = payload.new as Message;
           if (
             activeConversationRef.current &&
-            newMessage.conversation_id !== activeConversationRef.current
+            newMessage.conversation_id === activeConversationRef.current
           ) {
-            return;
+            setMessages((current) => {
+              if (current.some((m) => m.id === newMessage.id)) return current;
+              return [...current, newMessage];
+            });
           }
-          setMessages((current) => {
-            if (current.some((m) => m.id === newMessage.id)) return current;
-            return [...current, newMessage];
+          setUnreadCounts((prev) => {
+            if (newMessage.sender_id === profile?.id) return prev;
+            const convId = newMessage.conversation_id;
+            if (convId === activeConversationRef.current) return prev;
+            return { ...prev, [convId]: (prev[convId] ?? 0) + 1 };
           });
         },
       )
@@ -318,19 +322,23 @@ export function useMessages() {
     if (!profile || isLocalDemo) return;
 
     try {
+      const targets = convs ?? conversations;
+      const results = await Promise.all(
+        targets.map((conv) =>
+          supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .not('read_by', 'cs', `{${profile.id}}`)
+            .neq('sender_id', profile.id)
+            .then(({ count, error }) => ({
+              id: conv.id,
+              count: !error && count != null ? count : 0,
+            })),
+        ),
+      );
       const counts: Record<string, number> = {};
-      for (const conv of convs ?? conversations) {
-        const { count, error } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', conv.id)
-          .not('read_by', 'cs', `{${profile.id}}`)
-          .neq('sender_id', profile.id);
-
-        if (!error && count != null) {
-          counts[conv.id] = count;
-        }
-      }
+      for (const r of results) counts[r.id] = r.count;
       setUnreadCounts(counts);
     } catch (error) {
       mapSupabaseError('Erreur fetchUnreadCounts', error);

@@ -8,6 +8,7 @@ export interface NewProductPayload {
   name: string;
   category: string | null;
   stock_quantity: number;
+  min_stock: number | null;
   price: number | null;
   dlc: string | null;
   barcode: string | null;
@@ -29,6 +30,7 @@ export function AddProductModal({
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [stock, setStock] = useState('0');
+  const [minStock, setMinStock] = useState('');
   const [price, setPrice] = useState('');
   const [dlcDays, setDlcDays] = useState('');
   const [barcode, setBarcode] = useState('');
@@ -39,6 +41,7 @@ export function AddProductModal({
       setName('');
       setCategory('');
       setStock('0');
+      setMinStock('');
       setPrice('');
       setDlcDays('');
       setBarcode(prefillBarcode);
@@ -53,11 +56,13 @@ export function AddProductModal({
       const days = parseInt(dlcDays, 10);
       const parsedPrice = parseFloat(price.replace(',', '.'));
       const parsedStock = parseInt(stock, 10);
+      const parsedMinStock = parseInt(minStock, 10);
       await onSubmit({
         name: name.trim(),
         category: category.trim() || null,
         stock_quantity:
           Number.isFinite(parsedStock) && parsedStock >= 0 ? parsedStock : 0,
+        min_stock: Number.isFinite(parsedMinStock) ? parsedMinStock : null,
         price:
           Number.isFinite(parsedPrice) && parsedPrice >= 0 ? parsedPrice : null,
         dlc:
@@ -101,6 +106,13 @@ export function AddProductModal({
             onChangeText={setStock}
             keyboardType="numeric"
             placeholder="Stock initial"
+          />
+          <TextInput
+            style={modalStyles.modalInput}
+            value={minStock}
+            onChangeText={setMinStock}
+            keyboardType="numeric"
+            placeholder="Seuil d'alerte stock bas (optionnel)"
           />
           <TextInput
             style={modalStyles.modalInput}

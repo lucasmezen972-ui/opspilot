@@ -88,5 +88,37 @@ export function useTeam() {
     }
   };
 
-  return { members, loading, error, refetch: fetchMembers, updateMemberRole };
+  const deactivateMember = async (memberId: string) => {
+    if (isLocalDemo) {
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      return { error: null };
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: false })
+        .eq('id', memberId);
+      if (error) {
+        return {
+          error: mapSupabaseError('Erreur désactivation membre', error),
+        };
+      }
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      return { error: null };
+    } catch (error) {
+      return {
+        error: mapSupabaseError('Erreur deactivateMember', error),
+      };
+    }
+  };
+
+  return {
+    members,
+    loading,
+    error,
+    refetch: fetchMembers,
+    updateMemberRole,
+    deactivateMember,
+  };
 }

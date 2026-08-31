@@ -76,6 +76,7 @@ export function useProducts() {
         .from('products')
         .select('*')
         .eq('barcode', barcode)
+        .eq('organization_id', profile?.organization_id ?? '')
         .maybeSingle();
 
       if (error) {
@@ -179,6 +180,7 @@ export function useProducts() {
           category: productData.category ?? null,
           price: productData.price ?? null,
           stock_quantity: productData.stock_quantity ?? 0,
+          min_stock: productData.min_stock ?? null,
           dlc: productData.dlc ?? null,
           added_by: profile.id,
         })
@@ -203,6 +205,66 @@ export function useProducts() {
     }
   };
 
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    const payload = { ...updates, updated_at: new Date().toISOString() };
+
+    if (isLocalDemo) {
+      let updated: Product | null = null;
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id !== id) return p;
+          updated = { ...p, ...payload } as Product;
+          return updated;
+        }),
+      );
+      return { data: updated, error: null };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return {
+          data: null,
+          error: mapSupabaseError('Erreur mise à jour produit', error),
+        };
+      }
+      setProducts((prev) => prev.map((p) => (p.id === id ? data : p)));
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur updateProduct', error),
+      };
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (isLocalDemo) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      return { error: null };
+    }
+
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) {
+        return {
+          error: mapSupabaseError('Erreur suppression produit', error),
+        };
+      }
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      return { error: null };
+    } catch (error) {
+      return {
+        error: mapSupabaseError('Erreur deleteProduct', error),
+      };
+    }
+  };
+
   return {
     products,
     loading,
@@ -210,6 +272,8 @@ export function useProducts() {
     fetchProduct,
     scanProduct,
     createProduct,
+    updateProduct,
+    deleteProduct,
     updateProductStock,
     refetch: fetchProducts,
   };

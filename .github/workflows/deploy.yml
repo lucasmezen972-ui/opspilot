@@ -36,6 +36,9 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
 
+      - name: Copy admin back-office into dist
+        run: cp -R admin dist/admin
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
