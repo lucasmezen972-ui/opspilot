@@ -1,6 +1,7 @@
 import { FileText, Download } from 'lucide-react-native';
 import { useMemo } from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
   StyleSheet,
@@ -35,8 +36,8 @@ import { can } from '../../utils/permissions';
 
 export default function ReportsScreen() {
   const { profile } = useAuth();
-  const { audits, getAuditResponses } = useAudits();
-  const { actions } = useCorrectiveActions();
+  const { audits, loading: auditsLoading, error: auditsError, getAuditResponses } = useAudits();
+  const { actions, loading: actionsLoading, error: actionsError } = useCorrectiveActions();
   const { getItemsForTemplate } = useAuditTemplates();
   const { logEvent } = useActivityLog();
   const canExport = can(profile?.role, 'reports.export');
@@ -83,6 +84,9 @@ export default function ReportsScreen() {
     });
   };
 
+  const isLoading = auditsLoading || actionsLoading;
+  const fetchError = auditsError ?? actionsError;
+
   return (
     <ScrollView style={styles.container} testID="reports-screen">
       <AppScreenHeader
@@ -95,6 +99,19 @@ export default function ReportsScreen() {
           </View>
         }
       />
+
+      {isLoading && (
+        <View style={styles.loadingBanner}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>Chargement des données…</Text>
+        </View>
+      )}
+
+      {fetchError && !isLoading && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{fetchError}</Text>
+        </View>
+      )}
 
       <ReportStatsGrid stats={stats} />
 
@@ -175,6 +192,34 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  loadingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 10,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  errorBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.dangerStrong,
+    fontWeight: '500',
   },
   bottomPadding: {
     height: 24,

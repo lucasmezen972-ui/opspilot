@@ -77,7 +77,9 @@ function TeamScreenContent() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Équipe</Text>
+        <Text style={styles.title} testID="page-team-title">
+          Équipe
+        </Text>
         <Text style={styles.subtitle}>
           {members.length} membre{members.length > 1 ? 's' : ''}
         </Text>
