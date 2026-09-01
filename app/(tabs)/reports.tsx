@@ -36,8 +36,17 @@ import { can } from '../../utils/permissions';
 
 export default function ReportsScreen() {
   const { profile } = useAuth();
-  const { audits, loading: auditsLoading, error: auditsError, getAuditResponses } = useAudits();
-  const { actions, loading: actionsLoading, error: actionsError } = useCorrectiveActions();
+  const {
+    audits,
+    loading: auditsLoading,
+    error: auditsError,
+    getAuditResponses,
+  } = useAudits();
+  const {
+    actions,
+    loading: actionsLoading,
+    error: actionsError,
+  } = useCorrectiveActions();
   const { getItemsForTemplate } = useAuditTemplates();
   const { logEvent } = useActivityLog();
   const canExport = can(profile?.role, 'reports.export');

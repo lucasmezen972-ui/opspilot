@@ -4,7 +4,13 @@ import {
   TrendingUp,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, View, Text, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
 
 import RequireRole from '../../components/RequireRole';
 import { ActivityFeed } from '../../features/governance/ActivityFeed';
