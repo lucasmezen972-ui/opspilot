@@ -108,14 +108,6 @@ export default function ChatScreen() {
     return convUnread + chanUnread;
   }, [conversations, channels, getChannelUnread]);
 
-  // Sélectionner la première conversation par défaut.
-  useEffect(() => {
-    if (conversations.length > 0 && !selectedConversation) {
-      setSelectedConversation(conversations[0]?.id ?? null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversations.length, selectedConversation]);
-
   // Charger les messages quand on change de conversation réelle.
   useEffect(() => {
     if (selectedConversation && !selectedConversation.startsWith('demo-')) {
@@ -374,6 +366,18 @@ export default function ChatScreen() {
             </ScrollView>
           )}
         </View>
+      ) : selectedConversation ? (
+        <ConversationPanel
+          name={selectedConvName}
+          isAI={Boolean(isAIConversation)}
+          assistantLoading={assistantLoading}
+          loading={loading}
+          messages={displayMessages}
+          draft={newMessage}
+          onChangeDraft={setNewMessage}
+          onSend={handleSendMessage}
+          onBack={() => setSelectedConversation(null)}
+        />
       ) : (
         <ScrollView style={styles.conversationsList}>
           <Text style={styles.sectionTitle}>Conversations</Text>
@@ -381,21 +385,10 @@ export default function ChatScreen() {
             <ConversationCard
               key={conversation.id}
               conversation={conversation}
-              active={selectedConversation === conversation.id}
+              active={false}
               onPress={() => setSelectedConversation(conversation.id)}
             />
           ))}
-
-          <ConversationPanel
-            name={selectedConvName}
-            isAI={Boolean(isAIConversation)}
-            assistantLoading={assistantLoading}
-            loading={loading}
-            messages={displayMessages}
-            draft={newMessage}
-            onChangeDraft={setNewMessage}
-            onSend={handleSendMessage}
-          />
         </ScrollView>
       )}
     </View>

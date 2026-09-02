@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react-native';
 import {
+  ActivityIndicator,
   View,
   Text,
   StyleSheet,
@@ -35,7 +36,7 @@ function requestActivation(planId: string) {
 
 function BillingScreenContent() {
   const { profile } = useAuth();
-  const { subscription, trialDaysLeft } = useSubscription();
+  const { subscription, trialDaysLeft, loading } = useSubscription();
 
   const currentPlan = subscription?.plan ?? 'trial';
   const status = subscription?.status ?? 'trialing';
@@ -94,6 +95,15 @@ function BillingScreenContent() {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2563EB" />
+        <Text style={styles.loadingText}>Chargement de l'abonnement…</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -145,6 +155,13 @@ function BillingScreenContent() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+  },
+  loadingText: { color: '#6B7280', marginTop: 12, fontSize: 14 },
   header: {
     padding: 20,
     paddingTop: 60,

@@ -1,6 +1,7 @@
 import { Plus, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useState, useMemo } from 'react';
 import {
+  ActivityIndicator,
   View,
   StyleSheet,
   ScrollView,
@@ -46,6 +47,7 @@ import type { CorrectiveAction } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
+import { colors } from '../../shared/styles/tokens';
 
 export default function ActionsScreen() {
   const {
@@ -226,6 +228,12 @@ export default function ActionsScreen() {
 
       <ActionsViewToggle viewMode={viewMode} onChange={setViewMode} />
 
+      {loading && (
+        <View style={styles.loadingBanner}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
+      )}
+
       {viewMode === 'list' ? (
         <ScrollView
           style={styles.list}
@@ -312,5 +320,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  loadingBanner: {
+    alignItems: 'center',
+    paddingVertical: 12,
   },
 });

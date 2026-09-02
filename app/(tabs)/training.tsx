@@ -1,6 +1,7 @@
 import { Star, Sparkles } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
   StyleSheet,
@@ -51,6 +52,7 @@ export default function TrainingScreen() {
   const { entries: leaderboard } = useLeaderboard();
   const {
     courses: dbCourses,
+    loading: coursesLoading,
     startCourse,
     markChapterRead,
     completeQuiz,
@@ -376,13 +378,26 @@ export default function TrainingScreen() {
               </TouchableOpacity>
             </View>
 
-            {courses.map((course) => (
-              <TrainingCourseCard
-                key={course.id}
-                course={course}
-                onOpen={handleOpenCourse}
-              />
-            ))}
+            {coursesLoading ? (
+              <View style={styles.loadingBanner}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.loadingText}>
+                  Chargement des formations…
+                </Text>
+              </View>
+            ) : courses.length === 0 ? (
+              <Text style={styles.emptyCourses}>
+                Aucune formation disponible pour le moment.
+              </Text>
+            ) : (
+              courses.map((course) => (
+                <TrainingCourseCard
+                  key={course.id}
+                  course={course}
+                  onOpen={handleOpenCourse}
+                />
+              ))
+            )}
           </View>
 
           <TrainingLeaderboard
@@ -479,5 +494,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
+  },
+  loadingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  emptyCourses: {
+    fontSize: 14,
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: 24,
   },
 });
