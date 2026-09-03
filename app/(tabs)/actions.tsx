@@ -141,6 +141,11 @@ export default function ActionsScreen() {
       });
       if (storagePath) {
         finalPayload = { ...payload, proofPhotoUri: storagePath };
+      } else {
+        Alert.alert(
+          'Preuve photo',
+          'Le téléversement de la preuve a échoué. La photo locale est conservée mais ne sera pas accessible depuis un autre appareil.',
+        );
       }
     }
 

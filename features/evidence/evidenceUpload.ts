@@ -4,6 +4,7 @@ import {
   type EvidenceEntityType,
 } from './evidenceStorage';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../utils/logger';
 
 /**
  * Téléversement réel des preuves photo vers le bucket privé « evidence »
@@ -53,7 +54,10 @@ export async function uploadEvidencePhoto(
     const { error: uploadError } = await supabase.storage
       .from(EVIDENCE_BUCKET)
       .upload(path, blob, { contentType, upsert: false });
-    if (uploadError) return null;
+    if (uploadError) {
+      logger.error('Evidence upload failed', uploadError);
+      return null;
+    }
 
     // Traçabilité (best-effort) : un échec d'insert ne perd pas le fichier.
     await supabase.from('evidence_files').insert({
@@ -65,7 +69,8 @@ export async function uploadEvidencePhoto(
     });
 
     return path;
-  } catch {
+  } catch (err) {
+    logger.error('Evidence upload exception', err);
     return null;
   }
 }

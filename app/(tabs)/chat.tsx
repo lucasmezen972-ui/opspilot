@@ -1,5 +1,5 @@
-import { Bell, Search, X } from 'lucide-react-native';
-import { useState, useEffect, useMemo } from 'react';
+import { Bell, MessageCircle, Search, X } from 'lucide-react-native';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useChannels } from '../../hooks/useChannels';
 import { useMessages } from '../../hooks/useMessages';
 import { supabase } from '../../lib/supabase';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
@@ -108,12 +109,17 @@ export default function ChatScreen() {
     return convUnread + chanUnread;
   }, [conversations, channels, getChannelUnread]);
 
-  // Charger les messages quand on change de conversation réelle.
+  const stableFetchMessages = useCallback(
+    (id: string) => fetchMessages(id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isLocalDemo, profile?.organization_id],
+  );
+
   useEffect(() => {
     if (selectedConversation && !selectedConversation.startsWith('demo-')) {
-      fetchMessages(selectedConversation);
+      stableFetchMessages(selectedConversation);
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, stableFetchMessages]);
 
   const displayMessages = selectedConversation?.startsWith('demo-')
     ? localMessages.filter(
@@ -381,14 +387,26 @@ export default function ChatScreen() {
       ) : (
         <ScrollView style={styles.conversationsList}>
           <Text style={styles.sectionTitle}>Conversations</Text>
-          {filteredConversations.map((conversation) => (
-            <ConversationCard
-              key={conversation.id}
-              conversation={conversation}
-              active={false}
-              onPress={() => setSelectedConversation(conversation.id)}
+          {filteredConversations.length === 0 ? (
+            <AppEmptyState
+              icon={MessageCircle}
+              title={searchQuery ? 'Aucun resultat' : 'Aucune conversation'}
+              description={
+                searchQuery
+                  ? "Essayez avec d'autres termes de recherche."
+                  : "Vos conversations et l'assistant IA apparaîtront ici."
+              }
             />
-          ))}
+          ) : (
+            filteredConversations.map((conversation) => (
+              <ConversationCard
+                key={conversation.id}
+                conversation={conversation}
+                active={false}
+                onPress={() => setSelectedConversation(conversation.id)}
+              />
+            ))
+          )}
         </ScrollView>
       )}
     </View>
