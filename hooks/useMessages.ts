@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import { useDemoCollection, updateDemoCollection } from '../lib/demoStore';
@@ -14,6 +14,9 @@ export function useMessages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
+  const [activeConversationId, setActiveConversationId] = useState<
+    string | null
+  >(null);
   const activeConversationRef = useRef<string | null>(null);
   const isLocalDemo = isDemoMode && !session;
 
@@ -22,9 +25,7 @@ export function useMessages() {
 
   const conversations = isLocalDemo ? demoConversations : remoteConversations;
   const messages = isLocalDemo
-    ? demoMessages.filter(
-        (m) => m.conversation_id === activeConversationRef.current,
-      )
+    ? demoMessages.filter((m) => m.conversation_id === activeConversationId)
     : remoteMessages;
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function useMessages() {
         cleanup?.();
       };
     }
-  }, [profile?.organization_id, isLocalDemo]);
+  }, [profile?.organization_id, profile?.id, isLocalDemo]);
 
   const fetchConversations = async () => {
     if (!profile?.organization_id) return;
@@ -74,38 +75,43 @@ export function useMessages() {
     }
   };
 
-  const fetchMessages = async (conversationId: string) => {
-    activeConversationRef.current = conversationId;
-    if (isLocalDemo) {
-      return;
-    }
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(
-          `
+  const fetchMessages = useCallback(
+    async (conversationId: string) => {
+      activeConversationRef.current = conversationId;
+      setActiveConversationId(conversationId);
+      if (isLocalDemo) {
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select(
+            `
           *,
           profiles(full_name, avatar_url)
         `,
-        )
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+          )
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true });
 
-      if (error) {
-        setError(
-          mapSupabaseError(
-            'Erreur lors de la récupération des messages',
-            error,
-          ),
-        );
-        return;
+        if (error) {
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération des messages',
+              error,
+            ),
+          );
+          return;
+        }
+
+        setRemoteMessages(data || []);
+      } catch (err) {
+        setError(mapSupabaseError('Erreur fetchMessages', err));
       }
-
-      setRemoteMessages(data || []);
-    } catch (err) {
-      setError(mapSupabaseError('Erreur fetchMessages', err));
-    }
-  };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [isLocalDemo, profile?.organization_id],
+  );
 
   const sendMessage = async (
     conversationId: string,

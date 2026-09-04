@@ -115,13 +115,16 @@ export default function ChatScreen() {
     [isLocalDemo, profile?.organization_id],
   );
 
+  const isSyntheticConversation =
+    selectedConversation === 'demo-ai' || selectedConversation === 'demo-team';
+
   useEffect(() => {
-    if (selectedConversation && !selectedConversation.startsWith('demo-')) {
+    if (selectedConversation && !isSyntheticConversation) {
       stableFetchMessages(selectedConversation);
     }
-  }, [selectedConversation, stableFetchMessages]);
+  }, [selectedConversation, isSyntheticConversation, stableFetchMessages]);
 
-  const displayMessages = selectedConversation?.startsWith('demo-')
+  const displayMessages = isSyntheticConversation
     ? localMessages.filter(
         (message) => message.conversationId === selectedConversation,
       )
@@ -141,7 +144,10 @@ export default function ChatScreen() {
     const content = newMessage.trim();
     setNewMessage('');
 
-    if (!selectedConversation.startsWith('demo-')) {
+    if (
+      selectedConversation !== 'demo-ai' &&
+      selectedConversation !== 'demo-team'
+    ) {
       const result = await sendDbMessage(selectedConversation, content);
       if (result.error) {
         Alert.alert('Erreur', "Impossible d'envoyer le message.");

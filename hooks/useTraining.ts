@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import {
@@ -64,17 +64,7 @@ export function useTraining() {
   const progress = isLocalDemo ? demoProgress : remoteProgress;
   const certificates = isLocalDemo ? demoCertificates : remoteCertificates;
 
-  useEffect(() => {
-    if (isLocalDemo) {
-      setLoading(false);
-      return;
-    }
-    if (profile?.organization_id) {
-      fetchTrainingData();
-    }
-  }, [profile?.organization_id, profile?.id, isLocalDemo]);
-
-  const fetchTrainingData = async () => {
+  const fetchTrainingData = useCallback(async () => {
     if (isLocalDemo || !profile?.organization_id || !profile.id) {
       setLoading(false);
       return;
@@ -185,7 +175,17 @@ export function useTraining() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isLocalDemo, profile?.organization_id, profile?.id]);
+
+  useEffect(() => {
+    if (isLocalDemo) {
+      setLoading(false);
+      return;
+    }
+    if (profile?.organization_id) {
+      fetchTrainingData();
+    }
+  }, [fetchTrainingData, isLocalDemo, profile?.organization_id]);
 
   const startCourse = async (courseId: string) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
