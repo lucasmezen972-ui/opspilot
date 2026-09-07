@@ -1,5 +1,5 @@
-import { Bell, Search, X } from 'lucide-react-native';
-import { useState, useEffect, useMemo } from 'react';
+import { Bell, MessageCircle, Search, X } from 'lucide-react-native';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useChannels } from '../../hooks/useChannels';
 import { useMessages } from '../../hooks/useMessages';
 import { supabase } from '../../lib/supabase';
+import { AppEmptyState } from '../../shared/components/AppEmptyState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
@@ -108,23 +109,20 @@ export default function ChatScreen() {
     return convUnread + chanUnread;
   }, [conversations, channels, getChannelUnread]);
 
-  // Sélectionner la première conversation par défaut.
-  useEffect(() => {
-    if (conversations.length > 0 && !selectedConversation) {
-      setSelectedConversation(conversations[0]?.id ?? null);
-    }
+  const stableFetchMessages = useCallback(
+    (id: string) => fetchMessages(id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversations.length, selectedConversation]);
+    [isLocalDemo, profile?.organization_id],
+  );
 
   const isSyntheticConversation =
     selectedConversation === 'demo-ai' || selectedConversation === 'demo-team';
 
-  // Charger les messages quand on change de conversation réelle.
   useEffect(() => {
     if (selectedConversation && !isSyntheticConversation) {
-      fetchMessages(selectedConversation);
+      stableFetchMessages(selectedConversation);
     }
-  }, [selectedConversation, isSyntheticConversation, fetchMessages]);
+  }, [selectedConversation, isSyntheticConversation, stableFetchMessages]);
 
   const displayMessages = isSyntheticConversation
     ? localMessages.filter(
@@ -380,28 +378,41 @@ export default function ChatScreen() {
             </ScrollView>
           )}
         </View>
+      ) : selectedConversation ? (
+        <ConversationPanel
+          name={selectedConvName}
+          isAI={Boolean(isAIConversation)}
+          assistantLoading={assistantLoading}
+          loading={loading}
+          messages={displayMessages}
+          draft={newMessage}
+          onChangeDraft={setNewMessage}
+          onSend={handleSendMessage}
+          onBack={() => setSelectedConversation(null)}
+        />
       ) : (
         <ScrollView style={styles.conversationsList}>
           <Text style={styles.sectionTitle}>Conversations</Text>
-          {filteredConversations.map((conversation) => (
-            <ConversationCard
-              key={conversation.id}
-              conversation={conversation}
-              active={selectedConversation === conversation.id}
-              onPress={() => setSelectedConversation(conversation.id)}
+          {filteredConversations.length === 0 ? (
+            <AppEmptyState
+              icon={MessageCircle}
+              title={searchQuery ? 'Aucun resultat' : 'Aucune conversation'}
+              description={
+                searchQuery
+                  ? "Essayez avec d'autres termes de recherche."
+                  : "Vos conversations et l'assistant IA apparaîtront ici."
+              }
             />
-          ))}
-
-          <ConversationPanel
-            name={selectedConvName}
-            isAI={Boolean(isAIConversation)}
-            assistantLoading={assistantLoading}
-            loading={loading}
-            messages={displayMessages}
-            draft={newMessage}
-            onChangeDraft={setNewMessage}
-            onSend={handleSendMessage}
-          />
+          ) : (
+            filteredConversations.map((conversation) => (
+              <ConversationCard
+                key={conversation.id}
+                conversation={conversation}
+                active={false}
+                onPress={() => setSelectedConversation(conversation.id)}
+              />
+            ))
+          )}
         </ScrollView>
       )}
     </View>

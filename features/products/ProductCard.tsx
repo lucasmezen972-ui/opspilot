@@ -41,9 +41,14 @@ const STATUS_ICONS: Record<StockStatus, typeof Package> = {
 interface ProductCardProps {
   product: Product;
   onPress: (product: Product) => void;
+  onLongPress?: (product: Product) => void;
 }
 
-export function ProductCard({ product, onPress }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onPress,
+  onLongPress,
+}: ProductCardProps) {
   const status = getStockStatus(product);
   const StatusIcon = STATUS_ICONS[status];
 
@@ -52,6 +57,7 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
       testID={`product-card-${product.id}`}
       style={styles.productCard}
       onPress={() => onPress(product)}
+      onLongPress={onLongPress ? () => onLongPress(product) : undefined}
     >
       <Image
         source={{

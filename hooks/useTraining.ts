@@ -425,6 +425,7 @@ export function useTraining() {
         .update({
           xp: newXP,
           level: newLevel,
+          completed_trainings: (profile.completed_trainings ?? 0) + 1,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);

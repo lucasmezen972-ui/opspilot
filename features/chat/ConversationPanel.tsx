@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Sparkles,
   Phone,
   Video,
@@ -17,7 +18,7 @@ import {
 import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import type { DisplayMessage } from './chatModel';
-import { colors, radius, shadow } from '../../shared/styles/tokens';
+import { colors } from '../../shared/styles/tokens';
 
 interface ConversationPanelProps {
   name: string;
@@ -28,6 +29,7 @@ interface ConversationPanelProps {
   draft: string;
   onChangeDraft: (text: string) => void;
   onSend: () => void;
+  onBack?: () => void;
 }
 
 /** Panneau de la conversation active : en-tête, fil de messages et saisie. */
@@ -40,12 +42,22 @@ export function ConversationPanel({
   draft,
   onChangeDraft,
   onSend,
+  onBack,
 }: ConversationPanelProps) {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        {onBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={onBack}
+            testID="chat-back-button"
+          >
+            <ArrowLeft size={20} color={colors.textStrong} />
+          </TouchableOpacity>
+        )}
         <View style={styles.info}>
           <Text style={styles.name}>{name}</Text>
           <View style={styles.status}>
@@ -139,13 +151,8 @@ export function ConversationPanel({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
-    maxHeight: 400,
   },
   header: {
     flexDirection: 'row',
@@ -191,8 +198,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
   messagesList: {
-    maxHeight: 250,
+    flex: 1,
     padding: 16,
   },
   empty: {

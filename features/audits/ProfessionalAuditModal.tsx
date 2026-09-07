@@ -33,18 +33,12 @@ type ProfessionalAuditModalProps = {
 };
 
 function initialResponse(item: AuditTemplateItem): AuditResponseDraft {
-  const value =
-    item.item_type === 'yes_no'
-      ? true
-      : item.item_type === 'score_1_5'
-        ? 5
-        : '';
   return {
     item_id: item.id,
-    value,
+    value: null,
     photo_url: null,
     comment: '',
-    is_compliant: getResponseCompliance(item, value),
+    is_compliant: null,
   };
 }
 
@@ -127,7 +121,7 @@ export function ProfessionalAuditModal({
 
     const score = calculateAuditScore(items, responseList);
     const issuesCount = responseList.filter(
-      (response) => !response.is_compliant,
+      (response) => response.is_compliant === false,
     ).length;
     await onSubmit(responseList, score, issuesCount);
   };
@@ -251,7 +245,7 @@ export function ProfessionalAuditModal({
                       )}
 
                       {(item.item_type === 'photo' ||
-                        !response.is_compliant) && (
+                        response.is_compliant === false) && (
                         <TouchableOpacity
                           testID={`audit-item-${item.id}-photo`}
                           style={[
@@ -272,7 +266,7 @@ export function ProfessionalAuditModal({
                           >
                             {response.photo_url
                               ? 'Preuve jointe'
-                              : !response.is_compliant
+                              : response.is_compliant === false
                                 ? 'Joindre la preuve obligatoire'
                                 : 'Prendre une photo'}
                           </Text>

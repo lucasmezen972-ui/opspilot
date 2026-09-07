@@ -36,6 +36,7 @@ export default function ProductsScreen() {
     scanProduct,
     createProduct,
     updateProductStock,
+    deleteProduct,
   } = useProducts();
   const [isScanning, setIsScanning] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
@@ -60,6 +61,24 @@ export default function ProductsScreen() {
     } else {
       Alert.alert('Produit ajouté', `${payload.name} a été ajouté au stock.`);
     }
+  };
+
+  const handleDeleteProduct = (product: Product) => {
+    Alert.alert(
+      'Supprimer le produit',
+      `Supprimer « ${product.name} » du catalogue ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await deleteProduct(product.id);
+            if (error) Alert.alert('Erreur', String(error));
+          },
+        },
+      ],
+    );
   };
 
   const handleStockConfirm = async (product: Product, newStock: number) => {
@@ -158,6 +177,7 @@ export default function ProductsScreen() {
             key={product.id}
             product={product}
             onPress={setStockModalProduct}
+            onLongPress={handleDeleteProduct}
           />
         ))}
 

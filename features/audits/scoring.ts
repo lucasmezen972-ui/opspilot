@@ -5,7 +5,7 @@ export type AuditResponseDraft = {
   value: boolean | number | string | null;
   photo_url?: string | null;
   comment?: string | null;
-  is_compliant: boolean;
+  is_compliant: boolean | null;
 };
 
 export type AuditValidationError = {
@@ -52,7 +52,7 @@ export function validateAuditResponses(
 
     if (
       response &&
-      !response.is_compliant &&
+      response.is_compliant === false &&
       !response.photo_url &&
       (item.item_type === 'yes_no' || item.item_type === 'score_1_5')
     ) {

@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import {
   Settings,
@@ -39,6 +40,8 @@ export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
   const router = useRouter();
 
+  const appVersion =
+    Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0';
   const displayName = profile?.full_name ?? 'Utilisateur';
   const displayRole = getProfileRoleLabel(profile?.role);
   const progress = computeXpProgress(profile?.level ?? 1, profile?.xp ?? 0);
@@ -71,7 +74,7 @@ export default function ProfileScreen() {
       onPress: () =>
         Alert.alert(
           'Appareil',
-          `Plateforme: ${Platform.OS}\nVersion: OpsPilot 1.0.0`,
+          `Plateforme: ${Platform.OS}\nVersion: OpsPilot v${appVersion}`,
         ),
     },
     {
@@ -142,7 +145,7 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.appInfo}>
-          <Text style={styles.appInfoText}>OpsPilot v1.0.0</Text>
+          <Text style={styles.appInfoText}>OpsPilot v{appVersion}</Text>
           <Text style={styles.appInfoSubtext}>
             © 2026 OpsPilot. Tous droits réservés.
           </Text>

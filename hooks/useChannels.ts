@@ -225,7 +225,11 @@ export function useChannels() {
         .single();
 
       if (!error && data) {
-        setRemoteMessages((prev) => [...prev, data as ChannelMessage]);
+        setRemoteMessages((prev) =>
+          prev.some((m) => m.id === (data as ChannelMessage).id)
+            ? prev
+            : [...prev, data as ChannelMessage],
+        );
         return { data };
       }
       return { error };

@@ -107,6 +107,8 @@ test.describe('Gestion des audits', () => {
     await expect(page.getByText('Réception', { exact: true })).toBeVisible();
     await expect(page.getByText('Stockage', { exact: true })).toBeVisible();
 
+    // Répondre à tous les critères obligatoires du modèle HACCP.
+    // item-1 (yes_no) : non conforme + preuve photo
     await page.getByTestId('audit-item-demo-haccp-item-1-ko').click();
     await page.getByTestId('audit-item-demo-haccp-item-1-photo').click();
     await expect(page.getByTestId('camera-e2e-photo-button')).toBeVisible({
@@ -116,6 +118,30 @@ test.describe('Gestion des audits', () => {
     await expect(
       page.getByTestId('audit-item-demo-haccp-item-1-photo'),
     ).toContainText('Preuve jointe');
+
+    // Critères yes_no obligatoires : conformes
+    for (const id of [
+      'demo-haccp-item-6',
+      'demo-haccp-item-3',
+      'demo-haccp-item-7',
+      'demo-haccp-item-8',
+      'demo-haccp-item-9',
+      'demo-haccp-item-11',
+      'demo-haccp-item-13',
+      'demo-haccp-item-14',
+      'demo-haccp-item-15',
+    ]) {
+      await page.getByTestId(`audit-item-${id}-ok`).click();
+    }
+    // Critères score_1_5 obligatoires : note 4
+    for (const id of [
+      'demo-haccp-item-2',
+      'demo-haccp-item-10',
+      'demo-haccp-item-12',
+      'demo-haccp-item-16',
+    ]) {
+      await page.getByTestId(`audit-item-${id}-score-4`).click();
+    }
 
     await page.getByTestId('audit-professional-submit').click();
     await expect(page.getByTestId('audit-finish-demo-audit-7')).toHaveCount(0, {

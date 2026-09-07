@@ -4,7 +4,13 @@ import {
   TrendingUp,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
 
 import RequireRole from '../../components/RequireRole';
 import { ActivityFeed } from '../../features/governance/ActivityFeed';
@@ -32,6 +38,7 @@ import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { AppTabBar } from '../../shared/components/AppTabBar';
+import { colors } from '../../shared/styles/tokens';
 
 function auditStatusColor(status: string): string {
   if (status === 'completed') return '#10B981';
@@ -49,14 +56,17 @@ export default function ManagerDashboard() {
 
 function ManagerDashboardContent() {
   const { profile } = useAuth();
-  const { audits } = useAudits();
-  const { tasks } = useTasks();
+  const { audits, loading: auditsLoading, error: auditsError } = useAudits();
+  const { tasks, loading: tasksLoading, error: tasksError } = useTasks();
   const { stores } = useStores();
   const { actions } = useCorrectiveActions();
   const { channels, getUnreadCount } = useChannels();
   const { entries: trainingEntries } = useTrainingSupervision();
   const { events: activityEvents } = useActivityLog();
   const [activeTab, setActiveTab] = useState<'cockpit' | 'details'>('cockpit');
+
+  const isLoading = auditsLoading || tasksLoading;
+  const fetchError = auditsError ?? tasksError;
 
   const stats = useMemo(
     () => computeManagerStats(audits, tasks),
@@ -101,6 +111,19 @@ function ManagerDashboardContent() {
           Bienvenue, {profile?.full_name ?? 'Manager'}
         </Text>
       </View>
+
+      {isLoading && (
+        <View style={styles.loadingBanner}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={styles.loadingText}>Chargement des données…</Text>
+        </View>
+      )}
+
+      {fetchError && !isLoading && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{fetchError}</Text>
+        </View>
+      )}
 
       <AppTabBar
         activeKey={activeTab}
@@ -261,5 +284,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  loadingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 12,
+    backgroundColor: colors.primarySoft,
+    borderRadius: 10,
+  },
+  loadingText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  errorBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.dangerStrong,
+    fontWeight: '500',
   },
 });

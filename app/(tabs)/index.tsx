@@ -46,14 +46,16 @@ export default function HomeScreen() {
   const isLoading = auditsLoading || actionsLoading || productsLoading;
   const fetchError = auditsError ?? actionsError ?? productsError;
 
-  const now = useMemo(() => new Date(), []);
+  const now = new Date();
   const kpis = useMemo(
     () => getDashboardKpis(audits, actions, products, now),
-    [audits, actions, products, now],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [audits, actions, products],
   );
   const fieldBrief = useMemo(
     () => getDashboardFieldBrief(audits, actions, products, now),
-    [audits, actions, products, now],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [audits, actions, products],
   );
 
   const isManager = isManagerRole(profile?.role);
