@@ -83,10 +83,10 @@ export default function ChatScreen() {
   // Modules pilotés depuis le back-office (assistant IA désactivable).
   const { isEnabled } = useAppSettings();
 
-  const conversations = buildConversations(
-    dbConversations,
-    getUnreadCount,
-    isEnabled('features.ai_assistant'),
+  const aiEnabled = isEnabled('features.ai_assistant');
+  const conversations = useMemo(
+    () => buildConversations(dbConversations, getUnreadCount, aiEnabled),
+    [dbConversations, getUnreadCount, aiEnabled],
   );
 
   const filteredConversations = useMemo(() => {
@@ -116,14 +116,17 @@ export default function ChatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations.length, selectedConversation]);
 
+  const isSyntheticConversation =
+    selectedConversation === 'demo-ai' || selectedConversation === 'demo-team';
+
   // Charger les messages quand on change de conversation réelle.
   useEffect(() => {
-    if (selectedConversation && !selectedConversation.startsWith('demo-')) {
+    if (selectedConversation && !isSyntheticConversation) {
       fetchMessages(selectedConversation);
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, isSyntheticConversation, fetchMessages]);
 
-  const displayMessages = selectedConversation?.startsWith('demo-')
+  const displayMessages = isSyntheticConversation
     ? localMessages.filter(
         (message) => message.conversationId === selectedConversation,
       )
@@ -143,7 +146,10 @@ export default function ChatScreen() {
     const content = newMessage.trim();
     setNewMessage('');
 
-    if (!selectedConversation.startsWith('demo-')) {
+    if (
+      selectedConversation !== 'demo-ai' &&
+      selectedConversation !== 'demo-team'
+    ) {
       const result = await sendDbMessage(selectedConversation, content);
       if (result.error) {
         Alert.alert('Erreur', "Impossible d'envoyer le message.");

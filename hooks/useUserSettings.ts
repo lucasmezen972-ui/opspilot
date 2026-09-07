@@ -5,6 +5,7 @@ import { DEFAULT_NOTIFICATION_PREFERENCES } from '../features/settings/preferenc
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type NotificationPreferences } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
+import { can } from '../utils/permissions';
 
 type SaveResult = { error: string | null };
 
@@ -152,7 +153,7 @@ export function useUserSettings() {
     nextOrganizationName: string,
     nextStoreName: string,
   ): Promise<SaveResult> => {
-    if (profile?.role !== 'admin' && profile?.role !== 'superadmin') {
+    if (!profile || !can(profile.role, 'settings.manage')) {
       return { error: 'Action réservée aux administrateurs.' };
     }
     if (isLocalDemo) {

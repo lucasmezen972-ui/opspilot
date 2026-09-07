@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import { DEMO_ORG_ID, DEMO_USER_ID } from '../lib/demoData';
@@ -57,7 +57,7 @@ export function useMessages() {
         cleanup?.();
       };
     }
-  }, [profile?.organization_id, isLocalDemo]);
+  }, [profile?.organization_id, profile?.id, isLocalDemo]);
 
   const fetchConversations = async () => {
     if (!profile?.organization_id) return;
@@ -90,41 +90,47 @@ export function useMessages() {
     }
   };
 
-  const fetchMessages = async (conversationId: string) => {
-    activeConversationRef.current = conversationId;
-    if (isLocalDemo) {
-      setMessages(
-        DEMO_MESSAGES.filter((m) => m.conversation_id === conversationId),
-      );
-      return;
-    }
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(
-          `
-          *,
-          profiles(full_name, avatar_url)
-        `,
-        )
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        setError(
-          mapSupabaseError(
-            'Erreur lors de la récupération des messages',
-            error,
-          ),
+  const fetchMessages = useCallback(
+    async (conversationId: string) => {
+      activeConversationRef.current = conversationId;
+      if (isLocalDemo) {
+        setMessages(
+          DEMO_MESSAGES.filter((m) => m.conversation_id === conversationId),
         );
         return;
       }
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select(
+            `
+            *,
+            profiles(full_name, avatar_url)
+          `,
+          )
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true });
 
-      setMessages(data || []);
-    } catch (err) {
-      setError(mapSupabaseError('Erreur fetchMessages', err));
-    }
-  };
+        if (activeConversationRef.current !== conversationId) return;
+
+        if (error) {
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération des messages',
+              error,
+            ),
+          );
+          return;
+        }
+
+        setMessages(data || []);
+      } catch (err) {
+        if (activeConversationRef.current !== conversationId) return;
+        setError(mapSupabaseError('Erreur fetchMessages', err));
+      }
+    },
+    [isLocalDemo],
+  );
 
   const sendMessage = async (
     conversationId: string,
