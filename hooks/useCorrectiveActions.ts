@@ -148,14 +148,10 @@ export function useCorrectiveActions() {
       }
 
       if (isLocalDemo) {
-        let updated: CorrectiveAction | null = null;
-        setActions((prev) =>
-          prev.map((a) => {
-            if (a.id !== id) return a;
-            updated = { ...a, ...updates } as CorrectiveAction;
-            return updated;
-          }),
-        );
+        const existing = actions.find((a) => a.id === id);
+        if (!existing) return { data: null, error: 'Action introuvable' };
+        const updated = { ...existing, ...updates } as CorrectiveAction;
+        setActions((prev) => prev.map((a) => (a.id === id ? updated : a)));
         return { data: updated, error: null };
       }
 

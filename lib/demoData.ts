@@ -13,6 +13,7 @@ import type {
   NotificationPreferences,
   Product,
   Profile,
+  Store,
   Task,
   Training,
   TrainingChapter,
@@ -3576,6 +3577,28 @@ export function getDemoMessages(): Message[] {
       attachments: [],
       read_by: [],
       created_at: days(0),
+    },
+  ];
+}
+
+export function getDemoStores(): Store[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      id: 'demo-store-001',
+      organization_id: DEMO_ORG_ID,
+      name: 'Magasin Centre-Ville',
+      address: '12 rue du Commerce',
+      city: 'Lyon',
+      postal_code: '69002',
+      country: 'FR',
+      latitude: null,
+      longitude: null,
+      manager_id: null,
+      settings: {},
+      is_active: true,
+      created_at: now,
+      updated_at: now,
     },
   ];
 }
