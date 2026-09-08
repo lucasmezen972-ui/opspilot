@@ -15,6 +15,9 @@ export function useMessages() {
   const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const activeConversationRef = useRef<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<
+    string | null
+  >(null);
   const isLocalDemo = isDemoMode && !session;
 
   const demoConversations = useDemoCollection('conversations');
@@ -23,7 +26,7 @@ export function useMessages() {
   const conversations = isLocalDemo ? demoConversations : remoteConversations;
   const messages = isLocalDemo
     ? demoMessages.filter(
-        (m) => m.conversation_id === activeConversationRef.current,
+        (m) => m.conversation_id === activeConversationId,
       )
     : remoteMessages;
 
@@ -76,6 +79,7 @@ export function useMessages() {
 
   const fetchMessages = async (conversationId: string) => {
     activeConversationRef.current = conversationId;
+    setActiveConversationId(conversationId);
     if (isLocalDemo) {
       return;
     }
@@ -333,7 +337,7 @@ export function useMessages() {
   const getUnreadCount = (conversationId: string) => {
     if (!profile) return 0;
 
-    if (conversationId === activeConversationRef.current) {
+    if (conversationId === activeConversationId) {
       const allMessages = isLocalDemo ? demoMessages : remoteMessages;
       return allMessages.filter(
         (m) =>
