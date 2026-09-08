@@ -91,6 +91,8 @@ export function useMessages() {
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
+      if (activeConversationRef.current !== conversationId) return;
+
       if (error) {
         setError(
           mapSupabaseError(
@@ -103,6 +105,7 @@ export function useMessages() {
 
       setRemoteMessages(data || []);
     } catch (err) {
+      if (activeConversationRef.current !== conversationId) return;
       setError(mapSupabaseError('Erreur fetchMessages', err));
     }
   };
