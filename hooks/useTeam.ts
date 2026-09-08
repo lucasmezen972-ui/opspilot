@@ -61,9 +61,7 @@ export function useTeam() {
       const existing = members.find((m) => m.id === memberId);
       if (!existing) return { data: null, error: 'Membre introuvable' };
       const updated = { ...existing, role };
-      setMembers((prev) =>
-        prev.map((m) => (m.id === memberId ? updated : m)),
-      );
+      setMembers((prev) => prev.map((m) => (m.id === memberId ? updated : m)));
       return { data: updated, error: null };
     }
 
