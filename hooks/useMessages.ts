@@ -25,9 +25,7 @@ export function useMessages() {
 
   const conversations = isLocalDemo ? demoConversations : remoteConversations;
   const messages = isLocalDemo
-    ? demoMessages.filter(
-        (m) => m.conversation_id === activeConversationId,
-      )
+    ? demoMessages.filter((m) => m.conversation_id === activeConversationId)
     : remoteMessages;
 
   useEffect(() => {
