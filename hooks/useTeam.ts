@@ -1,20 +1,26 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { getDemoTeamProfiles } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
 export function useTeam() {
-  const [members, setMembers] = useState<Profile[]>([]);
+  const [remoteMembers, setRemoteMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
+  const demoMembers = useDemoCollection('members');
+  const members = isLocalDemo ? demoMembers : remoteMembers;
+  const setMembers = isLocalDemo
+    ? (updater: (prev: Profile[]) => Profile[]) =>
+        updateDemoCollection('members', updater)
+    : setRemoteMembers;
+
   const fetchMembers = useCallback(async () => {
     if (isLocalDemo) {
-      setMembers(getDemoTeamProfiles());
       setLoading(false);
       return;
     }
@@ -38,7 +44,7 @@ export function useTeam() {
         return;
       }
 
-      setMembers(data || []);
+      setRemoteMembers(data || []);
     } catch (err) {
       setError(mapSupabaseError('Erreur useTeam', err));
     } finally {
@@ -52,14 +58,10 @@ export function useTeam() {
 
   const updateMemberRole = async (memberId: string, role: Profile['role']) => {
     if (isLocalDemo) {
-      let updated: Profile | null = null;
-      setMembers((prev) =>
-        prev.map((m) => {
-          if (m.id !== memberId) return m;
-          updated = { ...m, role };
-          return updated;
-        }),
-      );
+      const existing = members.find((m) => m.id === memberId);
+      if (!existing) return { data: null, error: 'Membre introuvable' };
+      const updated = { ...existing, role };
+      setMembers((prev) => prev.map((m) => (m.id === memberId ? updated : m)));
       return { data: updated, error: null };
     }
 
@@ -78,7 +80,9 @@ export function useTeam() {
         };
       }
 
-      setMembers((prev) => prev.map((m) => (m.id === memberId ? data : m)));
+      setRemoteMembers((prev) =>
+        prev.map((m) => (m.id === memberId ? data : m)),
+      );
       return { data, error: null };
     } catch (error) {
       return {
@@ -104,7 +108,7 @@ export function useTeam() {
           error: mapSupabaseError('Erreur désactivation membre', error),
         };
       }
-      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      setRemoteMembers((prev) => prev.filter((m) => m.id !== memberId));
       return { error: null };
     } catch (error) {
       return {

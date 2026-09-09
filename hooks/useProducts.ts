@@ -101,18 +101,14 @@ export function useProducts() {
 
   const updateProductStock = async (id: string, newStock: number) => {
     if (isLocalDemo) {
-      let updated: Product | null = null;
-      setProducts((prev) =>
-        prev.map((p) => {
-          if (p.id !== id) return p;
-          updated = {
-            ...p,
-            stock_quantity: newStock,
-            updated_at: new Date().toISOString(),
-          };
-          return updated;
-        }),
-      );
+      const existing = products.find((p) => p.id === id);
+      if (!existing) return { data: null, error: 'Produit introuvable' };
+      const updated = {
+        ...existing,
+        stock_quantity: newStock,
+        updated_at: new Date().toISOString(),
+      };
+      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
       return { data: updated, error: null };
     }
 
@@ -209,14 +205,10 @@ export function useProducts() {
     const payload = { ...updates, updated_at: new Date().toISOString() };
 
     if (isLocalDemo) {
-      let updated: Product | null = null;
-      setProducts((prev) =>
-        prev.map((p) => {
-          if (p.id !== id) return p;
-          updated = { ...p, ...payload } as Product;
-          return updated;
-        }),
-      );
+      const existing = products.find((p) => p.id === id);
+      if (!existing) return { data: null, error: 'Produit introuvable' };
+      const updated = { ...existing, ...payload } as Product;
+      setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
       return { data: updated, error: null };
     }
 
