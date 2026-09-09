@@ -14,7 +14,9 @@ import {
   getDemoMessages,
   getDemoProducts,
   getDemoSettings,
+  getDemoStores,
   getDemoTasks,
+  getDemoTeamProfiles,
   getDemoTrainingChapters,
   getDemoTrainingQuizQuestions,
   getDemoTrainings,
@@ -34,6 +36,8 @@ import type {
   CorrectiveAction,
   Message,
   Product,
+  Profile,
+  Store,
   Task,
   Training,
   TrainingCertificate,
@@ -60,7 +64,9 @@ export interface DemoState {
   auditResponses: AuditResponse[];
   auditSignatures: AuditSignature[];
   actions: CorrectiveAction[];
+  members: Profile[];
   products: Product[];
+  stores: Store[];
   tasks: Task[];
   trainings: Training[];
   trainingChapters: TrainingChapter[];
@@ -83,7 +89,9 @@ function seed(): DemoState {
     auditResponses: getDemoAuditResponses(),
     auditSignatures: getDemoAuditSignatures(),
     actions: getDemoActions(),
+    members: getDemoTeamProfiles(),
     products: getDemoProducts(),
+    stores: getDemoStores(),
     tasks: getDemoTasks(),
     trainings: getDemoTrainings(),
     trainingChapters: getDemoTrainingChapters(),
