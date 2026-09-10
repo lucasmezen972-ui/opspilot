@@ -19,6 +19,7 @@ import { loginSchema } from '../utils/validation';
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showReset, setShowReset] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -26,7 +27,8 @@ export default function AuthScreen() {
   const [demoLoading, setDemoLoading] = useState(false);
   const [localError, setLocalError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const { signIn, signInDemo, signUp, authError, isOffline } = useAuth();
+  const { signIn, signInDemo, signUp, resetPassword, authError, isOffline } =
+    useAuth();
 
   const handleAuth = async () => {
     setLocalError('');
@@ -86,6 +88,38 @@ export default function AuthScreen() {
       );
     } finally {
       setDemoLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setLocalError('');
+    setSuccessMessage('');
+    if (!email || !email.includes('@')) {
+      setLocalError(
+        'Entrez votre adresse email ci-dessus avant de réinitialiser.',
+      );
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await resetPassword(email);
+      if (result.error) {
+        setLocalError(
+          extractErrorMessage(result.error) ??
+            'Impossible d’envoyer le lien. Réessayez.',
+        );
+      } else {
+        setSuccessMessage(
+          'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.',
+        );
+        setShowReset(false);
+      }
+    } catch (e) {
+      setLocalError(
+        extractErrorMessage(e) ?? 'Impossible d’envoyer le lien. Réessayez.',
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,38 +232,93 @@ export default function AuthScreen() {
           testID="password-input"
         />
 
-        <TouchableOpacity
-          testID="auth-submit-button"
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleAuth}
-          disabled={loading || demoLoading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : isLogin ? (
-            <LogIn size={20} color="#FFFFFF" />
-          ) : (
-            <UserPlus size={20} color="#FFFFFF" />
-          )}
-          <Text style={styles.buttonText}>
-            {loading ? 'Connexion...' : isLogin ? 'Se connecter' : "S'inscrire"}
-          </Text>
-        </TouchableOpacity>
+        {showReset ? (
+          <>
+            <Text style={styles.resetHint}>
+              Entrez votre email ci-dessus puis appuyez sur le bouton.
+            </Text>
+            <TouchableOpacity
+              testID="reset-password-button"
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleResetPassword}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  Envoyer le lien de réinitialisation
+                </Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.switchButton}
+              onPress={() => {
+                setShowReset(false);
+                setLocalError('');
+                setSuccessMessage('');
+              }}
+            >
+              <Text style={styles.switchButtonText}>Retour à la connexion</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              testID="auth-submit-button"
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleAuth}
+              disabled={loading || demoLoading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : isLogin ? (
+                <LogIn size={20} color="#FFFFFF" />
+              ) : (
+                <UserPlus size={20} color="#FFFFFF" />
+              )}
+              <Text style={styles.buttonText}>
+                {loading
+                  ? 'Connexion...'
+                  : isLogin
+                    ? 'Se connecter'
+                    : "S'inscrire"}
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.switchButton}
-          onPress={() => {
-            setIsLogin(!isLogin);
-            setLocalError('');
-            setSuccessMessage('');
-          }}
-        >
-          <Text style={styles.switchButtonText}>
-            {isLogin
-              ? "Pas encore de compte ? S'inscrire"
-              : 'Déjà un compte ? Se connecter'}
-          </Text>
-        </TouchableOpacity>
+            {isLogin && (
+              <TouchableOpacity
+                testID="forgot-password-button"
+                style={styles.switchButton}
+                onPress={() => {
+                  setShowReset(true);
+                  setLocalError('');
+                  setSuccessMessage('');
+                }}
+              >
+                <Text style={styles.forgotPasswordText}>
+                  Mot de passe oublié ?
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              style={styles.switchButton}
+              onPress={() => {
+                setIsLogin(!isLogin);
+                setShowReset(false);
+                setLocalError('');
+                setSuccessMessage('');
+              }}
+            >
+              <Text style={styles.switchButtonText}>
+                {isLogin
+                  ? "Pas encore de compte ? S'inscrire"
+                  : 'Déjà un compte ? Se connecter'}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <View style={styles.legalLinks}>
@@ -391,8 +480,16 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  resetHint: {
+    fontSize: 13,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
   switchButton: { alignItems: 'center', paddingVertical: 6 },
   switchButtonText: { color: '#2563EB', fontSize: 14, fontWeight: '500' },
+  forgotPasswordText: { color: '#6B7280', fontSize: 13, fontWeight: '500' },
   legalLinks: {
     alignItems: 'center',
     flexDirection: 'row',

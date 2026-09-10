@@ -44,6 +44,7 @@ describe('AuthScreen Component', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
   });
 
@@ -165,6 +166,7 @@ describe('AuthScreen Component', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
 
     render(<AuthScreen />);

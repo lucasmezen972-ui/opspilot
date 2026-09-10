@@ -1,10 +1,11 @@
-import { X } from 'lucide-react-native';
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { PRIORITY_COLORS, PRIORITY_LABELS } from './constants';
 import type { CorrectiveAction } from '../../lib/supabase';
 import { AppInput } from '../../shared/components/AppInput';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 export interface NewActionPayload {
   title: string;
@@ -52,148 +53,113 @@ export function CreateActionModal({
   };
 
   return (
-    <Modal
+    <AppModal
       visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
+      onClose={onClose}
+      title="Nouvelle action corrective"
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Nouvelle action corrective</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={24} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.field}>
-            <AppInput
-              testID="action-create-title"
-              placeholder="Titre de l'action *"
-              value={title}
-              onChangeText={setTitle}
-            />
-          </View>
-          <View style={styles.field}>
-            <AppInput
-              placeholder="Description"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
-          </View>
-
-          <Text style={styles.fieldLabel}>Priorité</Text>
-          <View style={styles.priorityRow}>
-            {(['low', 'medium', 'high', 'critical'] as const).map((p) => (
-              <TouchableOpacity
-                key={p}
-                style={[
-                  styles.priorityOption,
-                  priority === p && {
-                    backgroundColor: PRIORITY_COLORS[p] + '22',
-                    borderColor: PRIORITY_COLORS[p],
-                  },
-                ]}
-                onPress={() => setPriority(p)}
-              >
-                <Text
-                  style={[
-                    styles.priorityOptionText,
-                    priority === p && { color: PRIORITY_COLORS[p] },
-                  ]}
-                >
-                  {PRIORITY_LABELS[p]}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.field}>
-            <AppInput
-              label="Échéance (jours)"
-              placeholder="7"
-              value={dueDays}
-              onChangeText={setDueDays}
-              keyboardType="number-pad"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              !title.trim() && styles.submitButtonDisabled,
-            ]}
-            testID="action-create-submit"
-            onPress={handleSubmit}
-            disabled={!title.trim()}
-          >
-            <Text style={styles.submitButtonText}>Créer l'action</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.field}>
+        <AppInput
+          testID="action-create-title"
+          placeholder="Titre de l'action *"
+          value={title}
+          onChangeText={setTitle}
+        />
       </View>
-    </Modal>
+      <View style={styles.field}>
+        <AppInput
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+      </View>
+
+      <Text style={styles.fieldLabel}>Priorité</Text>
+      <View style={styles.priorityRow}>
+        {(['low', 'medium', 'high', 'critical'] as const).map((p) => (
+          <TouchableOpacity
+            key={p}
+            style={[
+              styles.priorityOption,
+              priority === p && {
+                backgroundColor: PRIORITY_COLORS[p] + '22',
+                borderColor: PRIORITY_COLORS[p],
+              },
+            ]}
+            onPress={() => setPriority(p)}
+          >
+            <Text
+              style={[
+                styles.priorityOptionText,
+                priority === p && { color: PRIORITY_COLORS[p] },
+              ]}
+            >
+              {PRIORITY_LABELS[p]}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.field}>
+        <AppInput
+          label="Échéance (jours)"
+          placeholder="7"
+          value={dueDays}
+          onChangeText={setDueDays}
+          keyboardType="number-pad"
+        />
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          !title.trim() && styles.submitButtonDisabled,
+        ]}
+        testID="action-create-submit"
+        onPress={handleSubmit}
+        disabled={!title.trim()}
+      >
+        <Text style={styles.submitButtonText}>Créer l'action</Text>
+      </TouchableOpacity>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 36,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-  },
   field: {
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   fieldLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   priorityRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   priorityOption: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingVertical: 8,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
   },
   priorityOptionText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   submitButton: {
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: spacing.xs,
   },
   submitButtonDisabled: {
     opacity: 0.5,

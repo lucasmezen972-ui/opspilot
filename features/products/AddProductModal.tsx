@@ -1,8 +1,14 @@
-import { X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+} from 'react-native';
 
-import { modalStyles } from './modalStyles';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 export interface NewProductPayload {
   name: string;
@@ -77,88 +83,114 @@ export function AddProductModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={modalStyles.modalOverlay}>
-        <View style={modalStyles.modalContent} testID="product-add-modal">
-          <View style={modalStyles.modalHeader}>
-            <Text style={modalStyles.modalTitle}>Ajouter un produit</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            testID="product-add-name"
-            style={modalStyles.modalInput}
-            value={name}
-            onChangeText={setName}
-            placeholder="Nom du produit *"
-            autoFocus
-          />
-          <TextInput
-            style={modalStyles.modalInput}
-            value={category}
-            onChangeText={setCategory}
-            placeholder="Catégorie (ex : Crèmerie)"
-          />
-          <TextInput
-            style={modalStyles.modalInput}
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="numeric"
-            placeholder="Stock initial"
-          />
-          <TextInput
-            style={modalStyles.modalInput}
-            value={minStock}
-            onChangeText={setMinStock}
-            keyboardType="numeric"
-            placeholder="Seuil d'alerte stock bas (optionnel)"
-          />
-          <TextInput
-            style={modalStyles.modalInput}
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-            placeholder="Prix (€)"
-          />
-          <TextInput
-            style={modalStyles.modalInput}
-            value={dlcDays}
-            onChangeText={setDlcDays}
-            keyboardType="numeric"
-            placeholder="DLC dans X jours (vide = sans DLC)"
-          />
-          <TextInput
-            testID="product-add-barcode"
-            style={modalStyles.modalInput}
-            value={barcode}
-            onChangeText={setBarcode}
-            keyboardType="numeric"
-            placeholder="Code-barres (optionnel)"
-          />
-          <View style={modalStyles.modalActions}>
-            <TouchableOpacity
-              style={modalStyles.modalCancelButton}
-              onPress={onClose}
-            >
-              <Text style={modalStyles.modalCancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              testID="product-add-submit"
-              style={[
-                modalStyles.modalConfirmButton,
-                submitting && { opacity: 0.5 },
-              ]}
-              onPress={handleSubmit}
-              disabled={submitting}
-            >
-              <Text style={modalStyles.modalConfirmText}>
-                {submitting ? 'Ajout…' : 'Ajouter'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Ajouter un produit"
+      testID="product-add-modal"
+    >
+      <TextInput
+        testID="product-add-name"
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+        placeholder="Nom du produit *"
+        autoFocus
+      />
+      <TextInput
+        style={styles.input}
+        value={category}
+        onChangeText={setCategory}
+        placeholder="Catégorie (ex : Crèmerie)"
+      />
+      <TextInput
+        style={styles.input}
+        value={stock}
+        onChangeText={setStock}
+        keyboardType="numeric"
+        placeholder="Stock initial"
+      />
+      <TextInput
+        style={styles.input}
+        value={minStock}
+        onChangeText={setMinStock}
+        keyboardType="numeric"
+        placeholder="Seuil d'alerte stock bas (optionnel)"
+      />
+      <TextInput
+        style={styles.input}
+        value={price}
+        onChangeText={setPrice}
+        keyboardType="numeric"
+        placeholder="Prix (€)"
+      />
+      <TextInput
+        style={styles.input}
+        value={dlcDays}
+        onChangeText={setDlcDays}
+        keyboardType="numeric"
+        placeholder="DLC dans X jours (vide = sans DLC)"
+      />
+      <TextInput
+        testID="product-add-barcode"
+        style={styles.input}
+        value={barcode}
+        onChangeText={setBarcode}
+        keyboardType="numeric"
+        placeholder="Code-barres (optionnel)"
+      />
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+          <Text style={styles.cancelText}>Annuler</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID="product-add-submit"
+          style={[styles.confirmButton, submitting && { opacity: 0.5 }]}
+          onPress={handleSubmit}
+          disabled={submitting}
+        >
+          <Text style={styles.confirmText}>
+            {submitting ? 'Ajout…' : 'Ajouter'}
+          </Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </AppModal>
   );
 }
+
+const styles = StyleSheet.create({
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    fontSize: 16,
+    marginBottom: spacing.lg,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.md,
+  },
+  cancelButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.backgroundAlt,
+  },
+  cancelText: {
+    color: colors.textMuted,
+    fontWeight: '500',
+  },
+  confirmButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+  },
+  confirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+});

@@ -39,6 +39,7 @@ describe('ManagerDashboard', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
 
     mockUseAudits.mockReturnValue({

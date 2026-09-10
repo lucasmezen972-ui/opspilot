@@ -1,4 +1,3 @@
-import { X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   View,
@@ -6,10 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
 } from 'react-native';
 
 import { AUDIT_QUESTIONS } from './constants';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface QuestionnaireModalProps {
   visible: boolean;
@@ -17,10 +17,6 @@ interface QuestionnaireModalProps {
   onSubmit: (answers: boolean[]) => Promise<void> | void;
 }
 
-/**
- * Questionnaire de clôture d'audit : chaque point « Non conforme » baisse le
- * score et déclenche la création automatique d'une action corrective.
- */
 export function QuestionnaireModal({
   visible,
   onClose,
@@ -37,172 +33,138 @@ export function QuestionnaireModal({
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent} testID="audit-questionnaire">
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Audit libre</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Audit libre"
+      testID="audit-questionnaire"
+    >
+      <Text style={styles.questionnaireHint}>
+        Contrôle générique de la zone : évaluez chaque point. Une non-conformité
+        crée automatiquement une action corrective.
+      </Text>
+      <ScrollView style={styles.questionList}>
+        {AUDIT_QUESTIONS.map((q, i) => (
+          <View key={q} style={styles.questionRow}>
+            <Text style={styles.questionText}>{q}</Text>
+            <View style={styles.questionChoices}>
+              <TouchableOpacity
+                testID={`question-${i}-ok`}
+                style={[
+                  styles.choiceButton,
+                  answers[i] && styles.choiceButtonOk,
+                ]}
+                onPress={() =>
+                  setAnswers((prev) => prev.map((v, j) => (j === i ? true : v)))
+                }
+              >
+                <Text
+                  style={[styles.choiceText, answers[i] && styles.choiceTextOk]}
+                >
+                  Conforme
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID={`question-${i}-ko`}
+                style={[
+                  styles.choiceButton,
+                  !answers[i] && styles.choiceButtonKo,
+                ]}
+                onPress={() =>
+                  setAnswers((prev) =>
+                    prev.map((v, j) => (j === i ? false : v)),
+                  )
+                }
+              >
+                <Text
+                  style={[
+                    styles.choiceText,
+                    !answers[i] && styles.choiceTextKo,
+                  ]}
+                >
+                  Non conforme
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={styles.questionnaireHint}>
-            Contrôle générique de la zone : évaluez chaque point. Une
-            non-conformité crée automatiquement une action corrective.
-          </Text>
-          <ScrollView style={styles.questionList}>
-            {AUDIT_QUESTIONS.map((q, i) => (
-              <View key={q} style={styles.questionRow}>
-                <Text style={styles.questionText}>{q}</Text>
-                <View style={styles.questionChoices}>
-                  <TouchableOpacity
-                    testID={`question-${i}-ok`}
-                    style={[
-                      styles.choiceButton,
-                      answers[i] && styles.choiceButtonOk,
-                    ]}
-                    onPress={() =>
-                      setAnswers((prev) =>
-                        prev.map((v, j) => (j === i ? true : v)),
-                      )
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.choiceText,
-                        answers[i] && styles.choiceTextOk,
-                      ]}
-                    >
-                      Conforme
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    testID={`question-${i}-ko`}
-                    style={[
-                      styles.choiceButton,
-                      !answers[i] && styles.choiceButtonKo,
-                    ]}
-                    onPress={() =>
-                      setAnswers((prev) =>
-                        prev.map((v, j) => (j === i ? false : v)),
-                      )
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.choiceText,
-                        !answers[i] && styles.choiceTextKo,
-                      ]}
-                    >
-                      Non conforme
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-          <TouchableOpacity
-            testID="questionnaire-submit"
-            style={styles.modalConfirmButton}
-            onPress={() => onSubmit(answers)}
-          >
-            <Text style={styles.modalConfirmText}>
-              Valider l'audit ({answers.filter(Boolean).length}/
-              {AUDIT_QUESTIONS.length} conformes)
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+        ))}
+      </ScrollView>
+      <TouchableOpacity
+        testID="questionnaire-submit"
+        style={styles.confirmButton}
+        onPress={() => onSubmit(answers)}
+      >
+        <Text style={styles.confirmText}>
+          Valider l'audit ({answers.filter(Boolean).length}/
+          {AUDIT_QUESTIONS.length} conformes)
+        </Text>
+      </TouchableOpacity>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  modalConfirmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  modalConfirmText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
   questionnaireHint: {
     fontSize: 12,
-    color: '#6B7280',
-    marginBottom: 12,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
     lineHeight: 17,
   },
   questionList: {
     maxHeight: 360,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   questionRow: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-    gap: 8,
+    borderBottomColor: colors.backgroundAlt,
+    gap: spacing.sm,
   },
   questionText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#111827',
+    color: colors.textStrong,
   },
   questionChoices: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
   choiceButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   choiceButtonOk: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#16A34A',
+    backgroundColor: colors.successSoft,
+    borderColor: colors.successText,
   },
   choiceButtonKo: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#DC2626',
+    backgroundColor: colors.dangerSoft,
+    borderColor: colors.dangerStrong,
   },
   choiceText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   choiceTextOk: {
-    color: '#16A34A',
+    color: colors.successText,
   },
   choiceTextKo: {
-    color: '#DC2626',
+    color: colors.dangerStrong,
+  },
+  confirmButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+  },
+  confirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
