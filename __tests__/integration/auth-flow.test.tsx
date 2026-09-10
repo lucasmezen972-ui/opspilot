@@ -37,6 +37,7 @@ describe('Authentication Flow Integration', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
 
     const { getByText } = render(<RootLayout />);
@@ -77,6 +78,7 @@ describe('Authentication Flow Integration', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
 
     const { queryByText } = render(<RootLayout />);
@@ -100,6 +102,7 @@ describe('Authentication Flow Integration', () => {
       signOut: vi.fn(),
       updateProfile: vi.fn(),
       fetchProfile: vi.fn(),
+      resetPassword: vi.fn(),
     });
 
     const { container } = render(<RootLayout />);

@@ -102,6 +102,7 @@ interface AuthContextValue {
     fullName: string,
   ) => Promise<AuthResult>;
   signOut: () => Promise<{ error: unknown }>;
+  resetPassword: (email: string) => Promise<AuthResult>;
   updateProfile: (updates: Partial<Profile>) => Promise<AuthResult<Profile>>;
   fetchProfile: (userId: string) => Promise<AuthResult<Profile>>;
 }
@@ -350,6 +351,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: signOutError };
   };
 
+  const resetPassword = async (email: string) => {
+    setAuthError(null);
+    try {
+      const redirectUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${window.location.pathname}`
+          : undefined;
+      const { error } = await withTimeout(
+        supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl,
+        }),
+        AUTH_TIMEOUT_MS,
+        { data: null, error: { message: OFFLINE_MSG } } as ReturnType<
+          typeof supabase.auth.resetPasswordForEmail
+        > extends Promise<infer R>
+          ? R
+          : never,
+      );
+      if (error) {
+        setAuthError(mapSupabaseError('reset password error', error));
+        return { data: null, error };
+      }
+      return { data: { message: 'Email envoyé' }, error: null };
+    } catch {
+      setAuthError(OFFLINE_MSG);
+      return { data: null, error: { message: OFFLINE_MSG } };
+    }
+  };
+
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { data: null, error: 'Utilisateur non connecté' };
     if (isDemoMode) {
@@ -386,6 +416,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInDemo,
         signUp,
         signOut,
+        resetPassword,
         updateProfile,
         fetchProfile,
       }}
