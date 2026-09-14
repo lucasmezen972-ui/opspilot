@@ -37,6 +37,8 @@ import { colors } from '../../shared/styles/tokens';
 import { logger } from '../../utils/logger';
 import { isManagerRole } from '../../utils/roles';
 
+let persistedLocalMessages: DisplayMessage[] = [];
+
 export default function ChatScreen() {
   const { profile, session, isDemoMode } = useAuth();
   const [activeTab, setActiveTab] = useState<'messages' | 'canaux'>('messages');
@@ -74,7 +76,16 @@ export default function ChatScreen() {
     string | null
   >(null);
   const [newMessage, setNewMessage] = useState('');
-  const [localMessages, setLocalMessages] = useState<DisplayMessage[]>([]);
+  const [localMessages, _setLocalMessages] = useState<DisplayMessage[]>(
+    persistedLocalMessages,
+  );
+  const setLocalMessages: typeof _setLocalMessages = useCallback((action) => {
+    _setLocalMessages((prev) => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      persistedLocalMessages = next;
+      return next;
+    });
+  }, []);
   const [assistantLoading, setAssistantLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
