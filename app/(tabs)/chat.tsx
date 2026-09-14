@@ -390,7 +390,7 @@ export default function ChatScreen() {
           {filteredConversations.length === 0 ? (
             <AppEmptyState
               icon={MessageCircle}
-              title={searchQuery ? 'Aucun resultat' : 'Aucune conversation'}
+              title={searchQuery ? 'Aucun résultat' : 'Aucune conversation'}
               description={
                 searchQuery
                   ? "Essayez avec d'autres termes de recherche."

@@ -72,9 +72,9 @@ function BillingScreenContent() {
         {
           body: {
             returnUrl:
-              typeof window !== 'undefined'
-                ? `${window.location.origin}/opspilot/billing`
-                : 'https://lucasmezen972-ui.github.io/opspilot/billing',
+              typeof window !== 'undefined' && window.location?.origin
+                ? `${window.location.origin}${window.location.pathname}`
+                : 'https://opspilot.app/billing',
           },
         },
       );
