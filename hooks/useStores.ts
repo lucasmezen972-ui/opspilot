@@ -1,39 +1,27 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
-import { DEMO_ORG_ID, demoId } from '../lib/demoData';
+import { demoId } from '../lib/demoData';
+import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type Store } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
-const DEMO_STORES: Store[] = [
-  {
-    id: 'demo-store-001',
-    organization_id: DEMO_ORG_ID,
-    name: 'Magasin Centre-Ville',
-    address: '12 rue du Commerce',
-    city: 'Lyon',
-    postal_code: '69002',
-    country: 'FR',
-    latitude: null,
-    longitude: null,
-    manager_id: null,
-    settings: {},
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
-
 export function useStores() {
-  const [stores, setStores] = useState<Store[]>([]);
+  const [remoteStores, setRemoteStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
 
+  const demoStores = useDemoCollection('stores');
+  const stores = isLocalDemo ? demoStores : remoteStores;
+  const setStores = isLocalDemo
+    ? (updater: (prev: Store[]) => Store[]) =>
+        updateDemoCollection('stores', updater)
+    : setRemoteStores;
+
   const fetchStores = useCallback(async () => {
     if (isLocalDemo) {
-      setStores(DEMO_STORES);
       setLoading(false);
       return;
     }
@@ -57,7 +45,7 @@ export function useStores() {
         return;
       }
 
-      setStores(data || []);
+      setRemoteStores(data || []);
     } catch (err) {
       setError(mapSupabaseError('Erreur useStores', err));
     } finally {
@@ -119,7 +107,7 @@ export function useStores() {
           error: mapSupabaseError('Erreur création magasin', error),
         };
       }
-      setStores((prev) => [data, ...prev]);
+      setRemoteStores((prev) => [data, ...prev]);
       return { data, error: null };
     } catch (error) {
       return {
@@ -133,14 +121,10 @@ export function useStores() {
     const payload = { ...updates, updated_at: new Date().toISOString() };
 
     if (isLocalDemo) {
-      let updated: Store | null = null;
-      setStores((prev) =>
-        prev.map((s) => {
-          if (s.id !== id) return s;
-          updated = { ...s, ...payload } as Store;
-          return updated;
-        }),
-      );
+      const existing = stores.find((s) => s.id === id);
+      if (!existing) return { data: null, error: 'Magasin introuvable' };
+      const updated = { ...existing, ...payload } as Store;
+      setStores((prev) => prev.map((s) => (s.id === id ? updated : s)));
       return { data: updated, error: null };
     }
 
@@ -157,7 +141,7 @@ export function useStores() {
           error: mapSupabaseError('Erreur mise à jour magasin', error),
         };
       }
-      setStores((prev) => prev.map((s) => (s.id === id ? data : s)));
+      setRemoteStores((prev) => prev.map((s) => (s.id === id ? data : s)));
       return { data, error: null };
     } catch (error) {
       return {

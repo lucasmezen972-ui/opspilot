@@ -171,14 +171,10 @@ export function useTasks() {
       }
 
       if (isLocalDemo) {
-        let updated: Task | null = null;
-        setTasks((prev) =>
-          prev.map((t) => {
-            if (t.id !== id) return t;
-            updated = { ...t, ...updates } as Task;
-            return updated;
-          }),
-        );
+        const existing = tasks.find((t) => t.id === id);
+        if (!existing) return { data: null, error: 'Tâche introuvable' };
+        const updated = { ...existing, ...updates } as Task;
+        setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
         if (status === 'completed') await spawnNextOccurrence(id);
         return { data: updated, error: null };
       }
@@ -232,14 +228,10 @@ export function useTasks() {
     };
 
     if (isLocalDemo) {
-      let updated: Task | null = null;
-      setTasks((prev) =>
-        prev.map((t) => {
-          if (t.id !== id) return t;
-          updated = { ...t, ...updates } as Task;
-          return updated;
-        }),
-      );
+      const existing = tasks.find((t) => t.id === id);
+      if (!existing) return { data: null, error: 'Tâche introuvable' };
+      const updated = { ...existing, ...updates } as Task;
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
       await spawnNextOccurrence(id);
       return { data: updated, error: null };
     }
@@ -291,14 +283,10 @@ export function useTasks() {
     };
 
     if (isLocalDemo) {
-      let updated: Task | null = null;
-      setTasks((prev) =>
-        prev.map((t) => {
-          if (t.id !== id) return t;
-          updated = { ...t, ...updates } as Task;
-          return updated;
-        }),
-      );
+      const existing = tasks.find((t) => t.id === id);
+      if (!existing) return { data: null, error: 'Tâche introuvable' };
+      const updated = { ...existing, ...updates } as Task;
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
       return { data: updated, error: null };
     }
 
