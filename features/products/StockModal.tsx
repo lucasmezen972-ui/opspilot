@@ -1,4 +1,3 @@
-import { X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   View,
@@ -6,12 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Modal,
   ScrollView,
 } from 'react-native';
 
-import { modalStyles } from './modalStyles';
 import type { Product } from '../../lib/supabase';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface StockModalProps {
   product: Product | null;
@@ -78,93 +77,82 @@ export function StockModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={modalStyles.modalOverlay}>
-        <View style={modalStyles.modalContent}>
-          <View style={modalStyles.modalHeader}>
-            <Text style={modalStyles.modalTitle}>
-              {showDetails ? 'Modifier le produit' : 'Modifier le stock'}
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title={showDetails ? 'Modifier le produit' : 'Modifier le stock'}
+    >
+      <Text style={styles.productName} testID="product-stock-name">
+        {product?.name}
+      </Text>
+
+      <ScrollView style={styles.scrollContent}>
+        <Text style={styles.fieldLabel}>Stock</Text>
+        <TextInput
+          testID="product-stock-input"
+          style={styles.input}
+          value={stockValue}
+          onChangeText={setStockValue}
+          keyboardType="numeric"
+          placeholder="Quantité en stock"
+          autoFocus={!showDetails}
+        />
+
+        {showDetails && (
+          <>
+            <Text style={styles.fieldLabel}>
+              Date limite (DLC) — AAAA-MM-JJ
             </Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.productName} testID="product-stock-name">
-            {product?.name}
-          </Text>
-
-          <ScrollView style={styles.scrollContent}>
-            <Text style={styles.fieldLabel}>Stock</Text>
             <TextInput
-              testID="product-stock-input"
-              style={modalStyles.modalInput}
-              value={stockValue}
-              onChangeText={setStockValue}
-              keyboardType="numeric"
-              placeholder="Quantité en stock"
-              autoFocus={!showDetails}
+              testID="product-dlc-input"
+              style={styles.input}
+              value={dlcValue}
+              onChangeText={setDlcValue}
+              placeholder="2025-12-31"
             />
+            <Text style={styles.fieldLabel}>Prix unitaire (€)</Text>
+            <TextInput
+              testID="product-price-input"
+              style={styles.input}
+              value={priceValue}
+              onChangeText={setPriceValue}
+              keyboardType="decimal-pad"
+              placeholder="0.00"
+            />
+          </>
+        )}
 
-            {showDetails && (
-              <>
-                <Text style={styles.fieldLabel}>
-                  Date limite (DLC) — AAAA-MM-JJ
-                </Text>
-                <TextInput
-                  testID="product-dlc-input"
-                  style={modalStyles.modalInput}
-                  value={dlcValue}
-                  onChangeText={setDlcValue}
-                  placeholder="2025-12-31"
-                />
-                <Text style={styles.fieldLabel}>Prix unitaire (€)</Text>
-                <TextInput
-                  testID="product-price-input"
-                  style={modalStyles.modalInput}
-                  value={priceValue}
-                  onChangeText={setPriceValue}
-                  keyboardType="decimal-pad"
-                  placeholder="0.00"
-                />
-              </>
-            )}
+        {!showDetails && onUpdate && (
+          <TouchableOpacity
+            style={styles.detailsToggle}
+            onPress={() => setShowDetails(true)}
+          >
+            <Text style={styles.detailsToggleText}>
+              Modifier aussi la DLC et le prix
+            </Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
 
-            {!showDetails && onUpdate && (
-              <TouchableOpacity
-                style={styles.detailsToggle}
-                onPress={() => setShowDetails(true)}
-              >
-                <Text style={styles.detailsToggleText}>
-                  Modifier aussi la DLC et le prix
-                </Text>
-              </TouchableOpacity>
-            )}
-          </ScrollView>
-
-          <View style={modalStyles.modalActions}>
-            <TouchableOpacity
-              style={modalStyles.modalCancelButton}
-              onPress={onClose}
-            >
-              <Text style={modalStyles.modalCancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              testID="product-stock-confirm"
-              style={modalStyles.modalConfirmButton}
-              onPress={handleConfirm}
-            >
-              <Text style={modalStyles.modalConfirmText}>Valider</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+          <Text style={styles.cancelText}>Annuler</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID="product-stock-confirm"
+          style={styles.confirmButton}
+          onPress={handleConfirm}
+        >
+          <Text style={styles.confirmText}>Valider</Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
   productName: {
-    color: '#111827',
+    color: colors.textStrong,
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 12,
@@ -175,16 +163,50 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.textStrong,
     marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    fontSize: 16,
+    marginBottom: spacing.lg,
   },
   detailsToggle: {
     paddingVertical: 8,
     marginBottom: 8,
   },
   detailsToggleText: {
-    color: '#2563EB',
+    color: colors.primary,
     fontSize: 14,
+    fontWeight: '500',
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.md,
+  },
+  cancelButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.backgroundAlt,
+  },
+  cancelText: {
+    color: colors.textMuted,
+    fontWeight: '500',
+  },
+  confirmButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+  },
+  confirmText: {
+    color: '#FFFFFF',
     fontWeight: '500',
   },
 });

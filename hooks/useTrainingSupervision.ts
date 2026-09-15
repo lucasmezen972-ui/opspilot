@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import {
@@ -74,16 +74,7 @@ export function useTrainingSupervision() {
   );
   const courses = isLocalDemo ? demoCourses : remoteCourses;
 
-  useEffect(() => {
-    if (isLocalDemo) return;
-    if (!profile?.organization_id) return;
-    fetchOrgData().catch((err) => {
-      setError(mapSupabaseError('Erreur supervision formations', err));
-      setLoading(false);
-    });
-  }, [profile?.organization_id, isLocalDemo]);
-
-  const fetchOrgData = async () => {
+  const fetchOrgData = useCallback(async () => {
     if (!profile?.organization_id) return;
     setLoading(true);
     try {
@@ -114,7 +105,16 @@ export function useTrainingSupervision() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.organization_id]);
+
+  useEffect(() => {
+    if (isLocalDemo) return;
+    if (!profile?.organization_id) return;
+    fetchOrgData().catch((err) => {
+      setError(mapSupabaseError('Erreur supervision formations', err));
+      setLoading(false);
+    });
+  }, [profile?.organization_id, isLocalDemo, fetchOrgData]);
 
   const entries = useMemo(
     () => buildEntries(members, courses, orgProgress),

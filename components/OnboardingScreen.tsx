@@ -132,6 +132,10 @@ export default function OnboardingScreen() {
         }
       }
       await fetchProfile(user.id);
+    } catch (err) {
+      setError(
+        mapSupabaseError('Erreur lors de la finalisation du compte', err),
+      );
     } finally {
       setSubmitting(false);
     }

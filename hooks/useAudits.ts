@@ -175,14 +175,10 @@ export function useAudits() {
       }
 
       if (isLocalDemo) {
-        let updated: Audit | null = null;
-        setAudits((prev) =>
-          prev.map((a) => {
-            if (a.id !== id) return a;
-            updated = { ...a, ...updates } as Audit;
-            return updated;
-          }),
-        );
+        const existing = audits.find((a) => a.id === id);
+        if (!existing) return { data: null, error: 'Audit introuvable' };
+        const updated = { ...existing, ...updates } as Audit;
+        setAudits((prev) => prev.map((a) => (a.id === id ? updated : a)));
         return { data: updated, error: null };
       }
 
@@ -258,14 +254,11 @@ export function useAudits() {
         ]);
       }
 
-      let updated: Audit | null = null;
-      setAudits((prev) =>
-        prev.map((a) => {
-          if (a.id !== id) return a;
-          updated = { ...a, ...updates } as Audit;
-          return updated;
-        }),
-      );
+      const existing = audits.find((a) => a.id === id);
+      if (!existing)
+        return { data: null, responses: [], error: 'Audit introuvable' };
+      const updated = { ...existing, ...updates } as Audit;
+      setAudits((prev) => prev.map((a) => (a.id === id ? updated : a)));
       return { data: updated, responses: savedResponses, error: null };
     }
 
@@ -354,18 +347,23 @@ export function useAudits() {
       const audit = audits.find((a) => a.id === id);
       if (!audit) return { data: null, error: 'Audit introuvable' };
 
-      const updatedPhotos = [...(audit.photos || []), photoUrl];
-
       if (isLocalDemo) {
-        const updated: Audit = {
-          ...audit,
-          photos: updatedPhotos,
-          updated_at: new Date().toISOString(),
-        };
-        setAudits((prev) => prev.map((a) => (a.id === id ? updated : a)));
+        let updated: Audit | null = null;
+        setAudits((prev) =>
+          prev.map((a) => {
+            if (a.id !== id) return a;
+            updated = {
+              ...a,
+              photos: [...(a.photos || []), photoUrl],
+              updated_at: new Date().toISOString(),
+            };
+            return updated;
+          }),
+        );
         return { data: updated, error: null };
       }
 
+      const updatedPhotos = [...(audit.photos || []), photoUrl];
       const { data, error } = await supabase
         .from('audits')
         .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
