@@ -1,4 +1,3 @@
-import { X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import {
   View,
@@ -6,11 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Modal,
 } from 'react-native';
 
-import { modalStyles } from './modalStyles';
 import type { Product } from '../../lib/supabase';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface StockModalProps {
   product: Product | null;
@@ -43,61 +42,82 @@ export function StockModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={modalStyles.modalOverlay}>
-        <View style={modalStyles.modalContent}>
-          <View style={modalStyles.modalHeader}>
-            <Text style={modalStyles.modalTitle}>Modifier le stock</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.productName} testID="product-stock-name">
-            {product?.name}
-          </Text>
-          <Text style={styles.modalSubtitle}>
-            Stock actuel: {product?.stock_quantity}
-          </Text>
-          <TextInput
-            testID="product-stock-input"
-            style={modalStyles.modalInput}
-            value={value}
-            onChangeText={setValue}
-            keyboardType="numeric"
-            placeholder="Nouveau stock"
-            autoFocus
-          />
-          <View style={modalStyles.modalActions}>
-            <TouchableOpacity
-              style={modalStyles.modalCancelButton}
-              onPress={onClose}
-            >
-              <Text style={modalStyles.modalCancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              testID="product-stock-confirm"
-              style={modalStyles.modalConfirmButton}
-              onPress={handleConfirm}
-            >
-              <Text style={modalStyles.modalConfirmText}>Valider</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+    <AppModal visible={visible} onClose={onClose} title="Modifier le stock">
+      <Text style={styles.productName} testID="product-stock-name">
+        {product?.name}
+      </Text>
+      <Text style={styles.subtitle}>
+        Stock actuel: {product?.stock_quantity}
+      </Text>
+      <TextInput
+        testID="product-stock-input"
+        style={styles.input}
+        value={value}
+        onChangeText={setValue}
+        keyboardType="numeric"
+        placeholder="Nouveau stock"
+        autoFocus
+      />
+      <View style={styles.actions}>
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+          <Text style={styles.cancelText}>Annuler</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          testID="product-stock-confirm"
+          style={styles.confirmButton}
+          onPress={handleConfirm}
+        >
+          <Text style={styles.confirmText}>Valider</Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </AppModal>
   );
 }
 
 const styles = StyleSheet.create({
   productName: {
-    color: '#111827',
+    color: colors.textStrong,
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
   },
-  modalSubtitle: {
+  subtitle: {
     fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 16,
+    color: colors.textMuted,
+    marginBottom: spacing.lg,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    fontSize: 16,
+    marginBottom: spacing.lg,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.md,
+  },
+  cancelButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.backgroundAlt,
+  },
+  cancelText: {
+    color: colors.textMuted,
+    fontWeight: '500',
+  },
+  confirmButton: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primary,
+  },
+  confirmText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
