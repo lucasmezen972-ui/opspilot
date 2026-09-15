@@ -85,6 +85,9 @@ export function StockModal({
       <Text style={styles.productName} testID="product-stock-name">
         {product?.name}
       </Text>
+      <Text style={styles.subtitle}>
+        Stock actuel: {product?.stock_quantity}
+      </Text>
 
       <ScrollView style={styles.scrollContent}>
         <Text style={styles.fieldLabel}>Stock</Text>
@@ -156,6 +159,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginBottom: spacing.lg,
   },
   scrollContent: {
     maxHeight: 300,
