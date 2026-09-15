@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 
 import { DashboardDlcAlerts } from '../../features/dashboard/DashboardDlcAlerts';
@@ -31,31 +32,44 @@ const heroGradientColors = [colors.primary, colors.primaryDark] as const;
 
 export default function HomeScreen() {
   const { profile } = useAuth();
-  const { audits, loading: auditsLoading, error: auditsError } = useAudits();
+  const {
+    audits,
+    loading: auditsLoading,
+    error: auditsError,
+    refetch: refetchAudits,
+  } = useAudits();
   const {
     actions,
     loading: actionsLoading,
     error: actionsError,
+    refetch: refetchActions,
   } = useCorrectiveActions();
   const {
     products,
     loading: productsLoading,
     error: productsError,
+    refetch: refetchProducts,
   } = useProducts();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refetchAudits(), refetchActions(), refetchProducts()]);
+    setRefreshing(false);
+  }, [refetchAudits, refetchActions, refetchProducts]);
 
   const isLoading = auditsLoading || actionsLoading || productsLoading;
   const fetchError = auditsError ?? actionsError ?? productsError;
 
-  const now = new Date();
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const now = useMemo(() => new Date(), [todayKey]);
   const kpis = useMemo(
     () => getDashboardKpis(audits, actions, products, now),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [audits, actions, products],
+    [audits, actions, products, now],
   );
   const fieldBrief = useMemo(
     () => getDashboardFieldBrief(audits, actions, products, now),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [audits, actions, products],
+    [audits, actions, products, now],
   );
 
   const isManager = isManagerRole(profile?.role);
@@ -73,7 +87,17 @@ export default function HomeScreen() {
       : 'Terrain sous contrôle aujourd’hui';
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
       <LinearGradient
         colors={heroGradientColors}
         start={{ x: 0, y: 0 }}

@@ -1,5 +1,5 @@
 import { Search, Plus, Camera, X, Download } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 
 import CameraModal from '../../components/CameraModal';
@@ -54,7 +55,15 @@ export default function AuditsScreen() {
     getAuditResponses,
     getSignaturesForAudit,
     signAudit,
+    refetch: refetchAudits,
   } = useAudits();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetchAudits();
+    setRefreshing(false);
+  }, [refetchAudits]);
   const { profile } = useAuth();
   const isManager = isManagerRole(profile?.role);
   const {
@@ -373,7 +382,17 @@ export default function AuditsScreen() {
       />
 
       {/* Audits List */}
-      <ScrollView style={styles.auditsList}>
+      <ScrollView
+        style={styles.auditsList}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+      >
         <AuditTemplateLibrary
           templates={templates}
           expanded={showTemplates}

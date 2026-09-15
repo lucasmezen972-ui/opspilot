@@ -49,7 +49,7 @@ export function useTasks() {
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(500);
 
       if (fetchErr) {
         setError(

@@ -35,6 +35,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
 import { colors, shadow } from '../../shared/styles/tokens';
+import { SUPPORT_EMAIL } from '../../utils/constants';
 
 export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
@@ -79,9 +80,12 @@ export default function ProfileScreen() {
     },
     {
       icon: Globe,
-      label: 'Langue',
+      label: 'Langue — Français',
       onPress: () =>
-        Alert.alert('Langue', 'OpsPilot est disponible en français.'),
+        Alert.alert(
+          'Langue',
+          'OpsPilot est actuellement disponible en français. Le support multilingue est prévu dans une prochaine version.',
+        ),
     },
     {
       icon: HelpCircle,
@@ -89,7 +93,7 @@ export default function ProfileScreen() {
       onPress: () =>
         Alert.alert(
           'Support',
-          'Pour toute question, contactez contact@tradikom.com',
+          `Pour toute question, contactez ${SUPPORT_EMAIL}`,
         ),
     },
   ];

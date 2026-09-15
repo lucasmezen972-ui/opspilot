@@ -1,4 +1,4 @@
-import { Star, Sparkles } from 'lucide-react-native';
+import { Star, Sparkles, X, ChevronRight } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
 } from 'react-native';
 
 import { TrainingAchievements } from '../../features/training/TrainingAchievements';
@@ -108,6 +109,7 @@ export default function TrainingScreen() {
   });
 
   const [generatingCourse, setGeneratingCourse] = useState(false);
+  const [showTopicPicker, setShowTopicPicker] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const selectedCourse =
     dbCourses.find((course) => course.id === selectedCourseId) ?? null;
@@ -143,26 +145,31 @@ export default function TrainingScreen() {
     }
   };
 
-  const generateAICourse = async () => {
-    const topics = [
-      'Techniques de vente cross-selling',
-      'Gestion des clients difficiles',
-      'Optimisation de la présentation produits',
-      "Procédures d'ouverture/fermeture de magasin",
-      'Sécurité au travail dans la grande distribution',
-    ];
+  const AI_TOPICS = [
+    'Techniques de vente cross-selling',
+    'Gestion des clients difficiles',
+    'Optimisation de la présentation produits',
+    "Procédures d'ouverture/fermeture de magasin",
+    'Sécurité au travail dans la grande distribution',
+  ] as const;
 
-    const randomTopic = topics[Math.floor(Math.random() * topics.length)]!;
-    const difficulties = ['beginner', 'intermediate', 'advanced'] as const;
-    const randomDifficulty =
-      difficulties[Math.floor(Math.random() * difficulties.length)]!;
+  const AI_DIFFICULTIES = [
+    { key: 'beginner' as const, label: 'Débutant' },
+    { key: 'intermediate' as const, label: 'Intermédiaire' },
+    { key: 'advanced' as const, label: 'Avancé' },
+  ];
 
+  const generateAICourse = async (
+    chosenTopic: string,
+    chosenDifficulty: 'beginner' | 'intermediate' | 'advanced',
+  ) => {
+    setShowTopicPicker(false);
     setGeneratingCourse(true);
 
     try {
       const content = await generateTrainingContent(
-        randomTopic,
-        randomDifficulty,
+        chosenTopic,
+        chosenDifficulty,
       );
 
       if (
@@ -189,12 +196,12 @@ export default function TrainingScreen() {
         organization_id: orgId,
         title: content.title,
         content: content.content,
-        category: randomTopic,
-        difficulty: randomDifficulty,
+        category: chosenTopic,
+        difficulty: chosenDifficulty,
         xp_reward:
-          randomDifficulty === 'advanced'
+          chosenDifficulty === 'advanced'
             ? 50
-            : randomDifficulty === 'intermediate'
+            : chosenDifficulty === 'intermediate'
               ? 30
               : 20,
         duration_minutes: 30,
@@ -368,7 +375,7 @@ export default function TrainingScreen() {
               <Text style={styles.sectionTitle}>Formations disponibles</Text>
               <TouchableOpacity
                 style={styles.aiGenerateButton}
-                onPress={generateAICourse}
+                onPress={() => setShowTopicPicker(true)}
                 disabled={generatingCourse}
               >
                 <Sparkles size={16} color="#F59E0B" />
@@ -421,6 +428,44 @@ export default function TrainingScreen() {
         onCompleteQuiz={completeQuiz}
         onGenerateCertificate={handleGenerateCertificate}
       />
+
+      <Modal
+        visible={showTopicPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTopicPicker(false)}
+      >
+        <View style={styles.pickerOverlay}>
+          <View style={styles.pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Générer une formation IA</Text>
+              <TouchableOpacity onPress={() => setShowTopicPicker(false)}>
+                <X size={22} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.pickerSubtitle}>Choisissez un thème</Text>
+            {AI_TOPICS.map((topic) => (
+              <TouchableOpacity
+                key={topic}
+                style={styles.pickerOption}
+                onPress={() => {
+                  Alert.alert(
+                    'Niveau de difficulté',
+                    topic,
+                    AI_DIFFICULTIES.map((d) => ({
+                      text: d.label,
+                      onPress: () => generateAICourse(topic, d.key),
+                    })),
+                  );
+                }}
+              >
+                <Text style={styles.pickerOptionText}>{topic}</Text>
+                <ChevronRight size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -512,5 +557,48 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     paddingVertical: 24,
+  },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  pickerSheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 36,
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    paddingBottom: 4,
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.textStrong,
+  },
+  pickerSubtitle: {
+    fontSize: 13,
+    color: colors.textMuted,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  pickerOptionText: {
+    fontSize: 15,
+    color: colors.textStrong,
+    flex: 1,
   },
 });

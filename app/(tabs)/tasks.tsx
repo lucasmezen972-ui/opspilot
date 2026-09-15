@@ -1,5 +1,5 @@
 import { Plus, Filter, CircleCheck as CheckCircle } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
 
 import {
@@ -40,7 +41,15 @@ export default function TasksScreen() {
     completeTask,
     validateTask,
     createTask,
+    refetch: refetchTasks,
   } = useTasks();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetchTasks();
+    setRefreshing(false);
+  }, [refetchTasks]);
   const { profile } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState<TaskFilter>('all');
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -157,6 +166,14 @@ export default function TasksScreen() {
         keyExtractor={(task) => task.id}
         style={styles.tasksList}
         contentContainerStyle={styles.tasksListContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         ListEmptyComponent={
           loading ? (
             <View style={styles.loadingContainer}>

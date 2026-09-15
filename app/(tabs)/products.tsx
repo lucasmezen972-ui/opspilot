@@ -1,5 +1,5 @@
 import { Plus, Scan, Search, Package, X } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 
 import {
@@ -35,9 +36,18 @@ export default function ProductsScreen() {
     loading,
     scanProduct,
     createProduct,
+    updateProduct,
     updateProductStock,
     deleteProduct,
+    refetch: refetchProducts,
   } = useProducts();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetchProducts();
+    setRefreshing(false);
+  }, [refetchProducts]);
   const [isScanning, setIsScanning] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
   const [stockModalProduct, setStockModalProduct] = useState<Product | null>(
@@ -83,6 +93,17 @@ export default function ProductsScreen() {
 
   const handleStockConfirm = async (product: Product, newStock: number) => {
     const { error } = await updateProductStock(product.id, newStock);
+    setStockModalProduct(null);
+    if (error) {
+      Alert.alert('Erreur', String(error));
+    }
+  };
+
+  const handleProductUpdate = async (
+    product: Product,
+    updates: Partial<Product>,
+  ) => {
+    const { error } = await updateProduct(product.id, updates);
     setStockModalProduct(null);
     if (error) {
       Alert.alert('Erreur', String(error));
@@ -167,7 +188,17 @@ export default function ProductsScreen() {
       />
 
       {/* Products List */}
-      <ScrollView style={styles.productsList}>
+      <ScrollView
+        style={styles.productsList}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#059669"
+            colors={['#059669']}
+          />
+        }
+      >
         {loading && products.length === 0 && (
           <AppLoadingState label="Chargement des produits…" />
         )}
@@ -209,6 +240,7 @@ export default function ProductsScreen() {
         visible={stockModalProduct !== null}
         onClose={() => setStockModalProduct(null)}
         onConfirm={handleStockConfirm}
+        onUpdate={handleProductUpdate}
       />
 
       <AddProductModal
