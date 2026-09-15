@@ -271,6 +271,7 @@ export default function TrainingScreen() {
         }
 
         const realCourseId = savedCourse.id;
+        let partialFailure = false;
 
         if (newChapters.length > 0) {
           const { error: chapErr } = await supabase
@@ -285,6 +286,7 @@ export default function TrainingScreen() {
             );
           if (chapErr) {
             logger.error('Erreur sauvegarde chapitres IA', chapErr);
+            partialFailure = true;
           }
         }
 
@@ -303,7 +305,25 @@ export default function TrainingScreen() {
             );
           if (quizErr) {
             logger.error('Erreur sauvegarde quiz IA', quizErr);
+            partialFailure = true;
           }
+        }
+
+        if (partialFailure) {
+          await supabase
+            .from('training_quiz_questions')
+            .delete()
+            .eq('training_id', realCourseId);
+          await supabase
+            .from('training_chapters')
+            .delete()
+            .eq('training_id', realCourseId);
+          await supabase.from('trainings').delete().eq('id', realCourseId);
+          Alert.alert(
+            'Erreur',
+            'La formation a été partiellement créée puis annulée. Réessayez.',
+          );
+          return;
         }
 
         await refetch();
