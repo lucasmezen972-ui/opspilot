@@ -41,9 +41,9 @@ import { AppTabBar } from '../../shared/components/AppTabBar';
 import { colors } from '../../shared/styles/tokens';
 
 function auditStatusColor(status: string): string {
-  if (status === 'completed') return '#10B981';
-  if (status === 'in_progress') return '#F59E0B';
-  return '#6B7280';
+  if (status === 'completed') return colors.success;
+  if (status === 'in_progress') return colors.warning;
+  return colors.textMuted;
 }
 
 export default function ManagerDashboard() {
@@ -174,25 +174,41 @@ function ManagerDetails({
       <StatusBreakdown
         title="Statut des audits"
         entries={[
-          { label: 'En attente', count: stats.pendingAudits, color: '#6B7280' },
+          {
+            label: 'En attente',
+            count: stats.pendingAudits,
+            color: colors.textMuted,
+          },
           {
             label: 'En cours',
             count: stats.inProgressAudits,
-            color: '#F59E0B',
+            color: colors.warning,
           },
-          { label: 'Terminés', count: stats.completedAudits, color: '#10B981' },
+          {
+            label: 'Terminés',
+            count: stats.completedAudits,
+            color: colors.success,
+          },
         ]}
       />
 
       <StatusBreakdown
         title="Statut des tâches"
         entries={[
-          { label: 'À faire', count: stats.pendingTasks, color: '#6B7280' },
-          { label: 'En cours', count: stats.inProgressTasks, color: '#F59E0B' },
+          {
+            label: 'À faire',
+            count: stats.pendingTasks,
+            color: colors.textMuted,
+          },
+          {
+            label: 'En cours',
+            count: stats.inProgressTasks,
+            color: colors.warning,
+          },
           {
             label: 'Terminées',
             count: stats.completedTasks,
-            color: '#10B981',
+            color: colors.success,
           },
         ]}
       />
@@ -204,7 +220,7 @@ function ManagerDetails({
           title="Tâches urgentes"
           items={urgentTasks.map((task) => ({
             id: task.id,
-            icon: <AlertTriangle size={16} color="#EF4444" />,
+            icon: <AlertTriangle size={16} color={colors.danger} />,
             title: task.title,
             subtitle: `${task.location ?? 'Aucune localisation'} - ${
               task.status === 'in_progress' ? 'En cours' : 'À faire'
@@ -235,7 +251,7 @@ function ManagerDetails({
 
       {auditsEmpty && (
         <View style={styles.emptyState}>
-          <TrendingUp size={48} color="#9CA3AF" />
+          <TrendingUp size={48} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>Aucune donnée</Text>
           <Text style={styles.emptyText}>
             Les audits et tâches apparaîtront ici une fois créés.
@@ -249,25 +265,25 @@ function ManagerDetails({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
     padding: 20,
     paddingTop: 60,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
     letterSpacing: -0.4,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   emptyState: {
     alignItems: 'center',
@@ -276,13 +292,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textMuted,
     textAlign: 'center',
   },
   loadingBanner: {

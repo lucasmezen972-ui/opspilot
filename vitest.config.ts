@@ -18,7 +18,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
     include: ['**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules', 'dist', '.expo'],
+    exclude: ['node_modules', 'dist', '.expo', '.claude'],
     deps: {
       inline: ['@testing-library/react-native'],
     },

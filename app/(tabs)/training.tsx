@@ -321,7 +321,7 @@ export default function TrainingScreen() {
           Formation
         </Text>
         <View style={styles.pointsBadge}>
-          <Star size={16} color="#F59E0B" />
+          <Star size={16} color={colors.warning} />
           <Text style={styles.pointsText} testID="training-xp-value">
             {profile?.xp ?? 0} XP
           </Text>
@@ -371,7 +371,7 @@ export default function TrainingScreen() {
                 onPress={generateAICourse}
                 disabled={generatingCourse}
               >
-                <Sparkles size={16} color="#F59E0B" />
+                <Sparkles size={16} color={colors.warning} />
                 <Text style={styles.aiGenerateButtonText}>
                   {generatingCourse ? 'Génération...' : 'IA'}
                 </Text>
@@ -449,13 +449,13 @@ const styles = StyleSheet.create({
   pointsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.warningSoft,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   pointsText: {
-    color: '#D97706',
+    color: colors.fieldAmber,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4,
@@ -482,15 +482,15 @@ const styles = StyleSheet.create({
   aiGenerateButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.warningSoft,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: colors.warning,
   },
   aiGenerateButtonText: {
-    color: '#D97706',
+    color: colors.fieldAmber,
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,

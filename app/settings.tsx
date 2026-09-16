@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useUserSettings } from '../hooks/useUserSettings';
 import type { NotificationPreferences } from '../lib/supabase';
+import { colors } from '../shared/styles/tokens';
 
 type Feedback = { message: string; error: boolean } | null;
 
@@ -134,7 +135,7 @@ export default function SettingsScreen() {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Chargement des réglages...</Text>
       </View>
     );
@@ -152,7 +153,7 @@ export default function SettingsScreen() {
             accessibilityLabel="Retour"
             testID="settings-back-button"
           >
-            <ArrowLeft size={20} color="#1D4ED8" />
+            <ArrowLeft size={20} color={colors.primaryDark} />
           </TouchableOpacity>
           <View>
             <Text style={styles.eyebrow}>OpsPilot</Text>
@@ -243,18 +244,18 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: colors.background },
   loading: {
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     flex: 1,
     justifyContent: 'center',
   },
-  loadingText: { color: '#64748B', marginTop: 12 },
+  loadingText: { color: colors.textMuted, marginTop: 12 },
   header: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderBottomColor: '#E5E7EB',
+    backgroundColor: colors.surface,
+    borderBottomColor: colors.border,
     borderBottomWidth: 1,
     flexDirection: 'row',
     paddingBottom: 16,
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.primarySoft,
     borderRadius: 20,
     height: 40,
     justifyContent: 'center',
@@ -271,13 +272,13 @@ const styles = StyleSheet.create({
     width: 40,
   },
   eyebrow: {
-    color: '#2563EB',
+    color: colors.primary,
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 2,
   },
   title: {
-    color: '#111827',
+    color: colors.textStrong,
     fontSize: 24,
     fontWeight: '700',
     letterSpacing: -0.4,
@@ -296,8 +297,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 13,
   },
-  feedbackSuccess: { backgroundColor: '#ECFDF5', borderColor: '#6EE7B7' },
-  feedbackError: { backgroundColor: '#FEF2F2', borderColor: '#FCA5A5' },
-  feedbackSuccessText: { color: '#047857', fontWeight: '600' },
-  feedbackErrorText: { color: '#B91C1C', fontWeight: '600' },
+  feedbackSuccess: {
+    backgroundColor: colors.successSoft,
+    borderColor: '#6EE7B7',
+  },
+  feedbackError: { backgroundColor: colors.dangerSoft, borderColor: '#FCA5A5' },
+  feedbackSuccessText: { color: colors.trustGreen, fontWeight: '600' },
+  feedbackErrorText: { color: colors.dangerStrong, fontWeight: '600' },
 });

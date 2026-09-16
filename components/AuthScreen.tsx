@@ -94,7 +94,7 @@ export default function AuthScreen() {
   const handleResetPassword = async () => {
     setLocalError('');
     setSuccessMessage('');
-    if (!email || !email.includes('@')) {
+    if (!email?.includes('@')) {
       setLocalError(
         'Entrez votre adresse email ci-dessus avant de réinitialiser.',
       );

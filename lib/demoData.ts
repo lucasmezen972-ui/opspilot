@@ -17,6 +17,7 @@ import type {
   Task,
   Training,
   TrainingChapter,
+  TrainingCertificate,
   TrainingQuizQuestion,
   UserTrainingProgress,
 } from './supabase';
@@ -1527,7 +1528,246 @@ export function getDemoAuditTemplateItems(): AuditTemplateItem[] {
 }
 
 export function getDemoAuditResponses(): AuditResponse[] {
-  return [];
+  const resp = (
+    id: string,
+    auditId: string,
+    itemId: string,
+    value: boolean | number | string | null,
+    isCompliant: boolean | null,
+    comment: string | null,
+    createdAt: string,
+  ): AuditResponse => ({
+    id,
+    audit_id: auditId,
+    item_id: itemId,
+    value,
+    is_compliant: isCompliant,
+    photo_url: null,
+    comment,
+    response_value: null,
+    score: null,
+    notes: null,
+    photos: [],
+    created_at: createdAt,
+  });
+
+  return [
+    // ── demo-audit-1 : Contrôle hygiène rayon frais (92/100, 1 issue) ──
+    // Template: demo-template-hygiene, items demo-hygiene-item-1..11
+    resp(
+      'demo-resp-1-01',
+      'demo-audit-1',
+      'demo-hygiene-item-1',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-02',
+      'demo-audit-1',
+      'demo-hygiene-item-2',
+      4,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-03',
+      'demo-audit-1',
+      'demo-hygiene-item-6',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-04',
+      'demo-audit-1',
+      'demo-hygiene-item-3',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-05',
+      'demo-audit-1',
+      'demo-hygiene-item-7',
+      false,
+      false,
+      "Distributeur de savon vide au point d'eau côté réserve, pas de papier essuie-mains.",
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-06',
+      'demo-audit-1',
+      'demo-hygiene-item-4',
+      null,
+      null,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-07',
+      'demo-audit-1',
+      'demo-hygiene-item-8',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-08',
+      'demo-audit-1',
+      'demo-hygiene-item-9',
+      4,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-09',
+      'demo-audit-1',
+      'demo-hygiene-item-10',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-10',
+      'demo-audit-1',
+      'demo-hygiene-item-11',
+      true,
+      true,
+      null,
+      days(-1),
+    ),
+    resp(
+      'demo-resp-1-11',
+      'demo-audit-1',
+      'demo-hygiene-item-5',
+      'RAS, bon niveau général.',
+      null,
+      null,
+      days(-1),
+    ),
+
+    // ── demo-audit-2 : Vérification chambre froide (88/100, 2 issues) ──
+    // Template: demo-template-froid, items demo-template-froid-item-1..6
+    resp(
+      'demo-resp-2-01',
+      'demo-audit-2',
+      'demo-template-froid-item-1',
+      true,
+      true,
+      null,
+      days(-3),
+    ),
+    resp(
+      'demo-resp-2-02',
+      'demo-audit-2',
+      'demo-template-froid-item-2',
+      2,
+      false,
+      "Meuble surgelés surchargé, circulation d'air insuffisante au niveau du bac inférieur.",
+      days(-3),
+    ),
+    resp(
+      'demo-resp-2-03',
+      'demo-audit-2',
+      'demo-template-froid-item-3',
+      true,
+      true,
+      null,
+      days(-3),
+    ),
+    resp(
+      'demo-resp-2-04',
+      'demo-audit-2',
+      'demo-template-froid-item-4',
+      4,
+      true,
+      null,
+      days(-3),
+    ),
+    resp(
+      'demo-resp-2-05',
+      'demo-audit-2',
+      'demo-template-froid-item-5',
+      false,
+      false,
+      'Procédure de rupture de froid non affichée dans la chambre froide positive.',
+      days(-3),
+    ),
+    resp(
+      'demo-resp-2-06',
+      'demo-audit-2',
+      'demo-template-froid-item-6',
+      null,
+      null,
+      null,
+      days(-3),
+    ),
+
+    // ── demo-audit-3 : Audit DLC boulangerie (76/100, 4 issues) ────────
+    // Template: demo-template-dlc, items demo-template-dlc-item-1..6
+    resp(
+      'demo-resp-3-01',
+      'demo-audit-3',
+      'demo-template-dlc-item-1',
+      false,
+      false,
+      'Contrôle des dates non réalisé ce matin sur le rayon viennoiseries.',
+      days(-6),
+    ),
+    resp(
+      'demo-resp-3-02',
+      'demo-audit-3',
+      'demo-template-dlc-item-2',
+      2,
+      false,
+      'Rotation FEFO mal appliquée : lots récents placés devant les anciens sur 3 références.',
+      days(-6),
+    ),
+    resp(
+      'demo-resp-3-03',
+      'demo-audit-3',
+      'demo-template-dlc-item-3',
+      false,
+      false,
+      'Deux paquets de brioches avec DLC dépassée de 1 jour trouvés en rayon.',
+      days(-6),
+    ),
+    resp(
+      'demo-resp-3-04',
+      'demo-audit-3',
+      'demo-template-dlc-item-4',
+      false,
+      false,
+      "Pâte à tarte ouverte sans étiquette de date d'ouverture en chambre froide.",
+      days(-6),
+    ),
+    resp(
+      'demo-resp-3-05',
+      'demo-audit-3',
+      'demo-template-dlc-item-5',
+      3,
+      true,
+      null,
+      days(-6),
+    ),
+    resp(
+      'demo-resp-3-06',
+      'demo-audit-3',
+      'demo-template-dlc-item-6',
+      null,
+      null,
+      null,
+      days(-6),
+    ),
+  ];
 }
 
 /** Signatures d'audit démo : un audit clôturé signé par l'auditeur. */
@@ -3563,21 +3803,125 @@ export function getDemoConversations(): Conversation[] {
       created_by: null,
       created_at: days(-30),
     },
+    {
+      id: 'demo-conv-2',
+      organization_id: DEMO_ORG_ID,
+      name: 'Direction',
+      description: 'Échanges direction et encadrement',
+      type: 'group',
+      participants: [],
+      last_message_at: days(-1),
+      created_by: null,
+      created_at: days(-60),
+    },
+    {
+      id: 'demo-conv-3',
+      organization_id: DEMO_ORG_ID,
+      name: 'Thomas Lefèvre',
+      description: null,
+      type: 'direct',
+      participants: [],
+      last_message_at: days(-1),
+      created_by: DEMO_USER_ID,
+      created_at: days(-14),
+    },
   ];
 }
 
 export function getDemoMessages(): Message[] {
+  const msg = (
+    id: string,
+    conversationId: string,
+    senderId: string,
+    content: string,
+    createdAt: string,
+  ): Message => ({
+    id,
+    conversation_id: conversationId,
+    sender_id: senderId,
+    content,
+    message_type: 'text',
+    attachments: [],
+    read_by: [],
+    created_at: createdAt,
+  });
+
   return [
-    {
-      id: 'demo-msg-1',
-      conversation_id: 'demo-conv-1',
-      sender_id: DEMO_USER_ID,
-      content: 'Bienvenue sur OpsPilot ! Ceci est un message de démonstration.',
-      message_type: 'text',
-      attachments: [],
-      read_by: [],
-      created_at: days(0),
-    },
+    // ── Équipe magasin (demo-conv-1) ────────────────────────────────────
+    msg(
+      'demo-msg-1-01',
+      'demo-conv-1',
+      DEMO_USER_ID,
+      'Bonjour ! Checklist ouverture terminée, RAS sur le rayon frais.',
+      days(0),
+    ),
+    msg(
+      'demo-msg-1-02',
+      'demo-conv-1',
+      'demo-user-thomas',
+      "Merci Marie. J'ai relevé les températures chambre froide, tout est OK sauf le meuble 3 à +5,2 °C. Je surveille.",
+      days(0),
+    ),
+    msg(
+      'demo-msg-1-03',
+      'demo-conv-1',
+      'demo-user-sophie',
+      'Attention, alerte DLC sur les yaourts nature : 24 pots expirent demain. Je les mets en promo -30 %.',
+      days(0),
+    ),
+    msg(
+      'demo-msg-1-04',
+      'demo-conv-1',
+      DEMO_USER_ID,
+      "Bonne initiative Sophie. Thomas, si le meuble 3 ne redescend pas sous 4 °C d'ici midi, on fait une action corrective.",
+      days(0),
+    ),
+    msg(
+      'demo-msg-1-05',
+      'demo-conv-1',
+      'demo-user-thomas',
+      'Compris, je repasse vérifier à 11h30.',
+      days(0),
+    ),
+
+    // ── Direction (demo-conv-2) ─────────────────────────────────────────
+    msg(
+      'demo-msg-2-01',
+      'demo-conv-2',
+      DEMO_USER_ID,
+      'Résultats semaine 37 : score moyen audits 85/100, 3 actions correctives clôturées. Le point faible reste la DLC boulangerie (76/100).',
+      days(-1),
+    ),
+    msg(
+      'demo-msg-2-02',
+      'demo-conv-2',
+      'demo-user-thomas',
+      "On a renforcé le contrôle DLC matin et soir depuis lundi. Je fais un point avec l'équipe boulangerie demain.",
+      days(-1),
+    ),
+    msg(
+      'demo-msg-2-03',
+      'demo-conv-2',
+      'demo-user-sophie',
+      "J'ai mis à jour le planning de formation HACCP, 3 personnes restent à inscrire pour le trimestre.",
+      days(-1),
+    ),
+
+    // ── Thomas Lefèvre DM (demo-conv-3) ─────────────────────────────────
+    msg(
+      'demo-msg-3-01',
+      'demo-conv-3',
+      'demo-user-thomas',
+      "Marie, tu peux valider mon audit chambre froide d'hier ? J'ai corrigé le point sur l'affichage de la procédure rupture de froid.",
+      days(-1),
+    ),
+    msg(
+      'demo-msg-3-02',
+      'demo-conv-3',
+      DEMO_USER_ID,
+      "C'est noté, je regarde ça ce matin et je valide. Merci Thomas !",
+      days(-1),
+    ),
   ];
 }
 
@@ -3599,6 +3943,48 @@ export function getDemoStores(): Store[] {
       is_active: true,
       created_at: now,
       updated_at: now,
+    },
+    {
+      id: 'demo-store-002',
+      organization_id: DEMO_ORG_ID,
+      name: 'Magasin Gare Part-Dieu',
+      address: '85 avenue Vivier-Merle',
+      city: 'Lyon',
+      postal_code: '69003',
+      country: 'FR',
+      latitude: null,
+      longitude: null,
+      manager_id: null,
+      settings: {},
+      is_active: true,
+      created_at: now,
+      updated_at: now,
+    },
+  ];
+}
+
+export function getDemoTrainingCertificates(): TrainingCertificate[] {
+  return [
+    {
+      id: 'demo-cert-1',
+      user_id: DEMO_USER_ID,
+      training_id: 'demo-training-1',
+      organization_id: DEMO_ORG_ID,
+      full_name: 'Marie Dupont',
+      training_title: 'HACCP & Sécurité alimentaire',
+      score: 92,
+      issued_at: days(-10),
+      expires_at: null,
+      certificate_number: 'OPS-2026-00001',
+      created_at: days(-10),
+      employee_id: 'M-2024-001',
+      position: 'Responsable qualité',
+      store_name: 'Magasin Centre-Ville',
+      category: 'HACCP',
+      duration_minutes: 65,
+      quiz_version: 'v1.0',
+      attempt_number: 1,
+      status: 'validé',
     },
   ];
 }

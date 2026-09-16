@@ -147,7 +147,7 @@ export default function ReportsScreen() {
             }}
             disabled={audits.length === 0}
           >
-            <Download size={18} color="#FFFFFF" />
+            <Download size={18} color={colors.surface} />
             <Text style={styles.exportButtonText}>
               Exporter tous les audits (CSV)
             </Text>
@@ -168,13 +168,13 @@ export default function ReportsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   headerIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 12,
   },
   exportButton: {
@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
   },
   exportButtonText: {
-    color: '#FFFFFF',
+    color: colors.surface,
     fontSize: 14,
     fontWeight: '600',
   },
