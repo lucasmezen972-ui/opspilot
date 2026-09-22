@@ -200,7 +200,7 @@ export function useMessages() {
         .eq('id', messageId);
 
       if (error) {
-        mapSupabaseError('Erreur lors du marquage comme lu', error);
+        setError(mapSupabaseError('Erreur lors du marquage comme lu', error));
         return;
       }
 
@@ -210,7 +210,7 @@ export function useMessages() {
         ),
       );
     } catch (error) {
-      mapSupabaseError('Erreur markAsRead', error);
+      setError(mapSupabaseError('Erreur markAsRead', error));
     }
   };
 
@@ -328,7 +328,7 @@ export function useMessages() {
       for (const r of results) counts[r.id] = r.count;
       setUnreadCounts(counts);
     } catch (error) {
-      mapSupabaseError('Erreur fetchUnreadCounts', error);
+      setError(mapSupabaseError('Erreur fetchUnreadCounts', error));
     }
   };
 

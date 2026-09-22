@@ -114,8 +114,8 @@ export function TrainingSupervision({
   const handleReminder = (memberId: string, trainingId: string) => {
     const { memberName, trainingTitle } = onSendReminder(memberId, trainingId);
     Alert.alert(
-      'Relance envoyée',
-      `Une notification a été envoyée à ${memberName} pour la formation "${trainingTitle}".`,
+      'Relance',
+      `Relance notée pour ${memberName} — formation « ${trainingTitle} ». Les notifications push ne sont pas encore disponibles : pensez à relancer ${memberName} en personne ou via la messagerie.`,
     );
   };
 
