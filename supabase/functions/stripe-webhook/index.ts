@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
         session.subscription as string,
       );
 
-      await supabase.from('subscriptions').upsert(
+      const { error } = await supabase.from('subscriptions').upsert(
         {
           organization_id: orgId,
           stripe_customer_id: session.customer as string,
@@ -72,6 +72,12 @@ Deno.serve(async (req: Request) => {
         },
         { onConflict: 'organization_id' },
       );
+      if (error) {
+        console.error('Subscription upsert failed:', error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 500,
+        });
+      }
       break;
     }
 
@@ -90,19 +96,27 @@ Deno.serve(async (req: Request) => {
               ? 'canceled'
               : 'active';
 
-      await supabase.from('subscriptions').upsert(
-        {
-          organization_id: orgId,
-          stripe_subscription_id: sub.id,
-          plan,
-          status,
-          current_period_end: new Date(
-            sub.current_period_end * 1000,
-          ).toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'organization_id' },
-      );
+      const { error: updateError } = await supabase
+        .from('subscriptions')
+        .upsert(
+          {
+            organization_id: orgId,
+            stripe_subscription_id: sub.id,
+            plan,
+            status,
+            current_period_end: new Date(
+              sub.current_period_end * 1000,
+            ).toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'organization_id' },
+        );
+      if (updateError) {
+        console.error('Subscription update upsert failed:', updateError);
+        return new Response(JSON.stringify({ error: updateError.message }), {
+          status: 500,
+        });
+      }
       break;
     }
 
@@ -111,10 +125,16 @@ Deno.serve(async (req: Request) => {
       const orgId = orgFromMeta(sub.metadata);
       if (!orgId) break;
 
-      await supabase
+      const { error: deleteError } = await supabase
         .from('subscriptions')
         .update({ status: 'canceled', updated_at: new Date().toISOString() })
         .eq('organization_id', orgId);
+      if (deleteError) {
+        console.error('Subscription cancellation update failed:', deleteError);
+        return new Response(JSON.stringify({ error: deleteError.message }), {
+          status: 500,
+        });
+      }
       break;
     }
   }

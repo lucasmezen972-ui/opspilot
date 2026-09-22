@@ -21,6 +21,7 @@ import {
   getDemoTrainingQuizQuestions,
   getDemoTrainings,
   getDemoTrainingProgress,
+  getDemoTrainingCertificates,
   type DemoSettings,
 } from './demoData';
 import type {
@@ -97,7 +98,7 @@ function seed(): DemoState {
     trainingChapters: getDemoTrainingChapters(),
     trainingQuizQuestions: getDemoTrainingQuizQuestions(),
     trainingProgress: getDemoTrainingProgress(),
-    trainingCertificates: [],
+    trainingCertificates: getDemoTrainingCertificates(),
     channels: getDemoChannels(),
     channelMessages: getDemoChannelMessages(),
     conversations: getDemoConversations(),

@@ -19,7 +19,7 @@ describe('demo store', () => {
     const state = getDemoState();
     expect(state.audits.length).toBeGreaterThan(0);
     expect(state.trainings.length).toBeGreaterThan(0);
-    expect(state.trainingCertificates).toEqual([]);
+    expect(state.trainingCertificates.length).toBeGreaterThan(0);
   });
 
   it('applique une mutation immuable et la rend visible globalement', () => {

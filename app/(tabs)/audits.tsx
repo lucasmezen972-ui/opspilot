@@ -351,7 +351,7 @@ export default function AuditsScreen() {
 
       {showSearch && (
         <View style={styles.searchBar}>
-          <Search size={16} color="#9CA3AF" />
+          <Search size={16} color={colors.textFaint} />
           <TextInput
             style={styles.searchInput}
             placeholder="Rechercher un audit..."
@@ -361,7 +361,7 @@ export default function AuditsScreen() {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <X size={16} color="#9CA3AF" />
+              <X size={16} color={colors.textFaint} />
             </TouchableOpacity>
           )}
         </View>
@@ -433,7 +433,7 @@ export default function AuditsScreen() {
 
       {/* Floating Action Button */}
       <TouchableOpacity style={styles.fab} onPress={() => handleOpenCamera()}>
-        <Camera size={24} color="#FFFFFF" />
+        <Camera size={24} color={colors.surface} />
       </TouchableOpacity>
 
       <CameraModal
@@ -470,31 +470,31 @@ export default function AuditsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border,
     gap: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     paddingVertical: 6,
-    color: '#111827',
+    color: colors.textStrong,
   },
   createButton: {
     margin: 20,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     ...shadow.floating,
