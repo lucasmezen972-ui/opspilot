@@ -31,11 +31,13 @@ export function useAppSettings() {
       return;
     }
     try {
-      const { data, error } = await supabase
+      const { data, error: queryError } = await supabase
         .from('app_settings')
         .select('key, value')
         .eq('organization_id', profile.organization_id);
-      if (!error && data) {
+      if (queryError) {
+        setError(mapSupabaseError('Erreur fetchAppSettings', queryError));
+      } else if (data) {
         setSettings(
           Object.fromEntries(data.map((r) => [r.key, r.value ?? {}])),
         );

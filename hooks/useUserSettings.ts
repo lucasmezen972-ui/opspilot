@@ -57,9 +57,11 @@ export function useUserSettings() {
         await Promise.all([preferencesQuery, organizationQuery, storeQuery]);
 
       if (preferencesResult.error) {
-        mapSupabaseError(
-          'Erreur récupération préférences',
-          preferencesResult.error,
+        setError(
+          mapSupabaseError(
+            'Erreur récupération préférences',
+            preferencesResult.error,
+          ),
         );
       } else if (preferencesResult.data) {
         setPreferences({
@@ -69,16 +71,20 @@ export function useUserSettings() {
       }
 
       if (organizationResult.error) {
-        mapSupabaseError(
-          'Erreur récupération organisation',
-          organizationResult.error,
+        setError(
+          mapSupabaseError(
+            'Erreur récupération organisation',
+            organizationResult.error,
+          ),
         );
       } else {
         setOrganizationName(organizationResult.data?.name || '');
       }
 
       if (storeResult.error) {
-        mapSupabaseError('Erreur récupération magasin', storeResult.error);
+        setError(
+          mapSupabaseError('Erreur récupération magasin', storeResult.error),
+        );
       } else {
         setStoreName(storeResult.data?.name || '');
       }

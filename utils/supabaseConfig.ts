@@ -5,7 +5,7 @@ export interface SupabaseConfigResult {
   url?: string;
 }
 
-const DEFAULT_SUPABASE_URL = 'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
+export const DEFAULT_SUPABASE_URL = 'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
 
 export const getSupabaseConfigStatus = (): SupabaseConfigResult => {
   // `||` keeps GitHub Actions empty secrets from disabling the public fallback.
