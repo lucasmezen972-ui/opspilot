@@ -54,6 +54,7 @@ export default function TrainingScreen() {
   const {
     courses: dbCourses,
     loading: coursesLoading,
+    error: coursesError,
     startCourse,
     markChapterRead,
     completeQuiz,
@@ -412,6 +413,10 @@ export default function TrainingScreen() {
                   Chargement des formations…
                 </Text>
               </View>
+            ) : coursesError ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{coursesError}</Text>
+              </View>
             ) : courses.length === 0 ? (
               <Text style={styles.emptyCourses}>
                 Aucune formation disponible pour le moment.
@@ -571,6 +576,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primary,
     fontWeight: '500',
+  },
+  errorBanner: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.danger,
+    textAlign: 'center',
   },
   emptyCourses: {
     fontSize: 14,
