@@ -13,7 +13,7 @@ import {
 
 import ConnectedStatus from './ConnectedStatus';
 import { useAuth } from '../hooks/useAuth';
-import { colors, shadow } from '../shared/styles/tokens';
+import { colors, radius, spacing, shadow } from '../shared/styles/tokens';
 import { extractErrorMessage } from '../utils/error';
 import { loginSchema } from '../utils/validation';
 
@@ -168,7 +168,7 @@ export default function AuthScreen() {
 
       <View style={styles.demoContainer}>
         <View style={styles.demoHeader}>
-          <Zap size={16} color="#F59E0B" />
+          <Zap size={16} color={colors.warning} />
           <Text style={styles.demoTitle}>Démo terrain guidée</Text>
           <Text style={styles.demoSubtitle}> (fonctionne hors ligne)</Text>
         </View>
@@ -181,9 +181,9 @@ export default function AuthScreen() {
           accessibilityLabel="Connexion démo"
         >
           {demoLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.surface} />
           ) : (
-            <Zap size={16} color="#FFFFFF" />
+            <Zap size={16} color={colors.surface} />
           )}
           <Text style={styles.demoButtonText}>
             {demoLoading ? 'Connexion...' : 'Lancer la démo OpsPilot'}
@@ -244,7 +244,7 @@ export default function AuthScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={colors.surface} />
               ) : (
                 <Text style={styles.buttonText}>
                   Envoyer le lien de réinitialisation
@@ -271,11 +271,11 @@ export default function AuthScreen() {
               disabled={loading || demoLoading}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={colors.surface} />
               ) : isLogin ? (
-                <LogIn size={20} color="#FFFFFF" />
+                <LogIn size={20} color={colors.surface} />
               ) : (
-                <UserPlus size={20} color="#FFFFFF" />
+                <UserPlus size={20} color={colors.surface} />
               )}
               <Text style={styles.buttonText}>
                 {loading
@@ -339,82 +339,87 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#F8FAFC' },
+  scroll: { flex: 1, backgroundColor: colors.background },
   container: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: spacing.xl,
     paddingTop: 60,
     paddingBottom: 40,
   },
-  header: { alignItems: 'center', marginBottom: 24 },
+  header: { alignItems: 'center', marginBottom: spacing.xxl },
   logo: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  logoText: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
-  title: { fontSize: 28, fontWeight: '700', color: '#111827', marginBottom: 6 },
+  logoText: { color: colors.surface, fontSize: 28, fontWeight: '700' },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.textStrong,
+    marginBottom: 6,
+  },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 20,
   },
-  statusContainer: { marginBottom: 12 },
+  statusContainer: { marginBottom: spacing.md },
   offlineBanner: {
-    backgroundColor: '#FEF3C7',
-    borderRadius: 8,
+    backgroundColor: colors.warningSoft,
+    borderRadius: radius.sm,
     padding: 10,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
+    borderLeftColor: colors.warning,
   },
   offlineText: {
-    color: '#92400E',
+    color: colors.warningText,
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
   },
   successContainer: {
-    backgroundColor: '#DCFCE7',
-    borderRadius: 8,
+    backgroundColor: colors.successSoft,
+    borderRadius: radius.sm,
     padding: 10,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#22C55E',
+    borderLeftColor: colors.success,
   },
   successText: {
-    color: '#166534',
+    color: colors.successText,
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
   },
   errorContainer: {
-    backgroundColor: '#FEE2E2',
-    borderRadius: 8,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.sm,
     padding: 10,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
+    borderLeftColor: colors.danger,
   },
   errorText: {
-    color: '#DC2626',
+    color: colors.dangerStrong,
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
   },
   demoContainer: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 12,
+    backgroundColor: colors.fieldWarm,
+    borderRadius: radius.lg,
     padding: 14,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: colors.fieldBorder,
   },
   demoHeader: {
     flexDirection: 'row',
@@ -422,31 +427,35 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 10,
   },
-  demoTitle: { fontWeight: '600', fontSize: 14, color: '#92400E' },
-  demoSubtitle: { fontSize: 12, color: '#B45309', fontStyle: 'italic' },
+  demoTitle: { fontWeight: '600', fontSize: 14, color: colors.warningText },
+  demoSubtitle: {
+    fontSize: 12,
+    color: colors.warningText,
+    fontStyle: 'italic',
+  },
   demoButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#F59E0B',
-    paddingVertical: 12,
-    borderRadius: 10,
+    gap: spacing.sm,
+    backgroundColor: colors.warning,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
   },
   demoButtonLoading: { opacity: 0.8 },
-  demoButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  demoButtonText: { color: colors.surface, fontSize: 15, fontWeight: '700' },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
-  dividerText: { color: '#9CA3AF', fontSize: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { color: colors.textFaint, fontSize: 12 },
   form: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.hairline,
     ...shadow.card,
@@ -454,57 +463,61 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#111827',
-    marginBottom: 20,
+    color: colors.textStrong,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 11,
     fontSize: 15,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#2563EB',
-    borderRadius: 10,
+    gap: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
     paddingVertical: 14,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   buttonDisabled: { opacity: 0.7 },
-  buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  buttonText: { color: colors.surface, fontSize: 15, fontWeight: '600' },
   resetHint: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textMuted,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
     lineHeight: 18,
   },
   switchButton: { alignItems: 'center', paddingVertical: 6 },
-  switchButtonText: { color: '#2563EB', fontSize: 14, fontWeight: '500' },
-  forgotPasswordText: { color: '#6B7280', fontSize: 13, fontWeight: '500' },
+  switchButtonText: { color: colors.primary, fontSize: 14, fontWeight: '500' },
+  forgotPasswordText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '500',
+  },
   legalLinks: {
     alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: spacing.xl,
   },
   legalLink: {
-    color: '#4B5563',
+    color: colors.text,
     fontSize: 12,
     textDecorationLine: 'underline',
   },
   legalSeparator: {
-    color: '#9CA3AF',
+    color: colors.textFaint,
     fontSize: 12,
   },
 });
