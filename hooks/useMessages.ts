@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import { useDemoCollection, updateDemoCollection } from '../lib/demoStore';
@@ -15,6 +15,8 @@ export function useMessages() {
   const [error, setError] = useState<string | null>(null);
   const { profile, isDemoMode, session } = useAuth();
   const activeConversationRef = useRef<string | null>(null);
+  const profileIdRef = useRef<string | undefined>(profile?.id);
+  profileIdRef.current = profile?.id;
   const [activeConversationId, setActiveConversationId] = useState<
     string | null
   >(null);
@@ -28,23 +30,7 @@ export function useMessages() {
     ? demoMessages.filter((m) => m.conversation_id === activeConversationId)
     : remoteMessages;
 
-  useEffect(() => {
-    if (isLocalDemo) {
-      setLoading(false);
-      return;
-    }
-    if (profile?.organization_id) {
-      fetchConversations().then((convs) => {
-        if (convs && convs.length > 0) fetchUnreadCounts(convs);
-      });
-      const cleanup = setupRealtimeSubscription();
-      return () => {
-        cleanup?.();
-      };
-    }
-  }, [profile?.organization_id, isLocalDemo]);
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!profile?.organization_id) return;
 
     try {
@@ -73,7 +59,7 @@ export function useMessages() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.organization_id]);
 
   const fetchMessages = async (conversationId: string) => {
     activeConversationRef.current = conversationId;
@@ -214,7 +200,7 @@ export function useMessages() {
     }
   };
 
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscription = useCallback(() => {
     if (!profile?.organization_id) return;
 
     const subscription = supabase
@@ -238,7 +224,7 @@ export function useMessages() {
             });
           }
           setUnreadCounts((prev) => {
-            if (newMessage.sender_id === profile?.id) return prev;
+            if (newMessage.sender_id === profileIdRef.current) return prev;
             const convId = newMessage.conversation_id;
             if (convId === activeConversationRef.current) return prev;
             return { ...prev, [convId]: (prev[convId] ?? 0) + 1 };
@@ -250,7 +236,28 @@ export function useMessages() {
     return () => {
       subscription.unsubscribe();
     };
-  };
+  }, [profile?.organization_id]);
+
+  useEffect(() => {
+    if (isLocalDemo) {
+      setLoading(false);
+      return;
+    }
+    if (profile?.organization_id) {
+      fetchConversations().then((convs) => {
+        if (convs && convs.length > 0) fetchUnreadCounts(convs);
+      });
+      const cleanup = setupRealtimeSubscription();
+      return () => {
+        cleanup?.();
+      };
+    }
+  }, [
+    profile?.organization_id,
+    isLocalDemo,
+    fetchConversations,
+    setupRealtimeSubscription,
+  ]);
 
   const createConversation = async (
     name: string,

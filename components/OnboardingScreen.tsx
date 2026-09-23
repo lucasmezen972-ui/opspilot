@@ -32,6 +32,7 @@ import {
 } from '../features/onboarding/onboardingModel';
 import { useAuth } from '../hooks/AuthContext';
 import { supabase } from '../lib/supabase';
+import { colors, radius, spacing } from '../shared/styles/tokens';
 import { mapSupabaseError } from '../utils/error';
 
 type Mode = 'create' | 'join';
@@ -168,7 +169,7 @@ export default function OnboardingScreen() {
             >
               <Building2
                 size={18}
-                color={mode === 'create' ? '#2563EB' : '#6B7280'}
+                color={mode === 'create' ? colors.primary : colors.textMuted}
               />
               <Text
                 style={[
@@ -188,7 +189,7 @@ export default function OnboardingScreen() {
             >
               <Ticket
                 size={18}
-                color={mode === 'join' ? '#2563EB' : '#6B7280'}
+                color={mode === 'join' ? colors.primary : colors.textMuted}
               />
               <Text
                 style={[
@@ -208,7 +209,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.input}
               placeholder="Collez le code reçu de votre manager"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textFaint}
               value={inviteCode}
               onChangeText={setInviteCode}
               autoCapitalize="none"
@@ -224,7 +225,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.input}
               placeholder="Ex : Supermarchés Durand"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textFaint}
               value={orgName}
               onChangeText={setOrgName}
             />
@@ -272,7 +273,7 @@ export default function OnboardingScreen() {
                         m.core && styles.checkboxLocked,
                       ]}
                     >
-                      {active && <Check size={14} color="#FFFFFF" />}
+                      {active && <Check size={14} color={colors.surface} />}
                     </View>
                     <View style={styles.moduleBody}>
                       <Text style={styles.moduleLabel}>
@@ -290,7 +291,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.input}
               placeholder="Ex : Magasin Centre-Ville"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textFaint}
               value={storeName}
               onChangeText={setStoreName}
             />
@@ -299,7 +300,7 @@ export default function OnboardingScreen() {
             <TextInput
               style={styles.input}
               placeholder="Ex : Marie Dupont"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.textFaint}
               value={managerName}
               onChangeText={setManagerName}
             />
@@ -323,7 +324,7 @@ export default function OnboardingScreen() {
           // step === 'recap' : écran « configuration opérationnelle »
           <View style={styles.form} testID="onboarding-recap">
             <View style={styles.recapHeader}>
-              <CheckCircle size={20} color="#10B981" />
+              <CheckCircle size={20} color={colors.success} />
               <Text style={styles.recapTitle}>
                 Configuration opérationnelle
               </Text>
@@ -372,7 +373,7 @@ export default function OnboardingScreen() {
             disabled={(mode === 'join' && !canJoin) || submitting}
           >
             {submitting ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.surface} />
             ) : (
               <Text style={styles.submitText}>
                 {mode === 'create' ? 'Créer et démarrer' : "Rejoindre l'équipe"}
@@ -386,13 +387,13 @@ export default function OnboardingScreen() {
             style={styles.backButton}
             onPress={() => setStep('form')}
           >
-            <ChevronLeft size={16} color="#6B7280" />
+            <ChevronLeft size={16} color={colors.textMuted} />
             <Text style={styles.signOutText}>Revenir à la configuration</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={styles.signOut} onPress={() => signOut()}>
-          <LogOut size={16} color="#6B7280" />
+          <LogOut size={16} color={colors.textMuted} />
           <Text style={styles.signOutText}>Se déconnecter</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -412,47 +413,47 @@ function RecapRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.xxl,
   },
   logo: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   logoText: {
-    color: '#FFFFFF',
+    color: colors.surface,
     fontSize: 28,
     fontWeight: '700',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.textStrong,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: 6,
-    marginBottom: 24,
+    marginBottom: spacing.xxl,
   },
   modeToggle: {
     flexDirection: 'row',
-    backgroundColor: '#E5E7EB',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
+    backgroundColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.xs,
+    marginBottom: spacing.xl,
   },
   modeButton: {
     flex: 1,
@@ -464,84 +465,84 @@ const styles = StyleSheet.create({
     borderRadius: 9,
   },
   modeButtonActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   modeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   modeTextActive: {
-    color: '#2563EB',
+    color: colors.primary,
   },
   form: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.text,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 13,
     fontSize: 15,
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 14,
   },
   chipsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
     marginBottom: 14,
   },
   sectorChip: {
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 999,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
     paddingHorizontal: 14,
     paddingVertical: 9,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   sectorChipActive: {
-    borderColor: '#2563EB',
-    backgroundColor: '#EEF2FF',
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
   },
   sectorChipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   sectorChipTextActive: {
-    color: '#1D4ED8',
+    color: colors.primaryDark,
   },
   moduleList: {
     marginBottom: 14,
-    gap: 4,
+    gap: spacing.xs,
   },
   moduleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
   checkbox: {
     width: 22,
     height: 22,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: '#D1D5DB',
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxOn: {
-    backgroundColor: '#2563EB',
-    borderColor: '#2563EB',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   checkboxLocked: {
     opacity: 0.7,
@@ -552,11 +553,11 @@ const styles = StyleSheet.create({
   moduleLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
   },
   moduleDesc: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: colors.textFaint,
     marginTop: 1,
   },
   progressRow: {
@@ -569,69 +570,69 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.border,
     overflow: 'hidden',
   },
   progressFill: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
   },
   progressText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#2563EB',
+    color: colors.primary,
     width: 38,
     textAlign: 'right',
   },
   recapHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   recapTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#111827',
+    color: colors.textStrong,
   },
   recapRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: spacing.md,
     paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: colors.backgroundAlt,
   },
   recapLabel: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   recapValue: {
     flex: 1,
     fontSize: 13,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     textAlign: 'right',
   },
   hint: {
     fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 8,
-    marginBottom: 8,
+    color: colors.textFaint,
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
   },
   error: {
     fontSize: 13,
-    color: '#DC2626',
+    color: colors.dangerStrong,
     marginBottom: 10,
     textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: '#2563EB',
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
     paddingVertical: 15,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   submitDisabled: {
     opacity: 0.5,
@@ -639,13 +640,13 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.surface,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: spacing.xs,
     marginTop: 14,
   },
   signOut: {
@@ -653,10 +654,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: 20,
+    marginTop: spacing.xl,
   },
   signOutText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textMuted,
   },
 });

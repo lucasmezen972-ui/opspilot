@@ -4,6 +4,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useAuth } from '../hooks/useAuth';
+import { colors, radius, spacing } from '../shared/styles/tokens';
 
 type AppRole =
   | 'superadmin'
@@ -36,7 +37,7 @@ export default function RequireRole({
     return (
       <View style={styles.container} testID="access-denied-screen">
         <View style={styles.iconWrap}>
-          <ShieldAlert size={36} color="#DC2626" />
+          <ShieldAlert size={36} color={colors.dangerStrong} />
         </View>
         <Text style={styles.title}>Accès non autorisé</Text>
         <Text style={styles.subtitle}>
@@ -61,7 +62,7 @@ export default function RequireRole({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,
@@ -70,32 +71,32 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: colors.dangerSoft,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
+    color: colors.textStrong,
+    marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: spacing.xxl,
   },
   button: {
-    backgroundColor: '#2563EB',
-    borderRadius: 10,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: colors.surface,
     fontSize: 14,
     fontWeight: '600',
   },
