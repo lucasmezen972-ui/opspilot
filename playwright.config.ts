@@ -21,9 +21,9 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
-          executablePath:
-            process.env.PLAYWRIGHT_CHROMIUM_PATH ||
-            '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+          ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
+            ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+            : {}),
           args: [
             '--use-fake-device-for-media-stream',
             '--use-fake-ui-for-media-stream',
