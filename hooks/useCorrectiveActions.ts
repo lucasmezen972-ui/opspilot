@@ -96,6 +96,7 @@ export function useCorrectiveActions() {
       const { data, error } = await supabase
         .from('corrective_actions')
         .insert({
+          ...actionData,
           organization_id: profile.organization_id,
           store_id: profile.store_id ?? null,
           assignee_id: actionData.assignee_id ?? user.id,
@@ -104,7 +105,6 @@ export function useCorrectiveActions() {
           description: actionData.description ?? null,
           priority: actionData.priority ?? 'medium',
           status: 'open',
-          ...actionData,
         })
         .select()
         .single();

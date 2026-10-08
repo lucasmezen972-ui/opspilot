@@ -71,10 +71,13 @@ export function useAudits() {
 
       setRemoteAudits(data || []);
 
-      const { data: sigData } = await supabase
+      const { data: sigData, error: sigError } = await supabase
         .from('audit_signatures')
         .select('*')
         .eq('organization_id', profile.organization_id);
+      if (sigError) {
+        mapSupabaseError('Erreur récupération signatures', sigError);
+      }
       setRemoteSignatures((sigData ?? []) as AuditSignature[]);
     } catch (err) {
       setError(mapSupabaseError('Erreur fetchAudits', err));
@@ -124,6 +127,7 @@ export function useAudits() {
       const { data, error } = await supabase
         .from('audits')
         .insert({
+          ...auditData,
           organization_id: profile.organization_id,
           auditor_id: user.id,
           title: auditData.title ?? '',
@@ -133,7 +137,6 @@ export function useAudits() {
           max_score: auditData.max_score ?? 100,
           issues_count: 0,
           photos: [],
-          ...auditData,
         })
         .select()
         .single();
@@ -348,18 +351,12 @@ export function useAudits() {
       if (!audit) return { data: null, error: 'Audit introuvable' };
 
       if (isLocalDemo) {
-        let updated: Audit | null = null;
-        setAudits((prev) =>
-          prev.map((a) => {
-            if (a.id !== id) return a;
-            updated = {
-              ...a,
-              photos: [...(a.photos || []), photoUrl],
-              updated_at: new Date().toISOString(),
-            };
-            return updated;
-          }),
-        );
+        const updated = {
+          ...audit,
+          photos: [...(audit.photos || []), photoUrl],
+          updated_at: new Date().toISOString(),
+        };
+        setAudits((prev) => prev.map((a) => (a.id === id ? updated : a)));
         return { data: updated, error: null };
       }
 

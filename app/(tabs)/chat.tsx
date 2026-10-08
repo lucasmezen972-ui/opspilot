@@ -372,6 +372,9 @@ export default function ChatScreen() {
                       );
                     }
                   },
+                  () => {
+                    Alert.alert('Erreur', "Impossible d'envoyer le message.");
+                  },
                 );
               }}
               onTogglePin={togglePin}

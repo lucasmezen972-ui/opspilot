@@ -34,6 +34,7 @@ export default function ProductsScreen() {
   const {
     products: allProducts,
     loading,
+    error: productsError,
     scanProduct,
     createProduct,
     updateProduct,
@@ -114,7 +115,7 @@ export default function ProductsScreen() {
     () => filterProducts(allProducts, searchQuery),
     [allProducts, searchQuery],
   );
-  const stockCounts = useMemo(() => getStockCounts(products), [products]);
+  const stockCounts = useMemo(() => getStockCounts(allProducts), [allProducts]);
 
   const handleBarcodeDetected = async (barcode: string) => {
     setIsScanning(true);
@@ -212,7 +213,15 @@ export default function ProductsScreen() {
           />
         ))}
 
-        {!loading && products.length === 0 && (
+        {!loading && productsError && (
+          <AppEmptyState
+            icon={Package}
+            title="Erreur"
+            description={productsError}
+          />
+        )}
+
+        {!loading && !productsError && products.length === 0 && (
           <AppEmptyState
             icon={Package}
             title="Aucun produit"

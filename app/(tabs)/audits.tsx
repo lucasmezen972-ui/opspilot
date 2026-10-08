@@ -341,7 +341,13 @@ export default function AuditsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              onPress={() => exportAuditsAsCSV(dbAudits)}
+              onPress={async () => {
+                try {
+                  await exportAuditsAsCSV(dbAudits);
+                } catch (err) {
+                  Alert.alert('Erreur export', String(err));
+                }
+              }}
             >
               <Download size={20} color={colors.textMuted} />
             </TouchableOpacity>

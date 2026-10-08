@@ -37,6 +37,7 @@ export default function TasksScreen() {
   const {
     tasks,
     loading,
+    error: tasksError,
     updateTaskStatus,
     completeTask,
     validateTask,
@@ -178,6 +179,11 @@ export default function TasksScreen() {
           loading ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>Chargement des tâches...</Text>
+            </View>
+          ) : tasksError ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateTitle}>Erreur</Text>
+              <Text style={styles.emptyStateText}>{tasksError}</Text>
             </View>
           ) : (
             <View style={styles.emptyState}>

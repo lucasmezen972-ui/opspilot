@@ -78,7 +78,7 @@ export default function TrainingScreen() {
   const { logEvent } = useActivityLog();
 
   // Délivrer une attestation trace la certification dans le journal de gouvernance.
-  const handleGenerateCertificate = (
+  const handleGenerateCertificate = async (
     courseId: string,
     score: number,
     options: CertificateSubmitOptions,
@@ -90,7 +90,10 @@ export default function TrainingScreen() {
       entityId: courseId,
       label: `Formation « ${course?.title ?? 'formation'} » validée par ${options.fullName} (matricule ${options.employeeId}, score ${score} %).`,
     });
-    generateCertificate(courseId, score, options);
+    const result = await generateCertificate(courseId, score, options);
+    if (result?.error) {
+      Alert.alert('Erreur', String(result.error));
+    }
   };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
