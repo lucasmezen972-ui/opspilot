@@ -6,6 +6,7 @@ import {
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
+import { colors, radius, spacing } from '../shared/styles/tokens';
 import { getSupabaseConfigStatus } from '../utils/supabaseConfig';
 
 interface ConnectedStatusProps {
@@ -16,29 +17,30 @@ export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
   const { status } = getSupabaseConfigStatus();
 
   let message = '⚠️ Configuration Supabase incomplète';
-  let containerStyle = styles.disconnected;
-  let textStyle = styles.disconnectedText;
+  let containerStyle: (typeof styles)[keyof typeof styles] =
+    styles.disconnected;
+  let textStyle: (typeof styles)[keyof typeof styles] = styles.disconnectedText;
   let Icon = Wifi;
-  let iconColor = '#6B7280';
+  let iconColor: string = colors.textMuted;
 
   if (status === 'missing') {
     message = '❌ URL Supabase manquante';
     containerStyle = styles.error;
     textStyle = styles.errorText;
     Icon = CircleAlert;
-    iconColor = '#DC2626';
+    iconColor = colors.dangerStrong;
   } else if (status === 'placeholder') {
     message = '❌ URL Supabase invalide';
     containerStyle = styles.error;
     textStyle = styles.errorText;
     Icon = CircleAlert;
-    iconColor = '#DC2626';
+    iconColor = colors.dangerStrong;
   } else if (status === 'valid') {
     message = `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}`;
     containerStyle = styles.connected;
     textStyle = styles.connectedText;
     Icon = CheckCircle;
-    iconColor = '#10B981';
+    iconColor = colors.success;
   }
 
   return (
@@ -53,32 +55,32 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 8,
-    marginBottom: 16,
+    padding: spacing.sm,
+    borderRadius: radius.sm,
+    marginBottom: spacing.lg,
   },
   connected: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: colors.successSoft,
   },
   disconnected: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.backgroundAlt,
   },
   error: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: colors.dangerSoft,
   },
   text: {
     fontSize: 12,
     marginLeft: 6,
   },
   connectedText: {
-    color: '#16A34A',
+    color: colors.successText,
     fontWeight: '500',
   },
   disconnectedText: {
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   errorText: {
-    color: '#DC2626',
+    color: colors.dangerStrong,
     fontWeight: '500',
   },
 });

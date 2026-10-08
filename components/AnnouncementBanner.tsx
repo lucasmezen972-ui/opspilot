@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { colors as tokens, spacing } from '../shared/styles/tokens';
 
 interface Announcement {
   id: string;
@@ -14,9 +15,9 @@ interface Announcement {
 
 const LEVEL_COLORS: Record<Announcement['level'], { bg: string; fg: string }> =
   {
-    info: { bg: '#EFF6FF', fg: '#1D4ED8' },
-    warning: { bg: '#FFFBEB', fg: '#B45309' },
-    success: { bg: '#F0FDF4', fg: '#15803D' },
+    info: { bg: tokens.primarySoft, fg: tokens.primaryDark },
+    warning: { bg: tokens.fieldWarm, fg: tokens.warningText },
+    success: { bg: tokens.successSoft, fg: tokens.successText },
   };
 
 const DISMISSED_KEY = 'opspilot_dismissed_announcements';
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 10,
     paddingTop: 50,
   },

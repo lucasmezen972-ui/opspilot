@@ -8,6 +8,7 @@ import AuthScreen from '../components/AuthScreen';
 import GlobalErrorBoundary from '../components/GlobalErrorBoundary';
 import OnboardingScreen from '../components/OnboardingScreen';
 import { AuthProvider, useAuth } from '../hooks/AuthContext';
+import { colors, spacing } from '../shared/styles/tokens';
 
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
@@ -28,7 +29,7 @@ function AuthGate() {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#F8FAFC',
+          backgroundColor: colors.background,
         }}
       >
         <View
@@ -36,18 +37,26 @@ function AuthGate() {
             width: 80,
             height: 80,
             borderRadius: 40,
-            backgroundColor: '#2563EB',
+            backgroundColor: colors.primary,
             justifyContent: 'center',
             alignItems: 'center',
-            marginBottom: 16,
+            marginBottom: spacing.lg,
           }}
         >
-          <Text style={{ color: '#FFFFFF', fontSize: 32, fontWeight: '700' }}>
+          <Text
+            style={{ color: colors.surface, fontSize: 32, fontWeight: '700' }}
+          >
             OP
           </Text>
         </View>
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={{ color: '#6B7280', marginTop: 12, fontSize: 16 }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text
+          style={{
+            color: colors.textMuted,
+            marginTop: spacing.md,
+            fontSize: 16,
+          }}
+        >
           Chargement...
         </Text>
       </View>
