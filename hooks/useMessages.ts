@@ -17,6 +17,7 @@ export function useMessages() {
   const activeConversationRef = useRef<string | null>(null);
   const profileIdRef = useRef<string | undefined>(profile?.id);
   profileIdRef.current = profile?.id;
+  const conversationIdsRef = useRef<Set<string>>(new Set());
   const [activeConversationId, setActiveConversationId] = useState<
     string | null
   >(null);
@@ -57,6 +58,7 @@ export function useMessages() {
       }
 
       setRemoteConversations(data || []);
+      conversationIdsRef.current = new Set((data || []).map((c) => c.id));
       return data || [];
     } catch (err) {
       setError(mapSupabaseError('Erreur fetchConversations', err));
@@ -224,6 +226,9 @@ export function useMessages() {
         },
         (payload) => {
           const newMessage = payload.new as Message;
+          if (!conversationIdsRef.current.has(newMessage.conversation_id)) {
+            return;
+          }
           if (
             activeConversationRef.current &&
             newMessage.conversation_id === activeConversationRef.current

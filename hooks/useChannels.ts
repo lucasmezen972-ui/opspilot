@@ -281,7 +281,7 @@ export function useChannels() {
       }
       await fetchData();
     },
-    [isLocalDemo, allMessages],
+    [isLocalDemo, allMessages, fetchData],
   );
 
   const deleteMessage = useCallback(
