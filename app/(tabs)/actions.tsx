@@ -92,7 +92,8 @@ export default function ActionsScreen() {
 
   const advanceStatus = (action: CorrectiveAction) => {
     const idx = STATUS_FLOW.indexOf(action.status);
-    const next = idx >= 0 ? STATUS_FLOW[idx + 1] : undefined;
+    if (idx < 0) return;
+    const next = STATUS_FLOW[idx + 1];
     if (!next) return;
 
     if (next === 'done') {

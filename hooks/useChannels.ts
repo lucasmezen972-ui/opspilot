@@ -70,7 +70,9 @@ export function useChannels() {
           );
         }
         if (readResult.error) {
-          mapSupabaseError('Erreur chargement lectures', readResult.error);
+          setError(
+            mapSupabaseError('Erreur chargement lectures', readResult.error),
+          );
         }
         setRemoteMessages((msgResult.data ?? []) as ChannelMessage[]);
         const reads: Record<string, string> = {};

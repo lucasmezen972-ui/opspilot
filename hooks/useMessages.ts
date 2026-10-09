@@ -31,6 +31,10 @@ export function useMessages() {
     : remoteMessages;
 
   const fetchConversations = useCallback(async () => {
+    if (isLocalDemo) {
+      setLoading(false);
+      return;
+    }
     if (!profile?.organization_id) return;
 
     try {
@@ -59,7 +63,7 @@ export function useMessages() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, isLocalDemo]);
 
   const fetchMessages = async (conversationId: string) => {
     activeConversationRef.current = conversationId;
@@ -67,6 +71,7 @@ export function useMessages() {
     if (isLocalDemo) {
       return;
     }
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -95,6 +100,8 @@ export function useMessages() {
     } catch (err) {
       if (activeConversationRef.current !== conversationId) return;
       setError(mapSupabaseError('Erreur fetchMessages', err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,7 +124,7 @@ export function useMessages() {
         created_at: new Date().toISOString(),
       };
       updateDemoCollection('messages', (prev) => [...prev, msg]);
-      return { data: msg };
+      return { data: msg, error: null };
     }
 
     try {
@@ -141,11 +148,11 @@ export function useMessages() {
 
       if (error) {
         return {
+          data: null,
           error: mapSupabaseError("Erreur lors de l'envoi du message", error),
         };
       }
 
-      // Mettre à jour la dernière activité de la conversation
       await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -155,9 +162,12 @@ export function useMessages() {
         if (prev.some((m) => m.id === data.id)) return prev;
         return [...prev, data];
       });
-      return { data };
+      return { data, error: null };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur envoi message', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur envoi message', error),
+      };
     }
   };
 
@@ -280,7 +290,7 @@ export function useMessages() {
         created_at: new Date().toISOString(),
       };
       updateDemoCollection('conversations', (prev) => [conv, ...prev]);
-      return { data: conv };
+      return { data: conv, error: null };
     }
 
     try {
@@ -298,6 +308,7 @@ export function useMessages() {
 
       if (error) {
         return {
+          data: null,
           error: mapSupabaseError(
             'Erreur lors de la création de la conversation',
             error,
@@ -306,9 +317,12 @@ export function useMessages() {
       }
 
       setRemoteConversations((prev) => [data, ...prev]);
-      return { data };
+      return { data, error: null };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur createConversation', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur createConversation', error),
+      };
     }
   };
 
