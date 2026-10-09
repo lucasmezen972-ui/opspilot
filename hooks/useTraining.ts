@@ -282,13 +282,9 @@ export function useTraining() {
     };
 
     if (isLocalDemo) {
-      let updated: UserTrainingProgress | null = null;
+      const updated = { ...courseProgress, ...updates };
       updateDemoCollection('trainingProgress', (current) =>
-        current.map((item) => {
-          if (item.training_id !== courseId) return item;
-          updated = { ...item, ...updates };
-          return updated;
-        }),
+        current.map((item) => (item.training_id === courseId ? updated : item)),
       );
       return { data: updated };
     }
@@ -352,13 +348,13 @@ export function useTraining() {
           : null,
         updated_at: new Date().toISOString(),
       };
-      let updated: UserTrainingProgress | null = null;
+      const base =
+        existingProgress ?? progress.find((p) => p.training_id === courseId);
+      const updated = base ? { ...base, ...updates } : null;
       updateDemoCollection('trainingProgress', (prev) =>
-        prev.map((p) => {
-          if (p.training_id !== courseId) return p;
-          updated = { ...p, ...updates };
-          return updated;
-        }),
+        prev.map((p) =>
+          p.training_id === courseId ? { ...p, ...updates } : p,
+        ),
       );
       if (passed && !alreadyCompleted) {
         const newXP = (profile.xp ?? 0) + course.xp_reward;

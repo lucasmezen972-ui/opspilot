@@ -206,6 +206,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             demoModeRef.current = false;
             setIsDemoMode(false);
+            setAuthError(null);
           }
           setSession(s ?? null);
           setUserAndRef(s?.user ?? null);
@@ -329,14 +330,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     let signOutError: unknown = null;
     try {
-      if (!isDemoMode) {
+      if (!demoModeRef.current) {
         const { error } = await supabase.auth.signOut();
         if (error) signOutError = error;
       }
     } catch (e) {
       signOutError = e;
     }
-    if (isDemoMode) resetDemoStore();
+    if (demoModeRef.current) resetDemoStore();
     setProfile(null);
     setSession(null);
     setUserAndRef(null);

@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { AppErrorState } from '../shared/components/AppErrorState';
+import { colors, radius, spacing } from '../shared/styles/tokens';
 
 interface Props {
   children: ReactNode;
@@ -62,17 +63,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#F8FAFC',
+    padding: spacing.xxl,
+    backgroundColor: colors.background,
   },
   devError: {
     fontSize: 11,
-    color: '#EF4444',
+    color: colors.danger,
     fontFamily: 'monospace',
-    backgroundColor: '#FEE2E2',
+    backgroundColor: colors.dangerSoft,
     padding: 10,
-    borderRadius: 6,
-    marginTop: 12,
+    borderRadius: radius.sm,
+    marginTop: spacing.md,
     maxWidth: '100%',
   },
 });

@@ -37,12 +37,17 @@ export function useChannels() {
     if (!profile?.organization_id || !profile?.id) return;
     setLoading(true);
     try {
-      const { data: chData } = await supabase
+      setError(null);
+      const { data: chData, error: chErr } = await supabase
         .from('channels')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .eq('is_archived', false)
         .order('created_at', { ascending: true });
+      if (chErr) {
+        setError(mapSupabaseError('Erreur chargement canaux', chErr));
+        return;
+      }
       setRemoteChannels((chData ?? []) as Channel[]);
 
       const channelIds = (chData ?? []).map((c) => c.id as string);
@@ -52,12 +57,21 @@ export function useChannels() {
             .from('channel_messages')
             .select('*')
             .in('channel_id', channelIds)
-            .order('created_at', { ascending: true }),
+            .order('created_at', { ascending: true })
+            .limit(1000),
           supabase
             .from('channel_reads')
             .select('channel_id, last_read_at')
             .eq('user_id', profile.id),
         ]);
+        if (msgResult.error) {
+          setError(
+            mapSupabaseError('Erreur chargement messages', msgResult.error),
+          );
+        }
+        if (readResult.error) {
+          mapSupabaseError('Erreur chargement lectures', readResult.error);
+        }
         setRemoteMessages((msgResult.data ?? []) as ChannelMessage[]);
         const reads: Record<string, string> = {};
         for (const r of (readResult.data ?? []) as ChannelRead[]) {

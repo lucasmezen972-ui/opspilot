@@ -35,17 +35,14 @@ export const mapSupabaseError = (context: string, error: unknown): string => {
   return GENERIC_SUPABASE_ERROR;
 };
 
-export function extractErrorMessage(error: unknown): string | undefined {
+export const extractErrorMessage = (error: unknown): string | null => {
+  if (!error) return null;
+  if (typeof error === 'string') return error;
   if (error instanceof Error) return error.message;
-  if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
-  )
-    return (error as { message: string }).message;
-  return undefined;
-}
+  if (typeof error === 'object' && 'message' in error)
+    return String((error as { message: unknown }).message);
+  return null;
+};
 
 export const genericMessages = {
   supabase: GENERIC_SUPABASE_ERROR,

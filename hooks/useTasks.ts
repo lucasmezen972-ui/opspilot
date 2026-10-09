@@ -106,6 +106,7 @@ export function useTasks() {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
+          ...taskData,
           organization_id: profile.organization_id,
           store_id: profile.store_id ?? null,
           assigned_to: taskData.assigned_to ?? user.id,
@@ -115,7 +116,6 @@ export function useTasks() {
           location: taskData.location ?? null,
           priority: taskData.priority ?? 'medium',
           status: 'pending',
-          ...taskData,
         })
         .select()
         .single();

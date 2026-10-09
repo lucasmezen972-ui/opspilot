@@ -54,6 +54,7 @@ export default function TrainingScreen() {
   const {
     courses: dbCourses,
     loading: coursesLoading,
+    error: coursesError,
     startCourse,
     markChapterRead,
     completeQuiz,
@@ -77,7 +78,7 @@ export default function TrainingScreen() {
   const { logEvent } = useActivityLog();
 
   // Délivrer une attestation trace la certification dans le journal de gouvernance.
-  const handleGenerateCertificate = (
+  const handleGenerateCertificate = async (
     courseId: string,
     score: number,
     options: CertificateSubmitOptions,
@@ -89,7 +90,10 @@ export default function TrainingScreen() {
       entityId: courseId,
       label: `Formation « ${course?.title ?? 'formation'} » validée par ${options.fullName} (matricule ${options.employeeId}, score ${score} %).`,
     });
-    generateCertificate(courseId, score, options);
+    const result = await generateCertificate(courseId, score, options);
+    if (result?.error) {
+      Alert.alert('Erreur', String(result.error));
+    }
   };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
@@ -412,6 +416,10 @@ export default function TrainingScreen() {
                   Chargement des formations…
                 </Text>
               </View>
+            ) : coursesError ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{coursesError}</Text>
+              </View>
             ) : courses.length === 0 ? (
               <Text style={styles.emptyCourses}>
                 Aucune formation disponible pour le moment.
@@ -571,6 +579,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primary,
     fontWeight: '500',
+  },
+  errorBanner: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.danger,
+    textAlign: 'center',
   },
   emptyCourses: {
     fontSize: 14,

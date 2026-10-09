@@ -18,6 +18,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useInvitations } from '../../hooks/useInvitations';
 import { useTeam } from '../../hooks/useTeam';
 import type { Invitation } from '../../lib/supabase';
+import { colors } from '../../shared/styles/tokens';
 
 export default function TeamScreen() {
   return (
@@ -29,7 +30,12 @@ export default function TeamScreen() {
 
 function TeamScreenContent() {
   const { profile } = useAuth();
-  const { members, loading: loadingMembers, deactivateMember } = useTeam();
+  const {
+    members,
+    loading: loadingMembers,
+    error: membersError,
+    deactivateMember,
+  } = useTeam();
   const {
     invitations,
     loading: loadingInvitations,
@@ -112,17 +118,21 @@ function TeamScreenContent() {
               style={styles.inviteButton}
               onPress={() => setModalVisible(true)}
             >
-              <Plus size={16} color="#FFFFFF" />
+              <Plus size={16} color={colors.surface} />
               <Text style={styles.inviteButtonText}>Inviter</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {loadingMembers ? (
-          <ActivityIndicator color="#2563EB" style={styles.loader} />
+          <ActivityIndicator color={colors.primary} style={styles.loader} />
+        ) : membersError ? (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{membersError}</Text>
+          </View>
         ) : members.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Users size={32} color="#9CA3AF" />
+            <Users size={32} color={colors.textMuted} />
             <Text style={styles.emptyText}>Aucun membre trouvé</Text>
           </View>
         ) : (
@@ -145,10 +155,13 @@ function TeamScreenContent() {
           </Text>
 
           {loadingInvitations ? (
-            <ActivityIndicator color="#2563EB" style={styles.loaderSmall} />
+            <ActivityIndicator
+              color={colors.primary}
+              style={styles.loaderSmall}
+            />
           ) : pendingInvitations.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Mail size={28} color="#9CA3AF" />
+              <Mail size={28} color={colors.textMuted} />
               <Text style={styles.emptyText}>Aucune invitation en attente</Text>
             </View>
           ) : (
@@ -175,21 +188,21 @@ function TeamScreenContent() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     padding: 20,
     paddingTop: 60,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.hairline,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     letterSpacing: -0.4,
-    color: '#111827',
+    color: colors.text,
   },
-  subtitle: { fontSize: 15, color: '#6B7280', marginTop: 4 },
+  subtitle: { fontSize: 15, color: colors.textMuted, marginTop: 4 },
   section: { marginHorizontal: 20, marginTop: 20 },
   sectionLast: { marginBottom: 40 },
   sectionHeader: {
@@ -198,25 +211,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#111827' },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.text },
   inviteButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#2563EB',
+    backgroundColor: colors.primary,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
   },
-  inviteButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
+  inviteButtonText: { color: colors.surface, fontSize: 14, fontWeight: '600' },
   loader: { marginTop: 20 },
   loaderSmall: { marginTop: 12 },
   emptyCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
     gap: 8,
   },
-  emptyText: { fontSize: 14, color: '#9CA3AF' },
+  emptyText: { fontSize: 14, color: colors.textMuted },
+  errorCard: {
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  errorText: { fontSize: 14, color: colors.danger },
 });

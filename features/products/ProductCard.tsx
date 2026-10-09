@@ -59,14 +59,16 @@ export function ProductCard({
       onPress={() => onPress(product)}
       onLongPress={onLongPress ? () => onLongPress(product) : undefined}
     >
-      <Image
-        source={{
-          uri:
-            product.image_url ??
-            'https://images.pexels.com/photos/264537/pexels-photo-264537.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&dpr=2',
-        }}
-        style={styles.productImage}
-      />
+      {product.image_url ? (
+        <Image
+          source={{ uri: product.image_url }}
+          style={styles.productImage}
+        />
+      ) : (
+        <View style={[styles.productImage, styles.productImagePlaceholder]}>
+          <Package size={24} color={colors.textMuted} />
+        </View>
+      )}
 
       <View style={styles.productInfo}>
         <View style={styles.productHeader}>
@@ -130,6 +132,11 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 8,
     marginRight: 16,
+  },
+  productImagePlaceholder: {
+    backgroundColor: colors.backgroundAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   productInfo: {
     flex: 1,

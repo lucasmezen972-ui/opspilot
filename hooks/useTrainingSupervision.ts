@@ -89,6 +89,19 @@ export function useTrainingSupervision() {
           .eq('organization_id', profile.organization_id),
       ]);
 
+      if (membersResult.error) {
+        setError(
+          mapSupabaseError('Erreur chargement membres', membersResult.error),
+        );
+        return;
+      }
+      if (coursesResult.error) {
+        setError(
+          mapSupabaseError('Erreur chargement formations', coursesResult.error),
+        );
+        return;
+      }
+
       const fetchedMembers = (membersResult.data ?? []) as RemoteMember[];
       const fetchedCourses = (coursesResult.data ?? []) as Training[];
       setRemoteMembers(fetchedMembers);
@@ -96,10 +109,16 @@ export function useTrainingSupervision() {
 
       const courseIds = fetchedCourses.map((c) => c.id);
       if (courseIds.length > 0) {
-        const { data: progressData } = await supabase
+        const { data: progressData, error: progressError } = await supabase
           .from('user_training_progress')
           .select('*')
           .in('training_id', courseIds);
+        if (progressError) {
+          setError(
+            mapSupabaseError('Erreur chargement progression', progressError),
+          );
+          return;
+        }
         setRemoteOrgProgress((progressData ?? []) as UserTrainingProgress[]);
       }
     } finally {

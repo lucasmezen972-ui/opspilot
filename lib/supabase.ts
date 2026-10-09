@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 import { logger } from '../utils/logger';
+import { DEFAULT_SUPABASE_URL } from '../utils/supabaseConfig';
 
 // `||` plutôt que `??` : en CI, un secret GitHub absent est injecté comme
 // chaîne vide, qui doit retomber sur le fallback.
@@ -10,7 +11,7 @@ import { logger } from '../utils/logger';
 const SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL ||
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  'https://hpqfmuzkkxrqoqoabjmb.supabase.co';
+  DEFAULT_SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
