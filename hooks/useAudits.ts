@@ -392,20 +392,22 @@ export function useAudits() {
         return demoResponses.filter((r) => r.audit_id === auditId);
       }
       try {
-        const { data, error } = await supabase
+        const { data, error: fetchErr } = await supabase
           .from('audit_responses')
           .select('*')
           .eq('audit_id', auditId);
-        if (error) {
-          mapSupabaseError(
-            'Erreur lors de la récupération des réponses',
-            error,
+        if (fetchErr) {
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération des réponses',
+              fetchErr,
+            ),
           );
           return [];
         }
         return data ?? [];
-      } catch (error) {
-        mapSupabaseError('Erreur getAuditResponses', error);
+      } catch (err) {
+        setError(mapSupabaseError('Erreur getAuditResponses', err));
         return [];
       }
     },

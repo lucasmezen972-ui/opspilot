@@ -163,9 +163,11 @@ export function useTraining() {
       // Les certificats sont secondaires : on n'interrompt pas le chargement
       // de la formation si leur récupération échoue.
       if (certResult.error) {
-        mapSupabaseError(
-          'Erreur lors de la récupération des certificats',
-          certResult.error,
+        setError(
+          mapSupabaseError(
+            'Erreur lors de la récupération des certificats',
+            certResult.error,
+          ),
         );
       } else {
         setRemoteCertificates((certResult.data || []) as TrainingCertificate[]);
@@ -331,10 +333,18 @@ export function useTraining() {
     // Validation alignée sur le moteur de quiz : seuil propre au module
     // (min_score) et échec bloquant en cas de question critique ratée.
     const passed = isQuizPassed(score, failedCritical, course.min_score ?? 70);
-    const existingProgress = progress.find(
+    let existingProgress = progress.find(
       (item) => item.training_id === courseId,
     );
-    const alreadyCompleted = existingProgress?.status === 'completed';
+    if (!existingProgress) {
+      const started = await startCourse(courseId);
+      if (started.error) return started;
+      existingProgress = started.data;
+    }
+    if (!existingProgress) {
+      return { error: 'Impossible de créer la progression' };
+    }
+    const alreadyCompleted = existingProgress.status === 'completed';
     const remainsCompleted = passed || alreadyCompleted;
     const savedScore = alreadyCompleted
       ? Math.max(existingProgress.score ?? 0, score)
