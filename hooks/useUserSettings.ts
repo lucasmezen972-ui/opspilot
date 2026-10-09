@@ -206,11 +206,13 @@ export function useUserSettings() {
     loading,
     error,
     isLocalDemo,
-    preferences: isLocalDemo ? demoSettings.preferences : preferences,
+    preferences: isLocalDemo
+      ? (demoSettings.preferences ?? DEFAULT_NOTIFICATION_PREFERENCES)
+      : preferences,
     organizationName: isLocalDemo
-      ? demoSettings.organizationName
+      ? (demoSettings.organizationName ?? 'Démo OpsPilot')
       : organizationName,
-    storeName: isLocalDemo ? demoSettings.storeName : storeName,
+    storeName: isLocalDemo ? (demoSettings.storeName ?? '') : storeName,
     saveProfile,
     savePreferences,
     changePassword,

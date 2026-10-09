@@ -289,27 +289,33 @@ export function useTraining() {
       return { data: updated };
     }
 
-    const { data, error } = await supabase
-      .from('user_training_progress')
-      .update(updates)
-      .eq('user_id', profile.id)
-      .eq('training_id', courseId)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('user_training_progress')
+        .update(updates)
+        .eq('user_id', profile.id)
+        .eq('training_id', courseId)
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        return {
+          error: mapSupabaseError(
+            'Erreur lors de la validation du chapitre',
+            error,
+          ),
+        };
+      }
+
+      setRemoteProgress((current) =>
+        current.map((item) => (item.training_id === courseId ? data : item)),
+      );
+      return { data };
+    } catch (error) {
       return {
-        error: mapSupabaseError(
-          'Erreur lors de la validation du chapitre',
-          error,
-        ),
+        error: mapSupabaseError('Erreur markChapterRead', error),
       };
     }
-
-    setRemoteProgress((current) =>
-      current.map((item) => (item.training_id === courseId ? data : item)),
-    );
-    return { data };
   };
 
   const completeQuiz = async (

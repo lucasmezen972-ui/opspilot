@@ -76,7 +76,7 @@ export function useAudits() {
         .select('*')
         .eq('organization_id', profile.organization_id);
       if (sigError) {
-        mapSupabaseError('Erreur récupération signatures', sigError);
+        setError(mapSupabaseError('Erreur récupération signatures', sigError));
       }
       setRemoteSignatures((sigData ?? []) as AuditSignature[]);
     } catch (err) {

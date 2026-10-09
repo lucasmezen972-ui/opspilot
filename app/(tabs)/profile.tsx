@@ -41,8 +41,7 @@ export default function ProfileScreen() {
   const { profile, signOut } = useAuth();
   const router = useRouter();
 
-  const appVersion =
-    Constants.expoConfig?.version ?? Constants.manifest?.version ?? '1.0.0';
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
   const displayName = profile?.full_name ?? 'Utilisateur';
   const displayRole = getProfileRoleLabel(profile?.role);
   const progress = computeXpProgress(profile?.level ?? 1, profile?.xp ?? 0);

@@ -137,18 +137,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistDemoFlag(true);
   };
 
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      if (!error && data) setProfile(data);
-      return { data, error };
-    } catch (error) {
-      return { data: null, error };
+  const fetchProfile = async (userId: string, retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (!error && data) {
+          setProfile(data);
+          return { data, error: null };
+        }
+        if (error && attempt < retries) {
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+          continue;
+        }
+        return { data, error };
+      } catch (error) {
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+          continue;
+        }
+        return { data: null, error };
+      }
     }
+    return { data: null, error: 'Profile fetch failed after retries' };
   };
 
   useEffect(() => {
@@ -212,8 +226,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUserAndRef(s?.user ?? null);
           setIsOffline(false);
           if (s?.user?.id) {
-            fetchProfile(s.user.id).catch((error) => {
-              mapSupabaseError('Profile fetch error', error);
+            fetchProfile(s.user.id).then(({ error }) => {
+              if (error && !cancelled) {
+                setAuthError(
+                  'Impossible de charger votre profil. Vérifiez votre connexion.',
+                );
+              }
             });
           } else if (!demoModeRef.current) {
             setProfile(null);
@@ -328,28 +346,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    let signOutError: unknown = null;
-    try {
-      if (!demoModeRef.current) {
-        const { error } = await supabase.auth.signOut();
-        if (error) signOutError = error;
-      }
-    } catch (e) {
-      signOutError = e;
-    }
-    if (demoModeRef.current) resetDemoStore();
-    setProfile(null);
-    setSession(null);
-    setUserAndRef(null);
-    setIsDemoMode(false);
-    demoModeRef.current = false;
-    persistDemoFlag(false);
-    if (signOutError) {
-      setAuthError(mapSupabaseError('sign out error', signOutError));
-    } else {
+    if (demoModeRef.current) {
+      resetDemoStore();
+      setProfile(null);
+      setSession(null);
+      setUserAndRef(null);
+      setIsDemoMode(false);
+      demoModeRef.current = false;
+      persistDemoFlag(false);
       setAuthError(null);
+      return { error: null };
     }
-    return { error: signOutError };
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setAuthError(mapSupabaseError('sign out error', error));
+        return { error };
+      }
+      setProfile(null);
+      setSession(null);
+      setUserAndRef(null);
+      setIsDemoMode(false);
+      demoModeRef.current = false;
+      persistDemoFlag(false);
+      setAuthError(null);
+      return { error: null };
+    } catch (e) {
+      setAuthError(mapSupabaseError('sign out error', e));
+      return { error: e };
+    }
   };
 
   const resetPassword = async (email: string) => {
