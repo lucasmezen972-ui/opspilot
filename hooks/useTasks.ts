@@ -305,12 +305,22 @@ export function useTasks() {
       }
       setTasks((prev) => prev.map((t) => (t.id === id ? data : t)));
       if (profile?.organization_id) {
-        await supabase.from('task_validations').insert({
-          organization_id: profile.organization_id,
-          task_id: id,
-          validated_by: profile.id,
-          validator_name: validatorName,
-        });
+        const { error: auditErr } = await supabase
+          .from('task_validations')
+          .insert({
+            organization_id: profile.organization_id,
+            task_id: id,
+            validated_by: profile.id,
+            validator_name: validatorName,
+          });
+        if (auditErr) {
+          setError(
+            mapSupabaseError(
+              'Validation enregistrée mais traçabilité incomplète',
+              auditErr,
+            ),
+          );
+        }
       }
       return { data, error: null };
     } catch (error) {

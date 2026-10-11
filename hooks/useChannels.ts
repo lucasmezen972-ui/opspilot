@@ -173,6 +173,7 @@ export function useChannels() {
       const readAt = now();
       setRemoteReads((prev) => ({ ...prev, [channelId]: readAt }));
       if (!profile?.id) return;
+      const prevReadAt = remoteReads[channelId];
       supabase
         .from('channel_reads')
         .upsert(
@@ -185,13 +186,28 @@ export function useChannels() {
           { onConflict: 'user_id,channel_id' },
         )
         .then(
-          ({ error }) => {
-            if (error) mapSupabaseError('Erreur accusé de lecture', error);
+          ({ error: upsertErr }) => {
+            if (upsertErr) {
+              setRemoteReads((prev) => {
+                const next = { ...prev };
+                if (prevReadAt) next[channelId] = prevReadAt;
+                else delete next[channelId];
+                return next;
+              });
+              setError(mapSupabaseError('Erreur accusé de lecture', upsertErr));
+            }
           },
-          () => {},
+          () => {
+            setRemoteReads((prev) => {
+              const next = { ...prev };
+              if (prevReadAt) next[channelId] = prevReadAt;
+              else delete next[channelId];
+              return next;
+            });
+          },
         );
     },
-    [isLocalDemo, currentUserId, profile?.id],
+    [isLocalDemo, currentUserId, profile?.id, remoteReads],
   );
 
   const sendMessage = useCallback(
@@ -248,7 +264,7 @@ export function useChannels() {
         );
         return { data };
       }
-      return { error };
+      return { error: mapSupabaseError('Erreur envoi message canal', error) };
     },
     [isLocalDemo, currentUserId, profile],
   );
