@@ -1,5 +1,5 @@
 import { Plus, CircleCheck as CheckCircle } from 'lucide-react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   ActivityIndicator,
   View,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  RefreshControl,
 } from 'react-native';
 
 import { ActionCard } from '../../features/actions/ActionCard';
@@ -57,11 +58,19 @@ export default function ActionsScreen() {
     updateActionStatus,
     isOverdue,
     getActionsByStatus,
+    refetch: refetchActions,
   } = useCorrectiveActions();
   const { session, isDemoMode, profile } = useAuth();
   const { isEnabled } = useAppSettings();
   const { logEvent } = useActivityLog();
   const isLocalDemo = isDemoMode && !session;
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetchActions();
+    setRefreshing(false);
+  }, [refetchActions]);
 
   const [viewMode, setViewMode] = useState<ActionsViewMode>('list');
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -244,6 +253,14 @@ export default function ActionsScreen() {
         <ScrollView
           style={styles.list}
           contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
         >
           {actions.length === 0 && !loading && (
             <AppEmptyState

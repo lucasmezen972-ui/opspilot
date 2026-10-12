@@ -140,13 +140,28 @@ export function useTrainingSupervision() {
     [members, courses, orgProgress],
   );
 
-  const sendReminder = (memberId: string, trainingId: string) => {
+  const sendReminder = async (memberId: string, trainingId: string) => {
     const member = members.find((m) => m.id === memberId);
     const course = courses.find((c) => c.id === trainingId);
-    return {
-      memberName: member?.full_name ?? '',
-      trainingTitle: course?.title ?? '',
-    };
+    const memberName = member?.full_name ?? '';
+    const trainingTitle = course?.title ?? '';
+
+    if (!isLocalDemo && profile?.organization_id) {
+      try {
+        await supabase.from('notifications').insert({
+          user_id: memberId,
+          organization_id: profile.organization_id,
+          type: 'training_reminder',
+          title: 'Rappel formation',
+          body: `Vous n'avez pas encore terminé la formation « ${trainingTitle} ».`,
+          is_read: false,
+        });
+      } catch {
+        // Best-effort: the UI alert still informs the manager.
+      }
+    }
+
+    return { memberName, trainingTitle };
   };
 
   return {

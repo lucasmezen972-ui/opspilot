@@ -250,7 +250,13 @@ export default function TrainingScreen() {
           ...prev,
           ...newQuestions,
         ]);
-      } else if (profile?.organization_id) {
+      } else if (!profile?.organization_id) {
+        Alert.alert(
+          'Erreur',
+          "Votre profil n'est associé à aucune organisation. Contactez votre administrateur.",
+        );
+        return;
+      } else {
         const { data: savedCourse, error: courseErr } = await supabase
           .from('trainings')
           .insert({

@@ -24,7 +24,7 @@ interface Props {
   onSendReminder: (
     memberId: string,
     trainingId: string,
-  ) => { memberName: string; trainingTitle: string };
+  ) => Promise<{ memberName: string; trainingTitle: string }>;
 }
 
 function formatValidationDate(iso: string | null): string | null {
@@ -111,11 +111,14 @@ export function TrainingSupervision({
         entries.filter((e) => e.memberId === memberId),
       );
 
-  const handleReminder = (memberId: string, trainingId: string) => {
-    const { memberName, trainingTitle } = onSendReminder(memberId, trainingId);
+  const handleReminder = async (memberId: string, trainingId: string) => {
+    const { memberName, trainingTitle } = await onSendReminder(
+      memberId,
+      trainingId,
+    );
     Alert.alert(
-      'Relance',
-      `Relance notée pour ${memberName} — formation « ${trainingTitle} ». Les notifications push ne sont pas encore disponibles : pensez à relancer ${memberName} en personne ou via la messagerie.`,
+      'Relance envoyée',
+      `Relance envoyée pour ${memberName} — formation « ${trainingTitle} ».`,
     );
   };
 

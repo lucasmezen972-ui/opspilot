@@ -1,5 +1,5 @@
 import { FileText, Download } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   View,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 
 import { AuditReportList } from '../../features/reports/AuditReportList';
@@ -41,12 +42,21 @@ export default function ReportsScreen() {
     loading: auditsLoading,
     error: auditsError,
     getAuditResponses,
+    refetch: refetchAudits,
   } = useAudits();
   const {
     actions,
     loading: actionsLoading,
     error: actionsError,
+    refetch: refetchActions,
   } = useCorrectiveActions();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refetchAudits(), refetchActions()]);
+    setRefreshing(false);
+  }, [refetchAudits, refetchActions]);
   const { getItemsForTemplate } = useAuditTemplates();
   const { logEvent } = useActivityLog();
   const canExport = can(profile?.role, 'reports.export');
@@ -97,7 +107,18 @@ export default function ReportsScreen() {
   const fetchError = auditsError ?? actionsError;
 
   return (
-    <ScrollView style={styles.container} testID="reports-screen">
+    <ScrollView
+      style={styles.container}
+      testID="reports-screen"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
       <AppScreenHeader
         title="Rapports"
         titleTestID="page-reports-title"

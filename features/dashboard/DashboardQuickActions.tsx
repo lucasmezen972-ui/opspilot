@@ -73,7 +73,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     title: 'Facturation',
     sub: 'Abonnement',
     route: '/billing',
-    roles: ['admin'],
+    roles: ['admin', 'superadmin'],
   },
   {
     icon: Settings,
