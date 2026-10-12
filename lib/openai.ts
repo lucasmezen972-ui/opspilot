@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { DEFAULT_SUPABASE_URL } from '../utils/supabaseConfig';
 
 export interface AuditAnalysis {
   issues: {
@@ -38,8 +39,7 @@ async function callOpenAIProxy<T>(
   // `||` intentionnel : en CI le secret peut être une chaîne vide.
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
   const url =
-    (process.env.EXPO_PUBLIC_SUPABASE_URL ||
-      'https://hpqfmuzkkxrqoqoabjmb.supabase.co') +
+    (process.env.EXPO_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL) +
     '/functions/v1/openai-proxy';
   /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
