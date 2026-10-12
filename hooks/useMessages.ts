@@ -67,45 +67,48 @@ export function useMessages() {
     }
   }, [profile?.organization_id, isLocalDemo]);
 
-  const fetchMessages = async (conversationId: string) => {
-    activeConversationRef.current = conversationId;
-    setActiveConversationId(conversationId);
-    if (isLocalDemo) {
-      return;
-    }
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(
-          `
+  const fetchMessages = useCallback(
+    async (conversationId: string) => {
+      activeConversationRef.current = conversationId;
+      setActiveConversationId(conversationId);
+      if (isLocalDemo) {
+        return;
+      }
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select(
+            `
           *,
           profiles(full_name, avatar_url)
         `,
-        )
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+          )
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true });
 
-      if (activeConversationRef.current !== conversationId) return;
+        if (activeConversationRef.current !== conversationId) return;
 
-      if (error) {
-        setError(
-          mapSupabaseError(
-            'Erreur lors de la récupération des messages',
-            error,
-          ),
-        );
-        return;
+        if (error) {
+          setError(
+            mapSupabaseError(
+              'Erreur lors de la récupération des messages',
+              error,
+            ),
+          );
+          return;
+        }
+
+        setRemoteMessages(data || []);
+      } catch (err) {
+        if (activeConversationRef.current !== conversationId) return;
+        setError(mapSupabaseError('Erreur fetchMessages', err));
+      } finally {
+        setLoading(false);
       }
-
-      setRemoteMessages(data || []);
-    } catch (err) {
-      if (activeConversationRef.current !== conversationId) return;
-      setError(mapSupabaseError('Erreur fetchMessages', err));
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [isLocalDemo],
+  );
 
   const sendMessage = async (
     conversationId: string,
@@ -322,6 +325,7 @@ export function useMessages() {
       }
 
       setRemoteConversations((prev) => [data, ...prev]);
+      conversationIdsRef.current.add(data.id);
       return { data, error: null };
     } catch (error) {
       return {

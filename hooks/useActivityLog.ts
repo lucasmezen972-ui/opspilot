@@ -8,6 +8,7 @@ import {
   type ActivityEvent,
   type ActivityEventType,
 } from '../lib/supabase';
+import { mapSupabaseError } from '../utils/error';
 
 export type ActivityLogInput = {
   action: ActivityEventType;
@@ -27,17 +28,33 @@ export function useActivityLog() {
 
   const demoEvents = useDemoCollection('activityLog');
   const [remoteEvents, setRemoteEvents] = useState<ActivityEvent[]>([]);
+  const [loading, setLoading] = useState(!isLocalDemo);
+  const [error, setError] = useState<string | null>(null);
   const events = isLocalDemo ? demoEvents : remoteEvents;
 
   useEffect(() => {
-    if (isLocalDemo || !profile?.organization_id) return;
+    if (isLocalDemo || !profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      setLoading(true);
+      setError(null);
+      const { data, error: fetchErr } = await supabase
         .from('activity_log')
         .select('*')
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(50);
+      if (cancelled) return;
+      if (fetchErr) {
+        setError(
+          mapSupabaseError("Erreur chargement journal d'activité", fetchErr),
+        );
+        setLoading(false);
+        return;
+      }
       setRemoteEvents(
         ((data ?? []) as Record<string, any>[]).map((r) => ({
           id: r.id,
@@ -51,7 +68,16 @@ export function useActivityLog() {
           created_at: r.created_at,
         })),
       );
-    })().catch(() => setRemoteEvents([]));
+      setLoading(false);
+    })().catch((err) => {
+      if (!cancelled) {
+        setError(mapSupabaseError("Erreur journal d'activité", err));
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [isLocalDemo, profile?.organization_id]);
 
   const logEvent = useCallback(
@@ -98,18 +124,26 @@ export function useActivityLog() {
           metadata: { label: input.label, actor_name: profile.full_name },
         })
         .then(
-          ({ error }) => {
-            if (error) {
+          ({ error: insertErr }) => {
+            if (insertErr) {
               setRemoteEvents((prev) =>
                 prev.filter((event) => event.id !== optimistic.id),
               );
+              setError(
+                mapSupabaseError("Erreur enregistrement d'activité", insertErr),
+              );
             }
           },
-          () => {},
+          (err) => {
+            setRemoteEvents((prev) =>
+              prev.filter((event) => event.id !== optimistic.id),
+            );
+            setError(mapSupabaseError("Erreur enregistrement d'activité", err));
+          },
         );
     },
     [isLocalDemo, profile],
   );
 
-  return { events, logEvent };
+  return { events, loading, error, logEvent };
 }

@@ -425,6 +425,8 @@ export function useAudits() {
     signerName: string,
     signerRole: AuditSignature['signer_role'],
   ) => {
+    if (!profile?.organization_id)
+      return { data: null, error: 'Organisation non définie' };
     if (
       signaturesForAudit(signatures, auditId).some(
         (s) => s.signer_role === signerRole,
@@ -435,9 +437,9 @@ export function useAudits() {
     const now = new Date().toISOString();
     const signature: AuditSignature = {
       id: demoId('audit-sig'),
-      organization_id: profile?.organization_id ?? '',
+      organization_id: profile.organization_id,
       audit_id: auditId,
-      signer_id: profile?.id ?? null,
+      signer_id: profile.id,
       signer_name: signerName,
       signer_role: signerRole,
       signed_at: now,
