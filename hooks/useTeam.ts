@@ -37,6 +37,7 @@ export function useTeam() {
         .from('profiles')
         .select('*')
         .eq('organization_id', profile.organization_id)
+        .neq('is_active', false)
         .order('full_name', { ascending: true });
 
       if (fetchErr) {

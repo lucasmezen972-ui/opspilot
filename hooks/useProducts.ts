@@ -95,7 +95,10 @@ export function useProducts() {
   };
 
   const scanProduct = async (barcode: string) => {
-    const { data } = await fetchProduct(barcode);
+    const { data, error: scanErr } = await fetchProduct(barcode);
+    if (scanErr) {
+      setError(typeof scanErr === 'string' ? scanErr : String(scanErr));
+    }
     return data;
   };
 
