@@ -13,7 +13,10 @@ interface DashboardProgressProps {
 export function DashboardProgress({ profile }: DashboardProgressProps) {
   const level = profile.level ?? 1;
   const xp = profile.xp ?? 0;
-  const remaining = Math.max(0, level * 100 - xp);
+  const xpForNextLevel = level * 100;
+  const remaining = Math.max(0, xpForNextLevel - xp);
+  const progressPct =
+    xpForNextLevel > 0 ? Math.min(100, (xp / xpForNextLevel) * 100) : 0;
 
   return (
     <View style={styles.section}>
@@ -41,12 +44,7 @@ export function DashboardProgress({ profile }: DashboardProgressProps) {
           </TouchableOpacity>
         </View>
         <View style={styles.progressBar}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${Math.min(100, xp % 100)}%` },
-            ]}
-          />
+          <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
         </View>
         <Text style={styles.progressText}>
           {remaining} XP jusqu'au niveau suivant

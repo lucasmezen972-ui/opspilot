@@ -560,6 +560,14 @@ export function useTraining() {
           score: cert.score,
           issued_at: cert.issued_at,
           certificate_number: cert.certificate_number,
+          employee_id: cert.employee_id,
+          position: cert.position,
+          store_name: cert.store_name,
+          category: cert.category,
+          duration_minutes: cert.duration_minutes,
+          quiz_version: cert.quiz_version,
+          attempt_number: cert.attempt_number,
+          status: cert.status,
         })
         .select()
         .single();

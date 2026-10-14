@@ -102,7 +102,7 @@ export function useActivityLog() {
 
       if (!profile?.organization_id) return;
       const optimistic: ActivityEvent = {
-        id: `tmp-${now}`,
+        id: `tmp-${now}-${Math.random().toString(36).slice(2, 8)}`,
         organization_id: profile.organization_id,
         actor_id: profile.id,
         actor_name: profile.full_name ?? null,
