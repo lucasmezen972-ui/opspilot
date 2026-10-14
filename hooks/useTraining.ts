@@ -519,7 +519,7 @@ export function useTraining() {
       id: demoId('cert'),
       user_id: profile.id,
       training_id: courseId,
-      organization_id: profile.organization_id ?? '',
+      organization_id: profile.organization_id ?? profile.id,
       full_name: (() => {
         const candidate = options?.fullName?.trim();
         return candidate && candidate.length > 0

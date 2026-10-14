@@ -483,14 +483,13 @@ export default function TrainingScreen() {
                 key={topic}
                 style={styles.pickerOption}
                 onPress={() => {
-                  Alert.alert(
-                    'Niveau de difficulté',
-                    topic,
-                    AI_DIFFICULTIES.map((d) => ({
+                  Alert.alert('Niveau de difficulté', topic, [
+                    ...AI_DIFFICULTIES.map((d) => ({
                       text: d.label,
                       onPress: () => generateAICourse(topic, d.key),
                     })),
-                  );
+                    { text: 'Annuler', style: 'cancel' as const },
+                  ]);
                 }}
               >
                 <Text style={styles.pickerOptionText}>{topic}</Text>

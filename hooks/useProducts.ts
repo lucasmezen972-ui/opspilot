@@ -67,7 +67,7 @@ export function useProducts() {
     const local = products.find((p) => p.barcode === barcode);
     if (local) return { data: local, error: null };
 
-    if (isLocalDemo) {
+    if (isLocalDemo || !profile?.organization_id) {
       return { data: null, error: null };
     }
 
@@ -76,7 +76,7 @@ export function useProducts() {
         .from('products')
         .select('*')
         .eq('barcode', barcode)
-        .eq('organization_id', profile?.organization_id ?? '')
+        .eq('organization_id', profile.organization_id)
         .maybeSingle();
 
       if (error) {

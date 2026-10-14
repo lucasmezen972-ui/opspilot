@@ -78,6 +78,6 @@ export function computeXpProgress(level: number, xp: number): XpProgress {
     xp,
     xpForNextLevel,
     percent,
-    remaining: xpForNextLevel - xp,
+    remaining: Math.max(0, xpForNextLevel - xp),
   };
 }

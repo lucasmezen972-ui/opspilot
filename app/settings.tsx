@@ -147,7 +147,7 @@ export default function SettingsScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
-            onPress={() => router.replace('/profile')}
+            onPress={() => router.back()}
             style={styles.backButton}
             accessibilityRole="button"
             accessibilityLabel="Retour"

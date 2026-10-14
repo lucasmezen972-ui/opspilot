@@ -26,7 +26,7 @@ describe('computeXpProgress', () => {
   it('plafonne le pourcentage à 100', () => {
     const p = computeXpProgress(1, 500);
     expect(p.percent).toBe(100);
-    expect(p.remaining).toBeLessThan(0);
+    expect(p.remaining).toBe(0);
   });
 });
 
