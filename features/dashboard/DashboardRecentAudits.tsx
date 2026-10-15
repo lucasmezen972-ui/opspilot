@@ -30,41 +30,50 @@ export function DashboardRecentAudits({ audits }: DashboardRecentAuditsProps) {
         onAction={() => router.push('/audits')}
       />
       <View style={styles.list}>
-        {audits.slice(0, 3).map((audit) => (
-          <TouchableOpacity
-            key={audit.id}
-            style={styles.item}
-            onPress={() => router.push('/audits')}
-          >
-            <View
-              style={[
-                styles.icon,
-                {
-                  backgroundColor:
-                    audit.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
-                },
-              ]}
+        {[...audits]
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .slice(0, 3)
+          .map((audit) => (
+            <TouchableOpacity
+              key={audit.id}
+              style={styles.item}
+              onPress={() => router.push('/audits')}
             >
-              {audit.status === 'completed' ? (
-                <CheckCircle size={16} color="#16A34A" />
-              ) : (
-                <AlertTriangle size={16} color="#D97706" />
+              <View
+                style={[
+                  styles.icon,
+                  {
+                    backgroundColor:
+                      audit.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
+                  },
+                ]}
+              >
+                {audit.status === 'completed' ? (
+                  <CheckCircle size={16} color="#16A34A" />
+                ) : (
+                  <AlertTriangle size={16} color="#D97706" />
+                )}
+              </View>
+              <View style={styles.content}>
+                <Text style={styles.title}>{audit.title}</Text>
+                <Text style={styles.time}>
+                  {audit.status === 'completed' ? 'Terminé' : 'En cours'} ·{' '}
+                  {new Date(audit.created_at).toLocaleDateString('fr-FR')}
+                </Text>
+              </View>
+              {audit.score != null && (
+                <Text
+                  style={[styles.score, { color: scoreColor(audit.score) }]}
+                >
+                  {audit.score}%
+                </Text>
               )}
-            </View>
-            <View style={styles.content}>
-              <Text style={styles.title}>{audit.title}</Text>
-              <Text style={styles.time}>
-                {audit.status === 'completed' ? 'Terminé' : 'En cours'} ·{' '}
-                {new Date(audit.created_at).toLocaleDateString('fr-FR')}
-              </Text>
-            </View>
-            {audit.score != null && (
-              <Text style={[styles.score, { color: scoreColor(audit.score) }]}>
-                {audit.score}%
-              </Text>
-            )}
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))}
 
         {audits.length === 0 && (
           <TouchableOpacity

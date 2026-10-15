@@ -129,14 +129,16 @@ export function TrainingSupervision({
           <Users size={18} color={colors.primary} />
           <Text style={styles.headerTitle}>Supervision formations</Text>
         </View>
-        <TouchableOpacity
-          style={styles.exportButton}
-          onPress={() => exportCSV(filteredEntries)}
-          testID="training-supervision-export"
-        >
-          <Download size={14} color={colors.primary} />
-          <Text style={styles.exportButtonText}>Export</Text>
-        </TouchableOpacity>
+        {Platform.OS === 'web' && (
+          <TouchableOpacity
+            style={styles.exportButton}
+            onPress={() => exportCSV(filteredEntries)}
+            testID="training-supervision-export"
+          >
+            <Download size={14} color={colors.primary} />
+            <Text style={styles.exportButtonText}>Export</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.statsRow}>

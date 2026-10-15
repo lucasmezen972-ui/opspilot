@@ -121,7 +121,8 @@ export function TrainingCourseModal({
   );
   const [chapterIndex, setChapterIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<(number | number[])[]>([]);
+  const [multiPending, setMultiPending] = useState<number[]>([]);
   const [localCompletedIds, setLocalCompletedIds] = useState<string[]>([]);
   const [score, setScore] = useState<number | null>(null);
   const [failedCritical, setFailedCritical] = useState(false);
@@ -147,6 +148,7 @@ export function TrainingCourseModal({
     setChapterIndex(firstUnread >= 0 ? firstUnread : 0);
     setQuestionIndex(0);
     setAnswers([]);
+    setMultiPending([]);
     setLocalCompletedIds(completed);
     setScore(null);
     setFailedCritical(false);
@@ -202,11 +204,34 @@ export function TrainingCourseModal({
     }
   };
 
+  const isMulti =
+    currentQuestion?.question_type === 'qcm_multi' &&
+    Array.isArray(currentQuestion.correctAnswerIndexes);
+  const isMultiAnswered = isMulti && selectedAnswer !== undefined;
+
   const selectAnswer = (optionIndex: number) => {
-    if (selectedAnswer !== undefined) return;
+    if (isMulti) {
+      if (isMultiAnswered) return;
+      setMultiPending((prev) =>
+        prev.includes(optionIndex)
+          ? prev.filter((i) => i !== optionIndex)
+          : [...prev, optionIndex],
+      );
+    } else {
+      if (selectedAnswer !== undefined) return;
+      setAnswers((current) => {
+        const next = [...current];
+        next[questionIndex] = optionIndex;
+        return next;
+      });
+    }
+  };
+
+  const confirmMultiAnswer = () => {
+    if (!isMulti || multiPending.length === 0) return;
     setAnswers((current) => {
       const next = [...current];
-      next[questionIndex] = optionIndex;
+      next[questionIndex] = [...multiPending];
       return next;
     });
   };
@@ -215,6 +240,7 @@ export function TrainingCourseModal({
     if (selectedAnswer === undefined || saving) return;
     if (questionIndex < sessionQuestions.length - 1) {
       setQuestionIndex((current) => current + 1);
+      setMultiPending([]);
       return;
     }
 
@@ -406,17 +432,41 @@ export function TrainingCourseModal({
                 <Text style={styles.questionText}>
                   {currentQuestion.question}
                 </Text>
+                {isMulti && !isMultiAnswered && (
+                  <Text style={styles.multiHint}>
+                    Sélectionnez toutes les bonnes réponses
+                  </Text>
+                )}
                 <View style={styles.options}>
                   {currentQuestion.options.map((option, optionIndex) => {
-                    const isSelected = selectedAnswer === optionIndex;
-                    const isCorrect =
-                      selectedAnswer !== undefined &&
-                      optionIndex === currentQuestion.correctAnswerIndex;
-                    const isWrong =
-                      isSelected &&
-                      selectedAnswer !== currentQuestion.correctAnswerIndex;
-                    const isAnswerCorrect =
-                      optionIndex === currentQuestion.correctAnswerIndex;
+                    let isSelected: boolean;
+                    let isCorrect: boolean;
+                    let isWrong: boolean;
+                    let isAnswerCorrect: boolean;
+
+                    if (isMulti) {
+                      const correctIdxs =
+                        currentQuestion.correctAnswerIndexes ?? [];
+                      isAnswerCorrect = correctIdxs.includes(optionIndex);
+                      const chosen = isMultiAnswered
+                        ? (selectedAnswer as number[])
+                        : multiPending;
+                      isSelected = chosen.includes(optionIndex);
+                      isCorrect =
+                        isMultiAnswered && isSelected && isAnswerCorrect;
+                      isWrong =
+                        isMultiAnswered && isSelected && !isAnswerCorrect;
+                    } else {
+                      isSelected = selectedAnswer === optionIndex;
+                      isCorrect =
+                        selectedAnswer !== undefined &&
+                        optionIndex === currentQuestion.correctAnswerIndex;
+                      isWrong =
+                        isSelected &&
+                        selectedAnswer !== currentQuestion.correctAnswerIndex;
+                      isAnswerCorrect =
+                        optionIndex === currentQuestion.correctAnswerIndex;
+                    }
                     return (
                       <TouchableOpacity
                         key={option}
@@ -435,7 +485,11 @@ export function TrainingCourseModal({
                             styles.optionSelected,
                         ]}
                         onPress={() => selectAnswer(optionIndex)}
-                        disabled={selectedAnswer !== undefined}
+                        disabled={
+                          isMulti
+                            ? isMultiAnswered
+                            : selectedAnswer !== undefined
+                        }
                       >
                         <Text style={styles.optionLetter}>
                           {String.fromCharCode(65 + optionIndex)}
@@ -445,7 +499,18 @@ export function TrainingCourseModal({
                     );
                   })}
                 </View>
-                {selectedAnswer !== undefined && (
+                {isMulti && !isMultiAnswered && multiPending.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.confirmMultiButton}
+                    onPress={confirmMultiAnswer}
+                  >
+                    <Text style={styles.confirmMultiText}>
+                      Valider ({multiPending.length} sélectionnée
+                      {multiPending.length > 1 ? 's' : ''})
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {!isMulti && selectedAnswer !== undefined && (
                   <View
                     style={[
                       styles.feedback,
@@ -465,6 +530,34 @@ export function TrainingCourseModal({
                     </Text>
                   </View>
                 )}
+                {isMulti &&
+                  isMultiAnswered &&
+                  (() => {
+                    const correctIdxs =
+                      currentQuestion.correctAnswerIndexes ?? [];
+                    const given = selectedAnswer as number[];
+                    const sortedExpected = [...correctIdxs].sort();
+                    const sortedGiven = [...given].sort();
+                    const allCorrect =
+                      sortedExpected.length === sortedGiven.length &&
+                      sortedExpected.every((v, idx) => v === sortedGiven[idx]);
+                    return (
+                      <View
+                        style={[
+                          styles.feedback,
+                          allCorrect
+                            ? styles.feedbackCorrect
+                            : styles.feedbackWrong,
+                        ]}
+                      >
+                        <Text style={styles.feedbackText}>
+                          {allCorrect
+                            ? 'Bonne réponse.'
+                            : `Réponse incorrecte. Les bonnes réponses sont : ${correctIdxs.map((i) => currentQuestion.options[i]).join(', ')}.`}
+                        </Text>
+                      </View>
+                    );
+                  })()}
               </ScrollView>
               <View style={styles.footer}>
                 <TouchableOpacity
@@ -750,6 +843,24 @@ const styles = StyleSheet.create({
   feedbackCorrect: { backgroundColor: '#ECFDF5' },
   feedbackWrong: { backgroundColor: '#FEF2F2' },
   feedbackText: { color: '#374151', lineHeight: 20, fontWeight: '600' },
+  multiHint: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontStyle: 'italic',
+    marginBottom: 8,
+  },
+  confirmMultiButton: {
+    backgroundColor: '#2563EB',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  confirmMultiText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   result: {
     flex: 1,
     alignItems: 'center',

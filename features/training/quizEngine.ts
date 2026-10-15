@@ -181,7 +181,7 @@ export function createQuizSession(
  */
 export function scoreQuizSession(
   questions: ShuffledQuestion[],
-  answers: number[],
+  answers: (number | number[])[],
 ): { score: number; failedCritical: boolean; correctCount: number } {
   if (questions.length === 0)
     return { score: 0, failedCritical: false, correctCount: 0 };
@@ -190,7 +190,24 @@ export function scoreQuizSession(
   let failedCritical = false;
 
   questions.forEach((q, i) => {
-    if (answers[i] === q.correctAnswerIndex) {
+    const answer = answers[i];
+    let isCorrect: boolean;
+
+    if (
+      q.question_type === 'qcm_multi' &&
+      q.correctAnswerIndexes &&
+      Array.isArray(answer)
+    ) {
+      const expected = [...q.correctAnswerIndexes].sort();
+      const given = [...answer].sort();
+      isCorrect =
+        expected.length === given.length &&
+        expected.every((v, idx) => v === given[idx]);
+    } else {
+      isCorrect = answer === q.correctAnswerIndex;
+    }
+
+    if (isCorrect) {
       correct++;
     } else if (q.is_critical) {
       failedCritical = true;
