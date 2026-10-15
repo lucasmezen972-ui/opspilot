@@ -62,6 +62,7 @@ export default function AuthScreen() {
         setSuccessMessage(
           'Compte créé ! Vérifiez votre email pour confirmer votre inscription.',
         );
+        setPassword('');
       }
     } catch (e) {
       setLocalError(extractErrorMessage(e) ?? 'Erreur de connexion');

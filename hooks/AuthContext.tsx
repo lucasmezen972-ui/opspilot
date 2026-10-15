@@ -360,19 +360,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        setAuthError(mapSupabaseError('sign out error', error));
-        return { error };
-      }
       setProfile(null);
       setSession(null);
       setUserAndRef(null);
       setIsDemoMode(false);
       demoModeRef.current = false;
       persistDemoFlag(false);
+      if (error) {
+        setAuthError(mapSupabaseError('sign out error', error));
+        return { error };
+      }
       setAuthError(null);
       return { error: null };
     } catch (e) {
+      setProfile(null);
+      setSession(null);
+      setUserAndRef(null);
+      setIsDemoMode(false);
+      demoModeRef.current = false;
+      persistDemoFlag(false);
       setAuthError(mapSupabaseError('sign out error', e));
       return { error: e };
     }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import { DEMO_USER_ID, demoId } from '../lib/demoData';
@@ -30,6 +30,8 @@ export function useChannels() {
 
   const channels = isLocalDemo ? demoChannels : remoteChannels;
   const allMessages = isLocalDemo ? demoMessages : remoteMessages;
+  const channelIdsRef = useRef<string[]>([]);
+  channelIdsRef.current = channels.map((c) => c.id as string);
 
   const currentUserId = isLocalDemo ? DEMO_USER_ID : (profile?.id ?? '');
 
@@ -108,6 +110,10 @@ export function useChannels() {
         },
         (payload) => {
           const msg = payload.new as ChannelMessage;
+          const knownIds = channelIdsRef.current;
+          if (knownIds.length > 0 && !knownIds.includes(msg.channel_id)) {
+            return;
+          }
           setRemoteMessages((prev) => {
             if (prev.some((m) => m.id === msg.id)) return prev;
             return [...prev, msg];
@@ -217,7 +223,7 @@ export function useChannels() {
       messageType: ChannelMessage['message_type'] = 'text',
       attachmentUrl?: string,
     ) => {
-      if (!content.trim()) return;
+      if (!content.trim()) return { data: null, error: null };
 
       const msg: ChannelMessage = {
         id: demoId('cmsg'),
