@@ -87,7 +87,7 @@ export function quizVersion(questions: { id: string }[]): string {
  */
 export function buildQuizAttemptTrace(params: {
   questions: ShuffledQuestion[];
-  answers: number[];
+  answers: (number | number[])[];
   attemptNumber?: number;
   now?: Date;
 }): QuizAttemptTrace {
@@ -98,16 +98,34 @@ export function buildQuizAttemptTrace(params: {
 
   const tracedAnswers: AnsweredQuestion[] = questions.map((q, index) => {
     const given = answers[index];
-    const hasAnswer = typeof given === 'number';
-    const isCorrect = hasAnswer && given === q.correctAnswerIndex;
+    let isCorrect: boolean;
+    let hasAnswer: boolean;
+
+    if (
+      q.question_type === 'qcm_multi' &&
+      q.correctAnswerIndexes &&
+      Array.isArray(given)
+    ) {
+      hasAnswer = given.length > 0;
+      const expected = [...q.correctAnswerIndexes].sort();
+      const actual = [...given].sort();
+      isCorrect =
+        expected.length === actual.length &&
+        expected.every((v, i) => v === actual[i]);
+    } else {
+      hasAnswer = typeof given === 'number';
+      isCorrect = hasAnswer && given === q.correctAnswerIndex;
+    }
+
     if (isCorrect) correctCount += 1;
     else if (q.is_critical) failedCritical = true;
 
     return {
       questionId: q.id,
       question: q.question,
-      givenAnswerIndex: hasAnswer ? given : null,
-      givenAnswer: hasAnswer ? (q.options[given] ?? null) : null,
+      givenAnswerIndex: typeof given === 'number' ? given : null,
+      givenAnswer:
+        typeof given === 'number' ? (q.options[given] ?? null) : null,
       correctAnswerIndex: q.correctAnswerIndex,
       correctAnswer: q.options[q.correctAnswerIndex] ?? '',
       isCorrect,

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import type { Profile } from '../../lib/supabase';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { computeXpProgress } from '../profile/profileModel';
 
 interface DashboardProgressProps {
   profile: Profile;
@@ -13,10 +14,8 @@ interface DashboardProgressProps {
 export function DashboardProgress({ profile }: DashboardProgressProps) {
   const level = profile.level ?? 1;
   const xp = profile.xp ?? 0;
-  const xpForNextLevel = level * 100;
-  const remaining = Math.max(0, xpForNextLevel - xp);
-  const progressPct =
-    xpForNextLevel > 0 ? Math.min(100, (xp / xpForNextLevel) * 100) : 0;
+  const progress = computeXpProgress(level, xp);
+  const remaining = Math.max(0, progress.remaining);
 
   return (
     <View style={styles.section}>
@@ -44,7 +43,12 @@ export function DashboardProgress({ profile }: DashboardProgressProps) {
           </TouchableOpacity>
         </View>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${Math.min(100, progress.percent)}%` },
+            ]}
+          />
         </View>
         <Text style={styles.progressText}>
           {remaining} XP jusqu'au niveau suivant

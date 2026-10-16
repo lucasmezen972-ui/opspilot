@@ -2,8 +2,9 @@ import {
   CircleCheck as CheckCircle,
   Wifi,
   CircleAlert,
+  WifiOff,
 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { colors, radius, spacing } from '../shared/styles/tokens';
@@ -13,8 +14,46 @@ interface ConnectedStatusProps {
   dataCount?: number;
 }
 
+function useSupabaseReachable(): 'checking' | 'reachable' | 'unreachable' {
+  const { status, url } = getSupabaseConfigStatus();
+  const [reachable, setReachable] = useState<
+    'checking' | 'reachable' | 'unreachable'
+  >(status !== 'valid' ? 'unreachable' : 'checking');
+
+  useEffect(() => {
+    if (status !== 'valid' || !url) {
+      setReachable('unreachable');
+      return;
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5_000);
+    fetch(`${url}/rest/v1/`, {
+      method: 'HEAD',
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!cancelled)
+          setReachable(
+            res.ok || res.status === 401 ? 'reachable' : 'unreachable',
+          );
+      })
+      .catch(() => {
+        if (!cancelled) setReachable('unreachable');
+      })
+      .finally(() => clearTimeout(timer));
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [status, url]);
+
+  return reachable;
+}
+
 export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
   const { status } = getSupabaseConfigStatus();
+  const reachable = useSupabaseReachable();
 
   let message = '⚠️ Configuration Supabase incomplète';
   let containerStyle: (typeof styles)[keyof typeof styles] =
@@ -35,7 +74,19 @@ export default function ConnectedStatus({ dataCount }: ConnectedStatusProps) {
     textStyle = styles.errorText;
     Icon = CircleAlert;
     iconColor = colors.dangerStrong;
-  } else if (status === 'valid') {
+  } else if (status === 'valid' && reachable === 'checking') {
+    message = '⏳ Connexion en cours…';
+    containerStyle = styles.disconnected;
+    textStyle = styles.disconnectedText;
+    Icon = Wifi;
+    iconColor = colors.textMuted;
+  } else if (status === 'valid' && reachable === 'unreachable') {
+    message = '⚠️ Supabase injoignable — mode démo disponible';
+    containerStyle = styles.warning;
+    textStyle = styles.warningText;
+    Icon = WifiOff;
+    iconColor = colors.warningText;
+  } else if (status === 'valid' && reachable === 'reachable') {
     message = `✅ Supabase connecté${dataCount ? ` • ${dataCount} enregistrements` : ''}`;
     containerStyle = styles.connected;
     textStyle = styles.connectedText;
@@ -65,6 +116,9 @@ const styles = StyleSheet.create({
   disconnected: {
     backgroundColor: colors.backgroundAlt,
   },
+  warning: {
+    backgroundColor: colors.warningSoft,
+  },
   error: {
     backgroundColor: colors.dangerSoft,
   },
@@ -78,6 +132,10 @@ const styles = StyleSheet.create({
   },
   disconnectedText: {
     color: colors.textMuted,
+  },
+  warningText: {
+    color: colors.warningText,
+    fontWeight: '500',
   },
   errorText: {
     color: colors.dangerStrong,

@@ -35,15 +35,21 @@ function requestActivation(planId: string) {
 }
 
 function BillingScreenContent() {
-  const { profile } = useAuth();
+  const { profile, isDemoMode, session } = useAuth();
   const { subscription, trialDaysLeft, loading } = useSubscription();
+  const isLocalDemo = isDemoMode && !session;
 
   const currentPlan = subscription?.plan ?? 'trial';
   const status = subscription?.status ?? 'trialing';
 
-  // Tente le paiement en ligne (Stripe) si l'instance est configurée ; sinon
-  // bascule sur une demande d'activation pré-remplie — jamais un cul-de-sac.
   const handleUpgrade = async (planId: string) => {
+    if (isLocalDemo) {
+      Alert.alert(
+        'Mode démo',
+        "La facturation n'est pas disponible en mode démo.",
+      );
+      return;
+    }
     try {
       const { data, error } = await supabase.functions.invoke(
         'create-checkout-session',
@@ -66,6 +72,13 @@ function BillingScreenContent() {
   };
 
   const handleManageSubscription = async () => {
+    if (isLocalDemo) {
+      Alert.alert(
+        'Mode démo',
+        "La gestion d'abonnement n'est pas disponible en mode démo.",
+      );
+      return;
+    }
     try {
       const { data, error } = await supabase.functions.invoke(
         'create-customer-portal',
