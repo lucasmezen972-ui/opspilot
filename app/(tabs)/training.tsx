@@ -168,6 +168,15 @@ export default function TrainingScreen() {
     chosenDifficulty: 'beginner' | 'intermediate' | 'advanced',
   ) => {
     setShowTopicPicker(false);
+
+    if (!isLocalDemo && !profile?.organization_id) {
+      Alert.alert(
+        'Erreur',
+        "Votre profil n'est associé à aucune organisation. Contactez votre administrateur.",
+      );
+      return;
+    }
+
     setGeneratingCourse(true);
 
     try {
@@ -250,12 +259,6 @@ export default function TrainingScreen() {
           ...prev,
           ...newQuestions,
         ]);
-      } else if (!profile?.organization_id) {
-        Alert.alert(
-          'Erreur',
-          "Votre profil n'est associé à aucune organisation. Contactez votre administrateur.",
-        );
-        return;
       } else {
         const { data: savedCourse, error: courseErr } = await supabase
           .from('trainings')

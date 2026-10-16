@@ -3,11 +3,11 @@ type Locale = 'en' | 'fr';
 const translations: Record<Locale, Record<string, string>> = {
   en: {
     invalidEmail: 'Invalid email',
-    minPassword: 'Minimum 6 characters',
+    minPassword: 'Minimum 8 characters',
   },
   fr: {
     invalidEmail: 'Email invalide',
-    minPassword: '6 caractères minimum',
+    minPassword: '8 caractères minimum',
   },
 };
 

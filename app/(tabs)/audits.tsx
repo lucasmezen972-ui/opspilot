@@ -2,6 +2,7 @@ import { Search, Plus, Camera, X, Download } from 'lucide-react-native';
 import { useState, useMemo, useCallback } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -48,6 +49,7 @@ export default function AuditsScreen() {
   const {
     audits: dbAudits,
     loading,
+    error: auditsError,
     createAudit,
     updateAuditStatus,
     completeAudit,
@@ -418,6 +420,11 @@ export default function AuditsScreen() {
             label="Chargement des audits..."
           />
         )}
+        {!loading && auditsError && audits.length === 0 && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{auditsError}</Text>
+          </View>
+        )}
         {audits.map((audit) => {
           const sigs = getSignaturesForAudit(audit.id);
           return (
@@ -521,5 +528,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     ...shadow.floating,
+  },
+  errorBanner: {
+    margin: 20,
+    padding: 12,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.dangerStrong,
+    fontWeight: '500',
   },
 });
