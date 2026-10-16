@@ -63,7 +63,7 @@ export default function BackofficeScreen() {
   }
 
   return (
-    <RequireRole roles={['admin']}>
+    <RequireRole roles={['admin', 'superadmin']}>
       <BackofficeContent isDemo={false} />
     </RequireRole>
   );
@@ -509,8 +509,8 @@ function OrgDetailModal({
             </DetailSection>
 
             <DetailSection title="Derniers audits">
-              {org.recentAudits.map((audit) => (
-                <View key={audit.title} style={styles.lineRow}>
+              {org.recentAudits.map((audit, i) => (
+                <View key={`audit-${i}`} style={styles.lineRow}>
                   <ClipboardList size={14} color={colors.textMuted} />
                   <Text style={styles.lineText}>
                     {audit.title}
@@ -523,8 +523,8 @@ function OrgDetailModal({
             </DetailSection>
 
             <DetailSection title="Dernières actions correctives">
-              {org.recentActions.map((action) => (
-                <View key={action.title} style={styles.lineRow}>
+              {org.recentActions.map((action, i) => (
+                <View key={`action-${i}`} style={styles.lineRow}>
                   <TriangleAlert
                     size={14}
                     color={
@@ -595,8 +595,8 @@ function DetailList({
 }) {
   return (
     <DetailSection title={title}>
-      {items.map((name) => (
-        <View key={name} style={styles.lineRow}>
+      {items.map((name, i) => (
+        <View key={`${name}-${i}`} style={styles.lineRow}>
           <Icon size={14} color={colors.textMuted} />
           <Text style={styles.lineText}>{name}</Text>
         </View>
