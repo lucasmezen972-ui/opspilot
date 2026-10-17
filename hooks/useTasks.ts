@@ -148,7 +148,7 @@ export function useTasks() {
     const task = tasks.find((t) => t.id === taskId);
     if (!task || !isRecurring(task.recurrence)) return;
     const from = task.due_date ? new Date(task.due_date) : new Date();
-    await createTask({
+    const result = await createTask({
       title: task.title,
       description: task.description ?? undefined,
       location: task.location ?? undefined,
@@ -158,6 +158,9 @@ export function useTasks() {
       recurrence: task.recurrence,
       due_date: nextDueDate(task.recurrence, from) ?? undefined,
     });
+    if (result.error) {
+      setError(`Prochaine occurrence non créée : ${result.error}`);
+    }
   };
 
   const updateTaskStatus = async (id: string, status: string) => {

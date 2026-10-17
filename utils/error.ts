@@ -13,7 +13,7 @@ export const mapSupabaseError = (context: string, error: unknown): string => {
     if (msg.includes('User already registered'))
       return 'Un compte existe déjà avec cet email.';
     if (msg.includes('Password should be'))
-      return 'Le mot de passe doit contenir au moins 6 caractères.';
+      return 'Le mot de passe doit contenir au moins 8 caractères.';
     if (msg.includes('rate limit'))
       return 'Trop de tentatives. Veuillez patienter quelques minutes.';
     if (/Failed to fetch|NetworkError|network|fetch failed/i.test(msg))

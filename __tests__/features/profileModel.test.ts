@@ -16,17 +16,25 @@ describe('getProfileRoleLabel', () => {
 });
 
 describe('computeXpProgress', () => {
-  it('calcule le seuil, le pourcentage et le restant', () => {
+  it('calcule le pourcentage relatif au palier courant', () => {
+    // Level 3 = XP bracket [200, 300). 250 XP → 50% through the level.
     const p = computeXpProgress(3, 250);
     expect(p.xpForNextLevel).toBe(300);
     expect(p.remaining).toBe(50);
-    expect(Math.round(p.percent)).toBe(83);
+    expect(Math.round(p.percent)).toBe(50);
   });
 
   it('plafonne le pourcentage à 100', () => {
     const p = computeXpProgress(1, 500);
     expect(p.percent).toBe(100);
     expect(p.remaining).toBe(0);
+  });
+
+  it("affiche 0% au debut d'un palier", () => {
+    // Level 3 starts at XP 200
+    const p = computeXpProgress(3, 200);
+    expect(p.percent).toBe(0);
+    expect(p.remaining).toBe(100);
   });
 });
 

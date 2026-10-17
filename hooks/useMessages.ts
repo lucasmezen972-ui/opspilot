@@ -269,6 +269,8 @@ export function useMessages() {
       return () => {
         cleanup?.();
       };
+    } else {
+      setLoading(false);
     }
   }, [
     profile?.organization_id,

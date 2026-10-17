@@ -70,9 +70,12 @@ export interface XpProgress {
 
 /** Progression d'expérience : seuil du niveau suivant, % et XP restants. */
 export function computeXpProgress(level: number, xp: number): XpProgress {
+  const xpForCurrentLevel = (level - 1) * 100;
   const xpForNextLevel = level * 100;
+  const xpInLevel = xp - xpForCurrentLevel;
+  const levelRange = xpForNextLevel - xpForCurrentLevel;
   const percent =
-    xpForNextLevel > 0 ? Math.min((xp / xpForNextLevel) * 100, 100) : 0;
+    levelRange > 0 ? Math.min((xpInLevel / levelRange) * 100, 100) : 0;
   return {
     level,
     xp,

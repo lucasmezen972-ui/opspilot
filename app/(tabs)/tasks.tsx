@@ -85,10 +85,12 @@ export default function TasksScreen() {
     if (!completionTask) return;
     const result = await completeTask(completionTask.id, input);
     setCompletionTask(null);
-    if (!result.error) {
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    } else {
       Alert.alert(
         'Tâche tracée',
-        'Clôture enregistrée avec preuve d’exécution.',
+        "Clôture enregistrée avec preuve d'exécution.",
       );
     }
   };

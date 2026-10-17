@@ -3,6 +3,7 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   ActivityIndicator,
   View,
+  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -54,6 +55,7 @@ export default function ActionsScreen() {
   const {
     actions,
     loading,
+    error: actionsError,
     createAction,
     updateActionStatus,
     isOverdue,
@@ -99,7 +101,7 @@ export default function ActionsScreen() {
     setCreateModalVisible(false);
   };
 
-  const advanceStatus = (action: CorrectiveAction) => {
+  const advanceStatus = async (action: CorrectiveAction) => {
     const idx = STATUS_FLOW.indexOf(action.status);
     if (idx < 0) return;
     const next = STATUS_FLOW[idx + 1];
@@ -111,7 +113,10 @@ export default function ActionsScreen() {
       return;
     }
 
-    updateActionStatus(action.id, next);
+    const result = await updateActionStatus(action.id, next);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+    }
   };
 
   const handleResolutionConfirm = async (
@@ -249,6 +254,12 @@ export default function ActionsScreen() {
         </View>
       )}
 
+      {!loading && actionsError && actions.length === 0 && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{actionsError}</Text>
+        </View>
+      )}
+
       {viewMode === 'list' ? (
         <ScrollView
           style={styles.list}
@@ -347,5 +358,16 @@ const styles = StyleSheet.create({
   loadingBanner: {
     alignItems: 'center',
     paddingVertical: 12,
+  },
+  errorBanner: {
+    margin: 16,
+    padding: 12,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: colors.dangerStrong,
+    fontWeight: '500',
   },
 });
