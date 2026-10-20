@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Megaphone, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: spacing.lg,
     paddingVertical: 10,
-    paddingTop: 50,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 6,
   },
   texts: { flex: 1 },
   title: { fontSize: 13, fontWeight: '700' },

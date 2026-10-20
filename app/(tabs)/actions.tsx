@@ -169,7 +169,11 @@ export default function ActionsScreen() {
       id: profile?.id ?? null,
       role: profile?.role ?? null,
     });
-    updateActionStatus(action.id, 'done', record);
+    const result = await updateActionStatus(action.id, 'done', record);
+    if (result.error) {
+      Alert.alert('Erreur', String(result.error));
+      return;
+    }
     logEvent({
       action: 'action_resolved',
       entityType: 'corrective_action',
