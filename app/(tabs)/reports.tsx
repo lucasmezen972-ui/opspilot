@@ -2,6 +2,7 @@ import { FileText, Download } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -69,38 +70,46 @@ export default function ReportsScreen() {
   const sites = useMemo(() => buildSiteConformity(audits), [audits]);
   const evolution = useMemo(() => buildEvolution(audits), [audits]);
 
-  const handleExportDirection = (format: 'csv' | 'xlsx') => {
-    logEvent({
-      action: 'export',
-      entityType: 'report',
-      label: `Export du rapport direction (${format.toUpperCase()}).`,
-    });
-    return downloadDataset(
-      directionReportRows(sites),
-      'rapport-direction',
-      format,
-    );
+  const handleExportDirection = async (format: 'csv' | 'xlsx') => {
+    try {
+      await downloadDataset(
+        directionReportRows(sites),
+        'rapport-direction',
+        format,
+      );
+      logEvent({
+        action: 'export',
+        entityType: 'report',
+        label: `Export du rapport direction (${format.toUpperCase()}).`,
+      });
+    } catch {
+      Alert.alert('Erreur', "Impossible d'exporter le rapport direction.");
+    }
   };
 
   // Rapport PDF enrichi : critères détaillés + plan d'action correctif lié.
   const handleExport = async (audit: Audit) => {
-    logEvent({
-      action: 'export',
-      entityType: 'audit',
-      entityId: audit.id,
-      label: `Export du rapport d’audit « ${audit.title} ».`,
-    });
-    const responses = await getAuditResponses(audit.id);
-    const items = audit.template_id
-      ? getItemsForTemplate(audit.template_id)
-      : [];
-    const auditActions = actions.filter((a) => a.audit_id === audit.id);
-    await exportAuditReport(audit, {
-      responses,
-      items,
-      actions: auditActions,
-      auditorName: profile?.full_name ?? undefined,
-    });
+    try {
+      const responses = await getAuditResponses(audit.id);
+      const items = audit.template_id
+        ? getItemsForTemplate(audit.template_id)
+        : [];
+      const auditActions = actions.filter((a) => a.audit_id === audit.id);
+      await exportAuditReport(audit, {
+        responses,
+        items,
+        actions: auditActions,
+        auditorName: profile?.full_name ?? undefined,
+      });
+      logEvent({
+        action: 'export',
+        entityType: 'audit',
+        entityId: audit.id,
+        label: `Export du rapport d'audit « ${audit.title} ».`,
+      });
+    } catch {
+      Alert.alert('Erreur', "Impossible d'exporter le rapport.");
+    }
   };
 
   const isLoading = auditsLoading || actionsLoading;
@@ -158,13 +167,17 @@ export default function ReportsScreen() {
           <TouchableOpacity
             testID="export-csv-button"
             style={styles.exportButton}
-            onPress={() => {
-              logEvent({
-                action: 'export',
-                entityType: 'audit',
-                label: `Export CSV de ${audits.length} audit(s).`,
-              });
-              return exportAuditsAsCSV(audits);
+            onPress={async () => {
+              try {
+                await exportAuditsAsCSV(audits);
+                logEvent({
+                  action: 'export',
+                  entityType: 'audit',
+                  label: `Export CSV de ${audits.length} audit(s).`,
+                });
+              } catch {
+                Alert.alert('Erreur', "Impossible d'exporter les audits.");
+              }
             }}
             disabled={audits.length === 0}
           >
