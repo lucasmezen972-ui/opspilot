@@ -84,16 +84,17 @@ export default function TrainingScreen() {
     options: CertificateSubmitOptions,
   ) => {
     const course = dbCourses.find((c) => c.id === courseId);
+    const result = await generateCertificate(courseId, score, options);
+    if (result?.error) {
+      Alert.alert('Erreur', String(result.error));
+      return;
+    }
     logEvent({
       action: 'training_certified',
       entityType: 'training',
       entityId: courseId,
       label: `Formation « ${course?.title ?? 'formation'} » validée par ${options.fullName} (matricule ${options.employeeId}, score ${score} %).`,
     });
-    const result = await generateCertificate(courseId, score, options);
-    if (result?.error) {
-      Alert.alert('Erreur', String(result.error));
-    }
   };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
