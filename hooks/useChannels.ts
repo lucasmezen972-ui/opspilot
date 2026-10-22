@@ -242,7 +242,7 @@ export function useChannels() {
 
       if (isLocalDemo) {
         updateDemoCollection('channelMessages', (prev) => [...prev, msg]);
-        return { data: msg };
+        return { data: msg, error: null };
       }
 
       const { data, error } = await supabase
@@ -268,9 +268,12 @@ export function useChannels() {
             ? prev
             : [...prev, data as ChannelMessage],
         );
-        return { data };
+        return { data, error: null };
       }
-      return { error: mapSupabaseError('Erreur envoi message canal', error) };
+      return {
+        data: null,
+        error: mapSupabaseError('Erreur envoi message canal', error),
+      };
     },
     [isLocalDemo, currentUserId, profile],
   );

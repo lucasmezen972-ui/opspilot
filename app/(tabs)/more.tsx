@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { useRouter, type Href } from 'expo-router';
 import {
   Package,
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: spacing.xl,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

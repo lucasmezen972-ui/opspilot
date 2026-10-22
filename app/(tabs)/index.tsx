@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
 import {
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: 22,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,

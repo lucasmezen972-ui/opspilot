@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import type { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
     paddingHorizontal: spacing.xl,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: spacing.lg,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
