@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { ExternalLink } from 'lucide-react-native';
 import {
   ActivityIndicator,
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   loadingText: { color: '#6B7280', marginTop: 12, fontSize: 14 },
   header: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',

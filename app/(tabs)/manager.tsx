@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import {
   ClipboardCheck,
   TriangleAlert as AlertTriangle,
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
