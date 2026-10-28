@@ -75,7 +75,10 @@ export function useTrainingSupervision() {
   const courses = isLocalDemo ? demoCourses : remoteCourses;
 
   const fetchOrgData = useCallback(async () => {
-    if (!profile?.organization_id) return;
+    if (!profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const [membersResult, coursesResult] = await Promise.all([

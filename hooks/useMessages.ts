@@ -36,7 +36,10 @@ export function useMessages() {
       setLoading(false);
       return;
     }
-    if (!profile?.organization_id) return;
+    if (!profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
