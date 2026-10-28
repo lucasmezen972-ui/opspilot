@@ -36,7 +36,10 @@ export function useChannels() {
   const currentUserId = isLocalDemo ? DEMO_USER_ID : (profile?.id ?? '');
 
   const fetchData = useCallback(async () => {
-    if (!profile?.organization_id || !profile?.id) return;
+    if (!profile?.organization_id || !profile?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       setError(null);
@@ -66,15 +69,16 @@ export function useChannels() {
             .select('channel_id, last_read_at')
             .eq('user_id', profile.id),
         ]);
-        if (msgResult.error) {
-          setError(
-            mapSupabaseError('Erreur chargement messages', msgResult.error),
-          );
-        }
-        if (readResult.error) {
-          setError(
-            mapSupabaseError('Erreur chargement lectures', readResult.error),
-          );
+        const loadErrors = [
+          msgResult.error
+            ? mapSupabaseError('Erreur chargement messages', msgResult.error)
+            : null,
+          readResult.error
+            ? mapSupabaseError('Erreur chargement lectures', readResult.error)
+            : null,
+        ].filter(Boolean);
+        if (loadErrors.length > 0) {
+          setError(loadErrors.join(' | '));
         }
         setRemoteMessages((msgResult.data ?? []) as ChannelMessage[]);
         const reads: Record<string, string> = {};

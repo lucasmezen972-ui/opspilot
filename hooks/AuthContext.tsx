@@ -11,7 +11,7 @@ import { resetDemoStore } from '../lib/demoStore';
 import { supabase, type Profile } from '../lib/supabase';
 import { mapSupabaseError } from '../utils/error';
 
-const AUTH_TIMEOUT_MS = 10_000;
+const AUTH_TIMEOUT_MS = 5_000;
 const DEMO_TIMEOUT_MS = 5_000;
 const OFFLINE_MSG =
   'Connexion temporairement indisponible. Vérifiez votre réseau.';
@@ -168,6 +168,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
+    // Fast path: if the user was in demo mode before this page load,
+    // rehydrate instantly without waiting for the Supabase round-trip.
+    if (hasDemoFlag()) {
+      enterDemo();
+      setReady(true);
+      // Still start the Supabase check in the background so that if
+      // the server came back with a real session, we seamlessly upgrade.
+    }
+
     (async () => {
       try {
         const result = await withTimeout(
@@ -177,16 +186,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         const s = result?.data?.session ?? null;
         if (!cancelled) {
-          if (!s && hasDemoFlag()) {
-            // Réhydrate la démo locale (survit au reload / deep-link, B3).
-            enterDemo();
-          } else {
-            setSession(s);
-            setUserAndRef(s?.user ?? null);
-            setIsOffline(false);
-            if (s?.user?.id) {
-              await fetchProfile(s.user.id);
+          if (s) {
+            // Real session found — upgrade from demo to authenticated.
+            if (demoModeRef.current) {
+              resetDemoStore();
+              persistDemoFlag(false);
             }
+            demoModeRef.current = false;
+            setIsDemoMode(false);
+            setSession(s);
+            setUserAndRef(s.user);
+            setIsOffline(false);
+            await fetchProfile(s.user.id);
+          } else if (!demoModeRef.current) {
+            setSession(null);
+            setUserAndRef(null);
+            setIsOffline(false);
           }
         }
       } catch (error) {
