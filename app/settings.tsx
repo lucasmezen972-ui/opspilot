@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Stack, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingBottom: 16,
     paddingHorizontal: 20,
-    paddingTop: 52,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
   },
   backButton: {
     alignItems: 'center',
