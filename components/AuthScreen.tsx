@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Link } from 'expo-router';
 import { LogIn, UserPlus, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: spacing.xl,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: 40,
   },
   header: { alignItems: 'center', marginBottom: spacing.xxl },

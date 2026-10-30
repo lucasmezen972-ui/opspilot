@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Star, Sparkles, X, ChevronRight } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
@@ -517,7 +518,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

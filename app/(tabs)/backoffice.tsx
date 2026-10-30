@@ -18,6 +18,7 @@ import {
   Alert,
   Linking,
   Modal,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -149,6 +150,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
           summary={summary}
           alerts={alerts}
           onSelect={setSelectedId}
+          onRefresh={isDemo ? undefined : portfolio.refetch}
         />
       )}
 
@@ -204,14 +206,33 @@ function PortfolioList({
   summary,
   alerts,
   onSelect,
+  onRefresh,
 }: {
   organizations: ClientOrganization[];
   summary: ReturnType<typeof summarizeOrganizations>;
   alerts: ReturnType<typeof buildSuperadminAlerts>;
   onSelect: (id: string) => void;
+  onRefresh?: () => void;
 }) {
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        ) : undefined
+      }
+    >
       <View style={styles.summaryRow}>
         <SummaryTile
           testID="backoffice-summary-orgs"

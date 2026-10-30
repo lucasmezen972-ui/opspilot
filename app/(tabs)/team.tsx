@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Users, Mail, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
