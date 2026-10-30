@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import Constants from 'expo-constants';
 import {
   X,
   Camera,
