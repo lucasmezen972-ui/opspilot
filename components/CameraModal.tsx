@@ -1,5 +1,5 @@
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import Constants from 'expo-constants';
+import ExpoConstants from 'expo-constants';
 import {
   X,
   Camera,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
+    paddingTop: (ExpoConstants.statusBarHeight ?? 44) + 16,
     backgroundColor: '#000000',
   },
   title: {
