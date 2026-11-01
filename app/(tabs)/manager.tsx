@@ -7,6 +7,7 @@ import {
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   View,
   Text,
@@ -57,14 +58,33 @@ export default function ManagerDashboard() {
 
 function ManagerDashboardContent() {
   const { profile } = useAuth();
-  const { audits, loading: auditsLoading, error: auditsError } = useAudits();
-  const { tasks, loading: tasksLoading, error: tasksError } = useTasks();
+  const {
+    audits,
+    loading: auditsLoading,
+    error: auditsError,
+    refetch: refetchAudits,
+  } = useAudits();
+  const {
+    tasks,
+    loading: tasksLoading,
+    error: tasksError,
+    refetch: refetchTasks,
+  } = useTasks();
   const { stores } = useStores();
   const { actions } = useCorrectiveActions();
   const { channels, getUnreadCount } = useChannels();
   const { entries: trainingEntries } = useTrainingSupervision();
   const { events: activityEvents } = useActivityLog();
   const [activeTab, setActiveTab] = useState<'cockpit' | 'details'>('cockpit');
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchAudits(), refetchTasks()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const isLoading = auditsLoading || tasksLoading;
   const fetchError = auditsError ?? tasksError;
@@ -105,7 +125,12 @@ function ManagerDashboardContent() {
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Cockpit Manager</Text>
         <Text style={styles.subtitle}>

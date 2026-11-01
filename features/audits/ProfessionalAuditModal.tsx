@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { Camera, CircleCheck, CircleX, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -323,7 +324,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 56,
+    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
