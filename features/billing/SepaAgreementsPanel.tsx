@@ -1,13 +1,6 @@
 import { Check } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  Linking,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Linking, Text, TextInput, View } from 'react-native';
 
 import { invoicePeriodEnd } from './invoice';
 import {
@@ -19,6 +12,7 @@ import {
 } from './sepa';
 import { supabase } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
+import { ChoiceControl } from '../../shared/components/ChoiceControl';
 import { colors } from '../../shared/styles/tokens';
 
 async function action(body: Record<string, unknown>) {
@@ -300,7 +294,7 @@ export function SepaAgreementsPanel({
               a.status,
             ) && (
               <>
-                <TouchableOpacity
+                <ChoiceControl
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: accepted[a.id] === true }}
                   aria-checked={accepted[a.id] === true}
@@ -336,7 +330,7 @@ export function SepaAgreementsPanel({
                     les échéances suivantes utilisent le prélèvement SEPA. Je
                     peux arrêter les échéances futures ici.
                   </Text>
-                </TouchableOpacity>
+                </ChoiceControl>
                 <AppButton
                   label="Accepter et ouvrir ma banque avec Mollie"
                   onPress={() => perform(a, 'authorize')}

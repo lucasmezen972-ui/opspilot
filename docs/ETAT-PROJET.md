@@ -38,7 +38,22 @@ la régression complète est consignée dans [l’audit](AUDIT-2026-11-03.md). C
 `server-quiz-result-375.jpg`/`server-quiz-result-1440.jpg` dans le dossier de preuves.
 Ces tests interceptent les API ; ils ne prouvent pas un débit bancaire ni un
 rapprochement Qonto distant. Aucune fonction serveur ni migration ne change dans
-cette reprise. La publication doit être vérifiée contre le commit fusionné.
+cette reprise. La PR [#228](https://github.com/lucasmezen972-ui/opspilot/pull/228)
+est fusionnée (`cb8d7767`) ; Vercel est `READY` sur ce commit
+(`dpl_6t9VbwXSRFaXz25K7P7sCkn1tW19`) et le domaine public sert cette version.
+Le catalogue et l’import vidéo ont été rouverts après rechargement. La sélection
+de la réponse A est exposée comme cochée et la limite reste 50 Mo, sans R2 activé.
+La prévisualisation est protégée par la connexion Vercel ; aucun contournement
+de cette protection n’a été effectué.
+
+Le contrôle au clavier sur la version publique a révélé un complément : la barre
+d’espace n’activait pas les radios/checkboxes de `TouchableOpacity` sous RN Web.
+`ChoiceControl.web.tsx` utilise `Pressable` et traite explicitement Espace, sans
+double activation ni défilement involontaire ; Entrée reste gérée par RN Web.
+La version native conserve `TouchableOpacity`. Les six parcours concernés passent
+avec Espace/Entrée (quiz, accord SEPA, choix mensuel/annuel, réponse de l’import
+vidéo), sur téléphone et ordinateur. La preuve de publication du complément sera
+consignée dans la description de sa PR après vérification distante.
 
 Nouveau contrôle Mollie : le profil confirmé retourne `status=verified`, mais
 la liste réelle des méthodes récurrentes retourne toujours **zéro méthode**.

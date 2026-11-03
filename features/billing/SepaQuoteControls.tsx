@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { invoicePeriodEnd, parseInvoiceTotal } from './invoice';
 import type { BillingRequest } from '../../hooks/useQontoBilling';
 import { supabase } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
+import { ChoiceControl } from '../../shared/components/ChoiceControl';
 import { colors } from '../../shared/styles/tokens';
 
 export function SepaQuoteControls({
@@ -66,7 +67,7 @@ export function SepaQuoteControls({
       />
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {([1, 12] as const).map((n) => (
-          <TouchableOpacity
+          <ChoiceControl
             key={n}
             accessibilityRole="radio"
             accessibilityState={{ checked: months === n }}
@@ -83,7 +84,7 @@ export function SepaQuoteControls({
             <Text style={{ color: colors.textStrong }}>
               {n === 1 ? 'Mensuel' : 'Annuel'}
             </Text>
-          </TouchableOpacity>
+          </ChoiceControl>
         ))}
       </View>
       {error && (

@@ -82,10 +82,10 @@ for (const width of [375, 1440]) {
     await page.getByTestId('training-quiz-start').click();
     await page
       .getByRole('checkbox', { name: 'Élément A', exact: true })
-      .click();
+      .press('Space');
     await page
       .getByRole('checkbox', { name: 'Élément B', exact: true })
-      .click();
+      .press('Enter');
     await expect(
       page.getByRole('checkbox', { name: 'Élément A', exact: true }),
     ).toBeChecked();

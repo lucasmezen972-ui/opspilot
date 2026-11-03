@@ -1,8 +1,12 @@
 # Migrations OpsPilot
 
 Projet de référence : **OPS PILOT V2** (`hpqfmuzkkxrqoqoabjmb`, eu-west-3).
-Les workflows `migrate.yml` / `bootstrap.yml` rejouent les fichiers `2026*.sql`
-à chaque push sur `main` touchant ce dossier.
+Les workflows `migrate.yml` / `bootstrap.yml` sont manuels. La contrainte actuelle
+est de ne consommer aucune minute GitHub Actions : ne pas les déclencher ni
+rétablir de déclenchement automatique sur `main`. Une publication web ne prouve
+pas que les migrations Supabase sont appliquées. Vérifier l’historique du projet,
+appliquer séparément le SQL validé et consigner la version réellement attribuée
+par le fournisseur dans `docs/ETAT-PROJET.md`.
 
 ## Migrations périmées (sautées par les workflows)
 
