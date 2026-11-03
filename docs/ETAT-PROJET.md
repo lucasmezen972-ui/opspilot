@@ -52,8 +52,17 @@ d’espace n’activait pas les radios/checkboxes de `TouchableOpacity` sous RN 
 double activation ni défilement involontaire ; Entrée reste gérée par RN Web.
 La version native conserve `TouchableOpacity`. Les six parcours concernés passent
 avec Espace/Entrée (quiz, accord SEPA, choix mensuel/annuel, réponse de l’import
-vidéo), sur téléphone et ordinateur. La preuve de publication du complément sera
-consignée dans la description de sa PR après vérification distante.
+vidéo), sur téléphone et ordinateur. La PR
+[#229](https://github.com/lucasmezen972-ui/opspilot/pull/229) est fusionnée
+(`e3b58254`) ; le domaine public sert ce commit en état Vercel `READY`
+(`dpl_13LPgXfFDMnGX7DFsFrNju67oPuH`). Le contrôle distant confirme Espace → B
+cochée, puis Entrée → A cochée dans le formulaire d’import. Le formulaire a été
+fermé sans publication ni téléversement. La capture
+[`production-video-keyboard.jpg`](evidence/2026-11-03/production-video-keyboard.jpg)
+et le [relevé de validation](evidence/2026-11-03/finalisation-validation.json)
+conservent la preuve et ses limites ; la description de la PR est aussi à jour.
+Le README et les consignes de livraison ont été alignés : attestations internes,
+Vercel en production, Actions manuelles et migrations Supabase séparées du web.
 
 Nouveau contrôle Mollie : le profil confirmé retourne `status=verified`, mais
 la liste réelle des méthodes récurrentes retourne toujours **zéro méthode**.

@@ -1,0 +1,49 @@
+{
+  "verified_on": "2026-11-03",
+  "application_url": "https://opspilot-mu-six.vercel.app/",
+  "code_release": {
+    "pull_request": 229,
+    "commit": "e3b58254e2f6264f1971185bda33da716a45a027",
+    "tree": "7b4db80e48da43444ee8aa74131380e6b60294d7",
+    "deployment_id": "dpl_13LPgXfFDMnGX7DFsFrNju67oPuH",
+    "deployment_state": "READY",
+    "public_alias_commit_verified": true
+  },
+  "local_checks": {
+    "typescript": "passed",
+    "eslint": "passed",
+    "prettier": "passed",
+    "web_build": "passed",
+    "unit_tests": { "passed": 358, "files": 59 },
+    "chromium_regression": { "pull_request": 228, "passed": 64 },
+    "chromium_keyboard_followup": { "pull_request": 229, "passed": 6 },
+    "github_actions_runs_started": 0,
+    "connected_browser_apis": "intercepted with fictitious data"
+  },
+  "production_browser_checks": {
+    "data": "demonstration",
+    "catalogue_reloaded": true,
+    "video_editor_opened": true,
+    "space_selects_answer_b": {
+      "answer_a_checked": false,
+      "answer_b_checked": true
+    },
+    "enter_selects_answer_a": {
+      "answer_a_checked": true,
+      "answer_b_checked": false
+    },
+    "visible_import_limit": "50 Mo",
+    "editor_closed_without_publishing": true,
+    "media_uploaded": false,
+    "screenshot": "production-video-keyboard.jpg"
+  },
+  "limits": [
+    "No real customer debit, mandate or invoice created.",
+    "No new live private media upload performed in this verification.",
+    "No native iOS/Android application or assistive technology certification tested.",
+    "Mollie profile verified; live recurring payment method list still empty.",
+    "No new proof that Mollie settlements are authorized.",
+    "SEPA and extended R2 storage remain disabled.",
+    "Qonto invoice creation and bank reconciliation remain manual."
+  ]
+}
