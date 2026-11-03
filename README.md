@@ -2,6 +2,13 @@
 
 OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour piloter les opérations magasin : audits, tâches, formation, communication interne et suivi de performance.
 
+Version web de référence : https://opspilot-mu-six.vercel.app/.
+Lire [l’état vérifié](docs/ETAT-PROJET.md) et [la facturation](docs/QONTO.md)
+avant toute reprise. Les factures sont gérées dans Qonto ; les paiements Mollie
+et le cycle SEPA sont soumis à leurs contrôles d’activation. Le SEPA et le
+stockage étendu R2 ne sont pas annoncés opérationnels tant que leurs conditions
+et leurs tests prestataires ne sont pas validés.
+
 ## TL;DR (format lisible pour IA)
 
 - **Produit** : application mobile terrain pour retail, restauration et points de vente.
@@ -41,7 +48,7 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 - Génération de rapports PDF (synthèse exécutive, détail par critère, plan d'action, bloc de signature).
 - Plans d'action correctifs intelligents : l'échéance et les exigences de preuve sont déduites du problème détecté (chaîne du froid, hygiène, DLC, sécurité…).
 - Gamification (badges, score, classement).
-- Formation interactive (micro-cours + quiz anti-triche) avec attestations quasi-certifiantes nominatives.
+- Formation interactive (chapitres, vidéo privée et quiz corrigés côté serveur) avec attestations internes nominatives, sans certification officielle revendiquée.
 - Filtres avancés (catégorie, date, magasin).
 
 ---
@@ -87,16 +94,14 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 
 ## 4) Configuration Supabase
 
-### Option A — automatique (recommandée)
+### Projet existant
 
-1. Cliquer sur **“Connect to Supabase”** dans Bolt.
-2. Bolt va automatiquement :
-   - créer le projet Supabase,
-   - configurer les variables d’environnement,
-   - exécuter les migrations,
-   - injecter les données d’exemple.
+La production utilise **OPS PILOT V2** (`hpqfmuzkkxrqoqoabjmb`). Ne pas recréer
+ce projet, réinitialiser ses données ni y injecter des fixtures de démonstration.
+Les migrations déjà appliquées et les validations sont consignées dans
+[ETAT-PROJET.md](docs/ETAT-PROJET.md).
 
-### Option B — manuelle
+### Instance de développement distincte
 
 1. Créer un projet sur [supabase.com](https://supabase.com).
 2. Copier l’URL et la clé anonyme.
@@ -107,7 +112,9 @@ EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-4. Exécuter les migrations SQL dans l’éditeur Supabase.
+4. Lire les [règles de migration](supabase/migrations/README.md), vérifier le
+   schéma cible et appliquer uniquement les migrations pertinentes. Les fichiers
+   historiques explicitement périmés ne doivent pas être rejoués.
 
 ---
 
@@ -139,17 +146,17 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### Produits / stock
 
-- Scan code-barres (simulation).
+- Scan code-barres via caméra selon la plateforme, avec saisie manuelle de repli.
 - Suivi de stock temps réel.
 - Alertes ruptures et DLC.
 - Fiches produits enrichies.
 
 ### Formation
 
-- **Parcours quasi-certifiants longs et scénarisés** : chaque module prioritaire (HACCP, DLC/rotation, chaîne du froid, caisse, accueil client, management de proximité) compte au moins 6 chapitres concrets (procédures pas-à-pas, erreurs fréquentes, mini-situations terrain, points de contrôle manager, checklist opérationnelle, résumé final) pour une durée affichée crédible de 45 à 90 minutes.
-- Quiz renforcés : 8 à 14 questions par module, dont au moins 2 cas pratiques (mises en situation) et des questions critiques.
-- Quiz anti-triche : mélange des questions et des options, questions critiques, seuil de réussite, traçabilité des réponses (version d'évaluation, tentative, date).
-- Attestation quasi-certifiante : le candidat confirme son identité (nom, matricule, poste, magasin) et signe sur l'honneur ; le certificat porte score, statut validé/échoué, durée, version et numéro unique.
+- Cours par chapitres, avec texte, MP4 privé, résumé/transcription et sous-titres VTT facultatifs. Les vidéos et contenus pédagogiques réels restent à fournir et à vérifier par le responsable de formation.
+- Import privé de 50 Mo par fichier, chapitres, reprise et progression. L’extension R2 est désactivée tant que sa configuration et ses essais réels ne sont pas validés ; voir [VIDEO-R2.md](docs/VIDEO-R2.md).
+- Évaluation connectée : tirage des questions, conservation privée du corrigé, correction, seuil de réussite et récompenses côté serveur. Une tentative reprise ne doit pas dupliquer les XP. Le mode démo local utilise son propre moteur ; il ne constitue pas une validation en production.
+- Attestation interne après réussite vérifiée : identité déclarée par le candidat, score et référence enregistrés côté serveur. Cette attestation n’est pas une certification officielle et ne prouve pas l’identité ou la présence humaine. Les durées renseignées pour les cours ne sont pas une mesure de présence.
 - Supervision : le responsable suit nom, matricule, formation, score, date et statut de l'attestation, avec export CSV.
 - Progression personnalisée et récompenses liées à l’apprentissage.
 
@@ -183,13 +190,13 @@ Pour les démos sans comptes réels, utiliser le compte de test dédié document
 
 ## 7) Données d’exemple incluses
 
-La démo est conçue comme une **histoire client cohérente, prête pour une présentation commerciale** (supermarchés, franchises) : un magasin avec des audits contextualisés, des actions correctives issues de vraies non-conformités, des formations longues et crédibles, des attestations sérieuses et des rapports PDF exploitables par un manager. Elle fonctionne entièrement hors-ligne, sans dépendre d'un Supabase réel.
+La démo présente un magasin fictif : audits contextualisés, non-conformités et actions liées, exemples de formation et rapports PDF. Ses personnes, résultats et récompenses sont des données de démonstration. Le mode local fonctionne sans Supabase ; ses attestations et scores ne prouvent aucune validation distante.
 
 - Employés : Marie Dupont (manager) et son équipe.
 - Audits : contrôle hygiène rayon frais, chambre froide, DLC boulangerie, **audit HACCP professionnel structuré**, sécurité incendie, **tournée parking / extérieur** et contrôle terrain libre.
 - Produits : références supermarché + codes-barres.
 - Tâches : opérations courantes magasin.
-- Formation : 6 parcours quasi-certifiants scénarisés (HACCP, DLC/rotation, chaîne du froid, accueil client, caisse, management).
+- Formation : 6 exemples de parcours internes (HACCP, DLC/rotation, chaîne du froid, accueil client, caisse, management), sans certification officielle.
 
 ---
 

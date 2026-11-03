@@ -8,10 +8,11 @@ décrit le produit ; ce document décrit l'architecture et les conventions.
 ## Stack
 
 - **Expo / React Native + TypeScript** — une seule base de code, déployée en
-  web statique sur GitHub Pages (`expo export --platform web`).
+  web statique sur Vercel (`expo export --platform web`) :
+  https://opspilot-mu-six.vercel.app/. GitHub Pages est une surface historique.
 - **Expo Router** — routing par fichiers dans `app/`.
 - **Supabase** — auth, Postgres (RLS multi-tenant par `organization_id`),
-  Edge Functions (Stripe). Projet de production : **OPS PILOT V2**
+  Edge Functions (administration, formation privée, IA, paiements Mollie). Projet de production : **OPS PILOT V2**
   (`hpqfmuzkkxrqoqoabjmb`, eu-west-3). L'ancien projet us-east-1 est mort.
 
 ## Arborescence
@@ -28,10 +29,10 @@ lib/                supabase.ts (client + types), demoData.ts, demoStore.ts
 components/         Composants transverses (AuthScreen, RequireRole…)
 utils/              alertPolyfill, error, logger, exports CSV/rapport
 supabase/
-  migrations/       SQL rejoué par CI — lire migrations/README.md AVANT d'y toucher
-  functions/        Edge Functions (Stripe checkout/portal/webhook/worker)
-e2e/                Tests Playwright (34) — testIDs stables obligatoires
-__tests__/          Tests unitaires vitest (38)
+  migrations/       SQL versionné — lire migrations/README.md AVANT d'y toucher
+  functions/        Edge Functions privilégiées ; secrets exclusivement serveur
+e2e/                Tests Playwright — testIDs stables obligatoires
+__tests__/          Tests unitaires vitest
 ```
 
 Règle d'or : les écrans de `app/(tabs)/` orchestrent (état de navigation,
@@ -81,16 +82,24 @@ Pièges historiques (ne pas réintroduire) :
   bloque `**/supabase.co/**` pour des données déterministes. Les testIDs
   sont un contrat : ne pas les renommer sans mettre à jour les specs.
 
-## CI/CD (GitHub Actions, sur main et PR vers main)
+## Vérification et publication
 
-- **CI** (`tests.yml`) : `npm run quality` + build web + E2E Chromium.
-- **Deploy to GitHub Pages** (`deploy.yml`) : publie `dist/` →
-  https://lucasmezen972-ui.github.io/opspilot/
-- **Apply Supabase migrations** (`migrate.yml`) : rejoue
-  `supabase/migrations/2026*.sql` sur V2 quand ce dossier change.
-  Les migrations doivent être **idempotentes** ; deux fichiers historiques
-  sont volontairement sautés (voir `supabase/migrations/README.md`).
-- **Deploy Supabase Edge Functions** (`deploy-functions.yml`).
+- Les workflows GitHub Actions sont **manuels** (`workflow_dispatch`). La
+  contrainte de Lucas est de ne consommer aucune minute : ne pas les déclencher
+  ni rétablir leurs événements `push`/`pull_request` pendant cette contrainte.
+- Exécuter `npm run quality`, la compilation et les parcours pertinents dans
+  l’environnement de travail. Consigner les résultats et les limites dans le dépôt.
+- Branche de travail → PR → vérifications locales réussies et build Vercel
+  réussi → fusion. L’intégration Git Vercel publie `main` ; vérifier le commit
+  réellement servi sur le domaine public et les parcours concernés.
+- Les migrations et fonctions Supabase ne se déploient pas automatiquement
+  avec le web. Les appliquer séparément sur le projet confirmé, conserver leur
+  contenu exact dans le dépôt et vérifier leur état après application.
+- Les migrations doivent être **idempotentes** ; les fichiers historiques
+  explicitement périmés sont exclus (voir `supabase/migrations/README.md`).
+- Facturation actuelle, contrôles Mollie, SEPA désactivé et étapes Qonto manuelles :
+  [QONTO.md](QONTO.md). Les anciens checkouts/portails Stripe renvoient 410 ;
+  ne pas les réactiver comme solution de repli.
 
 ## Assistant IA
 
@@ -111,6 +120,6 @@ rate limit par utilisateur.
 
 ## Conventions
 
-- Branche de travail → PR vers `main` ; la CI doit être verte avant merge.
+- Branche de travail → PR vers `main` ; les contrôles locaux et le build Vercel doivent réussir avant fusion.
 - Prettier appliqué partout (`format:check` bloque la CI).
 - Textes UI en français ; messages d'erreur passés par `utils/error.ts`.
