@@ -16,7 +16,7 @@ import { CurrentPlanCard } from '../../features/billing/CurrentPlanCard';
 import { PlanCard } from '../../features/billing/PlanCard';
 import { QontoAdminPanel } from '../../features/billing/QontoAdminPanel';
 import { PLANS } from '../../features/billing/billingModel';
-import { isQontoPaymentUrl } from '../../features/billing/qonto';
+import { isBillingPaymentUrl } from '../../features/billing/qonto';
 import { useAuth } from '../../hooks/useAuth';
 import { useQontoBilling } from '../../hooks/useQontoBilling';
 import { useSubscription } from '../../hooks/useSubscription';
@@ -31,8 +31,17 @@ export default function BillingScreen() {
 
 function BillingScreenContent() {
   const { profile, isDemoMode, session } = useAuth();
-  const { subscription, trialDaysLeft, loading } = useSubscription();
-  const { requests, requestInvoice } = useQontoBilling();
+  const {
+    subscription,
+    trialDaysLeft,
+    loading,
+    refetch: refreshSubscription,
+  } = useSubscription();
+  const {
+    requests,
+    requestInvoice,
+    refetch: refreshRequests,
+  } = useQontoBilling();
   const isLocalDemo = isDemoMode && !session;
 
   const currentPlan = subscription?.plan ?? 'trial';
@@ -48,7 +57,7 @@ function BillingScreenContent() {
     }
     try {
       const invoice = await requestInvoice(planId);
-      if (isQontoPaymentUrl(invoice.payment_url)) {
+      if (isBillingPaymentUrl(invoice) && invoice.payment_url) {
         await Linking.openURL(invoice.payment_url);
       } else {
         Alert.alert(
@@ -122,6 +131,14 @@ function BillingScreenContent() {
         <Text style={styles.manageButtonText}>Gérer mon abonnement Qonto</Text>
       </TouchableOpacity>
 
+      {!isLocalDemo && ['essential', 'business'].includes(currentPlan) && (
+        <TouchableOpacity onPress={() => handleUpgrade(currentPlan)}>
+          <Text style={{ color: '#2563EB', padding: 20 }}>
+            Demander une facture de renouvellement
+          </Text>
+        </TouchableOpacity>
+      )}
+
       <View style={styles.section}>
         {requests
           .filter(
@@ -137,19 +154,39 @@ function BillingScreenContent() {
                   ? 'préparation en cours'
                   : 'en attente de règlement'}
               </Text>
-              {isQontoPaymentUrl(request.payment_url) && (
+              {isBillingPaymentUrl(request) && (
                 <TouchableOpacity
                   accessibilityRole="link"
                   onPress={() => Linking.openURL(request.payment_url!)}
                 >
                   <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
-                    Régler sur Qonto
+                    {request.payment_provider === 'mollie'
+                      ? 'Régler la facture par carte'
+                      : 'Régler sur Qonto'}
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
           ))}
         <Text style={styles.sectionTitle}>Choisir un plan</Text>
+        {!isLocalDemo && (
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await Promise.all([refreshRequests(), refreshSubscription()]);
+              } catch {
+                Alert.alert(
+                  'Actualisation impossible',
+                  'Réessayez dans quelques instants.',
+                );
+              }
+            }}
+          >
+            <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
+              Actualiser mon règlement
+            </Text>
+          </TouchableOpacity>
+        )}
         {PLANS.map((plan) => (
           <PlanCard
             key={plan.id}
@@ -165,7 +202,9 @@ function BillingScreenContent() {
         <Text style={styles.footerText}>
           Facturation mensuelle avec Qonto. Votre facture précise le montant,
           les taxes applicables et le moyen de règlement. L’activation suit la
-          vérification du paiement par notre équipe. Sans engagement.
+          vérification du paiement. Chaque période facturée fait l’objet d’un
+          règlement ; aucun prélèvement automatique n’est effectué. Sans
+          engagement.
         </Text>
       </View>
     </ScrollView>

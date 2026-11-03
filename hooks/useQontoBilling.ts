@@ -10,6 +10,10 @@ export interface BillingRequest {
   status: 'requested' | 'awaiting_payment' | 'paid' | 'canceled';
   payment_url: string | null;
   qonto_reference: string | null;
+  payment_provider?: 'qonto' | 'mollie';
+  mollie_payment_id?: string | null;
+  amount_cents?: number | null;
+  paid_until?: string | null;
 }
 
 export function useQontoBilling() {
@@ -40,5 +44,5 @@ export function useQontoBilling() {
     await refetch();
     return data as BillingRequest;
   };
-  return { requests, requestInvoice };
+  return { requests, requestInvoice, refetch };
 }

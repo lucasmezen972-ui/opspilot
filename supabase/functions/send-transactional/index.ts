@@ -7,7 +7,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-const APP_URL = 'https://lucasmezen972-ui.github.io/opspilot/';
+const APP_URL = 'https://opspilot-mu-six.vercel.app/';
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { persistSession: false },

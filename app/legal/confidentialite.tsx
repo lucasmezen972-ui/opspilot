@@ -44,7 +44,7 @@ export default function PrivacyPolicyScreen() {
         {
           title: '4. Destinataires et sous-traitants',
           content:
-            "L'accès est limité aux personnes autorisées de l'organisation cliente et aux prestataires nécessaires au service. OpsPilot utilise notamment Supabase pour l'authentification et la base de données, Vercel pour la diffusion web, Resend pour les emails transactionnels et Qonto pour la facturation et les paiements. L’assistance IA, lorsqu’elle est activée, peut transmettre le contenu fourni à Anthropic ou OpenAI ; les utilisateurs doivent éviter toute donnée personnelle non nécessaire. Les prestataires optionnels et garanties de transfert sont précisés au contrat.",
+            "L'accès est limité aux personnes autorisées de l'organisation cliente et aux prestataires nécessaires au service. OpsPilot utilise notamment Supabase pour l'authentification et la base de données, Vercel pour la diffusion web, Resend pour les emails transactionnels, Qonto pour la facturation et Mollie pour le traitement des paiements par carte. Les références de facture, montants et identifiants nécessaires au rapprochement sont transmis au prestataire de paiement ; les données de carte sont saisies sur sa page sécurisée et ne sont pas stockées dans OpsPilot. L’assistance IA, lorsqu’elle est activée, peut transmettre le contenu fourni à Anthropic ou OpenAI ; les utilisateurs doivent éviter toute donnée personnelle non nécessaire. Les prestataires optionnels et garanties de transfert sont précisés au contrat.",
         },
         {
           title: '5. Durées de conservation',
