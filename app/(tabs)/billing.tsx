@@ -14,13 +14,12 @@ import {
 import RequireRole from '../../components/RequireRole';
 import { CurrentPlanCard } from '../../features/billing/CurrentPlanCard';
 import { PlanCard } from '../../features/billing/PlanCard';
-import {
-  PLANS,
-  buildActivationMailtoUrl,
-} from '../../features/billing/billingModel';
+import { QontoAdminPanel } from '../../features/billing/QontoAdminPanel';
+import { PLANS } from '../../features/billing/billingModel';
+import { isQontoPaymentUrl } from '../../features/billing/qonto';
 import { useAuth } from '../../hooks/useAuth';
+import { useQontoBilling } from '../../hooks/useQontoBilling';
 import { useSubscription } from '../../hooks/useSubscription';
-import { supabase } from '../../lib/supabase';
 
 export default function BillingScreen() {
   return (
@@ -30,14 +29,10 @@ export default function BillingScreen() {
   );
 }
 
-/** Ouvre une demande d'activation pré-remplie (alternative claire au paiement). */
-function requestActivation(planId: string) {
-  return Linking.openURL(buildActivationMailtoUrl(planId));
-}
-
 function BillingScreenContent() {
   const { profile, isDemoMode, session } = useAuth();
   const { subscription, trialDaysLeft, loading } = useSubscription();
+  const { requests, requestInvoice } = useQontoBilling();
   const isLocalDemo = isDemoMode && !session;
 
   const currentPlan = subscription?.plan ?? 'trial';
@@ -52,17 +47,20 @@ function BillingScreenContent() {
       return;
     }
     try {
-      const { data, error } = await supabase.functions.invoke(
-        'create-checkout-session',
-        { body: { plan: planId } },
-      );
-      if (error || !data?.url) {
-        await requestActivation(planId);
-        return;
+      const invoice = await requestInvoice(planId);
+      if (isQontoPaymentUrl(invoice.payment_url)) {
+        await Linking.openURL(invoice.payment_url);
+      } else {
+        Alert.alert(
+          'Demande enregistrée',
+          'Votre demande de facture Qonto est enregistrée. Votre abonnement sera activé après vérification du règlement.',
+        );
       }
-      await Linking.openURL(data.url);
     } catch {
-      await requestActivation(planId);
+      Alert.alert(
+        'Demande impossible',
+        'Réessayez ou contactez contact@tradikom.com.',
+      );
     }
   };
 
@@ -80,33 +78,9 @@ function BillingScreenContent() {
       );
       return;
     }
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        'create-customer-portal',
-        {
-          body: {
-            returnUrl:
-              typeof window !== 'undefined' && window.location?.origin
-                ? `${window.location.origin}${window.location.pathname}`
-                : 'https://opspilot.app/billing',
-          },
-        },
-      );
-      if (error || !data?.url) {
-        const msg =
-          (error as { message?: string })?.message ??
-          data?.error ??
-          "Portail de facturation indisponible. Souscrivez d'abord à un plan.";
-        Alert.alert('Gestion abonnement', msg);
-        return;
-      }
-      await Linking.openURL(data.url);
-    } catch {
-      Alert.alert(
-        'Gestion abonnement',
-        'Portail de facturation indisponible pour le moment.',
-      );
-    }
+    await Linking.openURL(
+      'mailto:contact@tradikom.com?subject=Gestion%20abonnement%20OpsPilot%20Qonto',
+    );
   };
 
   if (loading) {
@@ -127,6 +101,11 @@ function BillingScreenContent() {
         </Text>
       </View>
 
+      {profile?.role === 'superadmin' && (
+        <View style={{ padding: 20 }}>
+          <QontoAdminPanel />
+        </View>
+      )}
       <CurrentPlanCard
         currentPlan={currentPlan}
         status={status}
@@ -140,10 +119,36 @@ function BillingScreenContent() {
         onPress={handleManageSubscription}
       >
         <ExternalLink size={16} color="#2563EB" />
-        <Text style={styles.manageButtonText}>Gérer mon abonnement</Text>
+        <Text style={styles.manageButtonText}>Gérer mon abonnement Qonto</Text>
       </TouchableOpacity>
 
       <View style={styles.section}>
+        {requests
+          .filter(
+            (request) =>
+              request.status === 'requested' ||
+              request.status === 'awaiting_payment',
+          )
+          .map((request) => (
+            <View key={request.id} style={{ marginBottom: 16 }}>
+              <Text>
+                Facture Qonto — {request.plan} :{' '}
+                {request.status === 'requested'
+                  ? 'préparation en cours'
+                  : 'en attente de règlement'}
+              </Text>
+              {isQontoPaymentUrl(request.payment_url) && (
+                <TouchableOpacity
+                  accessibilityRole="link"
+                  onPress={() => Linking.openURL(request.payment_url!)}
+                >
+                  <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
+                    Régler sur Qonto
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
         <Text style={styles.sectionTitle}>Choisir un plan</Text>
         {PLANS.map((plan) => (
           <PlanCard
@@ -158,9 +163,9 @@ function BillingScreenContent() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Souscription accompagnée par notre équipe. Le paiement en ligne
-          (Stripe) est proposé lorsqu’il est activé sur votre instance ; sinon
-          nous finalisons l’activation avec vous. Sans engagement.
+          Facturation mensuelle avec Qonto. Votre facture précise le montant,
+          les taxes applicables et le moyen de règlement. L’activation suit la
+          vérification du paiement par notre équipe. Sans engagement.
         </Text>
       </View>
     </ScrollView>

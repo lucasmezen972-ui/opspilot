@@ -1,5 +1,4 @@
-const STATIC_CACHE = 'opspilot-static-v4';
-const API_CACHE = 'opspilot-api-v4';
+const STATIC_CACHE = 'opspilot-static-v5';
 
 // Base path derived from the SW's own location (works on / or /opspilot/)
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '');
@@ -28,7 +27,7 @@ self.addEventListener('activate', (event) => {
       .then((names) =>
         Promise.all(
           names
-            .filter((n) => n !== STATIC_CACHE && n !== API_CACHE)
+            .filter((n) => n.startsWith('opspilot-') && n !== STATIC_CACHE)
             .map((n) => caches.delete(n)),
         ),
       ),
@@ -42,21 +41,15 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Supabase / API — network first, then cache
-  if (url.hostname.includes('supabase') || url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(API_CACHE).then((c) => c.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request)),
-    );
+  // Never cache authenticated responses, APIs, private files or back-office.
+  // Browser caches outlive a session and must not mix organisations.
+  if (
+    url.origin !== self.location.origin ||
+    request.headers.has('authorization') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith(BASE + '/admin')
+  )
     return;
-  }
 
   // Navigation/HTML — network first, then cached app shell.
   // This prevents GitHub Pages from serving an old cached blank shell forever.

@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useAuth } from './useAuth';
+import {
+  isUploadableEvidenceUri,
+  uploadEvidencePhoto,
+} from '../features/evidence/evidenceUpload';
 import { demoId } from '../lib/demoData';
 import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
 import { supabase, type CorrectiveAction } from '../lib/supabase';
@@ -155,6 +159,27 @@ export function useCorrectiveActions() {
         return { data: updated, error: null };
       }
 
+      const uri =
+        typeof updates.resolution_photo_url === 'string'
+          ? updates.resolution_photo_url
+          : null;
+      if (uri && isUploadableEvidenceUri(uri)) {
+        if (!profile?.organization_id)
+          return { data: null, error: 'Organisation introuvable' };
+        const path = await uploadEvidencePhoto({
+          organizationId: profile.organization_id,
+          entityType: 'corrective_action',
+          entityId: id,
+          uri,
+          uploadedBy: user?.id,
+        });
+        if (!path)
+          return {
+            data: null,
+            error: 'Preuve photo non enregistrée. Réessayez avant de clôturer.',
+          };
+        updates.resolution_photo_url = path;
+      }
       const { data, error } = await supabase
         .from('corrective_actions')
         .update(updates)

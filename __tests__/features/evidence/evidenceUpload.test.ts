@@ -30,7 +30,12 @@ describe('isUploadableEvidenceUri', () => {
     expect(isUploadableEvidenceUri('blob:http://localhost/abc')).toBe(true);
     expect(isUploadableEvidenceUri('content://media/1')).toBe(true);
     expect(isUploadableEvidenceUri('https://cdn/x.jpg')).toBe(false);
-    expect(isUploadableEvidenceUri('data:image/png;base64,zzz')).toBe(false);
+    expect(isUploadableEvidenceUri('data:image/png;base64,aGVsbG8=')).toBe(
+      true,
+    );
+    expect(isUploadableEvidenceUri('data:text/html;base64,aGVsbG8=')).toBe(
+      false,
+    );
     expect(isUploadableEvidenceUri(null)).toBe(false);
   });
 });

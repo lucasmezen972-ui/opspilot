@@ -37,7 +37,7 @@ OpsPilot est une application mobile professionnelle (inspirée de Yoobic) pour p
 
 - Scanner de code-barres (ajout/vérification produits).
 - Annotation des photos (flèches, texte, etc.).
-- Mode hors-ligne avec synchronisation au retour réseau.
+- Démonstration hors ligne ; les opérations de production nécessitent une connexion.
 - Génération de rapports PDF (synthèse exécutive, détail par critère, plan d'action, bloc de signature).
 - Plans d'action correctifs intelligents : l'échéance et les exigences de preuve sont déduites du problème détecté (chaîne du froid, hygiène, DLC, sécurité…).
 - Gamification (badges, score, classement).

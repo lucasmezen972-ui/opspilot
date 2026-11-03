@@ -67,12 +67,10 @@ export function useTeam() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ role })
-        .eq('id', memberId)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('update_team_member_role', {
+        p_member_id: memberId,
+        p_role: role,
+      });
 
       if (error) {
         return {
@@ -100,10 +98,9 @@ export function useTeam() {
     }
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_active: false })
-        .eq('id', memberId);
+      const { error } = await supabase.rpc('deactivate_team_member', {
+        p_member_id: memberId,
+      });
       if (error) {
         return {
           error: mapSupabaseError('Erreur désactivation membre', error),

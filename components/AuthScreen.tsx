@@ -332,6 +332,12 @@ export default function AuthScreen() {
           Confidentialité
         </Link>
         <Text style={styles.legalSeparator}>•</Text>
+        <Link href="/legal/cgv" style={styles.legalLink}>
+          Conditions commerciales
+        </Link>
+        <Link href="/legal/sous-traitance" style={styles.legalLink}>
+          Données professionnelles
+        </Link>
         <Link href="/legal/cgu" style={styles.legalLink}>
           CGU
         </Link>

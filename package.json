@@ -15,7 +15,8 @@
     "test:e2e:ui": "playwright test --ui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "quality": "npm run typecheck && npm run lint && npm run format:check && npm test"
+    "quality": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "postinstall": "node scripts/patch-metro.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
@@ -48,6 +49,7 @@
     "expo-system-ui": "~5.0.5",
     "expo-web-browser": "~14.1.5",
     "lucide-react-native": "^0.475.0",
+    "query-string": "^7.1.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.1",
@@ -59,7 +61,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
-    "zod": "^3.23.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -83,7 +85,17 @@
     "react-test-renderer": "^19.0.0",
     "serve": "^14.2.6",
     "typescript": "^5.4.0",
+    "vite": "^8.3.5",
     "vite-plugin-babel": "^1.3.2",
-    "vitest": "^1.6.0"
+    "vitest": "^5.1.0"
+  },
+  "overrides": {
+    "compression": "1.8.2",
+    "postcss": "8.5.32",
+    "decode-uri-component": "0.5.1",
+    "image-size": "2.0.4"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

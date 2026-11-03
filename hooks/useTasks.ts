@@ -241,8 +241,7 @@ export function useTasks() {
 
     try {
       // Preuve photo durable : téléverse l'URI locale dans le bucket privé
-      // « evidence » et persiste le chemin. Best-effort : conserve l'URI si
-      // l'upload échoue, ne bloque jamais la clôture.
+      // « evidence ». Une photo non enregistrée empêche la clôture.
       const uri = input.proofPhotoUrl;
       if (uri && isUploadableEvidenceUri(uri) && profile?.organization_id) {
         const storagePath = await uploadEvidencePhoto({
@@ -252,7 +251,13 @@ export function useTasks() {
           uri,
           uploadedBy: user?.id ?? null,
         });
-        if (storagePath) updates.proof_photo_url = storagePath;
+        if (!storagePath) {
+          return {
+            data: null,
+            error: 'Preuve photo non enregistrée. Réessayez avant de clôturer.',
+          };
+        }
+        updates.proof_photo_url = storagePath;
       }
 
       const { data, error } = await supabase

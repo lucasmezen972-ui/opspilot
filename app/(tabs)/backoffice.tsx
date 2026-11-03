@@ -64,13 +64,15 @@ export default function BackofficeScreen() {
   }
 
   return (
-    <RequireRole roles={['admin', 'superadmin']}>
+    <RequireRole roles={['superadmin', 'support']}>
       <BackofficeContent isDemo={false} />
     </RequireRole>
   );
 }
 
 function BackofficeContent({ isDemo }: { isDemo: boolean }) {
+  const { profile } = useAuth();
+  const canManage = isDemo || can(profile?.role, 'backoffice.manage');
   const portfolio = useOrganizationPortfolio(!isDemo);
   // En démo, le portefeuille est mutable localement (suspendre / réactiver).
   const [demoOrganizations, setDemoOrganizations] = useState<
@@ -92,6 +94,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
 
   // Suspendre / réactiver : mutation locale en démo, RPC superadmin en prod.
   const setOrgStatus = async (orgId: string, status: OrgStatus) => {
+    if (!canManage) return;
     if (isDemo) {
       setDemoOrganizations((prev) =>
         prev.map((org) => (org.id === orgId ? { ...org, status } : org)),
@@ -158,7 +161,7 @@ function BackofficeContent({ isDemo }: { isDemo: boolean }) {
         org={selected}
         onClose={() => setSelectedId(null)}
         onContactSupport={contactSupport}
-        onSetStatus={setOrgStatus}
+        onSetStatus={canManage ? setOrgStatus : undefined}
       />
     </View>
   );
@@ -424,7 +427,7 @@ function OrgDetailModal({
   org: ClientOrganization | null;
   onClose: () => void;
   onContactSupport: () => void;
-  onSetStatus: (orgId: string, status: OrgStatus) => void;
+  onSetStatus?: (orgId: string, status: OrgStatus) => void;
 }) {
   if (!org) return null;
   const status = orgStatusMeta(org.status);
@@ -559,36 +562,38 @@ function OrgDetailModal({
               ))}
             </DetailSection>
 
-            <TouchableOpacity
-              testID="backoffice-detail-toggle-status"
-              style={[
-                styles.statusActionButton,
-                isSuspended
-                  ? styles.statusActionReactivate
-                  : styles.statusActionSuspend,
-              ]}
-              onPress={() => onSetStatus(org.id, nextStatus)}
-            >
-              {isSuspended ? (
-                <Power size={18} color={colors.successText} />
-              ) : (
-                <Ban size={18} color={colors.dangerStrong} />
-              )}
-              <Text
+            {onSetStatus && (
+              <TouchableOpacity
+                testID="backoffice-detail-toggle-status"
                 style={[
-                  styles.statusActionText,
-                  {
-                    color: isSuspended
-                      ? colors.successText
-                      : colors.dangerStrong,
-                  },
+                  styles.statusActionButton,
+                  isSuspended
+                    ? styles.statusActionReactivate
+                    : styles.statusActionSuspend,
                 ]}
+                onPress={() => onSetStatus(org.id, nextStatus)}
               >
-                {isSuspended
-                  ? 'Réactiver l’organisation'
-                  : 'Suspendre l’organisation'}
-              </Text>
-            </TouchableOpacity>
+                {isSuspended ? (
+                  <Power size={18} color={colors.successText} />
+                ) : (
+                  <Ban size={18} color={colors.dangerStrong} />
+                )}
+                <Text
+                  style={[
+                    styles.statusActionText,
+                    {
+                      color: isSuspended
+                        ? colors.successText
+                        : colors.dangerStrong,
+                    },
+                  ]}
+                >
+                  {isSuspended
+                    ? 'Réactiver l’organisation'
+                    : 'Suspendre l’organisation'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               testID="backoffice-detail-support"
