@@ -1,42 +1,26 @@
 # Déploiement OpsPilot
 
-Tout est automatisé par **GitHub Actions** sur la branche `main`. Aucun
-déploiement manuel en temps normal.
+Le site web utilise Vercel et le dépôt GitHub `lucasmezen972-ui/opspilot`.
+Le build est `npm run build:web`, le répertoire publié est `dist` et les routes
+sont configurées dans `vercel.json`. La base URL Expo est vide pour une publication
+à la racine du domaine. Node 24 est déclaré dans `package.json`.
 
-## Cible
+Les opérations backend ciblent uniquement Supabase `hpqfmuzkkxrqoqoabjmb`.
+Les migrations doivent être idempotentes et le SQL appliqué doit correspondre au
+fichier versionné. Vérifier séparément leur présence en production : une PR ne
+prouve pas qu'une migration a été appliquée.
 
-- **Application web** : GitHub Pages →
-  https://lucasmezen972-ui.github.io/opspilot/
-- **Back-office superadmin** : `/opspilot/admin/` (SPA statique servie au
-  même endroit).
-- **Backend** : Supabase « OPS PILOT V2 » (`hpqfmuzkkxrqoqoabjmb`,
-  eu-west-3). L'ancien projet us-east-1 est mort — ne jamais l'utiliser.
+Les workflows GitHub Actions sont désormais déclenchés manuellement pour éviter
+la consommation automatique de minutes. Ne pas les relancer sans nécessité.
+Exécuter localement `npm run quality`, `npm run build:web` et les tests Playwright
+avec `PLAYWRIGHT_BASE_URL=http://localhost:3000/`. Un navigateur Chromium peut être
+fourni via `PLAYWRIGHT_CHROMIUM_PATH`.
 
-## Workflows (`.github/workflows/`)
+L'ancienne URL GitHub Pages n'est plus la cible de vente. Elle peut encore servir
+l'ancienne interface tant qu'un retrait ou une redirection n'est pas effectué.
+Le backend de cette ancienne interface bénéficie néanmoins des restrictions de
+droits et ne peut plus créer de paiement Stripe.
 
-| Workflow               | Déclencheur                            | Rôle                                                          |
-| ---------------------- | -------------------------------------- | ------------------------------------------------------------- |
-| `tests.yml` (CI)       | push/PR sur `main`                     | `npm run quality` + build web + 43 E2E Playwright (Chromium). |
-| `deploy.yml`           | push sur `main`                        | build web → `dist/` (+ `admin/`) → GitHub Pages.              |
-| `migrate.yml`          | changement de `supabase/migrations/**` | rejoue les migrations `2026*.sql` sur V2.                     |
-| `deploy-functions.yml` | changement de `supabase/functions/**`  | déploie les Edge Functions (`--no-verify-jwt`).               |
-
-## Spécificités GitHub Pages
-
-- Base path `/opspilot/`. Le SPA fallback (`404.html` = `index.html`) gère
-  les routes côté client ; `.nojekyll` autorise les fichiers `_expo/`.
-- Le back-office `admin/` est copié dans `dist/admin` au build.
-
-## Variables / secrets
-
-Build web : `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-(secrets GitHub ; fallback intégré sur le projet V2 si absents).
-Migrations/fonctions : `SUPABASE_ACCESS_TOKEN`. Stripe / IA / email : voir
-`docs/SUPABASE.md` (secrets Edge). **Aucun secret en clair dans le code.**
-
-## Règle de travail
-
-Branche dédiée → PR vers `main` → CI **verte** → merge (l'agent peut
-auto-merger une fois la CI verte). Les checks « CircleCI » / « Supabase
-Preview » rouges sur les PR sont des apps GitHub externes sans config, à
-ignorer : seuls les checks GitHub Actions font foi.
+Une migration de routage nécessite également la vérification des URL de retour
+Supabase Auth et du lien de récupération de mot de passe. Ne pas annoncer le
+parcours de récupération comme validé sans cet essai.

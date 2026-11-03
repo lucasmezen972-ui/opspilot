@@ -5,6 +5,19 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Vérification du 2 novembre 2026
+
+- Les administrateurs clients ne disposent plus des RPC de plateforme. Les modifications directes de rôle, d'organisation et de statut d'un profil sont protégées ; la gestion d'équipe utilise des RPC limitées à l'organisation.
+- `platform_settings` est réservé au serveur. Le jeton worker a été renouvelé ; une nouvelle clé Resend limitée à l'envoi depuis tradikom.com remplace l'ancienne clé « Ops pilot », révoquée. Aucune clé n'est reproduite ici.
+- Les contrôles SQL `supabase/tests/tenant_access.sql` et `employee_access.sql` ont été exécutés sur le projet réel, dans des transactions annulées.
+- La facturation est désormais orientée Qonto ; les anciens checkouts/portails Stripe renvoient 410, le cron Stripe est désactivé. Voir [QONTO.md](QONTO.md) pour les étapes encore nécessaires et la distinction entre code préparé et compte connecté.
+- Le cache web ne conserve plus les réponses privées. Une photo fournie doit être téléversée avant clôture d'un audit, d'une tâche ou d'une action corrective.
+- Les mentions légales reprennent l'identité vérifiée dans l'API publique Recherche d'entreprises (SIREN 820167914, établissement actif). Conditions professionnelles et annexe de sous-traitance ajoutées ; aucune promesse par défaut de SSO, hébergement dédié ou SLA chiffré.
+- Les workflows GitHub Actions sont manuels afin de préserver les minutes du compte. Les vérifications sont exécutées dans l'environnement de travail ; le déploiement web utilise la configuration Vercel à la racine.
+- Dépendances : 0 vulnérabilité haute ou critique dans l'audit npm après mise à jour. Des alertes modérées du socle Expo restent à traiter lors d'une montée de SDK dédiée ; ne pas annoncer « zéro vulnérabilité ».
+
+La carte historique ci-dessous décrit le socle antérieur ; les points ci-dessus priment en cas de contradiction.
+
 ## Vue d'ensemble
 
 OpsPilot est un SaaS de pilotage des opérations terrain (retail) :

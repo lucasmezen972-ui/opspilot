@@ -1,58 +1,34 @@
-import { Text } from 'react-native';
+import LegalPage from '../../components/LegalPage';
 
-import LegalPage, { legalStyles } from '../../components/LegalPage';
-
-export default function LegalNoticeScreen() {
+export default function Screen() {
   return (
     <LegalPage
       title="Mentions légales"
-      updatedAt="10 juin 2026"
-      notice="Publication bloquée pour un usage commercial tant que les informations signalées ci-dessous ne sont pas remplacées par l'identité juridique réelle de l'éditeur."
+      updatedAt="2 novembre 2026"
       sections={[
         {
           title: '1. Éditeur',
-          content: (
-            <>
-              <Text style={legalStyles.placeholder}>
-                À compléter : raison sociale ou nom de l’entrepreneur, forme
-                juridique, capital social le cas échéant, adresse du siège,
-                SIREN/SIRET et registre d’immatriculation.
-              </Text>
-              <Text style={legalStyles.paragraph}>
-                Nom du service : OpsPilot{'\n'}
-                Contact : contact@tradikom.com
-              </Text>
-            </>
-          ),
+          content:
+            'Lucas Mezen, entrepreneur individuel exerçant sous le nom commercial TRADIKOM. SIREN : 820 167 914. SIRET du siège : 820 167 914 00028. Adresse : 6 Anse-à-l’Âne, 97229 Les Trois-Îlets, Martinique. Contact : contact@tradikom.com.',
         },
         {
           title: '2. Direction de la publication',
-          content: (
-            <Text style={legalStyles.placeholder}>
-              À compléter : nom et qualité du directeur ou de la directrice de
-              la publication.
-            </Text>
-          ),
+          content: 'Lucas Mezen, éditeur d’OpsPilot.',
         },
         {
           title: '3. Hébergement',
           content:
-            'L’application web est diffusée au moyen de GitHub Pages, service de GitHub, Inc. Les services d’authentification, de base de données et de stockage applicatif reposent sur Supabase. Les coordonnées contractuelles et la région d’hébergement retenue doivent être reportées dans la documentation client.',
+            'Application web : Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. Authentification, base et preuves privées : Supabase, projet hébergé en région eu-west-3 (Paris). La publication historique sur GitHub Pages est remplacée par cette version.',
         },
         {
           title: '4. Propriété intellectuelle',
           content:
-            'Sauf mention contraire, les éléments composant OpsPilot sont protégés par le droit de la propriété intellectuelle. Toute reproduction, adaptation, extraction ou diffusion non autorisée est interdite, sous réserve des droits accordés par les licences des composants tiers.',
+            'Les droits sur les contenus du client restent à leurs titulaires. Les composants tiers conservent leurs licences respectives. L’accès au service n’emporte pas de transfert des droits sur l’application.',
         },
         {
-          title: '5. Données personnelles',
+          title: '5. Données personnelles et contact',
           content:
-            'Les traitements de données personnelles sont décrits dans la politique de confidentialité. Les demandes peuvent être adressées à contact@tradikom.com.',
-        },
-        {
-          title: '6. Contact',
-          content:
-            'Contact général : contact@tradikom.com. Questions relatives à la protection des données : contact@tradikom.com.',
+            'Les traitements sont décrits dans la politique de confidentialité et l’annexe de sous-traitance. Demandes : contact@tradikom.com.',
         },
       ]}
     />

@@ -6,8 +6,8 @@ export default function TermsScreen() {
   return (
     <LegalPage
       title="Conditions générales d'utilisation"
-      updatedAt="10 juin 2026"
-      notice="Ces CGU encadrent l'utilisation de l'application. Les conditions commerciales, niveaux de service et modalités de paiement doivent être complétés dans un contrat ou des CGV avant toute vente."
+      updatedAt="2 novembre 2026"
+      notice="Ces CGU encadrent l'utilisation de l'application. La souscription professionnelle est encadrée par les conditions commerciales, le devis accepté et l’annexe de sous-traitance."
       sections={[
         {
           title: '1. Objet',
@@ -67,7 +67,7 @@ export default function TermsScreen() {
         {
           title: '9. Droit applicable',
           content:
-            'Les présentes conditions sont soumises au droit français. Avant toute action contentieuse, les parties recherchent une solution amiable. La juridiction compétente doit être précisée dans le contrat conclu avec l’organisation cliente.',
+            'Les présentes conditions sont soumises au droit français. Avant toute action contentieuse, les parties recherchent une solution amiable. Les juridictions compétentes sont déterminées par les règles applicables, sans clause attributive particulière.',
         },
       ]}
     />

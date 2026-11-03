@@ -21,6 +21,7 @@ export type AppPermission =
   | 'reports.export'
   | 'settings.manage'
   | 'backoffice.access'
+  | 'backoffice.manage'
   | 'billing.manage';
 
 const FIELD_PERMISSIONS: AppPermission[] = [
@@ -49,11 +50,14 @@ const ADMIN_PERMISSIONS: AppPermission[] = [
   ...MANAGER_PERMISSIONS,
   'audit.delete',
   'settings.manage',
-  'backoffice.access',
   'billing.manage',
 ];
 
-const ALL_PERMISSIONS: AppPermission[] = [...ADMIN_PERMISSIONS];
+const ALL_PERMISSIONS: AppPermission[] = [
+  ...ADMIN_PERMISSIONS,
+  'backoffice.access',
+  'backoffice.manage',
+];
 
 /**
  * Permissions par rôle. Les rôles inconnus n'ont aucune permission (défaut sûr).

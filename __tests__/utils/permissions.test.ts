@@ -10,8 +10,9 @@ describe('permissions', () => {
     expect(can('manager', 'billing.manage')).toBe(false);
   });
 
-  it("l'admin et l'owner ont les droits de gouvernance", () => {
-    expect(can('admin', 'backoffice.access')).toBe(true);
+  it("l'admin et l'owner gèrent leur organisation sans accès plateforme", () => {
+    expect(can('admin', 'backoffice.access')).toBe(false);
+    expect(can('owner', 'backoffice.access')).toBe(false);
     expect(can('admin', 'settings.manage')).toBe(true);
     expect(can('owner', 'billing.manage')).toBe(true);
   });
@@ -19,6 +20,7 @@ describe('permissions', () => {
   it('le superadmin a toutes les permissions', () => {
     expect(can('superadmin', 'audit.delete')).toBe(true);
     expect(can('superadmin', 'billing.manage')).toBe(true);
+    expect(can('superadmin', 'backoffice.manage')).toBe(true);
   });
 
   it("l'employé reste sur les actions terrain, sans export", () => {
@@ -31,6 +33,7 @@ describe('permissions', () => {
     expect(can('support', 'reports.view')).toBe(true);
     expect(can('support', 'backoffice.access')).toBe(true);
     expect(can('support', 'audit.create')).toBe(false);
+    expect(can('support', 'backoffice.manage')).toBe(false);
   });
 
   it('le stagiaire et les rôles inconnus/vides n’ont aucune permission', () => {

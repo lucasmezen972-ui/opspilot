@@ -6,7 +6,7 @@ export default function PrivacyPolicyScreen() {
   return (
     <LegalPage
       title="Politique de confidentialité"
-      updatedAt="10 juin 2026"
+      updatedAt="2 novembre 2026"
       sections={[
         {
           title: '1. Qui traite vos données ?',
@@ -44,12 +44,12 @@ export default function PrivacyPolicyScreen() {
         {
           title: '4. Destinataires et sous-traitants',
           content:
-            "L'accès est limité aux personnes autorisées de l'organisation cliente et aux prestataires nécessaires au service. OpsPilot utilise notamment Supabase pour l'authentification et la base de données, GitHub Pages pour la diffusion de l'application web et, si la facturation est activée, Stripe pour les paiements. Chaque organisation doit vérifier et documenter les sous-traitants qu'elle active.",
+            "L'accès est limité aux personnes autorisées de l'organisation cliente et aux prestataires nécessaires au service. OpsPilot utilise notamment Supabase pour l'authentification et la base de données, Vercel pour la diffusion web, Resend pour les emails transactionnels et Qonto pour la facturation et les paiements. L’assistance IA, lorsqu’elle est activée, peut transmettre le contenu fourni à Anthropic ou OpenAI ; les utilisateurs doivent éviter toute donnée personnelle non nécessaire. Les prestataires optionnels et garanties de transfert sont précisés au contrat.",
         },
         {
           title: '5. Durées de conservation',
           content:
-            "Les données du compte et les données métier sont conservées pendant la durée du contrat, puis supprimées ou restituées selon les modalités convenues avec l'organisation cliente. Les sauvegardes et journaux de sécurité sont conservés pendant une durée limitée compatible avec leur finalité. Les données soumises à une obligation légale peuvent être archivées pendant la durée imposée.",
+            'Les données métier sont conservées pendant le contrat, puis exportables sur demande pendant 30 jours et supprimées de la base active sous 90 jours, sauf obligation légale ou instruction écrite différente. Les sauvegardes et journaux de sécurité sont conservés pendant une durée limitée compatible avec leur finalité. Les données soumises à une obligation légale peuvent être archivées pendant la durée imposée.',
         },
         {
           title: '6. Vos droits',

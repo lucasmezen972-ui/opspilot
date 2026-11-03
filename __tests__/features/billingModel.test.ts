@@ -28,9 +28,9 @@ describe('formatPlanName', () => {
 });
 
 describe('getPlanState', () => {
-  it('traite l’essai comme équivalent au plan Essential', () => {
+  it('permet de souscrire Essential pendant l’essai', () => {
     expect(getPlanState('essential', 'trial')).toEqual({
-      isCurrent: true,
+      isCurrent: false,
       isDowngrade: false,
     });
   });

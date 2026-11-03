@@ -17,7 +17,9 @@ export function isUploadableEvidenceUri(
   uri: string | null | undefined,
 ): boolean {
   if (!uri) return false;
-  return /^(file:|blob:|content:)/i.test(uri);
+  return /^(file:|blob:|content:|data:image\/(?:jpeg|png|webp);base64,)/i.test(
+    uri,
+  );
 }
 
 export interface UploadEvidenceInput {
@@ -31,16 +33,22 @@ export interface UploadEvidenceInput {
 
 /**
  * Téléverse une preuve photo et trace le fichier dans evidence_files.
- * Best-effort : retourne le chemin de stockage, ou null en cas d'échec
- * (l'appelant conserve alors l'URI d'origine sans bloquer la clôture).
+ * Retourne le chemin durable, ou null en cas d'échec. L'appelant doit
+ * refuser la clôture si une photo fournie n'a pas été enregistrée.
  */
 export async function uploadEvidencePhoto(
   input: UploadEvidenceInput,
 ): Promise<string | null> {
   try {
     const response = await fetch(input.uri);
+    if (response.ok === false) return null;
     const blob = await response.blob();
     const contentType = blob.type || 'image/jpeg';
+    if (
+      !['image/jpeg', 'image/png', 'image/webp'].includes(contentType) ||
+      blob.size > 10 * 1024 * 1024
+    )
+      return null;
     const extension = contentType.includes('png') ? 'png' : 'jpg';
     const fileName = input.fileName ?? `preuve.${extension}`;
 

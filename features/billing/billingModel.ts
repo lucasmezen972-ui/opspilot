@@ -48,7 +48,7 @@ export const PLANS: Plan[] = [
       'Dashboard multi-sites',
       'Bibliothèque de modèles avancés',
       'Rapports PDF/Excel',
-      'API webhooks',
+      'Suivi des actions correctives',
       'Support prioritaire',
     ],
   },
@@ -60,14 +60,13 @@ export const PLANS: Plan[] = [
     icon: Crown,
     color: '#D97706',
     bg: '#FFFBEB',
-    description: 'Illimité · SSO · Marque blanche',
+    description: 'Périmètre et accompagnement sur devis',
     features: [
       'Tout Business +',
-      'Magasins & utilisateurs illimités',
-      'SSO (SAML / OAuth)',
-      'SLA garanti 99,9 %',
-      'Compte manager dédié',
-      'Déploiement on-premise possible',
+      'Nombre de sites adapté au contrat',
+      'Paramétrage des référentiels',
+      'Formation à la prise en main',
+      'Accompagnement au déploiement',
     ],
   },
 ];
@@ -104,7 +103,7 @@ export const SALES_CONTACT_EMAIL = 'contact@tradikom.com';
 
 /**
  * URL mailto de demande d'activation : alternative claire au paiement en ligne
- * quand Stripe n'est pas configuré sur l'instance (jamais un cul-de-sac).
+ * quand le paiement Qonto n'est pas configuré sur l'instance (jamais un cul-de-sac).
  */
 export function buildActivationMailtoUrl(planId: string): string {
   const subject = encodeURIComponent(`Activation offre OpsPilot — ${planId}`);
@@ -121,9 +120,7 @@ export interface PlanState {
 
 /** Position d'un plan vis-à-vis du plan courant (actuel / rétrogradation). */
 export function getPlanState(planId: string, currentPlan: string): PlanState {
-  const isCurrent =
-    currentPlan === planId ||
-    (currentPlan === 'trial' && planId === 'essential');
+  const isCurrent = currentPlan === planId;
   const isDowngrade =
     (PLAN_ORDER[planId] ?? 0) < (PLAN_ORDER[currentPlan] ?? 0);
   return { isCurrent, isDowngrade };

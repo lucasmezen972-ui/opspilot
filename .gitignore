@@ -43,3 +43,8 @@ coverage/
 # auth / outils locaux
 .gh-auth/
 .playwright-site/
+
+# Local CLI metadata
+supabase/.temp/
+.playwright-site/
+test-results/

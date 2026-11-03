@@ -25,13 +25,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Autoriser OpsPilot à utiliser la caméra pour scanner les produits et documenter les audits."
+          "cameraPermission": "Autoriser OpsPilot \u00e0 utiliser la cam\u00e9ra pour scanner les produits et documenter les audits."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
-      "baseUrl": "/opspilot"
+      "baseUrl": ""
     }
   }
 }

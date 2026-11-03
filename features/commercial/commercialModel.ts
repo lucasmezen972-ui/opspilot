@@ -86,8 +86,8 @@ export const COMMERCIAL_PLANS: CommercialPlan[] = [
     description:
       'Pour réseaux, franchises et directions régionales avec accompagnement dédié.',
     limits: [
-      'Magasins illimités',
-      'Utilisateurs illimités',
+      'Nombre de magasins défini au devis',
+      'Capacité utilisateurs définie au devis',
       'Onboarding accompagné',
       'SLA sur devis',
     ],

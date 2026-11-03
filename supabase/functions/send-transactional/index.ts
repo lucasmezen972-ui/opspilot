@@ -22,8 +22,9 @@ interface EmailConfig {
   from: string;
 }
 let configCache: EmailConfig | null = null;
+let configLoadedAt = 0;
 async function getEmailConfig(): Promise<EmailConfig> {
-  if (configCache) return configCache;
+  if (configCache && Date.now() - configLoadedAt < 60_000) return configCache;
   const { data } = await admin
     .from('platform_settings')
     .select('value')
@@ -31,12 +32,14 @@ async function getEmailConfig(): Promise<EmailConfig> {
     .maybeSingle();
   configCache = {
     key:
+      (data?.value?.resend_key as string) ||
       Deno.env.get('RESEND_API_KEY') ||
-      ((data?.value?.resend_key as string) ?? ''),
+      '',
     from:
       Deno.env.get('EMAIL_FROM') ||
       ((data?.value?.from as string) ?? 'OpsPilot <onboarding@resend.dev>'),
   };
+  configLoadedAt = Date.now();
   return configCache;
 }
 

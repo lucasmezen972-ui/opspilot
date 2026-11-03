@@ -268,7 +268,7 @@ export function useAudits() {
     try {
       // Production : téléverse les preuves photo locales dans le bucket privé
       // « evidence » (cloisonné par organisation) et remplace l'URI locale par
-      // le chemin de stockage persistant. Best-effort, ne bloque pas la clôture.
+      // le chemin persistant. Un échec laisse l'audit ouvert pour réessayer.
       let responsesToSave = responses;
       const orgId = profile?.organization_id;
       if (orgId) {
@@ -282,9 +282,12 @@ export function useAudits() {
               uri: response.photo_url as string,
               uploadedBy: user?.id ?? null,
             });
-            return storagePath
-              ? { ...response, photo_url: storagePath }
-              : response;
+            if (!storagePath) {
+              throw new Error(
+                'Preuve photo non enregistrée. Réessayez avant de clôturer.',
+              );
+            }
+            return { ...response, photo_url: storagePath };
           }),
         );
       }
