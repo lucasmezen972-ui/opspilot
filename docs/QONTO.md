@@ -31,6 +31,13 @@ Le compte de reversement configuré chez Mollie a été rapproché du sous-compt
 
 Le code du cycle SEPA est désormais préparé dans `mollie-recurring` et `mollie-recurring-webhook`, avec l’interface dans Abonnement. Il reste désactivé : la validation du moyen de paiement par Mollie, celle des reversements et la configuration des accès récurrents sont des contrôles distincts. Les tests locaux ne prouvent pas un prélèvement prestataire bout en bout.
 
+Publication du 3 novembre : l'interface issue de la PR #223 est en ligne,
+mais les migrations récurrentes n'ont pas été appliquées au projet Supabase et
+les deux fonctions récurrentes ne sont pas déployées. Cette séparation est
+volontaire : publier les fonctions avant leur schéma laisserait un parcours
+incohérent. Le SEPA reste donc indisponible, en plus des validations Mollie et
+des accès dédiés encore manquants.
+
 ### Parcours SEPA préparé
 
 1. Le superadmin crée d’abord la vraie facture dans Qonto puis prépare son calendrier dans OpsPilot : référence, montant TTC exact, fin de première période et fréquence mensuelle ou annuelle. La préparation ne crée aucun règlement. Le plafond conservateur est de 1 000 € TTC par échéance.

@@ -29,8 +29,20 @@ demande d’activation existante n’a pas été répétée. Le rapprochement de
 renouvellements exige la référence et la période exactes de la facture Qonto ;
 la création des factures et le rapprochement bancaire Qonto restent manuels.
 
-Publication et contrôles Supabase réels : à consigner après leur vérification.
-Ne pas annoncer cette branche déployée sur la seule base des tests locaux.
+La PR [#223](https://github.com/lucasmezen972-ui/opspilot/pull/223) a été
+fusionnée dans `main` (`eeb9287a`) et Vercel sert ce commit en état `READY` sur
+https://opspilot-mu-six.vercel.app/. La connexion démo, le catalogue de
+formation et la modale de cours ont été rouverts dans le navigateur après la
+publication. Les fonctions indépendantes `admin-api` v13, `ai-assistant` v5 et
+`openai-proxy` v3 sont actives dans Supabase.
+
+Les quatre nouvelles migrations Supabase ne sont **pas encore appliquées** :
+le connecteur a demandé une confirmation d'écriture qui a expiré et la CLI
+locale n'est pas liée au projet. Les fonctions `mollie-recurring` et
+`mollie-recurring-webhook` ne sont donc pas déployées. Tant que cette étape
+n'est pas terminée et contrôlée sur le projet réel, la correction serveur des
+quiz/XP/attestations, l'import MP4 privé et le cycle SEPA ne doivent pas être
+annoncés comme opérationnels en production, même si le code web est publié.
 
 ## Vérifications antérieures des 2 et 3 novembre 2026
 
