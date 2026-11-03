@@ -8,6 +8,7 @@ import AuthScreen from '../components/AuthScreen';
 import GlobalErrorBoundary from '../components/GlobalErrorBoundary';
 import OnboardingScreen from '../components/OnboardingScreen';
 import { AuthProvider, useAuth } from '../hooks/AuthContext';
+import { AppBrand } from '../shared/components/AppBrand';
 import { colors, spacing } from '../shared/styles/tokens';
 
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -32,22 +33,8 @@ function AuthGate() {
           backgroundColor: colors.background,
         }}
       >
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.primary,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: spacing.lg,
-          }}
-        >
-          <Text
-            style={{ color: colors.surface, fontSize: 32, fontWeight: '700' }}
-          >
-            OP
-          </Text>
+        <View style={{ marginBottom: 28 }}>
+          <AppBrand vertical size={56} wordmarkSize={28} subtitle={false} />
         </View>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text

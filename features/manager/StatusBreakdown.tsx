@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-import { colors, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 export interface StatusEntry {
   label: string;
@@ -17,13 +17,17 @@ interface StatusBreakdownProps {
 export function StatusBreakdown({ title, entries }: StatusBreakdownProps) {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text accessibilityRole="header" style={styles.sectionTitle}>
+        {title}
+      </Text>
       <View style={styles.row}>
         {entries.map((entry) => (
           <View key={entry.label} style={styles.item}>
-            <View style={[styles.dot, { backgroundColor: entry.color }]} />
-            <Text style={styles.label}>{entry.label}</Text>
             <Text style={styles.count}>{entry.count}</Text>
+            <View style={styles.labelRow}>
+              <View style={[styles.dot, { backgroundColor: entry.color }]} />
+              <Text style={styles.label}>{entry.label}</Text>
+            </View>
           </View>
         ))}
       </View>
@@ -33,45 +37,49 @@ export function StatusBreakdown({ title, entries }: StatusBreakdownProps) {
 
 const styles = StyleSheet.create({
   section: {
-    marginHorizontal: 20,
-    marginTop: 20,
+    flexGrow: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.textStrong,
-    marginBottom: 12,
+    color: colors.primaryInk,
+    marginBottom: spacing.lg,
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
+    gap: spacing.md,
   },
   item: {
     flex: 1,
     minWidth: 0,
+    alignItems: 'flex-start',
+  },
+  labelRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    marginTop: spacing.xs,
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginBottom: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   label: {
     fontSize: 13,
     lineHeight: 19,
-    textAlign: 'center',
+    flexShrink: 1,
     color: colors.textMuted,
-    marginBottom: 4,
   },
   count: {
-    fontSize: 20,
+    fontSize: 26,
+    lineHeight: 34,
     fontWeight: '700',
-    color: colors.textStrong,
+    color: colors.primaryInk,
   },
 });

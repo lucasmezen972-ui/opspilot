@@ -119,6 +119,7 @@ export default function ProfileScreen() {
             accessibilityLabel="Ouvrir les réglages"
           >
             <Settings size={20} color={colors.textMuted} />
+            <Text style={styles.settingsLabel}>Réglages</Text>
           </TouchableOpacity>
         }
       />
@@ -166,13 +167,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F3F4F6',
+    minHeight: 44,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    gap: 8,
+    borderRadius: 10,
+    backgroundColor: colors.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  settingsLabel: { color: colors.textStrong, fontSize: 13, fontWeight: '600' },
   content: {
     flex: 1,
   },

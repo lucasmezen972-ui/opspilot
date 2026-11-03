@@ -80,3 +80,15 @@ export async function readCount(page: Page, testId: string): Promise<number> {
   );
   return value;
 }
+
+/** Let font loading, ResizeObserver and the resulting React layout commit settle. */
+export async function waitForVisualLayout(page: Page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+    });
+  });
+}

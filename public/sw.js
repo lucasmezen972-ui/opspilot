@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'opspilot-static-v5';
+const STATIC_CACHE = 'opspilot-static-v6';
 
 // Base path derived from the SW's own location (works on / or /opspilot/)
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '');

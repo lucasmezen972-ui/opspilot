@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 
 import type { ProfileStat } from './profileModel';
 import { colors, shadow } from '../../shared/styles/tokens';
+import { DashboardGrid } from '../dashboard/DashboardGrid';
 
 interface ProfileStatsProps {
   stats: ProfileStat[];
@@ -12,7 +13,7 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Vos statistiques</Text>
-      <View style={styles.grid}>
+      <DashboardGrid columnOptions={[2, 4]} minItemWidth={140}>
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -27,7 +28,7 @@ export function ProfileStats({ stats }: ProfileStatsProps) {
             </View>
           );
         })}
-      </View>
+      </DashboardGrid>
     </View>
   );
 }
@@ -43,13 +44,10 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 16,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
   card: {
-    width: '48%',
+    width: '100%',
+    flex: 1,
+    minWidth: 0,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,

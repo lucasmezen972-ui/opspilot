@@ -61,6 +61,17 @@ jest.mock('expo-constants', () => ({
 }));
 
 // Mock Lucide React Native icons
+// Native SVG depends on platform internals unavailable in jsdom. Browser tests
+// render the real SVG; unit tests retain its DOM shape and accessible content.
+jest.mock('react-native-svg', () => ({
+  default: ({ children, accessible: _accessible, ...props }: any) =>
+    React.createElement('svg', props, children),
+  Path: ({ accessible: _accessible, ...props }: any) =>
+    React.createElement('path', props),
+  Circle: ({ accessible: _accessible, ...props }: any) =>
+    React.createElement('circle', props),
+}));
+
 jest.mock('lucide-react-native', () => {
   return new Proxy(
     {},

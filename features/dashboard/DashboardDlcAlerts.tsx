@@ -1,31 +1,41 @@
 import { router } from 'expo-router';
-import { Package, Calendar } from 'lucide-react-native';
+import { Package, CircleCheck } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { getDlcAlerts, getDlcUrgency } from './dashboardModel';
 import type { Product } from '../../lib/supabase';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface DashboardDlcAlertsProps {
   products: Product[];
   now: Date;
+  embedded?: boolean;
 }
 
 /** Section « Alertes DLC » : produits dont la date limite approche. */
-export function DashboardDlcAlerts({ products, now }: DashboardDlcAlertsProps) {
+export function DashboardDlcAlerts({
+  products,
+  now,
+  embedded = false,
+}: DashboardDlcAlertsProps) {
   const alerts = useMemo(() => getDlcAlerts(products, now), [products, now]);
-  if (alerts.length === 0) return null;
+  if (alerts.length === 0 && !embedded) return null;
 
   return (
-    <View style={styles.section}>
-      <AppSectionHeader
-        title="Alertes DLC"
-        actionLabel="Voir tout →"
-        onAction={() => router.push('/products')}
-      />
-      <View style={styles.card} testID="dlc-alerts">
+    <View style={[styles.section, embedded && styles.embedded]}>
+      <View style={embedded && styles.heading}>
+        <AppSectionHeader
+          title="Alertes DLC"
+          actionLabel="Voir tout →"
+          onAction={() => router.push('/products')}
+        />
+      </View>
+      <View
+        style={[styles.card, embedded && styles.embeddedList]}
+        testID={alerts.length > 0 ? 'dlc-alerts' : undefined}
+      >
         {alerts.map((product, idx) => {
           const urgency = getDlcUrgency(product.dlc!, now);
           return (
@@ -39,8 +49,8 @@ export function DashboardDlcAlerts({ products, now }: DashboardDlcAlertsProps) {
               onPress={() => router.push('/products')}
               accessibilityRole="link"
             >
-              <View style={[styles.icon, { backgroundColor: urgency.iconBg }]}>
-                <Package size={18} color={colors.text} />
+              <View style={styles.icon}>
+                <Package size={17} color={colors.textMuted} />
               </View>
               <Text style={styles.name} numberOfLines={2}>
                 {product.name}
@@ -48,12 +58,31 @@ export function DashboardDlcAlerts({ products, now }: DashboardDlcAlertsProps) {
               <View
                 style={[styles.badge, { backgroundColor: urgency.badgeBg }]}
               >
-                <Calendar size={13} color={colors.textStrong} />
-                <Text style={styles.badgeText}>{urgency.label}</Text>
+                <Text
+                  style={[
+                    styles.badgeText,
+                    {
+                      color: urgency.isExpired
+                        ? colors.dangerStrong
+                        : colors.text,
+                    },
+                  ]}
+                >
+                  {urgency.label}
+                </Text>
               </View>
             </TouchableOpacity>
           );
         })}
+        {alerts.length === 0 && (
+          <View style={styles.empty}>
+            <CircleCheck size={22} color={colors.trustGreen} />
+            <Text style={styles.emptyTitle}>Aucune échéance proche</Text>
+            <Text style={styles.emptyText}>
+              Aucun produit signalé dans les sept prochains jours.
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -64,30 +93,45 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: 0,
   },
+  embedded: {
+    flex: 1,
+    padding: 0,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  heading: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.hairline,
-    ...shadow.card,
+  },
+  embeddedList: {
+    borderWidth: 0,
+    borderRadius: 0,
   },
   item: {
-    minHeight: 64,
+    minHeight: 68,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    gap: spacing.sm + 2,
+    gap: spacing.sm,
   },
   itemBorder: {
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
   },
   icon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
+    width: 20,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -96,7 +140,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '600',
+    fontWeight: '500',
     color: colors.textStrong,
   },
   badge: {
@@ -106,10 +150,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.sm,
+    flexShrink: 0,
   },
   badgeText: {
     fontSize: 12,
     color: colors.textStrong,
     fontWeight: '600',
+  },
+  empty: {
+    paddingHorizontal: spacing.xl,
+    paddingVertical: 36,
+    gap: spacing.sm,
+  },
+  emptyTitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.primaryInk,
+    fontWeight: '500',
+  },
+  emptyText: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.textMuted,
   },
 });

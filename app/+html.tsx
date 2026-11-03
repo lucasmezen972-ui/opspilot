@@ -42,11 +42,32 @@ export default function Root({ children }: PropsWithChildren) {
           href={`${BASE}/favicon.png`}
         />
         <link rel="shortcut icon" href={`${BASE}/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${BASE}/brand-mark.svg`} />
+        <link
+          rel="preload"
+          href={`${BASE}/fonts/InstrumentSans-Variable.6cc0b916.woff2`}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
 
         {/* Disable tap highlight on mobile */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
+              @font-face {
+                font-family: 'OpsPilot Sans';
+                src: url('${BASE}/fonts/InstrumentSans-Variable.6cc0b916.woff2') format('woff2');
+                font-style: normal;
+                font-weight: 400 700;
+                font-display: swap;
+              }
+              body, input, textarea, select,
+              [dir="auto"]:not([style*="font-family:"]) {
+                font-family: 'OpsPilot Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-synthesis: none;
+              }
+              input, textarea { font-variant-numeric: tabular-nums; }
               * { -webkit-tap-highlight-color: transparent; }
               :where(a, button, input, textarea, select, [tabindex], [role="button"], [role="tab"]):focus-visible {
                 outline: 3px solid #2563EB !important;
@@ -55,6 +76,14 @@ export default function Root({ children }: PropsWithChildren) {
               .opspilot-skip-link { position: absolute; left: 244px; top: -100px; z-index: 10000; padding: 12px 16px; border-radius: 8px; background: #FFFFFF; color: #172554; font: 600 15px system-ui; }
               .opspilot-skip-link:focus { top: 12px; }
               @media (max-width: 1023px) { .opspilot-skip-link { left: 16px; } }
+              @media (prefers-reduced-motion: reduce) {
+                *, *::before, *::after {
+                  animation-duration: 0.01ms !important;
+                  animation-iteration-count: 1 !important;
+                  transition-duration: 0.01ms !important;
+                  scroll-behavior: auto !important;
+                }
+              }
             `,
           }}
         />

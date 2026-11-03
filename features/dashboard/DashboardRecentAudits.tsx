@@ -8,10 +8,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { Audit } from '../../lib/supabase';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface DashboardRecentAuditsProps {
   audits: Audit[];
+  embedded?: boolean;
 }
 
 function scoreColor(score: number): string {
@@ -21,15 +22,20 @@ function scoreColor(score: number): string {
 }
 
 /** Section « Audits récents » : les trois derniers audits, ou un état vide. */
-export function DashboardRecentAudits({ audits }: DashboardRecentAuditsProps) {
+export function DashboardRecentAudits({
+  audits,
+  embedded = false,
+}: DashboardRecentAuditsProps) {
   return (
-    <View style={styles.section}>
-      <AppSectionHeader
-        title="Audits récents"
-        actionLabel="Voir tout →"
-        onAction={() => router.push('/audits')}
-      />
-      <View style={styles.list}>
+    <View style={[styles.section, embedded && styles.embedded]}>
+      <View style={embedded && styles.heading}>
+        <AppSectionHeader
+          title="Audits récents"
+          actionLabel="Voir tout →"
+          onAction={() => router.push('/audits')}
+        />
+      </View>
+      <View style={[styles.list, embedded && styles.embeddedList]}>
         {[...audits]
           .sort(
             (a, b) =>
@@ -44,21 +50,11 @@ export function DashboardRecentAudits({ audits }: DashboardRecentAuditsProps) {
               onPress={() => router.push('/audits')}
               accessibilityRole="link"
             >
-              <View
-                style={[
-                  styles.icon,
-                  {
-                    backgroundColor:
-                      audit.status === 'completed'
-                        ? colors.successSoft
-                        : colors.warningSoft,
-                  },
-                ]}
-              >
+              <View style={styles.icon}>
                 {audit.status === 'completed' ? (
-                  <CheckCircle size={18} color={colors.trustGreen} />
+                  <CheckCircle size={17} color={colors.trustGreen} />
                 ) : (
-                  <AlertTriangle size={18} color={colors.warningText} />
+                  <AlertTriangle size={17} color={colors.warningText} />
                 )}
               </View>
               <View style={styles.content}>
@@ -99,28 +95,43 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: 0,
   },
+  embedded: {
+    flex: 1,
+    padding: 0,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  heading: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+  },
   list: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.hairline,
-    ...shadow.card,
+  },
+  embeddedList: {
+    borderWidth: 0,
+    borderRadius: 0,
   },
   item: {
-    minHeight: 76,
+    minHeight: 90,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.hairline,
     gap: spacing.sm + 2,
   },
   icon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
+    width: 20,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -131,7 +142,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '600',
+    fontWeight: '500',
     color: colors.textStrong,
   },
   time: {
@@ -143,6 +154,7 @@ const styles = StyleSheet.create({
   score: {
     fontSize: 14,
     fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   empty: {
     alignItems: 'center',

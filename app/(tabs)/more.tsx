@@ -26,12 +26,7 @@ import {
 
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
-import {
-  colors,
-  radius,
-  spacing,
-  typography,
-} from '../../shared/styles/tokens';
+import { colors, typography } from '../../shared/styles/tokens';
 import { can } from '../../utils/permissions';
 import { isManagerRole } from '../../utils/roles';
 
@@ -41,8 +36,7 @@ type HubLink = {
   description: string;
   icon: LucideIcon;
   href: Href;
-  accent: string;
-  accentSoft: string;
+  section: 'terrain' | 'pilotage' | 'compte';
 };
 
 /** Hub « Plus » : accès à tous les modules secondaires depuis une vue épurée. */
@@ -51,7 +45,7 @@ export default function MoreScreen() {
   const { width } = useWindowDimensions();
   const availableWidth =
     width - (Platform.OS === 'web' && width >= 1024 ? 228 : 0);
-  const columns = availableWidth >= 680 ? 2 : 1;
+  const columns = availableWidth >= 820 ? 2 : 1;
   const { profile, isDemoMode, session } = useAuth();
   const { isEnabled } = useAppSettings();
   const isManager = isManagerRole(profile?.role);
@@ -67,8 +61,7 @@ export default function MoreScreen() {
       description: 'Catalogue, scan & dates sensibles',
       icon: Package,
       href: '/products',
-      accent: colors.primary,
-      accentSoft: colors.primarySoft,
+      section: 'terrain',
     },
     {
       slug: 'actions',
@@ -76,8 +69,7 @@ export default function MoreScreen() {
       description: 'Plans correctifs, preuves & suivi',
       icon: Wrench,
       href: '/actions',
-      accent: colors.warningText,
-      accentSoft: colors.warningSoft,
+      section: 'terrain',
     },
     {
       slug: 'chat',
@@ -85,8 +77,7 @@ export default function MoreScreen() {
       description: 'Messages officiels & canaux terrain',
       icon: MessageCircle,
       href: '/chat',
-      accent: colors.primary,
-      accentSoft: colors.primarySoft,
+      section: 'terrain',
     },
   ];
 
@@ -97,8 +88,7 @@ export default function MoreScreen() {
       description: 'Preuves, conformité & exports direction',
       icon: FileText,
       href: '/reports',
-      accent: colors.successText,
-      accentSoft: colors.successSoft,
+      section: 'pilotage',
     });
   }
   if (isManager) {
@@ -109,8 +99,7 @@ export default function MoreScreen() {
         description: 'Pilotage, risques & gouvernance',
         icon: LayoutDashboard,
         href: '/manager',
-        accent: colors.dangerStrong,
-        accentSoft: colors.dangerSoft,
+        section: 'pilotage',
       },
       {
         slug: 'team',
@@ -118,8 +107,7 @@ export default function MoreScreen() {
         description: 'Membres, rôles & supervision',
         icon: Users,
         href: '/team',
-        accent: colors.primary,
-        accentSoft: colors.primarySoft,
+        section: 'pilotage',
       },
     );
   }
@@ -130,8 +118,7 @@ export default function MoreScreen() {
       description: 'Plan, facturation & activation',
       icon: CreditCard,
       href: '/billing',
-      accent: colors.textMuted,
-      accentSoft: colors.backgroundAlt,
+      section: 'compte',
     });
   }
   if (isAdmin || canBackoffice) {
@@ -141,8 +128,7 @@ export default function MoreScreen() {
       description: 'Démo, offres & conversion client',
       icon: Rocket,
       href: '/commercial',
-      accent: colors.primary,
-      accentSoft: colors.primarySoft,
+      section: 'pilotage',
     });
   }
   if (canBackoffice) {
@@ -152,8 +138,7 @@ export default function MoreScreen() {
       description: 'Santé des organisations & support',
       icon: Building2,
       href: '/backoffice',
-      accent: colors.primaryDark,
-      accentSoft: colors.primarySoft,
+      section: 'pilotage',
     });
   }
   links.push({
@@ -162,117 +147,202 @@ export default function MoreScreen() {
     description: 'Compte, sécurité & préférences',
     icon: User,
     href: '/profile',
-    accent: colors.textMuted,
-    accentSoft: colors.backgroundAlt,
+    section: 'compte',
   });
+
+  const sections = [
+    {
+      key: 'terrain',
+      title: 'Sur le terrain',
+      description: 'Les outils du quotidien, à portée de main.',
+    },
+    {
+      key: 'pilotage',
+      title: 'Piloter l’activité',
+      description: 'Une vue d’ensemble pour accompagner vos équipes.',
+    },
+    {
+      key: 'compte',
+      title: 'Compte et préférences',
+      description: 'Vos accès et les paramètres de votre espace.',
+    },
+  ] as const;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.title} testID="page-more-title">
-          Tous les outils
-        </Text>
-        <Text style={styles.subtitle}>
-          Retrouvez les outils et les réglages de votre équipe
-        </Text>
-      </View>
+      <View style={styles.inner}>
+        <View style={styles.header}>
+          <View style={styles.headerCopy}>
+            <Text style={styles.eyebrow}>VOTRE ESPACE DE TRAVAIL</Text>
+            <Text style={styles.title} testID="page-more-title">
+              Tous les outils
+            </Text>
+            <Text style={styles.subtitle}>
+              Le terrain, l’équipe et les réglages de votre espace.
+            </Text>
+          </View>
+          <View style={styles.moduleCount}>
+            <Text style={styles.moduleCountText}>{links.length} outils</Text>
+          </View>
+        </View>
 
-      <View style={styles.list}>
-        {links.map((link) => (
-          <TouchableOpacity
-            key={link.slug}
-            testID={`more-link-${link.slug}`}
-            accessibilityRole="button"
-            accessibilityLabel={link.label}
-            style={[
-              styles.row,
-              { width: columns === 2 ? (availableWidth - 52) / 2 : '100%' },
-            ]}
-            activeOpacity={0.7}
-            onPress={() => router.push(link.href)}
-          >
-            <View
-              style={[styles.iconWrap, { backgroundColor: link.accentSoft }]}
-            >
-              <link.icon size={20} color={link.accent} />
-            </View>
-            <View style={styles.rowBody}>
-              <Text style={styles.rowLabel}>{link.label}</Text>
-              <Text style={styles.rowDesc}>{link.description}</Text>
-            </View>
-            <ChevronRight size={18} color={colors.textFaint} />
-          </TouchableOpacity>
-        ))}
+        <View style={styles.sections}>
+          {sections.map((section) => {
+            const items = links.filter((link) => link.section === section.key);
+            if (!items.length) return null;
+            return (
+              <View key={section.key} style={styles.section}>
+                <View style={styles.sectionHeading}>
+                  <Text style={styles.sectionTitle}>{section.title}</Text>
+                  <Text style={styles.sectionDescription}>
+                    {section.description}
+                  </Text>
+                </View>
+                <View style={styles.list}>
+                  {items.map((link, index) => (
+                    <TouchableOpacity
+                      key={link.slug}
+                      testID={`more-link-${link.slug}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={link.label}
+                      style={[
+                        styles.row,
+                        { width: columns === 2 ? '50%' : '100%' },
+                        index >= columns && styles.rowDivider,
+                        columns === 2 &&
+                          index % 2 === 1 &&
+                          styles.rowColumnDivider,
+                      ]}
+                      activeOpacity={0.7}
+                      onPress={() => router.push(link.href)}
+                    >
+                      <View style={styles.iconWrap}>
+                        <link.icon
+                          size={20}
+                          color={colors.primaryDark}
+                          strokeWidth={1.8}
+                        />
+                      </View>
+                      <View style={styles.rowBody}>
+                        <Text style={styles.rowLabel}>{link.label}</Text>
+                        <Text style={styles.rowDesc}>{link.description}</Text>
+                      </View>
+                      <ChevronRight
+                        size={17}
+                        color={colors.textFaint}
+                        strokeWidth={1.6}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            );
+          })}
+        </View>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingBottom: spacing.xxl,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { paddingBottom: 44, paddingHorizontal: 20 },
+  inner: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
   header: {
-    padding: spacing.xl,
     paddingTop:
-      Platform.OS === 'web' ? 24 : (Constants.statusBarHeight ?? 44) + 16,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+      Platform.OS === 'web' ? 36 : (Constants.statusBarHeight ?? 44) + 18,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  headerCopy: { flex: 1, minWidth: 0 },
+  eyebrow: {
+    fontSize: 10,
+    lineHeight: 16,
+    fontWeight: '700',
+    color: colors.primaryDark,
+    letterSpacing: 1.35,
+    marginBottom: 9,
   },
   title: {
-    fontSize: 28,
-    letterSpacing: -0.4,
+    fontSize: 31,
+    lineHeight: 39,
+    letterSpacing: -0.9,
     fontWeight: '700',
     color: colors.textStrong,
   },
   subtitle: {
     fontSize: 14,
+    lineHeight: 22,
     color: colors.textMuted,
-    marginTop: 2,
+    marginTop: 8,
+    maxWidth: 520,
   },
+  moduleCount: {
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#E9EEF7',
+    marginTop: 25,
+  },
+  moduleCountText: {
+    fontSize: 11,
+    lineHeight: 17,
+    fontWeight: '600',
+    color: colors.primaryInk,
+  },
+  sections: { gap: 28 },
+  section: { gap: 12 },
+  sectionHeading: { gap: 5, paddingHorizontal: 2 },
+  sectionTitle: {
+    fontSize: 16,
+    lineHeight: 23,
+    fontWeight: '700',
+    color: colors.textStrong,
+    letterSpacing: -0.2,
+  },
+  sectionDescription: { fontSize: 13, lineHeight: 20, color: colors.textMuted },
   list: {
-    margin: spacing.xl,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 15,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    gap: 13,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
     minHeight: 88,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
   },
+  rowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  rowColumnDivider: { borderLeftWidth: 1, borderLeftColor: colors.hairline },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
+    width: 39,
+    height: 39,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F1F5FD',
   },
-  rowBody: {
-    flex: 1,
-    minWidth: 0,
-  },
+  rowBody: { flex: 1, minWidth: 0 },
   rowLabel: {
     ...typography.body,
     fontWeight: '600',
+    lineHeight: 22,
     color: colors.textStrong,
+    letterSpacing: -0.15,
   },
   rowDesc: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 12,
+    lineHeight: 19,
     color: colors.textMuted,
-    marginTop: 4,
+    marginTop: 3,
   },
 });

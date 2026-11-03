@@ -9,6 +9,7 @@ import {
   CreditCard,
   Settings,
   FileText,
+  ChevronRight,
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -78,37 +79,58 @@ const QUICK_ACTIONS: QuickAction[] = [
 
 interface DashboardQuickActionsProps {
   role: string;
+  compact?: boolean;
+  embedded?: boolean;
 }
 
 /** Section « Accès rapide » : raccourcis vers les modules, filtrés par rôle. */
-export function DashboardQuickActions({ role }: DashboardQuickActionsProps) {
+export function DashboardQuickActions({
+  role,
+  compact = false,
+  embedded = false,
+}: DashboardQuickActionsProps) {
   const items = QUICK_ACTIONS.filter(
     (item) => !item.roles || item.roles.includes(role),
   );
 
+  const links = items.map((item) => {
+    const Icon = item.icon;
+    return (
+      <TouchableOpacity
+        key={item.title}
+        style={[styles.card, compact && styles.compactCard]}
+        onPress={() => router.push(item.route)}
+        accessibilityRole="link"
+        accessibilityLabel={`${item.title}, ${item.sub}`}
+      >
+        <View style={[styles.iconWrap, compact && styles.compactIcon]}>
+          <Icon size={compact ? 17 : 21} color={colors.primary} />
+        </View>
+        <Text style={[styles.title, compact && styles.compactLink]}>
+          {item.title}
+        </Text>
+        {!compact && <Text style={styles.sub}>{item.sub}</Text>}
+        {compact && <ChevronRight size={14} color={colors.textMuted} />}
+      </TouchableOpacity>
+    );
+  });
+
   return (
-    <View style={styles.section}>
-      <AppSectionHeader title="Accès rapide" />
-      <DashboardGrid minItemWidth={180} columnOptions={[2, 3, 4]}>
-        {items.map((item) => {
-          const Icon = item.icon;
-          return (
-            <TouchableOpacity
-              key={item.title}
-              style={styles.card}
-              onPress={() => router.push(item.route)}
-              accessibilityRole="link"
-              accessibilityLabel={`${item.title}, ${item.sub}`}
-            >
-              <View style={styles.iconWrap}>
-                <Icon size={21} color={colors.primary} />
-              </View>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.sub}>{item.sub}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </DashboardGrid>
+    <View style={!embedded && styles.section}>
+      {compact ? (
+        <Text style={styles.compactTitle} accessibilityRole="header">
+          Accès rapide
+        </Text>
+      ) : (
+        <AppSectionHeader title="Accès rapide" />
+      )}
+      {compact ? (
+        <View>{links}</View>
+      ) : (
+        <DashboardGrid minItemWidth={180} columnOptions={[2, 3, 4]}>
+          {links}
+        </DashboardGrid>
+      )}
     </View>
   );
 }
@@ -147,5 +169,36 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: colors.textMuted,
     marginTop: 2,
+  },
+  compactTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: colors.primaryInk,
+    marginBottom: spacing.sm,
+  },
+  compactCard: {
+    flex: 0,
+    minHeight: 44,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 0,
+  },
+  compactIcon: {
+    width: 20,
+    height: 20,
+    backgroundColor: 'transparent',
+    marginBottom: 0,
+  },
+  compactLink: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.text,
   },
 });

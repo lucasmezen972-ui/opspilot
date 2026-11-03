@@ -1,10 +1,9 @@
 /**
  * Design tokens OpsPilot — source unique de vérité visuelle.
  *
- * Ces valeurs reprennent fidèlement l'identité existante (bleu OpsPilot,
- * verts/oranges/rouges de statut, gris de texte) : le but est d'unifier et
- * de fiabiliser, pas de changer la marque. Tout nouvel écran ou composant
- * doit consommer ces tokens plutôt que des valeurs en dur.
+ * Cobalt pour l'action, encre marine pour la structure, couleurs sémantiques
+ * pour les états terrain. La même échelle relie le cockpit, les outils et
+ * les formulaires ; un accent décoratif ne porte pas seul une information.
  */
 
 export const colors = {
@@ -13,6 +12,8 @@ export const colors = {
   primaryDark: '#1D4ED8',
   primarySoft: '#EEF2FF',
   primaryInk: '#172554',
+  navy: '#142641',
+  navyDeep: '#0D1C32',
 
   // Accents humains, utilisés avec parcimonie pour éviter un rendu froid.
   fieldWarm: '#FFFBF5',
@@ -35,15 +36,15 @@ export const colors = {
 
   // Surfaces & texte
   surface: '#FFFFFF',
-  background: '#F8FAFC',
-  backgroundAlt: '#F1F5F9',
-  border: '#E5E7EB',
+  background: '#F5F7FB',
+  backgroundAlt: '#EDF2F8',
+  border: '#DCE4EF',
   // Liseré « hairline » très clair des cartes : donne de la définition aux
   // surfaces blanches sur fond clair (rendu premium type dashboard SaaS).
-  hairline: '#ECEFF3',
-  textStrong: '#111827',
-  text: '#374151',
-  textMuted: '#5F6B7A',
+  hairline: '#E3E9F2',
+  textStrong: '#14213A',
+  text: '#38465C',
+  textMuted: '#56657B',
   textFaint: '#64748B',
 } as const;
 
