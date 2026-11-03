@@ -135,6 +135,7 @@ export function QontoAdminPanel() {
         </Text>
         <TouchableOpacity
           accessibilityRole="link"
+          style={{ minHeight: 44, justifyContent: 'center' }}
           onPress={() => Linking.openURL('https://app.qonto.com/')}
         >
           <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
@@ -181,11 +182,15 @@ export function QontoAdminPanel() {
               padding: 12,
               minHeight: 44,
               borderRadius: 8,
+              borderWidth: 1,
+              borderColor:
+                selected?.id === request.id ? colors.primary : colors.border,
               backgroundColor:
                 selected?.id === request.id
                   ? colors.primarySoft
                   : colors.surface,
               marginTop: 8,
+              opacity: error || loading || saving ? 0.5 : 1,
             }}
           >
             <Text>
@@ -312,4 +317,5 @@ const fieldStyle = {
   borderColor: colors.border,
   borderRadius: 8,
   color: colors.textStrong,
+  fontSize: 16,
 };

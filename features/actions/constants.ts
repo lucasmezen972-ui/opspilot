@@ -14,10 +14,10 @@ export const STATUS_LABELS: Record<CorrectiveAction['status'], string> = {
 };
 
 export const PRIORITY_COLORS: Record<CorrectiveAction['priority'], string> = {
-  critical: '#DC2626',
-  high: '#EF4444',
-  medium: '#F59E0B',
-  low: '#10B981',
+  critical: '#B91C1C',
+  high: '#B91C1C',
+  medium: '#92400E',
+  low: '#166534',
 };
 
 export const PRIORITY_LABELS: Record<CorrectiveAction['priority'], string> = {

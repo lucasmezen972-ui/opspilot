@@ -22,9 +22,9 @@ import {
   radius,
   spacing,
   shadow,
-  typography,
   riskPalette,
 } from '../../shared/styles/tokens';
+import { DashboardGrid } from '../dashboard/DashboardGrid';
 
 type Props = {
   signals: CockpitSignals;
@@ -46,30 +46,35 @@ export function ManagerCockpit({ signals, risks }: Props) {
   return (
     <View testID="manager-cockpit" style={styles.wrap}>
       <View style={styles.hero}>
-        <View style={styles.heroHead}>
-          <ShieldCheck size={18} color={colors.primary} />
-          <Text style={styles.heroTitle}>Conformité globale</Text>
-        </View>
-        <Text
-          testID="cockpit-conformity-score"
-          style={[styles.heroScore, { color: accent }]}
-        >
-          {signals.conformityScore}%
-        </Text>
-        <View style={[styles.healthChip, { backgroundColor: healthChip.bg }]}>
-          <Text style={[styles.healthChipText, { color: healthChip.fg }]}>
-            {health.label}
+        <View style={styles.heroIntro}>
+          <View style={styles.heroHead}>
+            <ShieldCheck size={20} color={colors.primary} />
+            <Text style={styles.heroTitle}>Conformité globale</Text>
+          </View>
+          <Text style={styles.heroHint}>
+            {signals.scoredAuditCount > 0
+              ? `Sur ${signals.scoredAuditCount} audit${signals.scoredAuditCount > 1 ? 's' : ''} clôturé${signals.scoredAuditCount > 1 ? 's' : ''}`
+              : 'Aucun audit clôturé pour le moment'}
           </Text>
         </View>
-        <Text style={styles.heroHint}>
-          {signals.scoredAuditCount > 0
-            ? `Sur ${signals.scoredAuditCount} audit${signals.scoredAuditCount > 1 ? 's' : ''} clôturé${signals.scoredAuditCount > 1 ? 's' : ''}`
-            : 'Aucun audit clôturé pour le moment'}
-        </Text>
+        <View style={styles.heroResult}>
+          <Text
+            testID="cockpit-conformity-score"
+            style={[styles.heroScore, { color: accent }]}
+          >
+            {signals.conformityScore}%
+          </Text>
+          <View style={[styles.healthChip, { backgroundColor: healthChip.bg }]}>
+            <Text style={[styles.healthChipText, { color: healthChip.fg }]}>
+              {health.label}
+            </Text>
+          </View>
+        </View>
       </View>
 
-      <View style={styles.kpiGrid}>
+      <DashboardGrid minItemWidth={160} columnOptions={[2, 3, 6]}>
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-overdue-audits"
           icon={ClipboardList}
           value={signals.overdueAudits}
@@ -78,6 +83,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accentSoft={colors.warningSoft}
         />
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-critical-actions"
           icon={ShieldAlert}
           value={signals.criticalActions}
@@ -86,6 +92,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accentSoft={colors.dangerSoft}
         />
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-open-actions"
           icon={Wrench}
           value={signals.openActions}
@@ -94,6 +101,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accentSoft={colors.primarySoft}
         />
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-incomplete-tasks"
           icon={ListTodo}
           value={signals.incompleteTasks}
@@ -102,6 +110,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accentSoft={colors.warningSoft}
         />
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-training-gaps"
           icon={GraduationCap}
           value={signals.trainingGaps}
@@ -110,6 +119,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accentSoft={colors.primarySoft}
         />
         <AppKpiCard
+          style={styles.kpiCard}
           testID="cockpit-kpi-unread-messages"
           icon={MessageSquare}
           value={signals.unreadMessages}
@@ -117,9 +127,11 @@ export function ManagerCockpit({ signals, risks }: Props) {
           accent={colors.textMuted}
           accentSoft={colors.backgroundAlt}
         />
-      </View>
+      </DashboardGrid>
 
-      <AppSectionHeader title="Risques prioritaires" />
+      <View style={styles.riskHeading}>
+        <AppSectionHeader title="Risques prioritaires" />
+      </View>
       {risks.length === 0 ? (
         <View style={styles.allClear} testID="cockpit-risks-empty">
           <ShieldCheck size={20} color={colors.successText} />
@@ -160,6 +172,7 @@ export function ManagerCockpit({ signals, risks }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     padding: spacing.xl,
+    paddingTop: spacing.lg,
     gap: spacing.lg,
   },
   hero: {
@@ -168,8 +181,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.xl,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.lg,
     ...shadow.card,
+  },
+  heroIntro: {
+    flex: 1,
+    minWidth: 0,
+  },
+  heroResult: {
+    alignItems: 'flex-end',
   },
   heroHead: {
     flexDirection: 'row',
@@ -177,14 +199,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   heroTitle: {
-    ...typography.sectionTitle,
+    flexShrink: 1,
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: '600',
     color: colors.textStrong,
   },
   heroScore: {
-    fontSize: 52,
-    fontWeight: '800',
+    fontSize: 42,
+    lineHeight: 50,
+    fontWeight: '700',
     letterSpacing: -1,
-    marginTop: spacing.sm,
   },
   healthChip: {
     borderRadius: radius.pill,
@@ -197,14 +222,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   heroHint: {
-    ...typography.label,
+    fontSize: 13,
+    lineHeight: 20,
     color: colors.textMuted,
     marginTop: spacing.sm,
   },
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
+  kpiCard: {
+    width: '100%',
+    minHeight: 144,
+    flex: 1,
+  },
+  riskHeading: {
+    marginTop: spacing.sm,
+    marginBottom: -spacing.md,
   },
   riskList: {
     gap: spacing.sm,
@@ -230,18 +260,22 @@ const styles = StyleSheet.create({
   },
   riskTop: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
   riskTitle: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: 180,
     fontSize: 14,
+    lineHeight: 21,
     fontWeight: '600',
     color: colors.textStrong,
   },
   riskDetail: {
     fontSize: 13,
+    lineHeight: 20,
     color: colors.textMuted,
   },
   riskCount: {

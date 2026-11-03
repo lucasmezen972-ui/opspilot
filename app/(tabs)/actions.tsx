@@ -237,6 +237,8 @@ export default function ActionsScreen() {
           <TouchableOpacity
             testID="action-create-button"
             style={styles.addButton}
+            accessibilityRole="button"
+            accessibilityLabel="Créer une action corrective"
             onPress={() => setCreateModalVisible(true)}
           >
             <Plus size={22} color="#FFFFFF" />

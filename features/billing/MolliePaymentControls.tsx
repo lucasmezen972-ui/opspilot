@@ -4,6 +4,7 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { invoicePeriodEnd, parseInvoiceTotal } from './invoice';
 import type { BillingRequest } from '../../hooks/useQontoBilling';
 import { supabase } from '../../lib/supabase';
+import { colors, radius } from '../../shared/styles/tokens';
 
 interface Props {
   request: BillingRequest;
@@ -103,17 +104,30 @@ export function MolliePaymentControls({
             Créez d’abord la facture dans Qonto. Saisissez son total TTC, sans
             recalculer les taxes ici.
           </Text>
+          <Text style={{ fontWeight: '600', color: colors.textStrong }}>
+            Montant total TTC de la facture (€)
+          </Text>
           <TextInput
             accessibilityLabel="Montant total TTC de la facture"
             placeholder="Total TTC en euros"
             value={amount}
             onChangeText={setAmount}
             keyboardType="decimal-pad"
-            style={{ backgroundColor: 'white', padding: 12 }}
+            style={{
+              backgroundColor: colors.surface,
+              padding: 12,
+              minHeight: 48,
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: radius.sm,
+              color: colors.textStrong,
+              fontSize: 16,
+            }}
           />
           <TouchableOpacity
             accessibilityRole="button"
             disabled={busy || ready !== true}
+            accessibilityState={{ disabled: busy || ready !== true, busy }}
             onPress={() => perform(false)}
             style={{
               opacity: busy || ready !== true ? 0.5 : 1,
@@ -134,6 +148,7 @@ export function MolliePaymentControls({
           accessibilityRole="button"
           style={{ minHeight: 44, justifyContent: 'center' }}
           disabled={busy}
+          accessibilityState={{ disabled: busy, busy }}
           onPress={() => perform(true)}
         >
           <Text style={{ color: '#2563EB' }}>

@@ -15,9 +15,9 @@ interface DashboardRecentAuditsProps {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 80) return '#10B981';
-  if (score >= 60) return '#F59E0B';
-  return '#EF4444';
+  if (score >= 80) return colors.trustGreen;
+  if (score >= 60) return colors.warningText;
+  return colors.dangerStrong;
 }
 
 /** Section « Audits récents » : les trois derniers audits, ou un état vide. */
@@ -42,20 +42,23 @@ export function DashboardRecentAudits({ audits }: DashboardRecentAuditsProps) {
               key={audit.id}
               style={styles.item}
               onPress={() => router.push('/audits')}
+              accessibilityRole="link"
             >
               <View
                 style={[
                   styles.icon,
                   {
                     backgroundColor:
-                      audit.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
+                      audit.status === 'completed'
+                        ? colors.successSoft
+                        : colors.warningSoft,
                   },
                 ]}
               >
                 {audit.status === 'completed' ? (
-                  <CheckCircle size={16} color="#16A34A" />
+                  <CheckCircle size={18} color={colors.trustGreen} />
                 ) : (
-                  <AlertTriangle size={16} color="#D97706" />
+                  <AlertTriangle size={18} color={colors.warningText} />
                 )}
               </View>
               <View style={styles.content}>
@@ -79,8 +82,9 @@ export function DashboardRecentAudits({ audits }: DashboardRecentAuditsProps) {
           <TouchableOpacity
             style={styles.empty}
             onPress={() => router.push('/audits')}
+            accessibilityRole="link"
           >
-            <BarChart3 size={32} color="#D1D5DB" />
+            <BarChart3 size={32} color={colors.textMuted} />
             <Text style={styles.emptyText}>Aucun audit récent</Text>
             <Text style={styles.emptyLink}>Créer un audit →</Text>
           </TouchableOpacity>
@@ -104,31 +108,35 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   item: {
+    minHeight: 76,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.hairline,
     gap: spacing.sm + 2,
   },
   icon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
     flex: 1,
+    minWidth: 0,
   },
   title: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
     color: colors.textStrong,
   },
   time: {
-    fontSize: 11,
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.textMuted,
     marginTop: 2,
   },
@@ -143,7 +151,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: colors.textFaint,
+    color: colors.textMuted,
   },
   emptyLink: {
     fontSize: 13,

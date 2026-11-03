@@ -115,6 +115,7 @@ export default function ProfileScreen() {
             style={styles.headerButton}
             onPress={() => router.push('/settings')}
             testID="profile-settings-button"
+            accessibilityRole="button"
             accessibilityLabel="Ouvrir les réglages"
           >
             <Settings size={20} color={colors.textMuted} />
@@ -140,9 +141,10 @@ export default function ProfileScreen() {
           <TouchableOpacity
             testID="logout-button"
             style={styles.logoutButton}
+            accessibilityRole="button"
             onPress={handleLogout}
           >
-            <LogOut size={20} color="#EF4444" />
+            <LogOut size={20} color={colors.dangerStrong} />
             <Text style={styles.logoutText}>Se déconnecter</Text>
           </TouchableOpacity>
         </View>
@@ -164,9 +166,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 16,
-    color: '#EF4444',
+    color: colors.dangerStrong,
     fontWeight: '500',
     marginLeft: 8,
   },
@@ -202,11 +204,11 @@ const styles = StyleSheet.create({
   },
   appInfoText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: colors.textMuted,
     marginBottom: 4,
   },
   appInfoSubtext: {
-    fontSize: 10,
-    color: '#D1D5DB',
+    fontSize: 12,
+    color: colors.textMuted,
   },
 });

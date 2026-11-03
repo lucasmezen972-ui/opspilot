@@ -63,6 +63,8 @@ export function SepaQuoteControls({
           borderWidth: 1,
           borderColor: colors.border,
           borderRadius: 8,
+          fontSize: 16,
+          color: colors.textStrong,
         }}
       />
       <View style={{ flexDirection: 'row', gap: 8 }}>

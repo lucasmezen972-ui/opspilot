@@ -38,6 +38,7 @@ export function DashboardProgress({ profile }: DashboardProgressProps) {
           <TouchableOpacity
             style={styles.profileBtn}
             onPress={() => router.push('/profile')}
+            accessibilityRole="link"
           >
             <Text style={styles.profileBtnText}>Profil</Text>
           </TouchableOpacity>
@@ -90,6 +91,7 @@ const styles = StyleSheet.create({
   },
   levelInfo: {
     flex: 1,
+    minWidth: 0,
   },
   levelName: {
     fontSize: 14,
@@ -97,23 +99,28 @@ const styles = StyleSheet.create({
     color: colors.textStrong,
   },
   levelXP: {
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.textMuted,
     marginTop: 2,
   },
   profileBtn: {
-    backgroundColor: '#EFF6FF',
+    minHeight: 44,
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySoft,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     borderRadius: radius.sm,
   },
   profileBtnText: {
     color: colors.primary,
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
   },
   progressBar: {
-    height: 6,
+    height: 8,
     backgroundColor: colors.border,
     borderRadius: 3,
     marginBottom: spacing.xs + 2,
@@ -124,8 +131,9 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 11,
-    color: colors.textFaint,
-    textAlign: 'center',
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
 });

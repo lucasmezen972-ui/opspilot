@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import type { ReactNode } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 
 import { colors, spacing } from '../styles/tokens';
 
@@ -25,7 +25,11 @@ export function AppScreenHeader({
   return (
     <View style={styles.header}>
       <View style={styles.titleBlock}>
-        <Text style={styles.title} testID={titleTestID} numberOfLines={1}>
+        <Text
+          style={styles.title}
+          testID={titleTestID}
+          accessibilityRole="header"
+        >
           {title}
         </Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -42,7 +46,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
     paddingHorizontal: spacing.xl,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
+    paddingTop:
+      Platform.OS === 'web' ? 24 : (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: spacing.lg,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
@@ -50,6 +55,7 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     flex: 1,
+    minWidth: 0,
   },
   title: {
     fontSize: 28,
@@ -58,11 +64,13 @@ const styles = StyleSheet.create({
     color: colors.textStrong,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 21,
     color: colors.textMuted,
     marginTop: 2,
   },
   right: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,

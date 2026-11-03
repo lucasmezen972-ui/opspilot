@@ -39,7 +39,9 @@ test.describe('Réglages utilisateur', () => {
     await page.getByTestId('settings-back-button').click();
     await expect(page.getByTestId('page-profile-title')).toBeVisible();
     await expect(
-      page.getByText('Demo Responsable', { exact: true }),
+      page
+        .locator('#opspilot-main')
+        .getByText('Demo Responsable', { exact: true }),
     ).toBeVisible();
   });
 });

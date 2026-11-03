@@ -18,7 +18,7 @@ export function StorePerformanceList({ stores }: StorePerformanceListProps) {
         return (
           <View key={store.id} style={styles.row}>
             <View style={styles.iconWrapper}>
-              <StoreIcon size={16} color="#2563EB" />
+              <StoreIcon size={18} color={colors.primary} />
             </View>
             <View style={styles.info}>
               <Text style={styles.name}>{store.name}</Text>
@@ -48,13 +48,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 12,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
@@ -66,14 +66,24 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
-  info: { flex: 1 },
-  name: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  subtitle: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  info: { flex: 1, minWidth: 0 },
+  name: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: colors.textStrong,
+  },
+  subtitle: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
   chip: {
     paddingHorizontal: 10,
     paddingVertical: 5,

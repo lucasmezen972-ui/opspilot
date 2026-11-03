@@ -56,6 +56,7 @@ export function TaskCompletionModal({
       onClose={onClose}
       title="Clôture de la tâche"
       testID="task-completion-modal"
+      scrollable
     >
       {task && (
         <Text style={styles.subject} numberOfLines={2}>
@@ -89,6 +90,7 @@ export function TaskCompletionModal({
 
       <TouchableOpacity
         testID="task-completion-photo"
+        accessibilityRole="button"
         style={[
           styles.photoButton,
           proofPhotoUrl
@@ -122,6 +124,8 @@ export function TaskCompletionModal({
 
       <TouchableOpacity
         testID="task-completion-submit"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !valid }}
         style={[styles.submit, !valid && styles.submitDisabled]}
         disabled={!valid}
         onPress={() => onConfirm(input)}
@@ -148,6 +152,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   photoButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
@@ -165,9 +170,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.successSoft,
   },
   photoButtonText: {
+    flex: 1,
     color: colors.primary,
     fontWeight: '600',
     fontSize: 13,
+    lineHeight: 18,
   },
   photoButtonTextDone: {
     color: colors.successText,
@@ -179,11 +186,13 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   submit: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
     paddingVertical: 13,
     borderRadius: radius.md,
   },
@@ -191,8 +200,10 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitText: {
+    flexShrink: 1,
     color: colors.surface,
     fontWeight: '700',
     fontSize: 15,
+    textAlign: 'center',
   },
 });

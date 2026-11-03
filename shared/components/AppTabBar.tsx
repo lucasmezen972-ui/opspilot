@@ -21,7 +21,7 @@ export function AppTabBar<T extends string>({
   onChange,
 }: Props<T>) {
   return (
-    <View style={styles.tabBar}>
+    <View style={styles.tabBar} accessibilityRole="tablist">
       {tabs.map((tab) => {
         const active = tab.key === activeKey;
         return (
@@ -30,6 +30,9 @@ export function AppTabBar<T extends string>({
             style={[styles.tab, active && styles.tabActive]}
             onPress={() => onChange(tab.key)}
             testID={tab.testID}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            aria-selected={active}
           >
             <Text style={[styles.tabText, active && styles.tabTextActive]}>
               {tab.label}
@@ -50,6 +53,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   tab: {
+    minHeight: 44,
+    justifyContent: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginRight: 4,

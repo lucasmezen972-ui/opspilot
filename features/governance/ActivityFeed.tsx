@@ -88,6 +88,9 @@ export function ActivityFeed({ events, limit = 8 }: Props) {
               testID={`activity-filter-${item.key}`}
               style={[styles.chip, active && styles.chipActive]}
               onPress={() => setFilter(item.key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              aria-pressed={active}
             >
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {item.label}
@@ -126,6 +129,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   chip: {
+    minHeight: 44,
+    justifyContent: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: radius.pill,

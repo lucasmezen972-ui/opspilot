@@ -75,7 +75,7 @@ export function ResolveActionModal({
       onClose={handleClose}
       testID="action-resolution-modal"
     >
-      <View>
+      <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <CheckCircle size={18} color={colors.success} />
@@ -84,6 +84,9 @@ export function ResolveActionModal({
           <TouchableOpacity
             onPress={handleClose}
             testID="action-resolution-close"
+            accessibilityRole="button"
+            accessibilityLabel="Fermer"
+            style={styles.closeButton}
           >
             <X size={22} color={colors.textMuted} />
           </TouchableOpacity>
@@ -103,7 +106,7 @@ export function ResolveActionModal({
           </View>
         )}
 
-        <ScrollView style={styles.body}>
+        <ScrollView style={styles.body} keyboardShouldPersistTaps="handled">
           <Field
             label="Commentaire d'exécution"
             value={evidence.comment}
@@ -193,10 +196,15 @@ export function ResolveActionModal({
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={handleClose}
+            accessibilityRole="button"
+          >
             <Text style={styles.cancelText}>Annuler</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            accessibilityRole="button"
             disabled={!canConfirm}
             onPress={handleConfirm}
             testID="action-resolution-confirm"
@@ -271,6 +279,10 @@ function CheckRow({
 }
 
 const styles = StyleSheet.create({
+  content: {
+    flexShrink: 1,
+    minHeight: 0,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -281,6 +293,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  closeButton: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 18,
@@ -312,6 +330,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   body: {
+    flexShrink: 1,
+    minHeight: 0,
     maxHeight: 430,
   },
   field: {
@@ -431,6 +451,8 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   cancelButton: {
+    minHeight: 44,
+    justifyContent: 'center',
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
@@ -439,6 +461,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   confirmButton: {
+    minHeight: 44,
+    justifyContent: 'center',
     backgroundColor: colors.success,
     borderRadius: radius.md,
     paddingHorizontal: 16,

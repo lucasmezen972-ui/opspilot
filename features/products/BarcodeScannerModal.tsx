@@ -3,15 +3,19 @@ import { Camera, Keyboard, ScanLine, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
+  KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 
 import { normalizeBarcode, validateBarcode } from './barcode';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 type BarcodeDetectorResult = { rawValue?: string };
 type BarcodeDetectorInstance = {
@@ -42,6 +46,8 @@ export function BarcodeScannerModal({
   onClose,
   onDetected,
 }: BarcodeScannerModalProps) {
+  const { height } = useWindowDimensions();
+  const cameraHeight = Math.min(330, Math.max(200, height * 0.4));
   const [permission, requestPermission] = useCameraPermissions();
   const [manualCode, setManualCode] = useState('');
   const [detected, setDetected] = useState(false);
@@ -185,149 +191,176 @@ export function BarcodeScannerModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay} testID="barcode-scanner-modal">
-        <View style={styles.modal}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        testID="barcode-scanner-modal"
+      >
+        <View style={styles.modal} accessibilityViewIsModal>
           <View style={styles.header}>
-            <View>
-              <Text style={styles.title}>Scanner un produit</Text>
+            <View style={styles.headerText}>
+              <Text accessibilityRole="header" style={styles.title}>
+                Scanner un produit
+              </Text>
               <Text style={styles.subtitle}>
                 Placez le code-barres dans le cadre.
               </Text>
             </View>
             <TouchableOpacity
               accessibilityLabel="Fermer le scanner"
+              accessibilityRole="button"
               style={styles.closeButton}
               onPress={onClose}
             >
-              <X size={20} color="#374151" />
+              <X size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
-
-          {e2eBarcode ? (
-            <View style={styles.cameraFallback}>
-              <ScanLine size={58} color="#2563EB" />
-              <Text style={styles.fallbackTitle}>Scanner de test</Text>
-              <TouchableOpacity
-                testID="barcode-e2e-scan"
-                style={styles.primaryButton}
-                onPress={() => submitBarcode(e2eBarcode)}
-              >
-                <Text style={styles.primaryButtonText}>
-                  Simuler le code {e2eBarcode}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : Platform.OS === 'web' ? (
-            <>
-              <View
-                ref={webPreviewRef}
-                style={[
-                  styles.webPreview,
-                  webStatus !== 'active' && styles.webPreviewInactive,
-                ]}
-              >
-                {webStatus !== 'active' && (
-                  <View style={styles.cameraFallback}>
-                    <Camera size={52} color="#2563EB" />
-                    <Text style={styles.fallbackTitle}>
-                      {webStatus === 'unsupported'
-                        ? 'Scan caméra non pris en charge'
-                        : webStatus === 'denied'
-                          ? 'Accès caméra refusé'
-                          : 'Caméra web'}
-                    </Text>
-                    <Text style={styles.fallbackText}>
-                      {webStatus === 'unsupported'
-                        ? 'Ce navigateur ne donne pas accès à la caméra. Utilisez la saisie manuelle.'
-                        : webStatus === 'denied'
-                          ? 'Autorisez la caméra dans le navigateur ou saisissez le code manuellement.'
-                          : 'Activez la caméra pour détecter automatiquement un code-barres.'}
-                    </Text>
-                    {webStatus !== 'unsupported' && webStatus !== 'denied' && (
-                      <TouchableOpacity
-                        testID="barcode-web-camera-button"
-                        style={styles.primaryButton}
-                        onPress={startWebCamera}
-                        disabled={webStatus === 'starting'}
-                      >
-                        <Text style={styles.primaryButtonText}>
-                          {webStatus === 'starting'
-                            ? 'Activation...'
-                            : 'Activer la caméra'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
+          <ScrollView
+            style={styles.content}
+            keyboardShouldPersistTaps="handled"
+          >
+            {e2eBarcode ? (
+              <View style={styles.cameraFallback}>
+                <ScanLine size={58} color="#2563EB" />
+                <Text style={styles.fallbackTitle}>Scanner de test</Text>
+                <TouchableOpacity
+                  testID="barcode-e2e-scan"
+                  accessibilityRole="button"
+                  style={styles.primaryButton}
+                  onPress={() => submitBarcode(e2eBarcode)}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    Simuler le code {e2eBarcode}
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <ManualBarcodeForm
-                value={manualCode}
-                onChange={setManualCode}
-                onSubmit={() => submitBarcode(manualCode)}
-              />
-            </>
-          ) : !permission ? (
-            <View style={styles.cameraFallback}>
-              <Text style={styles.fallbackText}>
-                Vérification de l’autorisation caméra…
-              </Text>
-            </View>
-          ) : !permission.granted ? (
-            <View style={styles.cameraFallback}>
-              <Camera size={52} color="#6B7280" />
-              <Text style={styles.fallbackTitle}>
-                Autorisation caméra requise
-              </Text>
-              <Text style={styles.fallbackText}>
-                Autorisez OpsPilot à utiliser la caméra pour scanner les
-                produits.
-              </Text>
-              <TouchableOpacity
-                testID="barcode-camera-permission"
-                style={styles.primaryButton}
-                onPress={requestPermission}
-              >
-                <Text style={styles.primaryButtonText}>
-                  Autoriser la caméra
-                </Text>
-              </TouchableOpacity>
-              <ManualBarcodeForm
-                value={manualCode}
-                onChange={setManualCode}
-                onSubmit={() => submitBarcode(manualCode)}
-              />
-            </View>
-          ) : (
-            <>
-              <View style={styles.nativeCamera}>
-                <CameraView
-                  style={StyleSheet.absoluteFill}
-                  facing="back"
-                  barcodeScannerSettings={{
-                    barcodeTypes: [
-                      'ean13',
-                      'ean8',
-                      'upc_a',
-                      'upc_e',
-                      'code128',
-                      'code39',
-                      'qr',
-                    ],
-                  }}
-                  onBarcodeScanned={detected ? undefined : handleNativeBarcode}
+            ) : Platform.OS === 'web' ? (
+              <>
+                <View
+                  ref={webPreviewRef}
+                  style={[
+                    styles.webPreview,
+                    { height: cameraHeight },
+                    webStatus !== 'active' && styles.webPreviewInactive,
+                  ]}
+                >
+                  {webStatus !== 'active' && (
+                    <View style={styles.cameraFallback}>
+                      <Camera size={52} color="#2563EB" />
+                      <Text style={styles.fallbackTitle}>
+                        {webStatus === 'unsupported'
+                          ? 'Scan caméra non pris en charge'
+                          : webStatus === 'denied'
+                            ? 'Accès caméra refusé'
+                            : 'Caméra web'}
+                      </Text>
+                      <Text style={styles.fallbackText}>
+                        {webStatus === 'unsupported'
+                          ? 'Ce navigateur ne donne pas accès à la caméra. Utilisez la saisie manuelle.'
+                          : webStatus === 'denied'
+                            ? 'Autorisez la caméra dans le navigateur ou saisissez le code manuellement.'
+                            : 'Activez la caméra pour détecter automatiquement un code-barres.'}
+                      </Text>
+                      {webStatus !== 'unsupported' &&
+                        webStatus !== 'denied' && (
+                          <TouchableOpacity
+                            testID="barcode-web-camera-button"
+                            accessibilityRole="button"
+                            accessibilityState={{
+                              disabled: webStatus === 'starting',
+                              busy: webStatus === 'starting',
+                            }}
+                            style={styles.primaryButton}
+                            onPress={startWebCamera}
+                            disabled={webStatus === 'starting'}
+                          >
+                            <Text style={styles.primaryButtonText}>
+                              {webStatus === 'starting'
+                                ? 'Activation...'
+                                : 'Activer la caméra'}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                    </View>
+                  )}
+                </View>
+                <ManualBarcodeForm
+                  value={manualCode}
+                  onChange={setManualCode}
+                  onSubmit={() => submitBarcode(manualCode)}
                 />
-                <View style={styles.scanFrame} pointerEvents="none" />
+              </>
+            ) : !permission ? (
+              <View style={styles.cameraFallback}>
+                <Text style={styles.fallbackText}>
+                  Vérification de l’autorisation caméra…
+                </Text>
               </View>
-              <ManualBarcodeForm
-                value={manualCode}
-                onChange={setManualCode}
-                onSubmit={() => submitBarcode(manualCode)}
-              />
-            </>
-          )}
+            ) : !permission.granted ? (
+              <View style={styles.cameraFallback}>
+                <Camera size={52} color="#6B7280" />
+                <Text style={styles.fallbackTitle}>
+                  Autorisation caméra requise
+                </Text>
+                <Text style={styles.fallbackText}>
+                  Autorisez OpsPilot à utiliser la caméra pour scanner les
+                  produits.
+                </Text>
+                <TouchableOpacity
+                  testID="barcode-camera-permission"
+                  accessibilityRole="button"
+                  style={styles.primaryButton}
+                  onPress={requestPermission}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    Autoriser la caméra
+                  </Text>
+                </TouchableOpacity>
+                <ManualBarcodeForm
+                  value={manualCode}
+                  onChange={setManualCode}
+                  onSubmit={() => submitBarcode(manualCode)}
+                />
+              </View>
+            ) : (
+              <>
+                <View style={[styles.nativeCamera, { height: cameraHeight }]}>
+                  <CameraView
+                    style={StyleSheet.absoluteFill}
+                    facing="back"
+                    barcodeScannerSettings={{
+                      barcodeTypes: [
+                        'ean13',
+                        'ean8',
+                        'upc_a',
+                        'upc_e',
+                        'code128',
+                        'code39',
+                        'qr',
+                      ],
+                    }}
+                    onBarcodeScanned={
+                      detected ? undefined : handleNativeBarcode
+                    }
+                  />
+                  <View style={styles.scanFrame} pointerEvents="none" />
+                </View>
+                <ManualBarcodeForm
+                  value={manualCode}
+                  onChange={setManualCode}
+                  onSubmit={() => submitBarcode(manualCode)}
+                />
+              </>
+            )}
+          </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -355,9 +388,11 @@ function ManualBarcodeForm({
         <Keyboard size={18} color="#6B7280" />
         <Text style={styles.manualTitle}>Saisie manuelle</Text>
       </View>
+      <Text style={styles.manualLabel}>Code-barres</Text>
       <View style={styles.manualRow}>
         <TextInput
           testID="barcode-manual-input"
+          accessibilityLabel="Code-barres"
           style={[styles.manualInput, showError && styles.manualInputError]}
           value={value}
           onChangeText={onChange}
@@ -367,6 +402,8 @@ function ManualBarcodeForm({
         />
         <TouchableOpacity
           testID="barcode-manual-submit"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !validation.valid }}
           style={[
             styles.manualSubmit,
             !validation.valid && styles.buttonDisabled,
@@ -378,7 +415,11 @@ function ManualBarcodeForm({
         </TouchableOpacity>
       </View>
       {showError && (
-        <Text style={styles.manualError} testID="barcode-manual-error">
+        <Text
+          accessibilityRole="alert"
+          style={styles.manualError}
+          testID="barcode-manual-error"
+        >
           {validation.reason}
         </Text>
       )}
@@ -392,30 +433,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 18,
+    padding: spacing.lg,
   },
   modal: {
     width: '100%',
     maxWidth: 620,
-    maxHeight: '92%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    maxHeight: '100%',
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
     overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    padding: 18,
+    padding: spacing.lg,
+    gap: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
+  headerText: { flex: 1 },
+  content: { flexShrink: 1 },
   title: { color: '#111827', fontSize: 20, fontWeight: '700' },
   subtitle: { color: '#6B7280', fontSize: 13, marginTop: 3 },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: radius.pill,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -446,10 +490,10 @@ const styles = StyleSheet.create({
   },
   cameraFallback: {
     flex: 1,
-    minHeight: 250,
+    minHeight: 200,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 28,
+    padding: spacing.xl,
   },
   fallbackTitle: {
     color: '#111827',
@@ -490,6 +534,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   manualTitle: { color: '#374151', fontSize: 14, fontWeight: '700' },
+  manualLabel: {
+    color: colors.textStrong,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+  },
   manualRow: { flexDirection: 'row', gap: 8 },
   manualInput: {
     flex: 1,
@@ -499,12 +549,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     color: '#111827',
-    fontSize: 15,
+    fontSize: 16,
   },
   manualSubmit: {
     minHeight: 44,
     borderRadius: 10,
-    backgroundColor: '#059669',
+    backgroundColor: colors.trustGreen,
     justifyContent: 'center',
     paddingHorizontal: 14,
   },

@@ -62,11 +62,7 @@ export function TaskCard({
   const validated = isTaskValidated(task);
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      accessibilityRole="button"
-      accessibilityLabel={`Voir les détails de la tâche ${task.title}`}
-    >
+    <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleSection}>
           <Text style={styles.title}>{task.title}</Text>
@@ -162,6 +158,7 @@ export function TaskCard({
           ) : canValidate && onValidate ? (
             <TouchableOpacity
               testID={`task-validate-${task.id}`}
+              accessibilityRole="button"
               style={styles.validateButton}
               onPress={() => onValidate(task.id)}
             >
@@ -197,7 +194,7 @@ export function TaskCard({
           )}
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -331,6 +328,8 @@ const styles = StyleSheet.create({
     color: colors.successText,
   },
   validateButton: {
+    minHeight: 44,
+    justifyContent: 'center',
     marginTop: 6,
     alignSelf: 'flex-start',
     backgroundColor: colors.primarySoft,
@@ -348,6 +347,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   startButton: {
+    minHeight: 44,
+    justifyContent: 'center',
     backgroundColor: '#EFF6FF',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -361,9 +362,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   completeButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: colors.trustGreen,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: radius.sm,
