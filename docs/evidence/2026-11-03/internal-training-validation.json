@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-03",
+  "base_commit": "8975d47bb881cfe380e1785c59973156a346a74c",
+  "branch": "codex/mixed-training-paths-20261103",
+  "programs": 10,
+  "written_chapters": 30,
+  "graded_questions": 60,
+  "new_graded_answer_keys_in_repository": false,
+  "media": {
+    "count": 10,
+    "total_seconds": 1194.136961,
+    "total_bytes": 14820706,
+    "checks": [
+      "SHA-256",
+      "H.264 720p",
+      "AAC audio",
+      "complete ffmpeg decode",
+      "short French captions",
+      "voice attribution"
+    ],
+    "full_decode": "passed"
+  },
+  "unit_tests": {
+    "passed": 365,
+    "files": 61
+  },
+  "quality": {
+    "typescript": "passed",
+    "eslint": "passed",
+    "prettier": "passed"
+  },
+  "sql": {
+    "scenarios_passed": 9,
+    "migration_replay": "passed",
+    "runtime": "PGlite 0.3.14",
+    "remote_library_scenarios": "not_run"
+  },
+  "deno_release": {
+    "tests_passed": 1,
+    "steps_passed": 4,
+    "sdk": "2.55.0",
+    "requests": "intercepted offline"
+  },
+  "web_build": "passed",
+  "browser": {
+    "new_tests": 3,
+    "status": "blocked before browser launch",
+    "error": "Unix socket operation not permitted",
+    "escalation": "rejected by environment policy: sandbox_approval=false",
+    "cloud_local_preview": "ERR_CONNECTION_REFUSED",
+    "mobile_and_desktop_verified": false
+  },
+  "publication": {
+    "supabase_migrations": "not_applied_after_expired_confirmation",
+    "library_bucket_count": 0,
+    "uploaded_mp4_count": 0,
+    "new_frontend_published": false
+  },
+  "github_actions_minutes_used": 0,
+  "learner_package": "https://chatgpt.com/library?file_id=libfile_02cb2de3438881918ea173eb24258e09&account_id=personal",
+  "trainer_package": "https://chatgpt.com/library?file_id=libfile_b8ad2db77f2081918d72c0103a3d98e7&account_id=personal"
+}

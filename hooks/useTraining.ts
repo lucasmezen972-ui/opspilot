@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from './useAuth';
 import {
@@ -57,22 +57,60 @@ export function useTraining() {
 
   // Mode démo local (Supabase injoignable) : store partagé entre écrans.
   const isLocalDemo = isDemoMode && !session;
+  const accountKey = `${profile?.id ?? ''}:${profile?.organization_id ?? ''}:${isLocalDemo}`;
+  const currentAccount = useRef(accountKey);
+  currentAccount.current = accountKey;
+  const readSequence = useRef(0);
+  const [remoteAccount, setRemoteAccount] = useState('');
   const demoCourses = useDemoCollection('trainings');
   const demoChapters = useDemoCollection('trainingChapters');
   const demoQuizQuestions = useDemoCollection('trainingQuizQuestions');
   const demoProgress = useDemoCollection('trainingProgress');
   const demoCertificates = useDemoCollection('trainingCertificates');
-  const courses = isLocalDemo ? demoCourses : remoteCourses;
-  const chapters = isLocalDemo ? demoChapters : remoteChapters;
-  const quizQuestions = isLocalDemo ? demoQuizQuestions : remoteQuizQuestions;
-  const progress = isLocalDemo ? demoProgress : remoteProgress;
-  const certificates = isLocalDemo ? demoCertificates : remoteCertificates;
+  const ownsRemoteData = remoteAccount === accountKey;
+  const courses = isLocalDemo
+    ? demoCourses
+    : ownsRemoteData
+      ? remoteCourses
+      : [];
+  const chapters = isLocalDemo
+    ? demoChapters
+    : ownsRemoteData
+      ? remoteChapters
+      : [];
+  const quizQuestions = isLocalDemo
+    ? demoQuizQuestions
+    : ownsRemoteData
+      ? remoteQuizQuestions
+      : [];
+  const progress = isLocalDemo
+    ? demoProgress
+    : ownsRemoteData
+      ? remoteProgress
+      : [];
+  const certificates = isLocalDemo
+    ? demoCertificates
+    : ownsRemoteData
+      ? remoteCertificates
+      : [];
+  const changedAccount = () => currentAccount.current !== accountKey;
+  const changedAccountError = {
+    error: 'Le compte a changé. Rouvrez le parcours.',
+  };
 
   const fetchTrainingData = useCallback(async () => {
+    const account = accountKey;
+    if (currentAccount.current !== account) return null;
     if (isLocalDemo || !profile?.organization_id || !profile.id) {
       setLoading(false);
-      return;
+      return isLocalDemo ? getDemoState().trainings : null;
     }
+
+    const sequence = ++readSequence.current;
+    const stale = () =>
+      currentAccount.current !== account || sequence !== readSequence.current;
+    let loadedChapters: TrainingChapter[] = [];
+    let loadedQuestions: TrainingQuizQuestion[] = [];
 
     try {
       setLoading(true);
@@ -85,6 +123,8 @@ export function useTraining() {
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false });
 
+      if (stale()) return null;
+
       if (coursesError) {
         setError(
           mapSupabaseError(
@@ -92,10 +132,8 @@ export function useTraining() {
             coursesError,
           ),
         );
-        return;
+        return null;
       }
-
-      setRemoteCourses(coursesData || []);
 
       const courseIds = (coursesData || []).map((course) => course.id);
       if (courseIds.length > 0) {
@@ -112,6 +150,8 @@ export function useTraining() {
             .order('sort_order', { ascending: true }),
         ]);
 
+        if (stale()) return null;
+
         if (chaptersResult.error) {
           setError(
             mapSupabaseError(
@@ -119,7 +159,7 @@ export function useTraining() {
               chaptersResult.error,
             ),
           );
-          return;
+          return null;
         }
         if (quizResult.error) {
           setError(
@@ -128,16 +168,11 @@ export function useTraining() {
               quizResult.error,
             ),
           );
-          return;
+          return null;
         }
 
-        setRemoteChapters((chaptersResult.data || []) as TrainingChapter[]);
-        setRemoteQuizQuestions(
-          (quizResult.data || []) as TrainingQuizQuestion[],
-        );
-      } else {
-        setRemoteChapters([]);
-        setRemoteQuizQuestions([]);
+        loadedChapters = (chaptersResult.data || []) as TrainingChapter[];
+        loadedQuestions = (quizResult.data || []) as TrainingQuizQuestion[];
       }
 
       // Récupérer la progression et les certificats de l'utilisateur
@@ -152,6 +187,8 @@ export function useTraining() {
           .eq('user_id', profile.id),
       ]);
 
+      if (stale()) return null;
+
       if (progressResult.error) {
         setError(
           mapSupabaseError(
@@ -159,10 +196,8 @@ export function useTraining() {
             progressResult.error,
           ),
         );
-        return;
+        return null;
       }
-
-      setRemoteProgress(progressResult.data || []);
 
       // Les certificats sont secondaires : on n'interrompt pas le chargement
       // de la formation si leur récupération échoue.
@@ -173,15 +208,26 @@ export function useTraining() {
             certResult.error,
           ),
         );
-      } else {
-        setRemoteCertificates((certResult.data || []) as TrainingCertificate[]);
       }
+      setRemoteCourses(coursesData || []);
+      setRemoteChapters(loadedChapters);
+      setRemoteQuizQuestions(loadedQuestions);
+      setRemoteProgress(progressResult.data || []);
+      setRemoteCertificates(
+        certResult.error
+          ? []
+          : ((certResult.data || []) as TrainingCertificate[]),
+      );
+      setRemoteAccount(account);
+      return (coursesData || []) as Training[];
     } catch (err) {
+      if (stale()) return null;
       setError(mapSupabaseError('Erreur fetchTrainingData', err));
+      return null;
     } finally {
-      setLoading(false);
+      if (!stale()) setLoading(false);
     }
-  }, [isLocalDemo, profile?.organization_id, profile?.id]);
+  }, [accountKey, isLocalDemo, profile?.organization_id, profile?.id]);
 
   useEffect(() => {
     if (isLocalDemo) {
@@ -193,7 +239,10 @@ export function useTraining() {
     }
   }, [fetchTrainingData, isLocalDemo, profile?.organization_id]);
 
-  const startCourse = async (courseId: string) => {
+  const startCourse = async (
+    courseId: string,
+  ): Promise<{ data?: UserTrainingProgress; error?: string }> => {
+    if (changedAccount()) return changedAccountError;
     if (!profile) return { error: 'Utilisateur non connecté' };
 
     try {
@@ -226,6 +275,7 @@ export function useTraining() {
       const { data, error } = await supabase.rpc('start_training', {
         p_training_id: courseId,
       });
+      if (changedAccount()) return changedAccountError;
 
       if (error) {
         return {
@@ -245,6 +295,7 @@ export function useTraining() {
     chapterId: string,
     totalChapters: number,
   ) => {
+    if (changedAccount()) return changedAccountError;
     if (!profile) return { error: 'Utilisateur non connecté' };
     if (!isLocalDemo) {
       try {
@@ -252,6 +303,7 @@ export function useTraining() {
           p_training_id: courseId,
           p_chapter_id: chapterId,
         });
+        if (changedAccount()) return changedAccountError;
         if (error)
           return {
             error: mapSupabaseError('Validation du chapitre impossible', error),
@@ -315,6 +367,7 @@ export function useTraining() {
     failedCritical = false,
     submission?: { sessionId: string; answers: (number | number[])[] },
   ) => {
+    if (changedAccount()) return changedAccountError;
     if (!profile) return { error: 'Utilisateur non connecté' };
 
     const course = courses.find((c) => c.id === courseId);
@@ -382,6 +435,7 @@ export function useTraining() {
         'submit_training_quiz',
         { p_session_id: submission.sessionId, p_answers: submission.answers },
       );
+      if (changedAccount()) return changedAccountError;
       if (error !== null || !result?.data)
         return { error: mapSupabaseError('Évaluation non enregistrée', error) };
       setRemoteProgress((current) => [
@@ -389,6 +443,7 @@ export function useTraining() {
         result.data,
       ]);
       if (result.passed) await fetchProfile(profile.id);
+      if (changedAccount()) return changedAccountError;
       return result as {
         data: UserTrainingProgress;
         passed: boolean;
@@ -401,10 +456,12 @@ export function useTraining() {
   };
 
   const startQuiz = async (courseId: string) => {
+    if (changedAccount()) return changedAccountError;
     if (isLocalDemo) return { data: null };
     const { data, error } = await supabase.rpc('start_training_quiz', {
       p_training_id: courseId,
     });
+    if (changedAccount()) return changedAccountError;
     if (error)
       return {
         error: mapSupabaseError('Impossible de démarrer le quiz', error),
@@ -413,6 +470,7 @@ export function useTraining() {
   };
 
   const recordVideoProgress = async (chapterId: string, seconds: number) => {
+    if (changedAccount()) return changedAccountError;
     const chapter = chapters.find((c) => c.id === chapterId);
     if (!chapter || !Number.isFinite(seconds))
       return { error: 'Lecture indisponible' };
@@ -446,6 +504,7 @@ export function useTraining() {
       p_chapter_id: chapterId,
       p_position: Math.round(seconds * 10) / 10,
     });
+    if (changedAccount()) return changedAccountError;
     if (error !== null || !data)
       return { error: mapSupabaseError('Lecture non enregistrée', error) };
     setRemoteProgress((current) =>
@@ -497,7 +556,8 @@ export function useTraining() {
     courseId: string,
     score: number,
     options?: CertificateOptions,
-  ) => {
+  ): Promise<{ data?: TrainingCertificate; error?: string }> => {
+    if (changedAccount()) return changedAccountError;
     if (!profile) return { error: 'Utilisateur non connecté' };
     const course = courses.find((c) => c.id === courseId);
     if (!course) return { error: 'Cours non trouvé' };
@@ -560,6 +620,7 @@ export function useTraining() {
         p_training_id: courseId,
         p_identity: options,
       });
+      if (changedAccount()) return changedAccountError;
 
       if (error) {
         return {

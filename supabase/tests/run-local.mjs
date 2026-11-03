@@ -16,6 +16,8 @@ const suffixes = [
   'onboarding_access_integrity',
   'rate_limit_clock_integrity',
   'private_r2_training_media',
+  'internal_training_library',
+  'internal_training_programs_202611',
 ];
 const apply = async (url) => {
   await db.exec(await readFile(url, 'utf8'));
@@ -45,6 +47,7 @@ try {
     'mollie_billing.sql',
     'rate_limit_integrity.sql',
     'r2_training_integrity.sql',
+    'internal_training_library.sql',
   ])
     await apply(new URL(file, root));
 } finally {

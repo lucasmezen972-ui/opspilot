@@ -1,0 +1,165 @@
+{
+  "key": "accueil-securite",
+  "version": "2026-11-03",
+  "title": "Accueil sécurité : prendre son poste sans s’exposer",
+  "category": "Sécurité au travail",
+  "summary": "Repérer les risques du site, utiliser les bonnes consignes et transmettre une alerte utile.",
+  "audience": "Salariés du magasin ou du restaurant, nouveaux arrivants et personnes changeant de poste ou de conditions de travail.",
+  "prerequisites": "Accès aux consignes du site et accompagnement d’un responsable connaissant le poste.",
+  "requirement": "internal_required",
+  "applicability": "Socle de formation à la sécurité à adapter aux risques réels, au poste, à l’expérience et à la langue comprise. Le responsable complète l’accueil sur site et le renouvelle quand nécessaire.",
+  "onsite": "Visite accompagnée : cheminements, zones engins, sorties, alarme, point de rassemblement, secours et interlocuteurs. Faire reformuler puis observer une prise de poste réelle en sécurité.",
+  "objectives": [
+    "Repérer trois risques de son poste et la protection collective prévue.",
+    "Identifier un trajet sûr et le relais à prévenir en cas d’anomalie.",
+    "Transmettre une alerte localisée sans se mettre en danger."
+  ],
+  "positioning": [
+    "Savez-vous qui contacter face à une situation dangereuse ?",
+    "Pouvez-vous montrer le cheminement autorisé de votre poste à la sortie ?",
+    "Savez-vous où consulter les consignes et le document d’évaluation des risques ?"
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 10,
+  "sources": [
+    {
+      "label": "Code du travail, R4141-2 à R4141-5 : contenu et adaptation de l’accueil sécurité",
+      "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018488276/"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "Voir le risque avant de commencer",
+      "body": "# Danger, exposition et prévention\nUn danger est une source possible de dommage : un couteau, un sol glissant, un véhicule en mouvement. Le risque dépend aussi de l’exposition : passer à pied dans une zone de livraison pendant une manœuvre n’a pas les mêmes conséquences qu’un trajet séparé et protégé. Repérer un risque sert à choisir une manière de travailler sûre, avant le premier geste.\n\nCommencez par demander la démonstration du poste : circulation autorisée, charges, matériels, produits utilisés, protections collectives et conduite à tenir face à une anomalie. Une barrière séparant piétons et engins protège plusieurs personnes ; un équipement individuel ne dispense pas de cette séparation. Ne retirez jamais une protection pour accélérer le travail.\n\nCas pédagogique fictif : des cartons occupent le passage prévu entre la réserve et la surface de vente. Les enjamber ne rétablit pas un passage sûr. Arrêtez le déplacement concerné, avertissez le responsable et suivez le chemin autorisé disponible. Si vous devez baliser, faites-le sans vous placer dans la circulation des engins.\n\nLe document unique d’évaluation des risques aide à connaître les risques identifiés et les actions de prévention. Demandez où il est consultable et quelles consignes concernent votre poste. Un document ne remplace pas l’explication sur le terrain. Si la langue, un handicap ou une difficulté de lecture empêche de comprendre une consigne, signalez-le avant de commencer pour obtenir une explication ou une adaptation appropriée."
+    },
+    {
+      "title": "Réagir à l’anomalie sans créer un second accident",
+      "body": "# Arrêter, protéger sans s’exposer, alerter\nUne situation anormale est un écart observable : fuite, bruit inhabituel, protecteur manquant, câble abîmé, passage bloqué ou comportement menaçant. Décrivez ce que vous observez. Vous n’avez pas à prouver la cause pour demander une vérification. Ne remettez pas en marche un équipement simplement parce qu’un collègue l’utilisait auparavant.\n\nEn cas d’accident ou de malaise, évitez le suraccident. Prévenez le relais de secours prévu par le site. Si nécessaire, appelez les secours d’urgence : 112 ou 15 pour une urgence médicale, 18 pour les sapeurs-pompiers. Donnez l’adresse exacte, l’accès, la nature du danger, le nombre de personnes concernées et votre numéro de rappel. Suivez les instructions de l’opérateur. Ne déplacez pas une victime sauf nécessité immédiate de la soustraire à un danger et sans vous exposer.\n\nNe touchez pas un équipement électrique endommagé et n’intervenez pas dans une machine pour dégager un produit. Prévenez la personne compétente. L’envie d’aider peut aggraver l’accident si l’énergie ou le danger n’est pas maîtrisé. Ce cours traite l’alerte interne, pas l’acquisition de gestes de secourisme.\n\nAprès la mise en sécurité, transmettez le lieu, l’heure, les faits et les mesures déjà prises. Une trace utile permet de corriger une cause et d’éviter une répétition. Elle ne doit pas devenir une recherche improvisée de faute ou contenir des détails de santé non nécessaires. Le responsable suit ensuite le traitement et informe l’équipe des consignes modifiées."
+    },
+    {
+      "title": "Réaliser sa visite et tester son alerte",
+      "body": "# Exercice accompagné sur le site\nAvec le responsable, partez de votre poste et montrez : le cheminement piéton, les zones à ne pas traverser, une sortie, le point de rassemblement, le moyen d’alerte et le lieu où demander les consignes. Demandez qui est votre relais pendant chaque plage horaire, y compris lorsqu’un responsable habituel est absent.\n\nCas pédagogique fictif : un sol mouillé se trouve dans un passage fréquenté et un collègue vient de tomber. Décrivez en une minute l’action immédiate, le relais et le message d’alerte. Livrable : une fiche de repérage avec les lieux et fonctions utiles, sans information personnelle inutile. Ne déclenchez aucun système d’alarme réel pour cet exercice sans l’organisation du responsable.\n\nCritères observés : vous restez hors du danger ; vous signalez le risque aux personnes exposées sans vous mettre en travers d’un engin ; vous donnez une localisation exploitable ; vous identifiez le relais et n’improvisez pas une intervention technique.\n\nPiste de correction : sécuriser l’accès si cela est possible sans risque, appeler le relais de secours, décrire le lieu et l’état observable de la personne, puis suivre ses instructions. Un message « quelqu’un est tombé quelque part » est trop imprécis. Le responsable valide la visite et les gestes réellement démontrés selon sa procédure. Le résultat du quiz ne suffit pas à constater cette validation pratique. Si un repère manque, inscrivez une action à résoudre avant de travailler seul."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Des cartons bloquent le trajet piéton prévu. Que faire ?",
+      "options": [
+        "Les enjamber rapidement.",
+        "Passer dans la zone des engins.",
+        "Signaler l’obstacle et utiliser seulement un trajet autorisé sûr."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Une protection collective sert notamment à…",
+      "options": [
+        "Réduire l’exposition de plusieurs personnes.",
+        "Remplacer toute consigne.",
+        "Autoriser l’usage d’un équipement défectueux."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Quelle alerte est la plus utile ?",
+      "options": [
+        "Il y a un problème.",
+        "Chute dans le couloir de réserve côté livraison ; passage balisé, relais secours demandé.",
+        "Je pense connaître le coupable."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Vous ne comprenez pas une consigne avant la prise de poste. Que faire ?",
+      "options": [
+        "Deviner en regardant de loin.",
+        "Signer puis demander plus tard.",
+        "Demander une explication ou une adaptation avant de commencer."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Un câble est abîmé et l’appareil fonctionne encore. Quelle décision prendre ?",
+      "options": [
+        "Cesser l’utilisation et prévenir le relais compétent sans intervention improvisée.",
+        "Continuer jusqu’à la panne.",
+        "Réparer soi-même avec du ruban."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Que prouve la réussite du quiz ?",
+      "options": [
+        "Une habilitation de secouriste.",
+        "La réussite de cette évaluation de connaissances, à compléter par l’accueil pratique du site.",
+        "La conformité de tout l’établissement."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Avant le premier geste",
+    "scenes": [
+      {
+        "heading": "Avant le premier geste",
+        "lines": [
+          "Comprendre le poste",
+          "Repérer les risques",
+          "Savoir qui alerter"
+        ],
+        "narration": "Avant de commencer un poste, trois questions doivent avoir une réponse concrète. Où puis-je circuler ? Qu’est-ce qui peut me blesser ou blesser une autre personne ? Qui dois-je prévenir si une situation est anormale ? L’accueil sécurité sert à répondre à ces questions sur votre site, avec les consignes réellement utilisées."
+      },
+      {
+        "heading": "Un danger + une exposition",
+        "lines": [
+          "Un engin en mouvement",
+          "Un piéton sur son trajet",
+          "Une séparation à respecter"
+        ],
+        "narration": "Un engin est une source de danger. Le risque augmente lorsqu’un piéton se trouve sur son trajet. Respecter le cheminement séparé évite cette exposition. Les protections collectives et l’organisation du travail passent avant l’idée de simplement faire attention. Un équipement individuel ne permet pas d’ignorer une barrière ou un trajet interdit."
+      },
+      {
+        "heading": "Cas fictif : passage bloqué",
+        "lines": [
+          "Ne pas enjamber",
+          "Ne pas improviser un détour",
+          "Signaler et demander un trajet sûr"
+        ],
+        "narration": "Dans notre cas pédagogique fictif, des cartons bloquent le passage de la réserve. Enjamber les cartons ne règle pas le problème. Passer dans la zone de livraison peut créer un autre danger. Arrêtez le déplacement concerné, signalez l’obstacle et utilisez seulement un chemin autorisé sûr. Le responsable organise la correction."
+      },
+      {
+        "heading": "Une alerte localisée",
+        "lines": [
+          "Où exactement ?",
+          "Quel danger observable ?",
+          "Quelle aide est nécessaire ?"
+        ],
+        "narration": "Pour alerter, décrivez des faits : le lieu exact, le danger observable et ce qui a déjà été fait. En cas d’accident, évitez le suraccident et prévenez le relais de secours prévu. Si une urgence impose d’appeler les secours, donnez l’adresse et l’accès, puis suivez les instructions de l’opérateur. N’improvisez pas une intervention technique."
+      },
+      {
+        "heading": "À montrer sur place",
+        "lines": [
+          "Trajet et sortie",
+          "Alerte et rassemblement",
+          "Consignes et interlocuteurs"
+        ],
+        "narration": "Mettez la vidéo en pause. Avec votre responsable, montrez un trajet sûr, la sortie, le moyen d’alerte et le point de rassemblement. Demandez aussi où consulter les risques du poste. Si une consigne n’est pas comprise, demandez une explication adaptée avant de travailler seul. Regarder une vidéo ne remplace pas cette visite."
+      },
+      {
+        "heading": "Comprendre puis démontrer",
+        "lines": [
+          "Un risque repéré",
+          "Une action sûre",
+          "Une alerte compréhensible"
+        ],
+        "narration": "Retenez cette méthode : repérer le risque, choisir une action qui n’expose personne et transmettre une alerte compréhensible. Poursuivez avec le cours écrit et l’exercice accompagné. Le quiz vérifiera les connaissances ; la démonstration sur le poste restera à organiser et à observer par le responsable."
+      }
+    ]
+  }
+}

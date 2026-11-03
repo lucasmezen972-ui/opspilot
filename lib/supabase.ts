@@ -188,6 +188,30 @@ export type Subscription = {
   updated_at?: string;
 };
 
+export type TrainingProgramMetadata = {
+  key: string;
+  version: string;
+  title: string;
+  category: string;
+  summary: string;
+  audience: string;
+  prerequisites: string;
+  requirement: 'internal_required' | 'role_required' | 'professional';
+  applicability: string;
+  onsite: string;
+  objectives: string[];
+  positioning: string[];
+  reading_minutes: number;
+  activity_minutes: number;
+  video_seconds: number;
+  video_chapters: { title: string; seconds: number }[];
+  sources: { label: string; url: string }[];
+  chapter_count: number;
+  quiz_count: number;
+  narration: 'synthetic';
+  voice_model_card: string;
+};
+
 export type Training = {
   id: string;
   organization_id: string;
@@ -203,6 +227,9 @@ export type Training = {
   updated_at?: string;
   ai_generated?: boolean;
   is_default?: boolean;
+  program_key?: string | null;
+  program_version?: string | null;
+  program_metadata?: TrainingProgramMetadata | null;
 };
 
 export type TrainingChapter = {

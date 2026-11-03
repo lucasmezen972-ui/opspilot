@@ -5,6 +5,32 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Parcours internes texte + vidéo — livraison préparée le 3 novembre 2026
+
+Lucas précise que le catalogue doit couvrir les formations internes des salariés,
+pas les démarches des organismes de formation. Dix programmes sont rédigés :
+quatre familles de sécurité au travail, trois d’hygiène alimentaire selon les
+missions et trois de développement professionnel. Chaque parcours associe une
+capsule réellement créée, trois chapitres écrits, une application corrigée et
+six questions finales. Les durées sont mesurées pour la vidéo et indicatives
+pour la lecture et l’activité. Le responsable doit encore organiser les pratiques
+sur le site ; aucune certification officielle ou conformité globale n’est affirmée.
+
+Le code ajoute un catalogue de programmes, l’installation par organisation sans
+doublon, les métadonnées pédagogiques et les repères vidéo. Les corrigés notés
+nouveaux sont hors du dépôt public et seront injectés dans le catalogue privé.
+Les anciens cours et leurs historiques ne sont pas réécrits. La lecture
+asynchrone est liée au compte pour écarter les réponses d’un compte précédent.
+
+Les dix MP4, textes et sous-titres sont créés et sauvegardés, avec leur paquet
+formateur privé. **Publication en attente** : migrations/import Supabase non
+appliqués après expiration de la confirmation native ; nouveaux parcours
+navigateur non validés à cause du refus des sockets Unix et de l’élévation de
+permissions dans l’environnement. La compilation, les contrôles de qualité,
+les scénarios SQL et le test d’import Deno sont consignés dans
+[FORMATION-PARCOURS.md](FORMATION-PARCOURS.md). Aucun téléversement pédagogique
+Supabase, prélèvement, facture client ni minute GitHub Actions dans cette reprise.
+
 ## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
 
 ### Finalisation des erreurs de facturation et évaluations connectées

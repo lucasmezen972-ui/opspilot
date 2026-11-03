@@ -11,6 +11,7 @@ export interface TrainingCourseView {
   difficulty: string;
   progress: number;
   status: string;
+  programRequirement?: 'internal_required' | 'role_required' | 'professional';
 }
 
 export function getTrainingStatusColor(status: string): string {

@@ -9,10 +9,12 @@ export function TrainingVideoLesson({
   chapter,
   position,
   onProgress,
+  chapters,
 }: {
   chapter: TrainingChapter;
   position: number;
   onProgress: (seconds: number) => Promise<{ error?: unknown }>;
+  chapters?: { title: string; seconds: number }[];
 }) {
   const [src, setSrc] = useState('');
   const [error, setError] = useState('');
@@ -40,7 +42,11 @@ export function TrainingVideoLesson({
           return;
         }
         const { data, error: issue } = await supabase.storage
-          .from('training-videos')
+          .from(
+            chapter.video_storage_path.startsWith('library/')
+              ? 'training-library'
+              : 'training-videos',
+          )
           .createSignedUrl(chapter.video_storage_path, 3600);
         if (active) {
           if (issue !== null || !data?.signedUrl)
@@ -71,6 +77,7 @@ export function TrainingVideoLesson({
           title={chapter.title}
           position={position}
           captionsUrl={chapter.captions_url}
+          chapters={chapters}
           onError={() =>
             setError('Lecture interrompue. Réessayez pour reprendre la vidéo.')
           }

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
+import { programRequirementLabel } from './internalPrograms';
 import {
   getTrainingStatusColor,
   getTrainingStatusText,
@@ -35,6 +36,19 @@ export function TrainingCourseCard({
     <View testID={`training-card-${course.id}`} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleSection}>
+          {course.programRequirement && (
+            <Text
+              style={{
+                fontSize: 12,
+                lineHeight: 18,
+                color: colors.primaryInk,
+                fontWeight: '700',
+                marginBottom: 6,
+              }}
+            >
+              {programRequirementLabel(course.programRequirement)}
+            </Text>
+          )}
           <Text style={styles.title}>{course.title}</Text>
           <Text style={styles.description} numberOfLines={2}>
             {course.description}
@@ -55,7 +69,9 @@ export function TrainingCourseCard({
       <View style={styles.meta}>
         <View style={styles.metaItem}>
           <Clock size={14} color="#6B7280" />
-          <Text style={styles.metaText}>{course.duration_minutes} min</Text>
+          <Text style={styles.metaText}>
+            Env. {course.duration_minutes} min
+          </Text>
         </View>
         <View style={styles.metaItem}>
           <BookOpen size={14} color="#6B7280" />

@@ -1,0 +1,617 @@
+[
+  {
+    "key": "accueil-client",
+    "version": "2026-11-03",
+    "title": "Accueil client et réclamations : agir avec méthode",
+    "category": "Relation client",
+    "summary": "Écouter une réclamation, vérifier les faits, proposer une suite précise et protéger les personnes.",
+    "audience": "Équipes d’accueil, de caisse, de vente et de restauration ; responsables de proximité.",
+    "prerequisites": "Connaître le relais responsable et disposer des procédures commerciales et de sécurité du site.",
+    "requirement": "professional",
+    "applicability": "Parcours de développement professionnel ; aucune obligation générale de suivre ce module n’est revendiquée.",
+    "onsite": "Jeu de rôle avec un collègue puis repérage du relais et du dispositif d’alerte du site. Le responsable observe la reformulation, le respect des limites et la suite annoncée.",
+    "objectives": [
+      "Reformuler une réclamation en séparant faits, ressenti et demande.",
+      "Choisir une réponse dans sa délégation et annoncer une prochaine action vérifiable.",
+      "Reconnaître une menace et appliquer le relais de sécurité du site."
+    ],
+    "positioning": [
+      "Pouvez-vous expliquer la méthode à un collègue ?",
+      "Savez-vous reconnaître les limites de votre rôle ?",
+      "Connaissez-vous le relais de votre site ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 8,
+    "sources": [],
+    "video_seconds": 135.0,
+    "video_chapters": [
+      {
+        "title": "Écouter. Vérifier. Agir.",
+        "seconds": 0.0
+      },
+      {
+        "title": "Séparer les trois éléments",
+        "seconds": 20.812
+      },
+      {
+        "title": "Vérifier avant de promettre",
+        "seconds": 42.308
+      },
+      {
+        "title": "Action + personne + retour",
+        "seconds": 64.177
+      },
+      {
+        "title": "À vous de jouer",
+        "seconds": 86.092
+      },
+      {
+        "title": "La sécurité reste prioritaire",
+        "seconds": 110.362
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "accueil-securite",
+    "version": "2026-11-03",
+    "title": "Accueil sécurité : prendre son poste sans s’exposer",
+    "category": "Sécurité au travail",
+    "summary": "Repérer les risques du site, utiliser les bonnes consignes et transmettre une alerte utile.",
+    "audience": "Salariés du magasin ou du restaurant, nouveaux arrivants et personnes changeant de poste ou de conditions de travail.",
+    "prerequisites": "Accès aux consignes du site et accompagnement d’un responsable connaissant le poste.",
+    "requirement": "internal_required",
+    "applicability": "Socle de formation à la sécurité à adapter aux risques réels, au poste, à l’expérience et à la langue comprise. Le responsable complète l’accueil sur site et le renouvelle quand nécessaire.",
+    "onsite": "Visite accompagnée : cheminements, zones engins, sorties, alarme, point de rassemblement, secours et interlocuteurs. Faire reformuler puis observer une prise de poste réelle en sécurité.",
+    "objectives": [
+      "Repérer trois risques de son poste et la protection collective prévue.",
+      "Identifier un trajet sûr et le relais à prévenir en cas d’anomalie.",
+      "Transmettre une alerte localisée sans se mettre en danger."
+    ],
+    "positioning": [
+      "Savez-vous qui contacter face à une situation dangereuse ?",
+      "Pouvez-vous montrer le cheminement autorisé de votre poste à la sortie ?",
+      "Savez-vous où consulter les consignes et le document d’évaluation des risques ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 10,
+    "sources": [
+      {
+        "label": "Code du travail, R4141-2 à R4141-5 : contenu et adaptation de l’accueil sécurité",
+        "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018488276/"
+      }
+    ],
+    "video_seconds": 123.516372,
+    "video_chapters": [
+      {
+        "title": "Avant le premier geste",
+        "seconds": 0.0
+      },
+      {
+        "title": "Un danger + une exposition",
+        "seconds": 19.083
+      },
+      {
+        "title": "Cas fictif : passage bloqué",
+        "seconds": 38.132
+      },
+      {
+        "title": "Une alerte localisée",
+        "seconds": 58.608
+      },
+      {
+        "title": "À montrer sur place",
+        "seconds": 81.415
+      },
+      {
+        "title": "Comprendre puis démontrer",
+        "seconds": 103.701
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "caisse",
+    "version": "2026-11-03",
+    "title": "Caisse : encaisser juste et protéger les personnes",
+    "category": "Encaissement",
+    "summary": "Vérifier une opération, appliquer sa délégation et traiter un écart avec une trace fiable.",
+    "audience": "Personnel de caisse et responsables de proximité.",
+    "prerequisites": "Procédure du site : moyens acceptés, contrôles, délégations, clôture et alerte de sécurité.",
+    "requirement": "professional",
+    "applicability": "Parcours de professionnalisation à adapter aux moyens de paiement et aux procédures du site ; aucune obligation générale de suivre ce module n’est revendiquée.",
+    "onsite": "Démonstration en environnement d’entraînement, sans encaissement réel : ouverture, contrôle d’un paiement, appel du relais et clôture fictive. Vérifier le verrouillage de la session et l’accès aux consignes.",
+    "objectives": [
+      "Vérifier un paiement dans le système du magasin sans se fier à une preuve externe isolée.",
+      "Appliquer les délégations et transmettre une contestation sans improviser une opération.",
+      "Rapprocher une clôture et signaler un écart factuel."
+    ],
+    "positioning": [
+      "Connaissez-vous votre délégation pour les annulations et remboursements ?",
+      "Savez-vous reconnaître un paiement confirmé dans le système prévu ?",
+      "Pouvez-vous indiquer la conduite de sécurité en cas de menace ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 10,
+    "sources": [],
+    "video_seconds": 116.858458,
+    "video_chapters": [
+      {
+        "title": "Préparer avant d’encaisser",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : paiement incertain",
+        "seconds": 18.051
+      },
+      {
+        "title": "La délégation protège la décision",
+        "seconds": 37.262
+      },
+      {
+        "title": "Clôturer avec les vrais chiffres",
+        "seconds": 57.831
+      },
+      {
+        "title": "Les personnes passent avant les fonds",
+        "seconds": 77.32
+      },
+      {
+        "title": "S’entraîner sans paiement réel",
+        "seconds": 96.253
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "chaine-froid",
+    "version": "2026-11-03",
+    "title": "Chaîne du froid : mesurer, comparer et décider",
+    "category": "Hygiène alimentaire",
+    "summary": "Contrôler le froid avec la bonne méthode et gérer un écart sans décider sur le seul afficheur.",
+    "audience": "Réception, réserve, rayon réfrigéré, préparation et service de denrées sensibles.",
+    "prerequisites": "Seuils validés du site et des produits, procédure de mesure, matériel de contrôle et relais responsable.",
+    "requirement": "role_required",
+    "applicability": "Instruction de maîtrise sanitaire pour les personnes exposant, recevant ou stockant des denrées sous température contrôlée. Les seuils varient selon les produits, étapes et textes applicables.",
+    "onsite": "Identifier les seuils réels, réaliser une mesure selon le protocole sans contaminer la denrée et simuler le signalement d’un écart. Le responsable valide l’usage de l’instrument et la décision.",
+    "objectives": [
+      "Retrouver le seuil applicable au produit et à l’étape contrôlée.",
+      "Distinguer température d’air, indication d’enceinte et mesure de denrée.",
+      "Isoler un écart et transmettre une information permettant une décision sûre."
+    ],
+    "positioning": [
+      "Savez-vous où lire les seuils de vos produits ?",
+      "Pouvez-vous expliquer ce que mesure votre thermomètre ?",
+      "Savez-vous qui décide du devenir d’un lot en écart ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 10,
+    "sources": [
+      {
+        "label": "Ministère de l’Agriculture : chaîne du froid et températures par denrée",
+        "url": "https://agriculture.gouv.fr/securite-sanitaire-des-aliments-tout-sur-la-chaine-du-froid"
+      }
+    ],
+    "video_seconds": 116.607438,
+    "video_chapters": [
+      {
+        "title": "Pas un seuil pour tout le frais",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : la caisse à quai",
+        "seconds": 19.802
+      },
+      {
+        "title": "Savoir ce que l’on mesure",
+        "seconds": 38.245
+      },
+      {
+        "title": "L’écart demande un relais",
+        "seconds": 58.025
+      },
+      {
+        "title": "Exercice de contrôle réel",
+        "seconds": 77.886
+      },
+      {
+        "title": "Mesurer. Comparer. Suivre.",
+        "seconds": 98.477
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "dates-stocks",
+    "version": "2026-11-03",
+    "title": "DLC, DDM et stocks : décider avant de réapprovisionner",
+    "category": "Hygiène alimentaire",
+    "summary": "Distinguer les dates, organiser la rotation et traiter une anomalie sans réétiqueter un produit retiré.",
+    "audience": "Équipes de réception, réserve, rayon alimentaire et préparation.",
+    "prerequisites": "Consignes de contrôle, conservation, ouverture et retrait propres aux produits du poste.",
+    "requirement": "role_required",
+    "applicability": "Compétences à intégrer aux instructions d’hygiène des personnes chargées des denrées et des stocks. La fréquence des contrôles est définie par les risques et la procédure du site.",
+    "onsite": "Contrôler un échantillon réel, lire les conditions après ouverture, organiser une rotation par dates et montrer la zone d’isolement. Aucun produit fictif ne doit être confondu avec un stock réel.",
+    "objectives": [
+      "Distinguer une DLC d’une DDM et une condition après ouverture.",
+      "Classer un stock par date pertinente plutôt que par seul ordre d’arrivée.",
+      "Isoler et tracer un produit non conforme sans prolonger sa date."
+    ],
+    "positioning": [
+      "Reconnaissez-vous les deux mentions de date ?",
+      "Savez-vous quelle durée appliquer après ouverture ?",
+      "Pouvez-vous retrouver le lot et la décision d’un retrait ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 10,
+    "sources": [
+      {
+        "label": "DGCCRF : distinguer DLC et DDM",
+        "url": "https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/date-limite-de-consommation-et-date-de-durabilite-minimale-ce-que-vous-devez-savoir"
+      },
+      {
+        "label": "Service Public : dates, conservation et responsabilité du vendeur",
+        "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10990"
+      }
+    ],
+    "video_seconds": 113.045442,
+    "video_chapters": [
+      {
+        "title": "Lire trois informations",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : deux livraisons",
+        "seconds": 19.652
+      },
+      {
+        "title": "L’ouverture peut changer la limite",
+        "seconds": 40.73
+      },
+      {
+        "title": "Retirer : séparer et tracer",
+        "seconds": 60.301
+      },
+      {
+        "title": "À vous de classer les lots",
+        "seconds": 78.466
+      },
+      {
+        "title": "Prévenir sans raccourci",
+        "seconds": 95.773
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "hygiene-alimentaire",
+    "version": "2026-11-03",
+    "title": "Hygiène alimentaire au poste : prévenir les contaminations",
+    "category": "Hygiène alimentaire",
+    "summary": "Séparer les usages, appliquer le nettoyage prévu, vérifier les allergènes et isoler une denrée douteuse.",
+    "audience": "Personnes manipulant ou servant des denrées en commerce alimentaire et restauration.",
+    "prerequisites": "Plan de maîtrise sanitaire et consignes du poste disponibles ; accès à la composition des produits et au relais responsable.",
+    "requirement": "internal_required",
+    "applicability": "Instructions et formation à l’hygiène adaptées aux manipulations réellement effectuées. Ce parcours interne ne remplace pas la formation spécifique distincte exigible dans certaines activités de restauration.",
+    "onsite": "Démontrer le lavage des mains et la séparation cru/prêt à consommer ; appliquer le protocole de nettoyage avec le matériel réel ; retrouver une information écrite sur un allergène. Le responsable observe et corrige.",
+    "objectives": [
+      "Repérer une contamination possible et interrompre le transfert.",
+      "Appliquer les étapes et paramètres du nettoyage prévus au poste.",
+      "Retrouver une information fiable sur les allergènes et traiter une incertitude sans promettre."
+    ],
+    "positioning": [
+      "Savez-vous distinguer nettoyer et désinfecter ?",
+      "Pouvez-vous retrouver la composition actuelle d’un produit ?",
+      "Savez-vous où isoler une denrée douteuse et qui alerter ?"
+    ],
+    "reading_minutes": 12,
+    "activity_minutes": 12,
+    "sources": [
+      {
+        "label": "Ministère de l’Agriculture : obligations de formation à l’hygiène, 16 juillet 2026",
+        "url": "https://agriculture.gouv.fr/restauration-quelles-obligations-en-matiere-de-formation-a-lhygiene-des-aliments"
+      },
+      {
+        "label": "Ministère de l’Agriculture : contrôles et bonnes pratiques en restauration",
+        "url": "https://agriculture.gouv.fr/la-securite-sanitaire-de-lalimentation-que-controle-t-dans-un-restaurant"
+      },
+      {
+        "label": "Service Public : information écrite sur les allergènes",
+        "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F32192"
+      }
+    ],
+    "video_seconds": 119.55746,
+    "video_chapters": [
+      {
+        "title": "Un transfert peut rester invisible",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : le couteau partagé",
+        "seconds": 19.756
+      },
+      {
+        "title": "Le protocole fait la différence",
+        "seconds": 39.165
+      },
+      {
+        "title": "Allergènes : vérifier avant de dire",
+        "seconds": 59.663
+      },
+      {
+        "title": "À pratiquer au poste",
+        "seconds": 79.198
+      },
+      {
+        "title": "Ne pas deviner face au doute",
+        "seconds": 100.034
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "incendie-evacuation",
+    "version": "2026-11-03",
+    "title": "Incendie et évacuation : appliquer les consignes du site",
+    "category": "Sécurité au travail",
+    "summary": "Reconnaître l’alerte, rejoindre le point prévu et transmettre les informations sans se réexposer.",
+    "audience": "Personnel des magasins et restaurants, selon l’organisation de sécurité de l’établissement.",
+    "prerequisites": "Consignes incendie et plan du site disponibles ; responsable pour la visite et l’exercice réel.",
+    "requirement": "internal_required",
+    "applicability": "Information et entraînement adaptés aux consignes, à l’effectif et aux risques du site. La périodicité des exercices dépend du cadre applicable ; aucun renouvellement universel n’est fixé par l’app.",
+    "onsite": "Visite des dégagements et du point de rassemblement ; exercice d’évacuation organisé et observé, avec prise en compte des visiteurs et des besoins d’assistance. La manipulation d’un extincteur exige une démonstration et un entraînement adaptés.",
+    "objectives": [
+      "Identifier le signal d’alarme et le cheminement d’évacuation prévu.",
+      "Choisir un comportement qui évite la réexposition et le retour dans les locaux.",
+      "Transmettre une absence ou une difficulté au responsable de rassemblement."
+    ],
+    "positioning": [
+      "Reconnaissez-vous le signal d’évacuation du site ?",
+      "Savez-vous quel point rejoindre et qui le coordonne ?",
+      "Connaissez-vous la procédure d’assistance et votre rôle ?"
+    ],
+    "reading_minutes": 9,
+    "activity_minutes": 10,
+    "sources": [
+      {
+        "label": "Code du travail, R4227-34 à R4227-39 : alarme, consignes et exercices",
+        "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018489063/"
+      }
+    ],
+    "video_seconds": 118.897415,
+    "video_chapters": [
+      {
+        "title": "Le chemin s’apprend avant",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : la veste oubliée",
+        "seconds": 18.341
+      },
+      {
+        "title": "Un trajet doit rester sûr",
+        "seconds": 39.234
+      },
+      {
+        "title": "Une absence : transmettre",
+        "seconds": 59.455
+      },
+      {
+        "title": "L’extincteur ne s’improvise pas",
+        "seconds": 78.804
+      },
+      {
+        "title": "À vérifier lors de l’exercice",
+        "seconds": 96.61
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "management",
+    "version": "2026-11-03",
+    "title": "Management de proximité : donner les moyens et suivre",
+    "category": "Management",
+    "summary": "Clarifier une mission, observer les difficultés et vérifier une amélioration sans réduire le travail à un indicateur.",
+    "audience": "Managers et responsables d’équipe du commerce et de la restauration.",
+    "prerequisites": "Connaître les rôles, procédures, relais RH et règles de planification applicables à l’établissement.",
+    "requirement": "professional",
+    "applicability": "Parcours de professionnalisation du management. Les obligations de l’employeur restent à examiner selon l’activité et ne sont pas remplacées par ce module.",
+    "onsite": "Préparer et observer un brief réel, faire reformuler une délégation et vérifier une action avec l’équipe. Choisir un cas sans données personnelles sensibles et recueillir le retour de l’apprenant.",
+    "objectives": [
+      "Formuler une mission avec résultat attendu, moyens, limites et point de suivi.",
+      "Conduire un échange fondé sur des faits et l’analyse de l’activité réelle.",
+      "Vérifier une action corrective avec des éléments observables et un retour de l’équipe."
+    ],
+    "positioning": [
+      "Une personne peut-elle reformuler ce qui est attendu après votre brief ?",
+      "Savez-vous distinguer résultat insuffisant et moyen manquant ?",
+      "Votre suivi vérifie-t-il la correction et ses effets sur l’équipe ?"
+    ],
+    "reading_minutes": 11,
+    "activity_minutes": 12,
+    "sources": [],
+    "video_seconds": 113.41746,
+    "video_chapters": [
+      {
+        "title": "Une consigne ne suffit pas",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : les dates dépassées",
+        "seconds": 17.955
+      },
+      {
+        "title": "Un brief relié au travail réel",
+        "seconds": 37.526
+      },
+      {
+        "title": "Un signalement n’est pas un conflit banal",
+        "seconds": 58.316
+      },
+      {
+        "title": "Vérifier l’effet de l’action",
+        "seconds": 77.062
+      },
+      {
+        "title": "Votre exercice : une action complète",
+        "seconds": 94.822
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "manutention",
+    "version": "2026-11-03",
+    "title": "Manutention : préparer le déplacement avant de porter",
+    "category": "Sécurité au travail",
+    "summary": "Éviter les ports inutiles, préparer le trajet et demander l’aide adaptée aux charges du poste.",
+    "audience": "Équipes manipulant manuellement cartons, bacs, marchandises, équipements ou charges en magasin et en restauration.",
+    "prerequisites": "Connaître les aides disponibles et disposer d’un encadrement pour l’entraînement pratique au poste.",
+    "requirement": "internal_required",
+    "applicability": "Pour les salariés dont l’activité comporte de la manutention manuelle : information sur les risques et formation adaptée, essentiellement pratique. À compléter avec les charges et conditions réelles.",
+    "onsite": "Observer un déplacement réel, choisir une aide, préparer le chemin et s’entraîner sous encadrement avec une charge adaptée. Le responsable vérifie l’organisation et les gestes ; aucun seuil universel de poids n’est donné par l’app.",
+    "objectives": [
+      "Analyser la charge, le trajet et la fréquence avant le déplacement.",
+      "Choisir une aide ou une organisation réduisant le port manuel.",
+      "Reconnaître une situation nécessitant l’arrêt et un relais."
+    ],
+    "positioning": [
+      "Identifiez-vous une aide disponible pour les charges de votre poste ?",
+      "Savez-vous qui demander quand une charge paraît inadaptée ?",
+      "Pouvez-vous repérer un obstacle avant de saisir un colis ?"
+    ],
+    "reading_minutes": 10,
+    "activity_minutes": 12,
+    "sources": [
+      {
+        "label": "Code du travail, R4541-8 : formation adaptée et essentiellement pratique",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000018528891/"
+      }
+    ],
+    "video_seconds": 121.648435,
+    "video_chapters": [
+      {
+        "title": "Porter n’est pas le point de départ",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : le carton masque le sol",
+        "seconds": 22.321
+      },
+      {
+        "title": "L’aide doit être adaptée",
+        "seconds": 41.067
+      },
+      {
+        "title": "À plusieurs : se coordonner",
+        "seconds": 60.453
+      },
+      {
+        "title": "Exercice sur votre tâche",
+        "seconds": 79.628
+      },
+      {
+        "title": "La prévention change le travail",
+        "seconds": 102.39
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  },
+  {
+    "key": "materiels-produits",
+    "version": "2026-11-03",
+    "title": "Matériels, produits et protections : utiliser sans improviser",
+    "category": "Sécurité au travail",
+    "summary": "Vérifier avant usage, suivre les consignes et arrêter une utilisation anormale sans intervention improvisée.",
+    "audience": "Personnel utilisant outils, équipements de travail, produits de nettoyage ou équipements de protection au magasin et au restaurant.",
+    "prerequisites": "Notices, étiquettes, fiches de données de sécurité et consignes du poste accessibles ; démonstration par une personne compétente.",
+    "requirement": "internal_required",
+    "applicability": "Selon les équipements, les produits dangereux et les protections réellement utilisés : information et formation adaptées, renouvelées lorsque nécessaire. Les autorisations spécifiques restent hors du périmètre de ce module interne.",
+    "onsite": "Démonstration sur chaque équipement concerné, lecture d’une étiquette et d’une fiche de données de sécurité, choix et entraînement aux protections prévues. Vérifier l’arrêt normal et le relais en cas de défaut sans créer une situation dangereuse.",
+    "objectives": [
+      "Vérifier l’état et les conditions d’emploi avant l’utilisation.",
+      "Retrouver une précaution dans la notice, l’étiquette ou la fiche de données de sécurité.",
+      "Arrêter l’usage et solliciter le relais adapté en cas de défaut."
+    ],
+    "positioning": [
+      "Savez-vous quel matériel vous êtes formé à utiliser ?",
+      "Savez-vous retrouver la fiche du produit de nettoyage de votre poste ?",
+      "Pouvez-vous expliquer le choix et les limites des protections prévues ?"
+    ],
+    "reading_minutes": 11,
+    "activity_minutes": 12,
+    "sources": [
+      {
+        "label": "Code du travail, R4323-1 à R4323-5 : équipements de travail",
+        "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018489707/"
+      },
+      {
+        "label": "Code du travail, R4323-106 : entraînement aux protections individuelles",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000018531280/"
+      },
+      {
+        "label": "Code du travail, R4412-38 : information et formation au risque chimique",
+        "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036483735/"
+      }
+    ],
+    "video_seconds": 115.588481,
+    "video_chapters": [
+      {
+        "title": "Connaître avant d’utiliser",
+        "seconds": 0.0
+      },
+      {
+        "title": "Cas fictif : la machine bloque",
+        "seconds": 18.421
+      },
+      {
+        "title": "Le produit doit être identifié",
+        "seconds": 37.121
+      },
+      {
+        "title": "Une protection adaptée à la tâche",
+        "seconds": 55.635
+      },
+      {
+        "title": "Votre atelier encadré",
+        "seconds": 76.529
+      },
+      {
+        "title": "Trois décisions à retenir",
+        "seconds": 96.413
+      }
+    ],
+    "chapter_count": 3,
+    "quiz_count": 6,
+    "narration": "synthetic",
+    "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD"
+  }
+]

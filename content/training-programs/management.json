@@ -1,0 +1,156 @@
+{
+  "key": "management",
+  "version": "2026-11-03",
+  "title": "Management de proximité : donner les moyens et suivre",
+  "category": "Management",
+  "summary": "Clarifier une mission, observer les difficultés et vérifier une amélioration sans réduire le travail à un indicateur.",
+  "audience": "Managers et responsables d’équipe du commerce et de la restauration.",
+  "prerequisites": "Connaître les rôles, procédures, relais RH et règles de planification applicables à l’établissement.",
+  "requirement": "professional",
+  "applicability": "Parcours de professionnalisation du management. Les obligations de l’employeur restent à examiner selon l’activité et ne sont pas remplacées par ce module.",
+  "onsite": "Préparer et observer un brief réel, faire reformuler une délégation et vérifier une action avec l’équipe. Choisir un cas sans données personnelles sensibles et recueillir le retour de l’apprenant.",
+  "objectives": [
+    "Formuler une mission avec résultat attendu, moyens, limites et point de suivi.",
+    "Conduire un échange fondé sur des faits et l’analyse de l’activité réelle.",
+    "Vérifier une action corrective avec des éléments observables et un retour de l’équipe."
+  ],
+  "positioning": [
+    "Une personne peut-elle reformuler ce qui est attendu après votre brief ?",
+    "Savez-vous distinguer résultat insuffisant et moyen manquant ?",
+    "Votre suivi vérifie-t-il la correction et ses effets sur l’équipe ?"
+  ],
+  "reading_minutes": 11,
+  "activity_minutes": 12,
+  "sources": [],
+  "chapters": [
+    {
+      "title": "Une mission réalisable et comprise",
+      "body": "# Déléguer avec les moyens, pas seulement une consigne\nUne délégation utile décrit le résultat attendu, les moyens disponibles, les limites de décision et le moment de suivi. Faire reformuler permet de vérifier la compréhension sans transformer l’échange en contrôle de mémoire. Une tâche nouvelle nécessite une démonstration et une autonomie adaptée à la compétence observée, pas à une impression générale.\n\nCas pédagogique fictif : « Faites mieux sur les dates » n’indique ni priorité ni moyen. Une consigne exploitable peut préciser le rayon, la vérification à réaliser, la procédure de retrait, le relais en cas d’écart et un point après le contrôle. L’objectif ne doit jamais pousser à masquer une anomalie pour obtenir un indicateur favorable.\n\nUn brief court prépare l’activité : priorité, risque important, répartition et possibilité de demander de l’aide. Sa durée est choisie selon le contexte ; cinq minutes n’est pas une obligation ni une garantie d’efficacité. Demandez ce qui manque pour réaliser la tâche, notamment une information, un matériel ou une disponibilité.\n\nLa planification tient compte de la charge, des compétences et des règles applicables. Délais de prévenance, repos et modifications d’horaires doivent être vérifiés avec les textes et accords de l’établissement ainsi que le relais RH. Ce cours ne fixe pas un délai universel d’affichage du planning. En cas d’absence, réorganisez les priorités sans confier un poste dangereux à une personne non formée."
+    },
+    {
+      "title": "Écouter les faits, traiter les difficultés et suivre",
+      "body": "# Observer l’activité avant de conclure\nUn résultat insuffisant peut avoir plusieurs causes : consigne imprécise, manque de compétence, charge, matériel, information ou organisation. Décrivez les faits observables puis demandez comment le travail s’est déroulé. Une règle de pourcentage de temps de parole ne garantit pas une écoute de qualité. Vérifiez la compréhension et construisez une action réalisable.\n\nUn désaccord courant peut se traiter dans un échange cadré, avec les personnes concernées et un suivi. En revanche, un signalement de violence, harcèlement ou discrimination ne doit pas être réduit à une médiation obligatoire entre les personnes. Protégez, recueillez les faits avec discrétion et sollicitez les relais prévus. N’organisez pas automatiquement une confrontation commune.\n\nPour une action corrective, fixez un responsable, une échéance réaliste, les moyens et ce qui permettra de vérifier l’effet. Un indicateur peut signaler un problème sans en prouver la cause. Comparez avec des observations de terrain et le retour de l’équipe. Une baisse des retraits ne prouve pas à elle seule une meilleure gestion si des produits ne sont plus contrôlés.\n\nLe suivi porte aussi sur l’appropriation : la personne sait-elle expliquer et réaliser la tâche ? Quel obstacle reste présent ? Tracez les décisions et les besoins utiles, sans enregistrer des détails sensibles dans un compte rendu collectif. Reconnaissez les progrès d’une manière adaptée à la personne et au contexte ; une valorisation publique n’est pas toujours souhaitée."
+    },
+    {
+      "title": "Exercice : transformer un écart en action vérifiée",
+      "body": "# Cas pédagogique fictif — retraits répétés\nUn rayon connaît plusieurs retraits pour dates dépassées. Un responsable propose seulement de demander à l’équipe d’aller plus vite. On ne sait pas encore si la cause vient des commandes, de l’ordre de rangement, du temps disponible ou d’une consigne mal comprise.\n\nTravail demandé : rédigez un brief de quatre points et trois questions d’analyse du travail. Proposez une action avec responsable, moyens, échéance et preuve d’effet. Livrable : une fiche d’action d’une page et une reformulation par un collègue. Les chiffres ou délais choisis pour l’exercice doivent être indiqués comme fictifs.\n\nPiste de correction : observer le rangement et le contrôle, demander comment les dates sont comparées et vérifier les moyens. Tester une rotation par échéance sur le périmètre défini puis contrôler l’absence de produits dépassés et recueillir le retour de l’équipe. La réussite ne se réduit pas à une baisse de démarque ; elle doit conserver les contrôles et la sécurité alimentaire.\n\nCritères observés : faits séparés des jugements, objectif compréhensible, moyens disponibles, relais connu, vérification planifiée. Pour approfondir, introduisez une absence : quelle priorité peut être reportée sans créer de risque ni méconnaître une règle ? Le quiz final vérifie la méthode ; il n’évalue pas à lui seul la compétence globale d’un manager ni la conformité RH de l’établissement."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Quelle délégation est la plus utile ?",
+      "options": [
+        "Faites mieux.",
+        "Un résultat attendu, des moyens, des limites de décision et un point de suivi.",
+        "Un chiffre sans explication."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Des retraits se répètent. Que faire avant de conclure à un manque d’effort ?",
+      "options": [
+        "Exiger seulement plus de vitesse.",
+        "Supprimer le contrôle.",
+        "Observer la tâche et analyser consignes, charge, compétences et moyens."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Un signalement de harcèlement est formulé. Quelle réponse éviter ?",
+      "options": [
+        "Imposer automatiquement une confrontation commune comme simple conflit.",
+        "Protéger et utiliser les relais prévus.",
+        "Traiter les faits avec discrétion."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Une action est déclarée terminée. Que faut-il encore vérifier ?",
+      "options": [
+        "Uniquement la case cochée.",
+        "Son effet observable et les difficultés restantes.",
+        "La sympathie du responsable."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Une absence survient sur un poste à risque. Que ne faut-il pas faire ?",
+      "options": [
+        "Revoir les priorités.",
+        "Vérifier les compétences disponibles.",
+        "Affecter sans formation une personne pour maintenir le volume."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Le délai d’affichage du planning est-il fixé universellement par ce cours ?",
+      "options": [
+        "Non ; vérifier les règles et accords applicables avec le relais compétent.",
+        "Oui, toujours deux semaines.",
+        "Non ; aucune règle ne s’applique."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Une mission comprise, une amélioration vérifiée",
+    "scenes": [
+      {
+        "heading": "Une consigne ne suffit pas",
+        "lines": ["Résultat attendu", "Moyens et limites", "Point de suivi"],
+        "narration": "Déléguer, ce n’est pas seulement donner une tâche. Il faut un résultat attendu, des moyens, des limites de décision et un point de suivi. Demandez une reformulation : que faut-il faire, avec quoi et à qui demander de l’aide ? Une tâche nouvelle nécessite une démonstration adaptée."
+      },
+      {
+        "heading": "Cas fictif : les dates dépassées",
+        "lines": [
+          "Des retraits se répètent",
+          "La cause n’est pas établie",
+          "Observer avant de juger"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, des produits dépassés sont retirés plusieurs fois. Demander seulement d’aller plus vite ne prouve rien sur la cause. Observez le rangement, le contrôle, la commande et le temps disponible. Un manque de moyen ou une consigne imprécise ne se corrige pas avec une injonction générale."
+      },
+      {
+        "heading": "Un brief relié au travail réel",
+        "lines": [
+          "Priorité et risque",
+          "Répartition et moyens",
+          "Question et relais possibles"
+        ],
+        "narration": "Le brief précise la priorité, le risque important et la répartition. L’équipe doit pouvoir signaler ce qui manque. Sa durée dépend du contexte. Les règles de planning et de repos doivent être vérifiées avec les textes et accords applicables. N’affectez pas une personne non formée à un poste dangereux pour maintenir un volume."
+      },
+      {
+        "heading": "Un signalement n’est pas un conflit banal",
+        "lines": [
+          "Protéger les personnes",
+          "Recueillir les faits discrètement",
+          "Solliciter les relais prévus"
+        ],
+        "narration": "Un désaccord courant et un signalement de violence ou de harcèlement ne se traitent pas de la même façon. N’imposez pas automatiquement une confrontation commune. Préservez les personnes, recueillez les faits avec discrétion et sollicitez les relais prévus. La méthode ne doit pas ajouter une nouvelle exposition."
+      },
+      {
+        "heading": "Vérifier l’effet de l’action",
+        "lines": [
+          "Responsable et échéance",
+          "Preuve observable",
+          "Retour de l’équipe"
+        ],
+        "narration": "Une action corrective précise le responsable, les moyens, l’échéance et la preuve d’effet. Une case cochée ou un indicateur en baisse ne suffit pas. Vérifiez sur le terrain et demandez le retour de l’équipe. Moins de retraits ne constitue pas un progrès si les produits ne sont plus contrôlés."
+      },
+      {
+        "heading": "Votre exercice : une action complète",
+        "lines": [
+          "Décrire les faits",
+          "Choisir un changement réalisable",
+          "Prévoir sa vérification"
+        ],
+        "narration": "Mettez la vidéo en pause. Préparez le brief et la fiche d’action du cas écrit. Faites reformuler par un collègue, puis expliquez comment vous vérifierez le changement. Le quiz final reprend les décisions essentielles ; l’observation d’un brief réel complète l’apprentissage du management de proximité."
+      }
+    ]
+  }
+}

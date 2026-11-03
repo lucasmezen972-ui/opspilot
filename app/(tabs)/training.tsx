@@ -21,6 +21,7 @@ import {
   type CertificateSubmitOptions,
 } from '../../features/training/TrainingCourseModal';
 import { TrainingLeaderboard } from '../../features/training/TrainingLeaderboard';
+import { TrainingProgramLibrary } from '../../features/training/TrainingProgramLibrary';
 import { TrainingStatsOverview } from '../../features/training/TrainingStatsOverview';
 import { TrainingSupervision } from '../../features/training/TrainingSupervision';
 import { TrainingVideoEditor } from '../../features/training/TrainingVideoEditor';
@@ -120,6 +121,7 @@ export default function TrainingScreen() {
           Boolean(chapter.video_url) || Boolean(chapter.video_storage_path),
       ).length,
       difficulty: c.difficulty,
+      programRequirement: c.program_metadata?.requirement,
       progress: progress?.progress_percentage ?? 0,
       status:
         !isLocalDemo &&
@@ -435,6 +437,23 @@ export default function TrainingScreen() {
 
           <TrainingAchievements completedCourses={completedCourses} />
 
+          {isManager && (
+            <TrainingProgramLibrary
+              organizationId={profile?.organization_id ?? ''}
+              actorId={profile?.id ?? ''}
+              isLocalDemo={isLocalDemo}
+              courses={dbCourses}
+              onInstalled={async (id) => {
+                const loaded = await refetch();
+                if (!loaded?.some((course) => course.id === id))
+                  throw new Error('Parcours non actualisé');
+                const started = await startCourse(id);
+                if (started.error) throw new Error(String(started.error));
+                setSelectedCourseId(id);
+              }}
+            />
+          )}
+
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Formations disponibles</Text>
@@ -554,7 +573,9 @@ export default function TrainingScreen() {
           organizationId={profile?.organization_id ?? ''}
           isLocalDemo={isLocalDemo}
           onClose={() => setShowVideoEditor(false)}
-          onSaved={refetch}
+          onSaved={async () => {
+            await refetch();
+          }}
         />
       )}
 

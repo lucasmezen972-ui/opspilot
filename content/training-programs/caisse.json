@@ -1,0 +1,160 @@
+{
+  "key": "caisse",
+  "version": "2026-11-03",
+  "title": "Caisse : encaisser juste et protéger les personnes",
+  "category": "Encaissement",
+  "summary": "Vérifier une opération, appliquer sa délégation et traiter un écart avec une trace fiable.",
+  "audience": "Personnel de caisse et responsables de proximité.",
+  "prerequisites": "Procédure du site : moyens acceptés, contrôles, délégations, clôture et alerte de sécurité.",
+  "requirement": "professional",
+  "applicability": "Parcours de professionnalisation à adapter aux moyens de paiement et aux procédures du site ; aucune obligation générale de suivre ce module n’est revendiquée.",
+  "onsite": "Démonstration en environnement d’entraînement, sans encaissement réel : ouverture, contrôle d’un paiement, appel du relais et clôture fictive. Vérifier le verrouillage de la session et l’accès aux consignes.",
+  "objectives": [
+    "Vérifier un paiement dans le système du magasin sans se fier à une preuve externe isolée.",
+    "Appliquer les délégations et transmettre une contestation sans improviser une opération.",
+    "Rapprocher une clôture et signaler un écart factuel."
+  ],
+  "positioning": [
+    "Connaissez-vous votre délégation pour les annulations et remboursements ?",
+    "Savez-vous reconnaître un paiement confirmé dans le système prévu ?",
+    "Pouvez-vous indiquer la conduite de sécurité en cas de menace ?"
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 10,
+  "sources": [],
+  "chapters": [
+    {
+      "title": "Préparer une caisse et vérifier un paiement",
+      "body": "# Exactitude et traçabilité avant la vitesse\nL’ouverture suit la procédure du site : contrôle du fonds, état des équipements, identification personnelle et signalement d’un écart avant l’utilisation. Le montant du fonds et les modalités de double contrôle dépendent de l’établissement. Aucun montant standard ni seuil universel d’annulation n’est fixé par ce cours.\n\nUtilisez votre propre session et verrouillez-la lors d’une absence. Un code partagé efface la possibilité de comprendre qui a réalisé une opération et expose les personnes à une attribution erronée. Ne transmettez pas un mot de passe dans une note, un groupe de discussion ou une capture.\n\nPour encaisser, contrôlez les articles, quantités, réductions et montant avant de demander le règlement. Attendez la confirmation attendue dans le système du magasin. Une capture de téléphone montrée par un client ne prouve pas à elle seule que le paiement est accepté dans votre caisse. Si une opération est incertaine, faites vérifier son état avant de relancer : une répétition peut créer un double paiement.\n\nPour les espèces et autres moyens acceptés, appliquez les contrôles prévus et les règles actuelles de l’établissement. Ne collectez pas de données supplémentaires « par prudence » sans procédure adaptée. Face à un doute sur un billet, un titre ou une opération, faites appel au relais compétent sans accusation ni geste de confrontation."
+    },
+    {
+      "title": "Contestation, clôture et sécurité",
+      "body": "# Une anomalie n’autorise pas une opération improvisée\nEn cas de contestation du rendu de monnaie, écoutez, conservez les éléments de l’opération et appliquez la vérification prévue avec le responsable. N’ouvrez pas le tiroir sous la pression d’un récit contradictoire et n’enchaînez pas plusieurs échanges sans stabiliser le premier. Expliquez l’étape de contrôle au client.\n\nLes annulations, remboursements et gestes commerciaux respectent les délégations du site et les droits applicables. Si la demande dépasse votre rôle, transmettez les faits et attendez la validation prévue. Une urgence commerciale n’autorise pas à utiliser le code d’un collègue.\n\nLa clôture rapproche le montant théorique et le comptage réel selon les catégories prévues. Recomptez et vérifiez les opérations sensibles en cas d’écart, consignez la valeur réelle puis transmettez au responsable. Un écart n’est pas, à lui seul, la preuve d’un vol ou d’une faute. Ne modifiez pas les nombres pour obtenir artificiellement zéro. La remise et son transport suivent les consignes de sécurité ; leurs détails ne se partagent pas publiquement.\n\nEn cas de menace ou d’agression, préservez les personnes et appliquez les consignes du site. Ne poursuivez pas un agresseur et ne prenez pas de risque pour protéger des fonds. Un dispositif discret ne doit être utilisé que dans les conditions expliquées, sans provoquer une exposition supplémentaire. Après l’incident, alerte et accompagnement passent avant la reprise précipitée de l’activité."
+    },
+    {
+      "title": "Exercice : paiement incertain et écart fictif",
+      "body": "# Deux cas pédagogiques fictifs, aucun règlement réel\nCas 1 : le terminal semble avoir interrompu une transaction et le client montre un écran indiquant un débit. Cas 2 : à la clôture d’entraînement, le comptage diffère du théorique. Les montants éventuellement utilisés par le formateur sont fictifs, sans valeur de seuil légal.\n\nTravail demandé : expliquez ce que vous vérifiez avant toute nouvelle demande de paiement. Pour la clôture, produisez une note indiquant le résultat du recomptage, les éléments consultés et le relais, sans accuser une personne. Livrable : deux décisions et une simulation dans l’environnement d’entraînement autorisé.\n\nPiste de correction : vérifier le statut de l’opération dans le système prévu et demander le relais avant de répéter un débit ; en clôture, garder les chiffres réels, rechercher les éléments utiles et transmettre l’écart selon la procédure. Une capture externe seule ou une supposition ne doit pas devenir une confirmation de caisse.\n\nCritères observés : identification personnelle ; vérification avant répétition ; délégation respectée ; trace factuelle ; confidentialité et sécurité conservées. Pour un débutant, le responsable montre une opération fictive complète avant l’essai. Pour approfondir, ajoutez une contestation de rendu et faites expliciter l’ordre de vérification. Le quiz final mesure la compréhension ; il n’autorise aucun encaissement ou remboursement de test sur un vrai client."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Le statut d’un paiement est incertain et le client montre son téléphone. Que faire avant de relancer ?",
+      "options": [
+        "Débiter immédiatement une seconde fois.",
+        "Vérifier l’état dans le système prévu et demander le relais si nécessaire.",
+        "Se fier uniquement à la capture."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Un écart apparaît à la clôture fictive. Quelle réponse retenir ?",
+      "options": [
+        "Modifier le total pour retrouver zéro.",
+        "Accuser le dernier utilisateur.",
+        "Recompter, vérifier, garder les valeurs réelles et transmettre selon la procédure."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Quel identifiant utiliser ?",
+      "options": [
+        "Sa session personnelle, verrouillée en cas d’absence.",
+        "Le code du responsable pour aller plus vite.",
+        "Une session partagée sans trace."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "La demande de remboursement dépasse votre délégation. Que faire ?",
+      "options": [
+        "Décider seul sous pression.",
+        "Transmettre les faits au relais et suivre la validation prévue.",
+        "Utiliser le code d’un collègue."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Face à une menace physique, quelle priorité retenir ?",
+      "options": [
+        "Défendre le tiroir à tout prix.",
+        "Poursuivre l’agresseur.",
+        "Préserver les personnes et appliquer les consignes de sécurité."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Le fonds de départ et le seuil d’annulation sont-ils universels ?",
+      "options": [
+        "Non ; consulter la procédure et les délégations du site.",
+        "Oui, les mêmes partout.",
+        "Oui, le montant se choisit librement à chaque ouverture."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Une caisse juste sans opération improvisée",
+    "scenes": [
+      {
+        "heading": "Préparer avant d’encaisser",
+        "lines": [
+          "Session personnelle",
+          "Fonds selon la procédure",
+          "Matériel et délégations connus"
+        ],
+        "narration": "Une caisse juste commence avant le premier client. Utilisez votre session personnelle, contrôlez le fonds selon la procédure et connaissez vos délégations. Ce cours ne fixe pas un montant de départ ou un seuil d’annulation universel. Les règles concrètes doivent être accessibles sur votre site."
+      },
+      {
+        "heading": "Cas fictif : paiement incertain",
+        "lines": [
+          "Le terminal s’interrompt",
+          "Le client montre un écran",
+          "Ne pas répéter sans vérifier"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, une transaction semble interrompue et le client montre son téléphone. Ne prenez ni la capture ni l’interruption comme une conclusion suffisante. Vérifiez le statut dans le système prévu et demandez le relais avant de relancer. Répéter sans contrôle peut créer un double paiement."
+      },
+      {
+        "heading": "La délégation protège la décision",
+        "lines": [
+          "Vérifier les faits",
+          "Respecter son rôle",
+          "Transmettre au bon relais"
+        ],
+        "narration": "Une annulation ou un remboursement doit respecter votre délégation et la règle applicable. Si la décision dépasse votre rôle, transmettez les faits et attendez la validation prévue. N’utilisez jamais le code d’un collègue pour contourner cette étape. En cas de contestation, expliquez la vérification sans vous laisser pousser à une opération improvisée."
+      },
+      {
+        "heading": "Clôturer avec les vrais chiffres",
+        "lines": [
+          "Comparer au théorique",
+          "Recompter et rechercher",
+          "Tracer sans accusation"
+        ],
+        "narration": "En clôture, comparez le comptage réel au théorique. S’il y a un écart, recomptez et recherchez les éléments utiles. Gardez les valeurs réelles et transmettez selon la procédure. Un écart ne prouve pas à lui seul un vol. Modifier les nombres pour retrouver zéro cache le problème et empêche de comprendre."
+      },
+      {
+        "heading": "Les personnes passent avant les fonds",
+        "lines": [
+          "Aucune confrontation",
+          "Consignes d’alerte du site",
+          "Accompagnement après incident"
+        ],
+        "narration": "En cas de menace, préservez les personnes. Appliquez les consignes sans poursuivre un agresseur ni défendre les fonds au prix d’une exposition. Les dispositifs d’alerte doivent être connus et utilisés dans les conditions expliquées. Le retour à l’activité se prépare après la mise en sécurité et le relais nécessaire."
+      },
+      {
+        "heading": "S’entraîner sans paiement réel",
+        "lines": [
+          "Simulation d’ouverture",
+          "Paiement fictif incertain",
+          "Clôture et transmission"
+        ],
+        "narration": "Mettez la vidéo en pause et réalisez les deux cas du cours avec le responsable. Utilisez seulement un environnement d’entraînement et des données fictives. Aucun vrai client ne doit être débité pour apprendre. Le quiz final reprend les vérifications, la délégation, la traçabilité et la priorité donnée aux personnes."
+      }
+    ]
+  }
+}

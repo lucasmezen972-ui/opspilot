@@ -1,0 +1,165 @@
+{
+  "key": "incendie-evacuation",
+  "version": "2026-11-03",
+  "title": "Incendie et évacuation : appliquer les consignes du site",
+  "category": "Sécurité au travail",
+  "summary": "Reconnaître l’alerte, rejoindre le point prévu et transmettre les informations sans se réexposer.",
+  "audience": "Personnel des magasins et restaurants, selon l’organisation de sécurité de l’établissement.",
+  "prerequisites": "Consignes incendie et plan du site disponibles ; responsable pour la visite et l’exercice réel.",
+  "requirement": "internal_required",
+  "applicability": "Information et entraînement adaptés aux consignes, à l’effectif et aux risques du site. La périodicité des exercices dépend du cadre applicable ; aucun renouvellement universel n’est fixé par l’app.",
+  "onsite": "Visite des dégagements et du point de rassemblement ; exercice d’évacuation organisé et observé, avec prise en compte des visiteurs et des besoins d’assistance. La manipulation d’un extincteur exige une démonstration et un entraînement adaptés.",
+  "objectives": [
+    "Identifier le signal d’alarme et le cheminement d’évacuation prévu.",
+    "Choisir un comportement qui évite la réexposition et le retour dans les locaux.",
+    "Transmettre une absence ou une difficulté au responsable de rassemblement."
+  ],
+  "positioning": [
+    "Reconnaissez-vous le signal d’évacuation du site ?",
+    "Savez-vous quel point rejoindre et qui le coordonne ?",
+    "Connaissez-vous la procédure d’assistance et votre rôle ?"
+  ],
+  "reading_minutes": 9,
+  "activity_minutes": 10,
+  "sources": [
+    {
+      "label": "Code du travail, R4227-34 à R4227-39 : alarme, consignes et exercices",
+      "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018489063/"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "Se préparer avant l’alarme",
+      "body": "# L’itinéraire s’apprend avant l’urgence\nRepérez le signal d’alarme, le moyen d’alerter, les sorties utilisables depuis votre poste et le point de rassemblement. Les consignes du site précisent les fonctions d’évacuation et le dispositif d’assistance. Ne vous attribuez pas un rôle de guide, de serre-file ou d’intervention sans qu’il vous soit confié et expliqué.\n\nUn dégagement doit rester praticable. Signalez une porte bloquée, une sortie masquée ou un stockage gênant. Ne neutralisez pas une porte coupe-feu pour faciliter un passage. Une bonne préparation consiste aussi à connaître une autre issue utilisable si le chemin habituel est impraticable, selon la configuration réelle.\n\nCas pédagogique fictif : un salarié rejoint une réserve éloignée pour prendre un vêtement dès que l’alarme retentit. Ce détour l’éloigne du trajet prévu et retarde la connaissance des personnes évacuées. L’urgence ne laisse pas le temps de récupérer des objets. Rejoignez le cheminement sûr prévu par les consignes et les personnes chargées de l’évacuation.\n\nDemandez comment sont accompagnés les clients, visiteurs et personnes ayant besoin d’assistance. Le dispositif doit être expliqué avant une situation réelle. Ne supposez pas qu’un collègue vous suivra, ni qu’il peut emprunter un escalier ou entendre le signal sans adaptation. Ce module prépare la compréhension ; le responsable organise la visite et l’exercice dans les locaux."
+    },
+    {
+      "title": "Évacuer sans revenir ni intervenir au hasard",
+      "body": "# Le départ de feu n’est pas un exercice improvisé\nÀ l’alarme ou sur instruction d’évacuation, appliquez les consignes du site, quittez les locaux par une issue sûre et rejoignez le point prévu. N’utilisez pas un ascenseur ordinaire. N’empruntez pas un passage enfumé ; signalez immédiatement que le trajet prévu est impraticable et suivez les instructions d’urgence adaptées à votre position.\n\nSi vous découvrez un feu, donnez l’alerte selon l’organisation du site et préservez une possibilité de retrait. L’utilisation d’un extincteur dépend de la situation, des consignes et de l’entraînement reçu. Ne vous approchez pas des fumées et ne retardez pas l’alerte pour essayer seul d’éteindre. Un quiz ne vous entraîne pas à choisir et à manipuler un appareil.\n\nAu point de rassemblement, présentez-vous au relais prévu et signalez une personne manquante, sa dernière localisation connue ou un besoin d’assistance. Ne retournez pas la chercher dans le bâtiment. Une information précise permet aux personnes compétentes d’organiser la réponse sans ajouter une victime.\n\nAttendez l’autorisation de retour de la personne compétente prévue par l’organisation des secours. L’arrêt du signal sonore ou l’apparence calme des lieux ne constitue pas une autorisation. Après l’exercice, participez au retour d’expérience : trajet encombré, signal mal perçu, point de rassemblement inadapté ou problème d’assistance sont des faits utiles à corriger."
+    },
+    {
+      "title": "Faire l’exercice et corriger les écarts",
+      "body": "# Mise en pratique organisée\nLe responsable prépare l’exercice selon les règles applicables au site. Ne déclenchez pas seul une alarme ni un appel aux secours pour vous entraîner. La consigne doit permettre de distinguer l’organisation de l’exercice d’une situation réelle, tout en observant les comportements nécessaires.\n\nTravail demandé : montrez votre trajet et l’issue alternative prévue ; expliquez ce que vous faites au point de rassemblement ; indiquez comment transmettre une difficulté. Livrable : trois observations factuelles et une action d’amélioration avec un responsable. Le temps d’évacuation peut être relevé par l’organisateur, mais l’app n’invente pas de résultat ni de délai garanti.\n\nCas pédagogique fictif : au rassemblement, une collègue manque et vous l’avez vue près d’une réserve. Réponse attendue : transmettre cette localisation au relais de sécurité et rester disponible au point prévu. Retourner dans les locaux constituerait une nouvelle exposition.\n\nCritères observés : absence de détour pour des affaires ; trajet sûr et consignes respectés ; assistance conforme au rôle confié ; remontée d’une absence sans retour en arrière. Si une difficulté est constatée, le responsable adapte les consignes puis organise une nouvelle vérification. Le quiz final permet de reprendre les décisions essentielles ; il ne valide ni un exercice réel, ni l’aptitude à manipuler tous les extincteurs."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "L’alarme retentit. Votre veste est dans la réserve. Que faire ?",
+      "options": [
+        "La récupérer rapidement.",
+        "Évacuer sans détour selon les consignes.",
+        "Attendre un collègue avant toute décision."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Au rassemblement, une collègue manque. Vous connaissez sa dernière localisation. Que faire ?",
+      "options": [
+        "Retourner la chercher.",
+        "Ne rien dire pour éviter l’inquiétude.",
+        "Transmettre la localisation au relais prévu sans rentrer."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "L’alarme s’arrête. Pouvez-vous reprendre votre poste immédiatement ?",
+      "options": [
+        "Non ; attendre l’autorisation de retour prévue.",
+        "Oui, le silence suffit.",
+        "Oui, si un client le demande."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Quelle préparation est nécessaire pour aider une personne ayant besoin d’assistance ?",
+      "options": [
+        "Inventer une méthode pendant l’urgence.",
+        "Connaître le dispositif et le rôle expliqués par le site.",
+        "Supposer qu’elle suit le groupe."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Quelle affirmation sur l’extincteur est juste ?",
+      "options": [
+        "Le quiz permet de l’utiliser dans toute situation.",
+        "Il faut toujours attaquer le feu seul.",
+        "Son usage exige des consignes et un entraînement adaptés sans retarder l’alerte."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Que faire face à une sortie encombrée avant toute urgence ?",
+      "options": [
+        "Signaler et faire rétablir le dégagement selon la procédure.",
+        "Attendre le prochain exercice.",
+        "Masquer la signalisation."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Évacuer : connaître le chemin, rester dehors",
+    "scenes": [
+      {
+        "heading": "Le chemin s’apprend avant",
+        "lines": [
+          "Reconnaître le signal",
+          "Repérer les issues",
+          "Connaître le rassemblement"
+        ],
+        "narration": "Une évacuation commence avant l’alarme. Vous devez connaître le signal du site, les issues utilisables et le point de rassemblement. Demandez aussi quel relais coordonne l’évacuation et quel dispositif d’assistance est prévu. Une vidéo générale ne peut pas deviner le plan de votre établissement."
+      },
+      {
+        "heading": "Cas fictif : la veste oubliée",
+        "lines": [
+          "L’alarme retentit",
+          "La veste reste en réserve",
+          "Aucun détour pour la reprendre"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, l’alarme retentit alors que votre veste est dans la réserve. Faut-il la récupérer ? Non. Le détour vous éloigne du trajet prévu et retarde le rassemblement. Appliquez les consignes, empruntez une issue sûre et laissez les objets personnels. N’utilisez pas un ascenseur ordinaire."
+      },
+      {
+        "heading": "Un trajet doit rester sûr",
+        "lines": [
+          "Ne pas entrer dans les fumées",
+          "Suivre l’organisation du site",
+          "Signaler une issue impraticable"
+        ],
+        "narration": "Si le trajet est enfumé ou impraticable, ne vous y engagez pas. Signalez la difficulté et appliquez les instructions adaptées à votre position. Les itinéraires et les solutions d’assistance doivent avoir été expliqués sur place. Prévenir un suraccident reste prioritaire, même quand on veut aider vite."
+      },
+      {
+        "heading": "Une absence : transmettre",
+        "lines": [
+          "Dernier lieu connu",
+          "Relais de sécurité",
+          "Aucun retour dans le bâtiment"
+        ],
+        "narration": "Au rassemblement, une collègue manque. Vous l’aviez vue près de la réserve. Transmettez cette information au relais de sécurité. Ne retournez pas la chercher. Les secours ont besoin d’un lieu précis, pas d’une nouvelle personne exposée. Attendez l’autorisation de retour prévue, même si le signal sonore s’arrête."
+      },
+      {
+        "heading": "L’extincteur ne s’improvise pas",
+        "lines": [
+          "Alerter sans attendre",
+          "Préserver son retrait",
+          "S’entraîner avec encadrement"
+        ],
+        "narration": "Un départ de feu n’est pas l’occasion de tester seul un extincteur. Alertez, gardez une possibilité de retrait et suivez les consignes. La manipulation exige un entraînement adapté et ne doit pas retarder l’évacuation. La réussite d’un quiz ne prouve pas que ce geste a été pratiqué."
+      },
+      {
+        "heading": "À vérifier lors de l’exercice",
+        "lines": [
+          "Trajet dégagé",
+          "Signal compris",
+          "Rassemblement et assistance"
+        ],
+        "narration": "Mettez la vidéo en pause et montrez votre trajet avec le responsable. Lors de l’exercice organisé, relevez ce qui facilite ou gêne l’évacuation. Un signal mal compris ou une porte bloquée mérite une correction concrète. Le cours écrit et le quiz vous aident à retenir les décisions ; l’exercice réel reste indispensable pour vérifier l’organisation."
+      }
+    ]
+  }
+}

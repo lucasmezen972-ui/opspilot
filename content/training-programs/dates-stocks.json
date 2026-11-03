@@ -1,0 +1,169 @@
+{
+  "key": "dates-stocks",
+  "version": "2026-11-03",
+  "title": "DLC, DDM et stocks : décider avant de réapprovisionner",
+  "category": "Hygiène alimentaire",
+  "summary": "Distinguer les dates, organiser la rotation et traiter une anomalie sans réétiqueter un produit retiré.",
+  "audience": "Équipes de réception, réserve, rayon alimentaire et préparation.",
+  "prerequisites": "Consignes de contrôle, conservation, ouverture et retrait propres aux produits du poste.",
+  "requirement": "role_required",
+  "applicability": "Compétences à intégrer aux instructions d’hygiène des personnes chargées des denrées et des stocks. La fréquence des contrôles est définie par les risques et la procédure du site.",
+  "onsite": "Contrôler un échantillon réel, lire les conditions après ouverture, organiser une rotation par dates et montrer la zone d’isolement. Aucun produit fictif ne doit être confondu avec un stock réel.",
+  "objectives": [
+    "Distinguer une DLC d’une DDM et une condition après ouverture.",
+    "Classer un stock par date pertinente plutôt que par seul ordre d’arrivée.",
+    "Isoler et tracer un produit non conforme sans prolonger sa date."
+  ],
+  "positioning": [
+    "Reconnaissez-vous les deux mentions de date ?",
+    "Savez-vous quelle durée appliquer après ouverture ?",
+    "Pouvez-vous retrouver le lot et la décision d’un retrait ?"
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 10,
+  "sources": [
+    {
+      "label": "DGCCRF : distinguer DLC et DDM",
+      "url": "https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/date-limite-de-consommation-et-date-de-durabilite-minimale-ce-que-vous-devez-savoir"
+    },
+    {
+      "label": "Service Public : dates, conservation et responsabilité du vendeur",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F10990"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "Lire la date avec les conditions du produit",
+      "body": "# Trois informations à rapprocher\nLa DLC est indiquée par « à consommer jusqu’au ». Lorsqu’elle est dépassée, la denrée ne doit plus être commercialisée. La DDM, annoncée par « à consommer de préférence avant », concerne la conservation de qualités attendues : son dépassement n’entraîne pas automatiquement un retrait, mais la sécurité et l’état du produit restent à vérifier selon la procédure. Une boîte bombée ou un emballage altéré ne devient pas acceptable parce que la DDM n’est pas dépassée.\n\nLa date doit être lue avec les conditions de conservation et les instructions après ouverture. Ouvrir un produit peut modifier sa durée d’utilisation. Étiquetez l’ouverture et la durée applicable selon la consigne validée ; n’utilisez pas une règle inventée « trois jours pour tout ». Si l’information manque, faites décider le responsable compétent avant utilisation.\n\nCas pédagogique fictif : un pot ouvert hier porte une DLC d’origine dans dix jours, mais le fabricant impose une durée plus courte après ouverture. La date lointaine ne permet pas d’ignorer cette instruction. Vérifiez ensemble date d’ouverture, conditions de conservation et limite applicable.\n\nL’apparence ou l’odeur ne suffisent pas à garantir la sécurité d’un produit. Le contrôle documentaire et les conditions réelles complètent l’observation. Pour un article non conforme, empêchez sa remise à disposition accidentelle et conservez les informations utiles au relais : référence, lot, date, quantité et anomalie."
+    },
+    {
+      "title": "Faire sortir la bonne date et agir avant la perte",
+      "body": "# L’ordre d’arrivée n’est pas toujours l’ordre utile\nLe FIFO suit l’ordre d’entrée ; le FEFO privilégie l’échéance la plus proche. Pour des denrées à dates différentes, regarder seulement la livraison la plus ancienne peut laisser un lot plus urgent derrière. Comparez les dates pertinentes avant le réassort et maintenez la séparation ou l’identification nécessaires pour conserver la traçabilité.\n\nPréparez un réassort qui ne prolonge pas l’exposition hors des conditions de conservation. Faites remonter les quantités et dates courtes au responsable afin d’ajuster la commande ou les actions autorisées. Une remise, un don ou une transformation ne permet jamais d’ignorer la sécurité, les règles de conservation et le cadre applicable. Les pourcentages de remise et les échéances commerciales sont des décisions du site, pas des règles universelles du cours.\n\nUn retrait doit comporter une action physique et une trace utile. L’isolement empêche une remise en rayon ; l’enregistrement permet de comprendre ce qui a été retiré et la décision prise. Ne changez pas une étiquette pour prolonger la DLC et ne remettez pas en vente un produit retiré pour ce motif.\n\nAnalysez ensuite les causes possibles sans conclure trop vite : commande, rotation, réception, conditionnement, panne ou demande peuvent expliquer une perte. Un indicateur de démarque sert à chercher et vérifier, pas à désigner automatiquement un responsable. Le contrôle se fait à une fréquence adaptée au rayon et aux produits, définie dans la procédure du site."
+    },
+    {
+      "title": "Exercice de classement et de retrait",
+      "body": "# Cas pédagogique fictif — trois lots\nAujourd’hui est le 3 novembre. Lot A : reçu le 1er, DLC au 7. Lot B : reçu le 2, DLC au 5. Lot C : retrouvé en rayon avec DLC au 2. Tous les produits sont fictifs et servent seulement au raisonnement.\n\nTravail demandé : classez ce qui peut être présenté en priorité selon les dates, indiquez le traitement du lot C puis rédigez une trace de retrait. Ajoutez les conditions de conservation à vérifier : la date seule ne suffit pas à décider de la sécurité. Livrable : un ordre de rotation, une action immédiate et une note comportant référence, lot, date, quantité, anomalie et relais.\n\nPiste de correction : pour les lots admissibles après contrôle, B précède A selon la logique des échéances. C est retiré et isolé, puis traité selon la procédure, sans réétiquetage de prolongation. Si les produits portent une durée après ouverture, il faut également l’intégrer.\n\nCritères observés sur place : dates comparées, conditions conservées pendant la manipulation, produit douteux séparé, trace exploitable. Pour approfondir, ajoutez une DDM dépassée sur un produit à emballage intact : expliquez pourquoi l’examen et la décision diffèrent du cas d’une DLC dépassée. Le responsable vérifie l’exercice réel ; le quiz final contrôle les distinctions et décisions essentielles."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Une DLC est dépassée. Quelle décision prendre ?",
+      "options": [
+        "Changer l’étiquette.",
+        "Retirer de la vente et isoler selon la procédure.",
+        "Accorder simplement une remise."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Un lot reçu hier expire avant celui reçu avant-hier. Quel principe suit les échéances ?",
+      "options": [
+        "Toujours vendre le plus ancien reçu.",
+        "Ignorer les dates si l’emballage paraît normal.",
+        "FEFO : privilégier l’échéance la plus proche après les contrôles."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Un produit ouvert porte une instruction après ouverture plus courte que sa date initiale. Que faire ?",
+      "options": [
+        "Tenir compte de l’ouverture, de l’instruction et des conditions réelles.",
+        "Suivre seulement la date initiale.",
+        "Appliquer trois jours à tous les produits."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Une DDM dépassée rend-elle automatiquement le produit dangereux ?",
+      "options": [
+        "Oui, sans autre examen.",
+        "Non ; vérifier son état, sa sécurité et la procédure applicable.",
+        "Non ; aucune vérification n’est nécessaire."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Quelle trace de retrait est exploitable ?",
+      "options": [
+        "Quelques produits retirés.",
+        "Une photo sans référence.",
+        "Référence, lot, date, quantité, anomalie et décision selon le site."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Une remise autorise-t-elle la vente d’un produit retiré pour DLC dépassée ?",
+      "options": [
+        "Non.",
+        "Oui, si elle dépasse la moitié du prix.",
+        "Oui, si le client accepte oralement."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    }
+  ],
+  "video": {
+    "title": "La bonne date avant le bon emplacement",
+    "scenes": [
+      {
+        "heading": "Lire trois informations",
+        "lines": [
+          "Le type de date",
+          "Les conditions de conservation",
+          "La durée après ouverture"
+        ],
+        "narration": "Avant de réapprovisionner, lisez le type de date, les conditions de conservation et l’instruction après ouverture. La date limite de consommation est une limite à ne pas dépasser pour commercialiser la denrée. La date de durabilité minimale n’a pas la même fonction, mais la sécurité et l’état du produit restent à vérifier."
+      },
+      {
+        "heading": "Cas fictif : deux livraisons",
+        "lines": [
+          "Lot A reçu en premier",
+          "Lot B expire plus tôt",
+          "Comparer avant de ranger"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, le lot A est arrivé avant le lot B. Pourtant, B expire plus tôt. Si les produits sont admissibles après contrôle, la rotation par échéance place B en priorité. C’est la logique du FEFO. L’ordre d’arrivée, à lui seul, ne suffit pas pour organiser tous les produits alimentaires."
+      },
+      {
+        "heading": "L’ouverture peut changer la limite",
+        "lines": [
+          "Identifier l’ouverture",
+          "Lire la consigne du produit",
+          "Ne pas inventer une durée"
+        ],
+        "narration": "Un pot ouvert peut avoir une durée d’utilisation plus courte que sa date initiale. Retenez l’ouverture, la consigne applicable et les conditions de conservation. Il n’existe pas dans ce cours une règle de trois jours valable pour tout. Quand une information manque, demandez une décision avant de continuer."
+      },
+      {
+        "heading": "Retirer : séparer et tracer",
+        "lines": [
+          "Empêcher la remise en rayon",
+          "Identifier le lot et le motif",
+          "Appliquer la décision prévue"
+        ],
+        "narration": "Un produit retrouvé après sa DLC doit être retiré de la vente et isolé selon la procédure. La trace précise le produit, le lot, la date, la quantité et le motif. Ne prolongez pas sa date avec une nouvelle étiquette. Une remise ne rend pas cette vente acceptable."
+      },
+      {
+        "heading": "À vous de classer les lots",
+        "lines": [
+          "Comparer les échéances",
+          "Vérifier la conservation",
+          "Expliquer votre décision"
+        ],
+        "narration": "Mettez la vidéo en pause et classez les trois lots du cours écrit. Justifiez la rotation des lots admissibles et le traitement du lot dépassé. Ensuite, faites le même repérage sur un échantillon réel avec le responsable, sans laisser les produits hors de leurs conditions de conservation."
+      },
+      {
+        "heading": "Prévenir sans raccourci",
+        "lines": [
+          "Anticiper les dates courtes",
+          "Adapter les quantités",
+          "Ne pas contourner la sécurité"
+        ],
+        "narration": "Anticiper les dates courtes permet de revoir les quantités et les actions autorisées. Promotions, dons ou transformations restent encadrés et ne contournent pas la sécurité des aliments. Le quiz final vérifiera votre capacité à distinguer les dates et à choisir une action de retrait et de suivi."
+      }
+    ]
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "key": "chaine-froid",
+  "version": "2026-11-03",
+  "title": "Chaîne du froid : mesurer, comparer et décider",
+  "category": "Hygiène alimentaire",
+  "summary": "Contrôler le froid avec la bonne méthode et gérer un écart sans décider sur le seul afficheur.",
+  "audience": "Réception, réserve, rayon réfrigéré, préparation et service de denrées sensibles.",
+  "prerequisites": "Seuils validés du site et des produits, procédure de mesure, matériel de contrôle et relais responsable.",
+  "requirement": "role_required",
+  "applicability": "Instruction de maîtrise sanitaire pour les personnes exposant, recevant ou stockant des denrées sous température contrôlée. Les seuils varient selon les produits, étapes et textes applicables.",
+  "onsite": "Identifier les seuils réels, réaliser une mesure selon le protocole sans contaminer la denrée et simuler le signalement d’un écart. Le responsable valide l’usage de l’instrument et la décision.",
+  "objectives": [
+    "Retrouver le seuil applicable au produit et à l’étape contrôlée.",
+    "Distinguer température d’air, indication d’enceinte et mesure de denrée.",
+    "Isoler un écart et transmettre une information permettant une décision sûre."
+  ],
+  "positioning": [
+    "Savez-vous où lire les seuils de vos produits ?",
+    "Pouvez-vous expliquer ce que mesure votre thermomètre ?",
+    "Savez-vous qui décide du devenir d’un lot en écart ?"
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 10,
+  "sources": [
+    {
+      "label": "Ministère de l’Agriculture : chaîne du froid et températures par denrée",
+      "url": "https://agriculture.gouv.fr/securite-sanitaire-des-aliments-tout-sur-la-chaine-du-froid"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "La température utile dépend du produit et de l’étape",
+      "body": "# Le froid ralentit ; il ne remet pas un compteur à zéro\nLe froid aide à maîtriser la multiplication de nombreux micro-organismes. Remettre un aliment au froid ne supprime pas automatiquement les conséquences d’une exposition précédente. La décision doit prendre en compte le produit, la température, la durée connue ou inconnue, l’emballage et les procédures validées. L’aspect et l’odeur ne suffisent pas à décider.\n\nIl n’existe pas un seuil unique « quatre degrés pour tout le frais » ni une tolérance automatique de réception valable pour tous les produits. Les exigences dépendent de la denrée et du stade. Retrouvez la consigne validée, l’information du fabricant et la règle applicable. Si elles semblent contradictoires ou absentes, demandez le relais plutôt que d’inventer une tolérance.\n\nCas pédagogique fictif : le camion affiche une température normale mais une caisse est restée à quai. L’afficheur ne prouve pas à lui seul la température de cette denrée ni son historique. Le contrôle de réception porte sur ce que prévoit le protocole : produit, intégrité, dates, mesure adaptée et délai de mise au froid.\n\nPréparez la réception pour limiter l’attente et la manutention inutile. Au stockage et à l’exposition, respectez les charges et la circulation d’air prévues par le fabricant de l’enceinte. Une porte ouverte, une surcharge ou une grille obstruée doit être corrigée selon la procédure sans masquer l’écart constaté."
+    },
+    {
+      "title": "Mesurer puis gérer l’écart sans le dissimuler",
+      "body": "# Mesure, heure et contexte\nUn afficheur d’enceinte, un thermomètre infrarouge et une sonde ne donnent pas nécessairement la même information. Utilisez la méthode prévue pour le contrôle et l’appareil adapté, vérifié selon le plan du site. Protégez les denrées contre la contamination par l’instrument. Une mesure de surface peut être un repère, mais ne remplace pas toute mesure de produit exigée par le protocole.\n\nEnregistrez la valeur réelle avec l’heure, la référence du produit ou de l’enceinte et le contexte utile. Ne recopiez pas une valeur attendue pour compléter un tableau. Une donnée exacte permet de comprendre et de décider ; une valeur inventée cache le danger et empêche le suivi.\n\nSi un seuil est dépassé ou si l’historique manque, interrompez la mise à disposition concernée, isolez selon la procédure et alertez. Le responsable évalue et décide du devenir des denrées et du traitement de l’équipement. Ne concluez pas que toute denrée est sûre parce que l’enceinte revient à sa température de consigne. Ne détruisez pas non plus sans appliquer la décision prévue.\n\nAprès correction, la vérification porte sur la cause et sur les denrées concernées : intervention technique, conditions de reprise, contrôle et trace de décision. Le rétablissement de l’afficheur seul ne clôt pas automatiquement l’incident. Ce module ne fixe aucune décision de vente universelle à partir d’une seule valeur."
+    },
+    {
+      "title": "Exercice : l’enceinte au-dessus du seuil du site",
+      "body": "# Cas pédagogique fictif — historique inconnu\nUne enceinte indique une valeur supérieure au seuil prévu pour les produits qu’elle contient. Vous ignorez depuis combien de temps l’écart dure. Le responsable n’a pas encore évalué les lots et aucune mesure complémentaire n’est réalisée.\n\nTravail demandé : écrivez les quatre premières informations utiles et les actions immédiates. Puis retrouvez sur le site le seuil de deux produits différents et faites une mesure encadrée avec la méthode prévue. Livrable : une fiche comportant heure, produit ou enceinte, valeur réelle, historique disponible, action de protection, relais et décision à compléter par la personne compétente.\n\nPiste de correction : ne pas remettre les produits à disposition sur une simple impression ; isoler selon la procédure ; transmettre la valeur et l’absence d’historique ; appliquer la décision du responsable puis vérifier la correction. « Le froid est revenu donc tout est bon » ignore l’exposition passée.\n\nCritères observés : bon seuil retrouvé, méthode de mesure adaptée, instrument utilisé sans contamination, valeur fidèle, décision réservée au relais prévu. Pour approfondir, comparez une mesure d’air et une mesure de denrée et expliquez pourquoi leur sens diffère. Le quiz final vérifie la logique de contrôle ; il ne prouve pas la réalisation des relevés réels du site."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Peut-on appliquer un seuil de +4 °C à tous les produits frais sans vérification ?",
+      "options": [
+        "Oui, toujours.",
+        "Non ; retrouver le seuil du produit et de l’étape.",
+        "Oui, si le camion est froid."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "L’enceinte a dépassé son seuil pendant une durée inconnue. Que faire ?",
+      "options": [
+        "Remettre en vente dès que l’afficheur redevient normal.",
+        "Changer seulement le relevé.",
+        "Isoler selon la procédure, alerter et faire évaluer l’historique et les lots."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Que doit contenir un relevé utile ?",
+      "options": [
+        "Valeur réelle, heure, produit ou enceinte et contexte prévu.",
+        "Une valeur copiée de la veille.",
+        "La température souhaitée."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Le camion affiche une valeur normale mais une caisse a attendu à quai. Quelle conclusion tirer ?",
+      "options": [
+        "La caisse est nécessairement conforme.",
+        "L’afficheur seul ne prouve pas l’état et l’historique de la denrée.",
+        "Le lot doit être automatiquement vendu avec remise."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Remettre au froid efface-t-il automatiquement le risque d’une exposition passée ?",
+      "options": [
+        "Oui, si l’on attend une heure.",
+        "Oui, si le produit sent bon.",
+        "Non ; appliquer l’évaluation et la décision prévues."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Quelle méthode de mesure utiliser ?",
+      "options": [
+        "Celle du protocole, avec un instrument adapté sans contaminer la denrée.",
+        "N’importe laquelle si elle donne une valeur basse.",
+        "Le toucher seulement."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "La mesure n’est utile qu’avec la bonne décision",
+    "scenes": [
+      {
+        "heading": "Pas un seuil pour tout le frais",
+        "lines": [
+          "Quel produit ?",
+          "À quelle étape ?",
+          "Quelle consigne validée ?"
+        ],
+        "narration": "Pour contrôler le froid, commencez par le produit et l’étape. Il n’existe pas un seuil unique valable pour toutes les denrées fraîches. Retrouvez la consigne validée, les indications du produit et la règle applicable. Si l’information manque, demandez une vérification ; n’inventez pas de tolérance."
+      },
+      {
+        "heading": "Cas fictif : la caisse à quai",
+        "lines": [
+          "Camion : indication normale",
+          "Caisse : attente prolongée",
+          "Denrée : contrôle nécessaire"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, le camion affiche une température normale, mais une caisse est restée à quai. L’afficheur du camion ne prouve pas l’historique de cette caisse. Réalisez le contrôle prévu pour la denrée, son emballage, sa date et sa température, avec la méthode adaptée."
+      },
+      {
+        "heading": "Savoir ce que l’on mesure",
+        "lines": [
+          "Air de l’enceinte",
+          "Surface du produit",
+          "Mesure prévue au protocole"
+        ],
+        "narration": "Un afficheur, un appareil infrarouge et une sonde ne mesurent pas nécessairement la même chose. Utilisez l’instrument et la méthode prévus sans contaminer l’aliment. Notez la valeur réelle, l’heure et le contexte utile. Une valeur souhaitée ou copiée ne permet ni de surveiller ni de décider."
+      },
+      {
+        "heading": "L’écart demande un relais",
+        "lines": [
+          "Limiter la mise à disposition",
+          "Isoler selon la procédure",
+          "Faire décider sur les données"
+        ],
+        "narration": "Si le seuil est dépassé ou si la durée est inconnue, limitez la mise à disposition, isolez selon la procédure et alertez. Le responsable évalue les données et décide du devenir des denrées. Remettre au froid n’efface pas automatiquement l’exposition passée. Un afficheur revenu à la normale ne suffit pas à clôturer l’incident."
+      },
+      {
+        "heading": "Exercice de contrôle réel",
+        "lines": [
+          "Retrouver deux seuils",
+          "Faire une mesure encadrée",
+          "Transmettre une fiche complète"
+        ],
+        "narration": "Mettez la vidéo en pause. Retrouvez les seuils de deux produits de votre poste. Avec le responsable, réalisez une mesure selon le protocole et expliquez ce que l’appareil mesure. Complétez ensuite la fiche du cas écrit : valeur, heure, historique disponible, action immédiate et relais de décision."
+      },
+      {
+        "heading": "Mesurer. Comparer. Suivre.",
+        "lines": [
+          "Une donnée fidèle",
+          "Une décision adaptée",
+          "Une correction vérifiée"
+        ],
+        "narration": "La méthode tient en trois verbes : mesurer, comparer et suivre. Mesurer une donnée fidèle, la comparer au bon seuil et suivre la décision avec sa vérification. Le quiz final reprend ces choix ; les contrôles réels et la formation pratique du site restent nécessaires."
+      }
+    ]
+  }
+}
