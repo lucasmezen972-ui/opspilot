@@ -2,6 +2,7 @@ import { Text } from 'react-native';
 export function TrainingVideoFilePicker(_props: {
   onChoose: (file: File, duration: number) => void;
   onError: (message: string) => void;
+  maxBytes?: number;
 }) {
   return (
     <Text>

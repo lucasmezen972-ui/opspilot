@@ -7,6 +7,25 @@
 
 ## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
 
+### Stockage vidéo étendu R2
+
+À la demande de Lucas, le code ajoute R2 pour les nouveaux MP4 privés, jusqu'à
+250 Mio par fichier, avec réserve globale de 8 Go et vérification serveur avant
+publication. Les objets Supabase existants restent pris en charge. R2 reste
+**désactivé tant que le compte, le bucket privé, les accès serveur et le test
+prestataire réel ne sont pas validés**. La session Cloudflare disponible affiche
+une page de connexion ; aucune souscription ni modification de facturation
+Cloudflare n'a été faite. Le quota gratuit du compte n'est pas un forfait illimité.
+Configuration et limites : [VIDEO-R2.md](VIDEO-R2.md).
+
+Vérifications locales de cette intégration : 351 tests unitaires, quatre tests
+Deno R2, huit scénarios SQL avec rejeu des migrations, et neuf parcours Chromium
+ciblés dont import/reprise/lecture R2 à 375 et 1440 pixels. Les appels R2 des
+tests sont interceptés ; aucune capacité de stockage réelle supplémentaire
+n'est annoncée avant activation du compte et vérification distante.
+
+### Socle publié
+
 Branche `codex/audit-sepa-video-20261103`, base `c3a2e01`.
 Les changements comprennent la correction serveur des quiz/XP/attestations,
 les accès des comptes inactifs et organisations suspendues, les invitations et

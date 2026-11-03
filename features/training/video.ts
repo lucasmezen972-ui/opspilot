@@ -1,6 +1,7 @@
 import type { TrainingChapter } from '../../lib/supabase';
 
 export const MAX_TRAINING_VIDEO_BYTES = 50 * 1024 * 1024;
+export const MAX_R2_VIDEO_BYTES = 250 * 1024 * 1024;
 export function isTrainingMediaUrl(
   value: string,
   extension: 'mp4' | 'vtt' = 'mp4',
@@ -19,13 +20,20 @@ export function isTrainingMediaUrl(
     return false;
   }
 }
-export function validateTrainingVideoFile(file: {
-  size: number;
-  type: string;
-  name: string;
-}): string | null {
-  if (!file.size || file.size > MAX_TRAINING_VIDEO_BYTES)
-    return 'Choisissez une vidéo MP4 de 50 Mo maximum.';
+export function validateTrainingVideoFile(
+  file: {
+    size: number;
+    type: string;
+    name: string;
+  },
+  maxBytes = MAX_TRAINING_VIDEO_BYTES,
+): string | null {
+  if (
+    !Number.isSafeInteger(file.size) ||
+    file.size < 1 ||
+    file.size > Math.min(maxBytes, MAX_R2_VIDEO_BYTES)
+  )
+    return `Choisissez une vidéo MP4 de ${Math.round(maxBytes / 1024 / 1024)} Mo maximum.`;
   if (file.type !== 'video/mp4' || !file.name.toLowerCase().endsWith('.mp4'))
     return 'Le format attendu est MP4.';
   return null;

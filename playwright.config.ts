@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000/';
+const PORT = new URL(BASE_URL).port || '3000';
 
 export default defineConfig({
   testDir: './e2e',
@@ -35,8 +36,7 @@ export default defineConfig({
     // e2e/server.mjs : serveur statique déterministe (équivalent GitHub
     // Pages : index de répertoire, cleanUrls, fallback SPA). `serve --single`
     // réécrivait /opspilot/admin/* vers l'index racine.
-    command:
-      'mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && cp -R admin .playwright-site/opspilot/admin && node e2e/server.mjs .playwright-site 3000',
+    command: `mkdir -p .playwright-site/opspilot && cp -R dist/. .playwright-site/ && cp -R dist/. .playwright-site/opspilot/ && cp -R admin .playwright-site/opspilot/admin && node e2e/server.mjs .playwright-site ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
