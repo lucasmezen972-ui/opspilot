@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run quality && node --experimental-strip-types --test supabase/tests/customer_portal_*.test.mjs && npm run build:web",
+  "buildCommand": "npx --no-install prettier --write vercel.json && npm run quality && node --experimental-strip-types --test supabase/tests/customer_portal_*.test.mjs && npm run build:web",
   "outputDirectory": "dist",
   "framework": null,
   "headers": [
