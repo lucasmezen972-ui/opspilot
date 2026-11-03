@@ -64,6 +64,19 @@ Les clés sont chiffrées dans Supabase Vault. Elles ne sont jamais placées dan
 
 ## État vérifié le 3 novembre 2026
 
+- Dernière relecture de cette reprise : le profil confirmé `pfl_pPJwqfQUtP`
+  retourne `status=verified`, et les méthodes récurrentes réelles restent vides
+  (`count=0`). Cette validation du profil est distincte de l’onboarding de
+  l’organisation et ne prouve pas que ses reversements sont autorisés. Les
+  états d’organisation ci-dessous sont les derniers observés, sans nouvelle
+  preuve de leur évolution. Aucun second dossier d’activation SEPA n’a été créé.
+- Les erreurs de chargement sont visibles et récupérables ; un abonnement
+  indisponible ne s’affiche plus comme un essai gratuit. Une demande de facture
+  confirmée ne devient pas un échec si la relecture échoue ensuite. Le
+  back-office bloque les contrôles tant que demandes, organisations et
+  calendriers n’ont pas tous été vérifiés. Les données tardives d’un ancien
+  compte ne sont pas affichées après changement de session. Le libellé de
+  période est « Accès réglé jusqu’au », sans promesse de reconduction automatique.
 - Le Dashboard Mollie annonce une fin de contrôle d’ici le **5 novembre 2026**, estimation sans garantie d’activation.
 - L’API répond HTTP 200 et indique `status=in-review`, `canReceivePayments=true`, `canReceiveSettlements=false`. La création de paiements réels reste donc bloquée dans OpsPilot jusqu’à autorisation des reversements.
 - Migrations appliquées : `20261103044345_mollie_verified_billing.sql` et `20261103044511_mollie_invoice_integrity.sql`. La migration Qonto antérieure porte la version en base `20261103034806` (fichier historique `20261103023738_qonto_billing_requests.sql`).

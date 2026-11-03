@@ -141,6 +141,8 @@ export function TrainingCourseModal({
   const [localCompletedIds, setLocalCompletedIds] = useState<string[]>([]);
   const [score, setScore] = useState<number | null>(null);
   const [failedCritical, setFailedCritical] = useState(false);
+  const [verifiedPassed, setVerifiedPassed] = useState<boolean | null>(null);
+  const [quizError, setQuizError] = useState('');
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
   const [serverSessionId, setServerSessionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -168,6 +170,8 @@ export function TrainingCourseModal({
     setLocalCompletedIds(completed);
     setScore(null);
     setFailedCritical(false);
+    setVerifiedPassed(null);
+    setQuizError('');
     setQuizSession(null);
     setServerSessionId(null);
     setWasCompletedOnOpen(progress?.status === 'completed');
@@ -189,7 +193,8 @@ export function TrainingCourseModal({
   );
   const sessionQuestions = quizSession?.questions ?? [];
   const minScore = course?.min_score ?? 70;
-  const passed = isQuizPassed(score ?? 0, failedCritical, minScore);
+  const passed =
+    verifiedPassed ?? isQuizPassed(score ?? 0, failedCritical, minScore);
   const currentChapter = sortedChapters[chapterIndex];
   const videoState = currentChapter
     ? progress?.video_progress?.[currentChapter.id]
@@ -228,9 +233,7 @@ export function TrainingCourseModal({
     }
   };
 
-  const isMulti =
-    currentQuestion?.question_type === 'qcm_multi' &&
-    Array.isArray(currentQuestion.correctAnswerIndexes);
+  const isMulti = currentQuestion?.question_type === 'qcm_multi';
   const isMultiAnswered = isMulti && selectedAnswer !== undefined;
 
   const selectAnswer = (optionIndex: number) => {
@@ -268,25 +271,50 @@ export function TrainingCourseModal({
       return;
     }
 
-    const { score: finalScore, failedCritical: fc } = scoreQuizSession(
-      sessionQuestions,
-      answers,
-    );
+    // Remote sessions deliberately contain no answer key. Their result only comes
+    // from the server; the local scorer is reserved for the offline demo.
+    const { score: finalScore, failedCritical: fc } = serverSessionId
+      ? { score: 0, failedCritical: false }
+      : scoreQuizSession(sessionQuestions, answers);
     setSaving(true);
-    const result = await onCompleteQuiz(
-      course.id,
-      finalScore,
-      fc,
-      serverSessionId ? { sessionId: serverSessionId, answers } : undefined,
-    );
-    setSaving(false);
-    if (result.error) {
-      Alert.alert('Erreur', String(result.error));
-      return;
+    setQuizError('');
+    try {
+      const result = await onCompleteQuiz(
+        course.id,
+        finalScore,
+        fc,
+        serverSessionId ? { sessionId: serverSessionId, answers } : undefined,
+      );
+      if (result.error) {
+        setQuizError(
+          'Vos réponses n’ont pas pu être validées. Vérifiez votre connexion puis réessayez avec cette même tentative.',
+        );
+        return;
+      }
+      if (
+        serverSessionId &&
+        (typeof result.passed !== 'boolean' ||
+          typeof result.failedCritical !== 'boolean' ||
+          !Number.isInteger(result.score) ||
+          result.score! < 0 ||
+          result.score! > 100)
+      ) {
+        setQuizError(
+          'Le résultat du serveur est incomplet. Réessayez pour récupérer la validation de cette tentative.',
+        );
+        return;
+      }
+      setVerifiedPassed(serverSessionId ? result.passed! : null);
+      setScore(result.score ?? finalScore);
+      setFailedCritical(result.failedCritical ?? fc);
+      setMode('result');
+    } catch {
+      setQuizError(
+        'Validation interrompue. Vérifiez votre connexion puis réessayez avec cette même tentative.',
+      );
+    } finally {
+      setSaving(false);
     }
-    setScore(result.score ?? finalScore);
-    setFailedCritical(result.failedCritical ?? fc);
-    setMode('result');
   };
 
   const handleIdentityChange = <K extends keyof CandidateIdentityValues>(
@@ -570,7 +598,16 @@ export function TrainingCourseModal({
                     }
                     return (
                       <TouchableOpacity
-                        key={option}
+                        key={`${currentQuestion.id}-${optionIndex}`}
+                        accessibilityRole={isMulti ? 'checkbox' : 'radio'}
+                        accessibilityLabel={option}
+                        aria-checked={isSelected}
+                        accessibilityState={{
+                          checked: isSelected,
+                          disabled: isMulti
+                            ? isMultiAnswered
+                            : selectedAnswer !== undefined,
+                        }}
                         testID={
                           isAnswerCorrect
                             ? 'training-quiz-option-correct'
@@ -602,6 +639,7 @@ export function TrainingCourseModal({
                 </View>
                 {isMulti && !isMultiAnswered && multiPending.length > 0 && (
                   <TouchableOpacity
+                    accessibilityRole="button"
                     style={styles.confirmMultiButton}
                     onPress={confirmMultiAnswer}
                   >
@@ -663,8 +701,26 @@ export function TrainingCourseModal({
                     );
                   })()}
               </ScrollView>
+              {!!quizError && (
+                <Text
+                  accessibilityRole="alert"
+                  style={{
+                    paddingHorizontal: 24,
+                    paddingVertical: 12,
+                    color: '#B91C1C',
+                    lineHeight: 21,
+                  }}
+                >
+                  {quizError}
+                </Text>
+              )}
               <View style={styles.footer}>
                 <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityState={{
+                    disabled: selectedAnswer === undefined || saving,
+                    busy: saving,
+                  }}
                   testID={
                     questionIndex === sessionQuestions.length - 1
                       ? 'training-quiz-submit'
@@ -716,10 +772,14 @@ export function TrainingCourseModal({
               </Text>
               <Text style={styles.resultText}>
                 {passed
-                  ? `Vous gagnez ${course.xp_reward} XP.`
+                  ? serverSessionId
+                    ? 'Votre réussite a été enregistrée. Retrouvez votre progression dans le catalogue.'
+                    : `Vous gagnez ${course.xp_reward} XP.`
                   : failedCritical
                     ? 'Une question critique a été ratée. Relisez les procédures obligatoires.'
-                    : `Relisez les chapitres puis retentez l'évaluation. Un score de ${minScore} % est requis.`}
+                    : serverSessionId
+                      ? 'Les conditions de validation enregistrées pour cette tentative ne sont pas remplies. Relisez les chapitres puis retentez l’évaluation.'
+                      : `Relisez les chapitres puis retentez l'évaluation. Un score de ${minScore} % est requis.`}
               </Text>
               {passed && onGenerateCertificate && (
                 <TouchableOpacity

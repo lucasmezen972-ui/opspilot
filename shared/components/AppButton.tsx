@@ -70,6 +70,7 @@ export function AppButton({
       activeOpacity={0.85}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
+      aria-busy={loading}
       style={[
         styles.base,
         size === 'lg' ? styles.lg : styles.md,

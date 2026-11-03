@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { ExternalLink } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   View,
@@ -21,6 +22,8 @@ import { isBillingPaymentUrl } from '../../features/billing/qonto';
 import { useAuth } from '../../hooks/useAuth';
 import { useQontoBilling } from '../../hooks/useQontoBilling';
 import { useSubscription } from '../../hooks/useSubscription';
+import { AppButton } from '../../shared/components/AppButton';
+import { colors } from '../../shared/styles/tokens';
 
 export default function BillingScreen() {
   return (
@@ -36,19 +39,32 @@ function BillingScreenContent() {
     subscription,
     trialDaysLeft,
     loading,
+    error: subscriptionError,
     refetch: refreshSubscription,
   } = useSubscription();
   const {
     requests,
+    loading: requestsLoading,
+    error: requestsError,
     requestInvoice,
     refetch: refreshRequests,
   } = useQontoBilling();
   const isLocalDemo = isDemoMode && !session;
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+  const submitting = useRef(false);
 
   const currentPlan = subscription?.plan ?? 'trial';
   const status = subscription?.status ?? 'trialing';
 
   const handleUpgrade = async (planId: string) => {
+    if (
+      submitting.current ||
+      (!isLocalDemo &&
+        (requestsLoading ||
+          Boolean(requestsError) ||
+          Boolean(subscriptionError)))
+    )
+      return;
     if (isLocalDemo) {
       Alert.alert(
         'Mode démo',
@@ -56,6 +72,8 @@ function BillingScreenContent() {
       );
       return;
     }
+    submitting.current = true;
+    setPendingPlan(planId);
     try {
       const invoice = await requestInvoice(planId);
       if (isBillingPaymentUrl(invoice) && invoice.payment_url) {
@@ -66,11 +84,16 @@ function BillingScreenContent() {
           'Votre demande de facture Qonto est enregistrée. Votre abonnement sera activé après vérification du règlement.',
         );
       }
-    } catch {
+    } catch (issue) {
       Alert.alert(
-        'Demande impossible',
-        'Réessayez ou contactez contact@tradikom.com.',
+        'Demande non confirmée',
+        issue instanceof Error
+          ? issue.message
+          : 'Réessayez ou contactez contact@tradikom.com.',
       );
+    } finally {
+      submitting.current = false;
+      setPendingPlan(null);
     }
   };
 
@@ -123,12 +146,40 @@ function BillingScreenContent() {
           <QontoAdminPanel />
         </View>
       )}
-      <CurrentPlanCard
-        currentPlan={currentPlan}
-        status={status}
-        trialDaysLeft={trialDaysLeft}
-        currentPeriodEnd={subscription?.current_period_end}
-      />
+      {subscriptionError ? (
+        <View
+          style={[styles.notice, styles.errorNotice]}
+          testID="billing-subscription-error"
+        >
+          <Text accessibilityRole="alert" style={styles.noticeTitle}>
+            Abonnement non vérifié
+          </Text>
+          <Text style={styles.noticeText}>
+            Impossible de vérifier votre abonnement. Actualisez les données
+            avant de demander une facture.
+          </Text>
+          <AppButton
+            label="Réessayer le chargement de l’abonnement"
+            variant="secondary"
+            onPress={() => {
+              refreshSubscription();
+            }}
+          />
+        </View>
+      ) : subscription ? (
+        <CurrentPlanCard
+          currentPlan={currentPlan}
+          status={status}
+          trialDaysLeft={trialDaysLeft}
+          currentPeriodEnd={subscription?.current_period_end}
+        />
+      ) : (
+        <View style={styles.notice}>
+          <Text style={styles.noticeText}>
+            Aucun abonnement enregistré pour cette organisation.
+          </Text>
+        </View>
+      )}
 
       <TouchableOpacity
         testID="manage-subscription-button"
@@ -140,7 +191,16 @@ function BillingScreenContent() {
       </TouchableOpacity>
 
       {!isLocalDemo && ['essential', 'business'].includes(currentPlan) && (
-        <TouchableOpacity onPress={() => handleUpgrade(currentPlan)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          disabled={
+            !!pendingPlan ||
+            requestsLoading ||
+            !!requestsError ||
+            !!subscriptionError
+          }
+          onPress={() => handleUpgrade(currentPlan)}
+        >
           <Text style={{ color: '#2563EB', padding: 20 }}>
             Demander une facture de renouvellement
           </Text>
@@ -158,6 +218,45 @@ function BillingScreenContent() {
             />
           </View>
         )}
+        {!isLocalDemo && (
+          <View
+            style={[styles.invoiceSummary, requestsError && styles.errorNotice]}
+            testID="billing-invoice-status"
+          >
+            <Text accessibilityRole="header" style={styles.noticeTitle}>
+              Mes demandes de facture
+            </Text>
+            {requestsLoading ? (
+              <Text accessibilityLiveRegion="polite" style={styles.noticeText}>
+                Chargement des demandes…
+              </Text>
+            ) : requestsError ? (
+              <>
+                <Text accessibilityRole="alert" style={styles.noticeText}>
+                  {requestsError}
+                </Text>
+                <AppButton
+                  label="Réessayer le chargement des factures"
+                  variant="secondary"
+                  onPress={() => {
+                    refreshRequests().catch(() => {});
+                  }}
+                />
+              </>
+            ) : !requests.some((request) =>
+                ['requested', 'awaiting_payment'].includes(request.status),
+              ) ? (
+              <Text style={styles.noticeText}>
+                Aucune demande de facture en attente.
+              </Text>
+            ) : (
+              <Text style={styles.noticeText}>
+                Retrouvez ci-dessous les demandes en cours et leurs liens de
+                règlement vérifiés.
+              </Text>
+            )}
+          </View>
+        )}
         {requests
           .filter(
             (request) =>
@@ -165,7 +264,7 @@ function BillingScreenContent() {
               request.status === 'awaiting_payment',
           )
           .map((request) => (
-            <View key={request.id} style={{ marginBottom: 16 }}>
+            <View key={request.id} style={styles.invoiceSummary}>
               <Text>
                 Facture Qonto — {request.plan} :{' '}
                 {request.status === 'requested'
@@ -189,6 +288,7 @@ function BillingScreenContent() {
         <Text style={styles.sectionTitle}>Choisir un plan</Text>
         {!isLocalDemo && (
           <TouchableOpacity
+            accessibilityRole="button"
             onPress={async () => {
               try {
                 await Promise.all([refreshRequests(), refreshSubscription()]);
@@ -212,14 +312,20 @@ function BillingScreenContent() {
             currentPlan={currentPlan}
             onUpgrade={handleUpgrade}
             onEnterprise={handleEnterprise}
+            disabled={
+              !!pendingPlan ||
+              (!isLocalDemo &&
+                (requestsLoading || !!requestsError || !!subscriptionError))
+            }
+            pending={pendingPlan === plan.id}
           />
         ))}
       </View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Facturation mensuelle avec Qonto. Votre facture précise le montant,
-          les taxes applicables et le moyen de règlement. L’activation suit la
+          Facturation avec Qonto. Votre facture précise le montant, les taxes
+          applicables et le moyen de règlement. L’activation suit la
           vérification du paiement. Le prélèvement SEPA nécessite un calendrier
           accepté, un mandat valide et l’activation du service par Mollie. Vous
           pouvez arrêter les prochaines échéances depuis ce calendrier.
@@ -230,6 +336,30 @@ function BillingScreenContent() {
 }
 
 const styles = StyleSheet.create({
+  notice: {
+    margin: 20,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+  },
+  invoiceSummary: {
+    marginBottom: 16,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+  },
+  errorNotice: {
+    backgroundColor: colors.fieldWarm,
+    borderColor: colors.fieldBorder,
+  },
+  noticeTitle: { fontSize: 16, fontWeight: '700', color: colors.textStrong },
+  noticeText: { fontSize: 14, lineHeight: 21, color: colors.text },
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   loadingContainer: {
     flex: 1,

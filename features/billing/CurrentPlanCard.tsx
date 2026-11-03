@@ -65,7 +65,7 @@ export function CurrentPlanCard({
         <View style={styles.countdown}>
           <CheckCircle size={18} color="#16A34A" />
           <Text style={styles.renewDate}>
-            Renouvelle le{'\n'}
+            Accès réglé jusqu’au{'\n'}
             {new Date(currentPeriodEnd).toLocaleDateString('fr-FR')}
           </Text>
         </View>

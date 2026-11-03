@@ -7,6 +7,45 @@
 
 ## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
 
+### Finalisation des erreurs de facturation et évaluations connectées
+
+Lucas demande de terminer les autres travaux avant de reprendre Cloudflare.
+Le stockage R2 reste désactivé ; ne pas recommencer les tentatives de connexion
+pendant cette reprise.
+
+Les erreurs de lecture de factures et d’abonnement ne sont plus présentées comme
+une liste vide ou un essai gratuit. Les demandes confirmées par le serveur restent
+affichées même si leur actualisation échoue. Les actions attendent une lecture
+valide ; les réponses tardives d’un ancien compte sont ignorées, y compris un
+lien de règlement retourné après un changement de compte. Le back-office vérifie
+les trois lectures (demandes, organisations, calendriers SEPA) avant d’ouvrir les
+contrôles d’une facture. Les confirmations manuelles possèdent un verrou local
+pendant l’enregistrement. La période réglée est affichée comme une fin d’accès,
+sans annoncer un renouvellement automatique.
+
+L’interface de quiz connecté utilise la décision `passed` du serveur. Elle ne
+recorrige plus la tentative avec le seuil courant du catalogue, qui peut différer
+de celui enregistré lors de son ouverture. Une réponse serveur incomplète ou
+interrompue conserve la même tentative et les mêmes choix pour la reprise. Les
+choix multiples ne dépendent plus de la présence du corrigé privé. Les cases du
+quiz, de l’accord SEPA et de l’administration vidéo exposent leur sélection au
+navigateur ; les chargements des boutons exposent leur état occupé.
+
+Contrôles locaux : qualité et compilation web réussies, **358 tests unitaires**
+sur 59 fichiers et **64 parcours Chromium** réussis, dont les 19 contrôles ciblés ;
+la régression complète est consignée dans [l’audit](AUDIT-2026-11-03.md). Captures de données fictives :
+`billing-recovery-375.jpg`, `billing-recovery-1440.jpg` et
+`server-quiz-result-375.jpg`/`server-quiz-result-1440.jpg` dans le dossier de preuves.
+Ces tests interceptent les API ; ils ne prouvent pas un débit bancaire ni un
+rapprochement Qonto distant. Aucune fonction serveur ni migration ne change dans
+cette reprise. La publication doit être vérifiée contre le commit fusionné.
+
+Nouveau contrôle Mollie : le profil confirmé retourne `status=verified`, mais
+la liste réelle des méthodes récurrentes retourne toujours **zéro méthode**.
+Le statut du profil ne prouve pas l’autorisation des reversements de l’organisation.
+Le SEPA reste désactivé et la demande d’activation existante n’est pas renouvelée.
+La création des factures et le rapprochement bancaire Qonto restent manuels.
+
 ### Stockage vidéo étendu R2
 
 À la demande de Lucas, le code ajoute R2 pour les nouveaux MP4 privés, jusqu'à
