@@ -10,15 +10,20 @@ npm install --prefix /tmp/opspilot-sql-runtime --ignore-scripts --no-audit @elec
 OPSPILOT_PGLITE_PATH=/tmp/opspilot-sql-runtime/node_modules/@electric-sql/pglite/dist/index.js node supabase/tests/run-local.mjs
 ```
 
-Le lanceur applique les migrations, rejoue les quatre nouvelles migrations pour
+Le lanceur applique les migrations, rejoue les cinq nouvelles migrations pour
 vérifier leur idempotence, puis exécute les scénarios dans des transactions annulées.
 La fixture reproduit les colonnes et contrôles utiles au projet ; elle ne remplace
 pas un contrôle du schéma et des politiques du projet Supabase déployé.
 
 `tenant_access.sql`, `employee_access.sql` et `training_integrity.sql` peuvent être
 exécutés par le rôle de maintenance sur le projet de référence, dans leurs
-transactions `ROLLBACK`. Le test de formation choisit deux profils actifs de
-deux organisations différentes et n’en conserve aucune modification.
+transactions `ROLLBACK`. Le test de formation crée deux identités fictives et
+deux organisations dans sa transaction ; il ne modifie aucun compte client et
+ne conserve aucune donnée. Les profils salariés ne déclenchent pas de bienvenue.
+
+`rate_limit_integrity.sql` peut également être exécuté sur le projet de référence :
+il utilise une clé aléatoire, sans compte ni appel prestataire, et annule tous ses
+compteurs. Il vérifie les appels autorisés, le plafond et l'expiration de fenêtre.
 
 Les autres fixtures ne doivent pas être exécutées sur les données d’un client.
 `mollie_billing.sql` peut faire l’objet de contrôles de maintenance encadrés,

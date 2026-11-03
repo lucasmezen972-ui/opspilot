@@ -36,13 +36,35 @@ formation et la modale de cours ont été rouverts dans le navigateur après la
 publication. Les fonctions indépendantes `admin-api` v13, `ai-assistant` v5 et
 `openai-proxy` v3 sont actives dans Supabase.
 
-Les quatre nouvelles migrations Supabase ne sont **pas encore appliquées** :
-le connecteur a demandé une confirmation d'écriture qui a expiré et la CLI
-locale n'est pas liée au projet. Les fonctions `mollie-recurring` et
-`mollie-recurring-webhook` ne sont donc pas déployées. Tant que cette étape
-n'est pas terminée et contrôlée sur le projet réel, la correction serveur des
-quiz/XP/attestations, l'import MP4 privé et le cycle SEPA ne doivent pas être
-annoncés comme opérationnels en production, même si le code web est publié.
+La confirmation Supabase a abouti lors de la reprise suivante : les quatre
+migrations sont appliquées et les fonctions `mollie-recurring` et
+`mollie-recurring-webhook` sont `ACTIVE`, version 1. Versions en base :
+`20261103111435` (formation/vidéo), `20261103111508` (accès/index),
+`20261103111537` (SEPA) et `20261103111545` (onboarding). Les fichiers SQL de
+la PR #223 sont inchangés ; les horodatages attribués par le connecteur diffèrent.
+Une cinquième migration, `rate_limit_clock_integrity`, appliquée en base sous
+`20261103112046`, corrige le limiteur de requêtes commun aux API IA/facturation :
+sa variable `current_time` était interprétée comme le mot-clé SQL `CURRENT_TIME`
+(heure sans date), ce qui faisait échouer les appels autorisés.
+
+Le test `training_integrity.sql` est passé sur le projet réel avec deux
+identités et organisations fictives, dans une transaction annulée : réponses
+masquées, score serveur, XP unique, attestation, isolation, vidéo non validée
+par saut, suspension et désactivation. Aucune fixture ne subsiste. Le bucket
+MP4 est privé (50 Mo) et les écritures directes de résultats/attestations sont
+refusées. Les sept scénarios SQL et le rejeu des cinq migrations passent à nouveau
+localement, ainsi que neuf parcours Chromium ciblés (vidéo et facturation).
+
+Les fonctions SEPA répondent réellement 401 sans session, 405 pour une méthode
+interdite et 400 pour une notification invalide. Le limiteur passe son test sur
+le projet réel (appels autorisés, plafond et nouvelle fenêtre). Une notification
+inconnue avec un faux statut payé n'ajoute aucun paiement ; un corps trop gros
+est refusé en 413. Le drapeau récurrent reste
+faux et les accès dédiés test/réel sont absents. Aucun prélèvement ni facture
+réelle n'a servi aux tests. Le catalogue a été rouvert dans le navigateur en
+ligne ; les tests automatisés contre Vercel n'ont pas pu charger le site depuis
+le runtime de test. L'import privé connecté reste testé par API interceptée,
+sans nouveau téléversement distant de média dans cette reprise.
 
 ## Vérifications antérieures des 2 et 3 novembre 2026
 

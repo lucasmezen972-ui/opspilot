@@ -1,9 +1,24 @@
 -- Run against a disposable database or in this rolled-back transaction.
--- Uses two existing active colleagues from different organisations; no email is sent.
+-- Creates fictional identities in this transaction; no customer row is used.
+-- The auth trigger creates employee profiles, which do not send welcome emails.
 begin;
-select set_config('opstest.actor',(select id::text from public.profiles where is_active and role in ('employé','employee','stagiaire') and organization_id is not null limit 1),true);
-select set_config('opstest.org',(select organization_id::text from public.profiles where id=current_setting('opstest.actor')::uuid),true);
-select set_config('opstest.other',(select id::text from public.profiles where is_active and organization_id<>current_setting('opstest.org')::uuid limit 1),true);
+select set_config('opstest.actor',gen_random_uuid()::text,true);
+select set_config('opstest.org',gen_random_uuid()::text,true);
+select set_config('opstest.other',gen_random_uuid()::text,true);
+select set_config('opstest.other_org',gen_random_uuid()::text,true);
+insert into public.organizations(id,name) values
+ (current_setting('opstest.org')::uuid,'Opspilot integrity fixture A'),
+ (current_setting('opstest.other_org')::uuid,'Opspilot integrity fixture B');
+insert into auth.users(id,email) values
+ (current_setting('opstest.actor')::uuid,'opspilot-integrity-'||current_setting('opstest.actor')||'@example.invalid'),
+ (current_setting('opstest.other')::uuid,'opspilot-integrity-'||current_setting('opstest.other')||'@example.invalid');
+-- The minimal local schema has no Auth signup trigger.
+insert into public.profiles(id,email,role,is_active) select id,email,'employé',true
+ from auth.users where id in (current_setting('opstest.actor')::uuid,current_setting('opstest.other')::uuid)
+ on conflict(id) do nothing;
+update public.profiles set organization_id=case when id=current_setting('opstest.actor')::uuid
+ then current_setting('opstest.org')::uuid else current_setting('opstest.other_org')::uuid end
+ where id in (current_setting('opstest.actor')::uuid,current_setting('opstest.other')::uuid);
 select set_config('opstest.course',gen_random_uuid()::text,true);
 select set_config('opstest.chapter',gen_random_uuid()::text,true);
 select set_config('opstest.video',gen_random_uuid()::text,true);

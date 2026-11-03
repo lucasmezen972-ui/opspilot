@@ -31,12 +31,13 @@ Le compte de reversement configuré chez Mollie a été rapproché du sous-compt
 
 Le code du cycle SEPA est désormais préparé dans `mollie-recurring` et `mollie-recurring-webhook`, avec l’interface dans Abonnement. Il reste désactivé : la validation du moyen de paiement par Mollie, celle des reversements et la configuration des accès récurrents sont des contrôles distincts. Les tests locaux ne prouvent pas un prélèvement prestataire bout en bout.
 
-Publication du 3 novembre : l'interface issue de la PR #223 est en ligne,
-mais les migrations récurrentes n'ont pas été appliquées au projet Supabase et
-les deux fonctions récurrentes ne sont pas déployées. Cette séparation est
-volontaire : publier les fonctions avant leur schéma laisserait un parcours
-incohérent. Le SEPA reste donc indisponible, en plus des validations Mollie et
-des accès dédiés encore manquants.
+Publication du 3 novembre, après nouvelle confirmation : les migrations sont
+appliquées au projet Supabase et les fonctions `mollie-recurring` et
+`mollie-recurring-webhook` sont actives en version 1. Les contrôles HTTP réels
+refusent l'accès sans session (401), les méthodes interdites (405) et les
+notifications invalides (400). Le SEPA reste indisponible : le drapeau
+`recurring_enabled` est faux, les secrets dédiés test/réel sont absents et les
+validations Mollie ne sont pas acquises. Aucun débit ou facture réel n'a été créé.
 
 ### Parcours SEPA préparé
 
