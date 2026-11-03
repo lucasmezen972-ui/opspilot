@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ArrowUpRight } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import type { Profile } from '../../lib/supabase';
+import { AppActionRow } from '../../shared/components/AppActionRow';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 import { computeXpProgress } from '../profile/profileModel';
@@ -31,14 +32,16 @@ export function DashboardProgress({
           <Text style={styles.compactTitle} accessibilityRole="header">
             Votre progression
           </Text>
-          <TouchableOpacity
+          <AppActionRow
             style={styles.headingAction}
-            onPress={() => router.push('/training')}
+            hoverStyle={{ backgroundColor: colors.controlHover }}
+            pressedStyle={{ backgroundColor: colors.controlPressed }}
+            href="/training"
             accessibilityRole="link"
             accessibilityLabel="Classement et formation"
           >
             <ArrowUpRight size={17} color={colors.primary} />
-          </TouchableOpacity>
+          </AppActionRow>
         </View>
       ) : (
         <AppSectionHeader
@@ -61,13 +64,15 @@ export function DashboardProgress({
               {profile.completed_trainings ?? 0} formations
             </Text>
           </View>
-          <TouchableOpacity
+          <AppActionRow
             style={[styles.profileBtn, compact && styles.compactProfileBtn]}
-            onPress={() => router.push('/profile')}
+            hoverStyle={{ backgroundColor: colors.controlHover }}
+            pressedStyle={{ backgroundColor: colors.controlPressed }}
+            href="/profile"
             accessibilityRole="link"
           >
             <Text style={styles.profileBtnText}>Profil</Text>
-          </TouchableOpacity>
+          </AppActionRow>
         </View>
         <View style={styles.progressBar}>
           <View
@@ -119,8 +124,12 @@ const styles = StyleSheet.create({
   headingAction: {
     width: 44,
     height: 44,
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
   },
   levelRow: {
     flexDirection: 'row',
@@ -129,9 +138,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm + 2,
   },
   levelBadge: {
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm + 2,
+    paddingHorizontal: 0,
     paddingVertical: spacing.xs,
   },
   levelBadgeText: {
@@ -165,7 +172,9 @@ const styles = StyleSheet.create({
     minWidth: 60,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
     borderRadius: radius.sm,
@@ -176,9 +185,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   compactProfileBtn: {
-    backgroundColor: 'transparent',
-    minWidth: 44,
-    paddingHorizontal: 0,
+    minWidth: 56,
+    paddingHorizontal: 8,
   },
   progressBar: {
     height: 4,

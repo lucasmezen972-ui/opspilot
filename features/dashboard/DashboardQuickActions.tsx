@@ -1,4 +1,4 @@
-import { router, type Href } from 'expo-router';
+import { type Href } from 'expo-router';
 import {
   type LucideIcon,
   Target,
@@ -9,11 +9,14 @@ import {
   CreditCard,
   Settings,
   FileText,
-  ChevronRight,
 } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { DashboardGrid } from './DashboardGrid';
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
@@ -96,10 +99,10 @@ export function DashboardQuickActions({
   const links = items.map((item) => {
     const Icon = item.icon;
     return (
-      <TouchableOpacity
+      <AppActionRow
         key={item.title}
         style={[styles.card, compact && styles.compactCard]}
-        onPress={() => router.push(item.route)}
+        href={item.route}
         accessibilityRole="link"
         accessibilityLabel={`${item.title}, ${item.sub}`}
       >
@@ -110,8 +113,8 @@ export function DashboardQuickActions({
           {item.title}
         </Text>
         {!compact && <Text style={styles.sub}>{item.sub}</Text>}
-        {compact && <ChevronRight size={14} color={colors.textMuted} />}
-      </TouchableOpacity>
+        {compact && <AppActionIndicator />}
+      </AppActionRow>
     );
   });
 
@@ -125,7 +128,7 @@ export function DashboardQuickActions({
         <AppSectionHeader title="Accès rapide" />
       )}
       {compact ? (
-        <View>{links}</View>
+        <View style={styles.compactList}>{links}</View>
       ) : (
         <DashboardGrid minItemWidth={180} columnOptions={[2, 3, 4]}>
           {links}
@@ -147,7 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.controlBorder,
   },
   iconWrap: {
     width: 36,
@@ -162,7 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '600',
-    color: colors.textStrong,
+    color: colors.primaryDark,
   },
   sub: {
     fontSize: 13,
@@ -179,16 +182,17 @@ const styles = StyleSheet.create({
   },
   compactCard: {
     flex: 0,
-    minHeight: 44,
+    minHeight: 48,
     paddingVertical: spacing.sm,
-    paddingHorizontal: 0,
+    paddingHorizontal: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    borderRadius: 0,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderRadius: radius.sm,
   },
+  compactList: { gap: 8 },
   compactIcon: {
     width: 20,
     height: 20,
@@ -199,6 +203,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.primaryDark,
   },
 });

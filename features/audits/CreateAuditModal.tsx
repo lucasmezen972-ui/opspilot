@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+import { AppButton } from '../../shared/components/AppButton';
+
 interface CreateAuditModalProps {
   visible: boolean;
   title: string;
@@ -50,17 +52,21 @@ export function CreateAuditModal({
               : 'Audit libre : questionnaire standard à la clôture'}
           </Text>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            <AppButton
+              label="Annuler"
+              variant="secondary"
+              fullWidth={false}
+              style={{ flex: 1 }}
+              onPress={onClose}
+            />
+            <AppButton
+              label="Créer"
               testID="audit-create-submit"
-              style={[styles.confirmButton, !title.trim() && { opacity: 0.5 }]}
+              fullWidth={false}
+              style={{ flex: 1 }}
               disabled={!title.trim()}
               onPress={onConfirm}
-            >
-              <Text style={styles.confirmText}>Créer</Text>
-            </TouchableOpacity>
+            />
           </View>
         </View>
       </View>

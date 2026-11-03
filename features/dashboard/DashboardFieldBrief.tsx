@@ -6,9 +6,10 @@ import {
   TriangleAlert,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import type { DashboardFieldBrief as FieldBrief } from './dashboardModel';
+import { AppPressable } from '../../shared/components/AppPressable';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface DashboardFieldBriefProps {
@@ -46,9 +47,11 @@ export function DashboardFieldBrief({
             </View>
           </View>
           {compact && (
-            <TouchableOpacity
+            <AppPressable
               onPress={() => setEvidenceOpen((open) => !open)}
               style={styles.evidenceToggle}
+              hoverStyle={{ backgroundColor: colors.controlHover }}
+              pressedStyle={{ backgroundColor: colors.controlPressed }}
               accessibilityRole="button"
               accessibilityLabel="Preuves et traçabilité"
               accessibilityState={{ expanded: evidenceOpen }}
@@ -61,7 +64,7 @@ export function DashboardFieldBrief({
                 color={colors.textMuted}
                 style={evidenceOpen ? styles.chevronOpen : undefined}
               />
-            </TouchableOpacity>
+            </AppPressable>
           )}
         </View>
 
@@ -70,15 +73,17 @@ export function DashboardFieldBrief({
             <Text style={styles.priority}>{brief.title}</Text>
             <Text style={styles.message}>{brief.message}</Text>
           </View>
-          <TouchableOpacity
+          <AppPressable
             style={styles.actionButton}
+            hoverStyle={{ backgroundColor: colors.primaryDark }}
+            pressedStyle={{ opacity: 0.82 }}
             onPress={() => router.push(brief.route)}
             testID="dashboard-field-brief-action"
             accessibilityRole="button"
           >
             <Text style={styles.actionText}>{brief.actionLabel}</Text>
             <ArrowUpRight size={16} color={colors.surface} />
-          </TouchableOpacity>
+          </AppPressable>
         </View>
 
         {evidenceOpen && (
@@ -139,11 +144,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingLeft: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
   },
   evidenceToggleText: {
     fontSize: 12,
-    color: colors.textMuted,
+    fontWeight: '600',
+    color: colors.primaryDark,
   },
   chevronOpen: {
     transform: [{ rotate: '180deg' }],

@@ -1,10 +1,14 @@
 import { router } from 'expo-router';
 import { Package, CircleCheck } from 'lucide-react-native';
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { getDlcAlerts, getDlcUrgency } from './dashboardModel';
 import type { Product } from '../../lib/supabase';
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
@@ -36,18 +40,16 @@ export function DashboardDlcAlerts({
         style={[styles.card, embedded && styles.embeddedList]}
         testID={alerts.length > 0 ? 'dlc-alerts' : undefined}
       >
-        {alerts.map((product, idx) => {
+        {alerts.map((product) => {
           const urgency = getDlcUrgency(product.dlc!, now);
           return (
-            <TouchableOpacity
+            <AppActionRow
               key={product.id}
               testID={`dlc-alert-${product.id}`}
-              style={[
-                styles.item,
-                idx < alerts.length - 1 && styles.itemBorder,
-              ]}
-              onPress={() => router.push('/products')}
+              style={styles.item}
+              href="/products"
               accessibilityRole="link"
+              accessibilityLabel={`${product.name}, ${urgency.label}. Ouvrir les produits`}
             >
               <View style={styles.icon}>
                 <Package size={17} color={colors.textMuted} />
@@ -71,7 +73,8 @@ export function DashboardDlcAlerts({
                   {urgency.label}
                 </Text>
               </View>
-            </TouchableOpacity>
+              <AppActionIndicator />
+            </AppActionRow>
           );
         })}
         {alerts.length === 0 && (
@@ -112,6 +115,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.hairline,
+    padding: 8,
+    gap: 8,
   },
   embeddedList: {
     borderWidth: 0,
@@ -125,10 +130,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     gap: spacing.sm,
   },
-  itemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
-  },
   icon: {
     width: 20,
     height: 24,
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '500',
-    color: colors.textStrong,
+    color: colors.primaryDark,
   },
   badge: {
     flexDirection: 'row',

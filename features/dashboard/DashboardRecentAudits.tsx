@@ -4,9 +4,13 @@ import {
   TriangleAlert as AlertTriangle,
   ChartBar as BarChart3,
 } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import type { Audit } from '../../lib/supabase';
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
@@ -44,11 +48,12 @@ export function DashboardRecentAudits({
           )
           .slice(0, 3)
           .map((audit) => (
-            <TouchableOpacity
+            <AppActionRow
               key={audit.id}
               style={styles.item}
-              onPress={() => router.push('/audits')}
+              href="/audits"
               accessibilityRole="link"
+              accessibilityLabel={`${audit.title}. Ouvrir les audits`}
             >
               <View style={styles.icon}>
                 {audit.status === 'completed' ? (
@@ -71,19 +76,20 @@ export function DashboardRecentAudits({
                   {audit.score}%
                 </Text>
               )}
-            </TouchableOpacity>
+              <AppActionIndicator />
+            </AppActionRow>
           ))}
 
         {audits.length === 0 && (
-          <TouchableOpacity
+          <AppActionRow
             style={styles.empty}
-            onPress={() => router.push('/audits')}
+            href="/audits"
             accessibilityRole="link"
           >
             <BarChart3 size={32} color={colors.textMuted} />
             <Text style={styles.emptyText}>Aucun audit récent</Text>
             <Text style={styles.emptyLink}>Créer un audit →</Text>
-          </TouchableOpacity>
+          </AppActionRow>
         )}
       </View>
     </View>
@@ -114,6 +120,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.hairline,
+    padding: 8,
+    gap: 8,
   },
   embeddedList: {
     borderWidth: 0,
@@ -125,8 +133,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
     gap: spacing.sm + 2,
   },
   icon: {
@@ -143,7 +149,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '500',
-    color: colors.textStrong,
+    color: colors.primaryDark,
   },
   time: {
     fontSize: 13,

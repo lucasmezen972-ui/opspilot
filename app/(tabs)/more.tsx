@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-import { useRouter, type Href } from 'expo-router';
+import { type Href } from 'expo-router';
 import {
   Package,
   Wrench,
@@ -10,7 +10,6 @@ import {
   CreditCard,
   Building2,
   User,
-  ChevronRight,
   Rocket,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -18,7 +17,6 @@ import {
   ScrollView,
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   useWindowDimensions,
   Platform,
@@ -26,6 +24,10 @@ import {
 
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
 import { colors, typography } from '../../shared/styles/tokens';
 import { can } from '../../utils/permissions';
 import { isManagerRole } from '../../utils/roles';
@@ -41,7 +43,6 @@ type HubLink = {
 
 /** Hub « Plus » : accès à tous les modules secondaires depuis une vue épurée. */
 export default function MoreScreen() {
-  const router = useRouter();
   const { width } = useWindowDimensions();
   const availableWidth =
     width - (Platform.OS === 'web' && width >= 1024 ? 228 : 0);
@@ -199,22 +200,17 @@ export default function MoreScreen() {
                   </Text>
                 </View>
                 <View style={styles.list}>
-                  {items.map((link, index) => (
-                    <TouchableOpacity
+                  {items.map((link) => (
+                    <AppActionRow
                       key={link.slug}
                       testID={`more-link-${link.slug}`}
                       accessibilityRole="button"
                       accessibilityLabel={link.label}
                       style={[
                         styles.row,
-                        { width: columns === 2 ? '50%' : '100%' },
-                        index >= columns && styles.rowDivider,
-                        columns === 2 &&
-                          index % 2 === 1 &&
-                          styles.rowColumnDivider,
+                        { flexBasis: columns === 2 ? '45%' : '100%' },
                       ]}
-                      activeOpacity={0.7}
-                      onPress={() => router.push(link.href)}
+                      href={link.href}
                     >
                       <View style={styles.iconWrap}>
                         <link.icon
@@ -227,12 +223,8 @@ export default function MoreScreen() {
                         <Text style={styles.rowLabel}>{link.label}</Text>
                         <Text style={styles.rowDesc}>{link.description}</Text>
                       </View>
-                      <ChevronRight
-                        size={17}
-                        color={colors.textFaint}
-                        strokeWidth={1.6}
-                      />
-                    </TouchableOpacity>
+                      <AppActionIndicator />
+                    </AppActionRow>
                   ))}
                 </View>
               </View>
@@ -307,13 +299,11 @@ const styles = StyleSheet.create({
   list: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 15,
-    overflow: 'hidden',
+    gap: 12,
   },
   row: {
+    flexGrow: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 13,
@@ -321,8 +311,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     minHeight: 88,
   },
-  rowDivider: { borderTopWidth: 1, borderTopColor: colors.hairline },
-  rowColumnDivider: { borderLeftWidth: 1, borderLeftColor: colors.hairline },
   iconWrap: {
     width: 39,
     height: 39,
@@ -336,7 +324,7 @@ const styles = StyleSheet.create({
     ...typography.body,
     fontWeight: '600',
     lineHeight: 22,
-    color: colors.textStrong,
+    color: colors.primaryDark,
     letterSpacing: -0.15,
   },
   rowDesc: {

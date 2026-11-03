@@ -14,7 +14,6 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   ScrollView,
@@ -24,6 +23,7 @@ import {
 
 import { useAuth } from '../hooks/useAuth';
 import { AppBrand } from '../shared/components/AppBrand';
+import { AppPressable } from '../shared/components/AppPressable';
 import { colors, radius, spacing } from '../shared/styles/tokens';
 import { extractErrorMessage } from '../utils/error';
 import { loginSchema } from '../utils/validation';
@@ -294,12 +294,14 @@ export default function AuthScreen() {
                 <Text style={styles.resetHint}>
                   Entrez votre email ci-dessus puis appuyez sur le bouton.
                 </Text>
-                <TouchableOpacity
+                <AppPressable
                   accessibilityRole="button"
                   testID="reset-password-button"
                   style={[styles.button, loading && styles.buttonDisabled]}
                   onPress={handleResetPassword}
                   disabled={loading}
+                  accessibilityState={{ disabled: loading, busy: loading }}
+                  aria-busy={loading}
                 >
                   {loading ? (
                     <ActivityIndicator size="small" color={colors.surface} />
@@ -308,8 +310,8 @@ export default function AuthScreen() {
                       Envoyer le lien de réinitialisation
                     </Text>
                   )}
-                </TouchableOpacity>
-                <TouchableOpacity
+                </AppPressable>
+                <AppPressable
                   accessibilityRole="button"
                   style={styles.switchButton}
                   onPress={() => {
@@ -321,16 +323,21 @@ export default function AuthScreen() {
                   <Text style={styles.switchButtonText}>
                     Retour à la connexion
                   </Text>
-                </TouchableOpacity>
+                </AppPressable>
               </>
             ) : (
               <>
-                <TouchableOpacity
+                <AppPressable
                   accessibilityRole="button"
                   testID="auth-submit-button"
                   style={[styles.button, loading && styles.buttonDisabled]}
                   onPress={handleAuth}
                   disabled={loading || demoLoading}
+                  accessibilityState={{
+                    disabled: loading || demoLoading,
+                    busy: loading,
+                  }}
+                  aria-busy={loading}
                 >
                   {loading ? (
                     <ActivityIndicator size="small" color={colors.surface} />
@@ -346,10 +353,10 @@ export default function AuthScreen() {
                         ? 'Se connecter'
                         : "S'inscrire"}
                   </Text>
-                </TouchableOpacity>
+                </AppPressable>
 
                 {isLogin && (
-                  <TouchableOpacity
+                  <AppPressable
                     accessibilityRole="button"
                     testID="forgot-password-button"
                     style={styles.switchButton}
@@ -362,10 +369,10 @@ export default function AuthScreen() {
                     <Text style={styles.forgotPasswordText}>
                       Mot de passe oublié ?
                     </Text>
-                  </TouchableOpacity>
+                  </AppPressable>
                 )}
 
-                <TouchableOpacity
+                <AppPressable
                   accessibilityRole="button"
                   style={styles.switchButton}
                   onPress={() => {
@@ -380,7 +387,7 @@ export default function AuthScreen() {
                       ? "Pas encore de compte ? S'inscrire"
                       : 'Déjà un compte ? Se connecter'}
                   </Text>
-                </TouchableOpacity>
+                </AppPressable>
               </>
             )}
             <View style={styles.demoContainer}>
@@ -388,7 +395,7 @@ export default function AuthScreen() {
                 <Text style={styles.demoTitle}>Démo terrain guidée</Text>
                 <Text style={styles.demoSubtitle}>Sans inscription</Text>
               </View>
-              <TouchableOpacity
+              <AppPressable
                 testID="demo-login-button"
                 style={[
                   styles.demoButton,
@@ -414,7 +421,7 @@ export default function AuthScreen() {
                 {!demoLoading && (
                   <ArrowRight size={16} color={colors.primary} />
                 )}
-              </TouchableOpacity>
+              </AppPressable>
             </View>
           </View>
 
@@ -634,6 +641,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+    marginTop: 8,
   },
   switchButtonText: {
     color: colors.primaryDark,
@@ -643,7 +656,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   forgotPasswordText: {
-    color: colors.textMuted,
+    color: colors.primaryDark,
+    textDecorationLine: 'underline',
     fontSize: 13,
     fontWeight: '500',
   },

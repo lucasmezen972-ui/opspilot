@@ -1,0 +1,23 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> opspilot@1.0.0 test:e2e
+> playwright test e2e/25-action-affordances.spec.ts
+
+[WebServer] (node:36) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 7 tests using 1 worker
+
+(node:48) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/25-action-affordances.spec.ts:9:7 › les liens terrain et les outils ouvrent leur destination à 320px (5.4s)
+  ✓  2 [chromium] › e2e/25-action-affordances.spec.ts:9:7 › les liens terrain et les outils ouvrent leur destination à 1440px (9.3s)
+  ✓  3 [chromium] › e2e/25-action-affordances.spec.ts:95:5 › survol, focus et activation Espace/Entrée de la traçabilité (2.5s)
+  ✓  4 [chromium] › e2e/25-action-affordances.spec.ts:130:5 › la commande Ajouter est inactive sans nom, puis devient disponible (2.7s)
+  ✓  5 [chromium] › e2e/25-action-affordances.spec.ts:173:5 › pendant une connexion interceptée, le bouton indique son attente et se bloque (1.5s)
+  ✓  6 [chromium] › e2e/25-action-affordances.spec.ts:231:7 › création de tâche : commandes accessibles à 375x812 (2.7s)
+  ✓  7 [chromium] › e2e/25-action-affordances.spec.ts:231:7 › création de tâche : commandes accessibles à 812x375 (2.5s)
+
+  7 passed (32.7s)
