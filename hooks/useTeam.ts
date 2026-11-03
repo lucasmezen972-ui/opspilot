@@ -79,10 +79,14 @@ export function useTeam() {
         };
       }
 
+      const member = Array.isArray(data) ? data[0] : data;
+      if (!member || member.id !== memberId) {
+        return { data: null, error: 'Réponse de gestion d’équipe invalide' };
+      }
       setRemoteMembers((prev) =>
-        prev.map((m) => (m.id === memberId ? data : m)),
+        prev.map((m) => (m.id === memberId ? member : m)),
       );
-      return { data, error: null };
+      return { data: member, error: null };
     } catch (error) {
       return {
         data: null,
