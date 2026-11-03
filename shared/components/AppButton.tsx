@@ -1,18 +1,18 @@
-import type { LucideIcon } from 'lucide-react-native';
+import { LockKeyhole, type LucideIcon } from 'lucide-react-native';
 import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
 
+import { AppPressable } from './AppPressable';
 import { colors, radius, shadow } from '../styles/tokens';
 
 type Variant = 'primary' | 'success' | 'secondary' | 'danger';
-type Size = 'md' | 'lg';
+type Size = 'sm' | 'md' | 'lg';
 
 interface AppButtonProps {
   label: string;
@@ -30,14 +30,14 @@ interface AppButtonProps {
 const VARIANT_BG: Record<Variant, string> = {
   primary: colors.primary,
   success: colors.trustGreen,
-  secondary: colors.primarySoft,
+  secondary: colors.surface,
   danger: colors.dangerStrong,
 };
 
 const VARIANT_FG: Record<Variant, string> = {
   primary: '#FFFFFF',
   success: '#FFFFFF',
-  secondary: colors.primary,
+  secondary: colors.primaryDark,
   danger: '#FFFFFF',
 };
 
@@ -58,52 +58,73 @@ export function AppButton({
   testID,
   style,
 }: AppButtonProps) {
-  const fg = VARIANT_FG[variant];
   const isDisabled = disabled || loading;
+  const fg = isDisabled ? colors.disabledText : VARIANT_FG[variant];
   const elevated = variant === 'primary' || variant === 'success';
 
   return (
-    <TouchableOpacity
+    <AppPressable
       testID={testID}
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.85}
       accessibilityRole="button"
+      accessibilityLabel={label}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       aria-busy={loading}
       style={[
         styles.base,
-        size === 'lg' ? styles.lg : styles.md,
-        { backgroundColor: VARIANT_BG[variant] },
+        size === 'lg' ? styles.lg : size === 'sm' ? styles.sm : styles.md,
+        {
+          backgroundColor: VARIANT_BG[variant],
+          borderColor:
+            variant === 'secondary'
+              ? colors.controlBorder
+              : VARIANT_BG[variant],
+        },
         elevated && shadow.card,
         fullWidth && styles.fullWidth,
-        isDisabled && styles.disabled,
         style,
       ]}
+      hoverStyle={{
+        backgroundColor:
+          variant === 'secondary'
+            ? colors.controlHover
+            : variant === 'primary'
+              ? colors.primaryDark
+              : VARIANT_BG[variant],
+        borderColor:
+          variant === 'secondary' ? colors.primary : VARIANT_BG[variant],
+      }}
+      pressedStyle={{ opacity: 0.82 }}
+      disabledStyle={styles.disabled}
     >
-      {loading ? (
-        <ActivityIndicator color={fg} />
-      ) : (
-        <View style={styles.content}>
-          {Icon && <Icon size={size === 'lg' ? 22 : 18} color={fg} />}
-          <Text
-            style={[
-              styles.label,
-              size === 'lg' ? styles.labelLg : null,
-              { color: fg },
-            ]}
-          >
-            {label}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
+      <View style={styles.content}>
+        {loading ? (
+          <ActivityIndicator color={fg} />
+        ) : disabled ? (
+          <LockKeyhole size={16} color={fg} accessible={false} />
+        ) : (
+          Icon && <Icon size={size === 'lg' ? 22 : 18} color={fg} />
+        )}
+        <Text
+          style={[
+            styles.label,
+            size === 'lg' ? styles.labelLg : null,
+            size === 'sm' ? styles.labelSm : null,
+            { color: fg },
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
+    </AppPressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
     minHeight: 48,
+    borderWidth: 1,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -111,6 +132,12 @@ const styles = StyleSheet.create({
   md: {
     paddingVertical: 14,
     paddingHorizontal: 18,
+  },
+  sm: {
+    minHeight: 40,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: radius.sm,
   },
   lg: {
     paddingVertical: 16,
@@ -120,7 +147,11 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 1,
+    backgroundColor: colors.disabledBackground,
+    borderColor: colors.disabledBorder,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   content: {
     maxWidth: '100%',
@@ -138,4 +169,5 @@ const styles = StyleSheet.create({
   labelLg: {
     fontSize: 16,
   },
+  labelSm: { fontSize: 13 },
 });

@@ -7,10 +7,13 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 
 import { getPriorityColor, getPriorityText } from './taskModel';
 import { RECURRENCE_OPTIONS, type Recurrence } from './taskRecurrence';
+import { AppButton } from '../../shared/components/AppButton';
 import { colors, radius } from '../../shared/styles/tokens';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -36,6 +39,7 @@ export function CreateTaskModal({
   onClose,
   onSubmit,
 }: CreateTaskModalProps) {
+  const { height } = useWindowDimensions();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
@@ -52,97 +56,120 @@ export function CreateTaskModal({
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      accessibilityLabel="Nouvelle tâche"
+    >
       <View style={styles.overlay}>
-        <View style={styles.content}>
+        <View
+          style={[styles.content, { maxHeight: Math.max(160, height - 32) }]}
+          testID="task-create-modal"
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Nouvelle tâche</Text>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Fermer la création de tâche"
+              style={styles.closeButton}
+            >
               <X size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
-          <TextInput
-            style={styles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Titre de la tâche"
-            autoFocus
-          />
-          <TextInput
-            style={[styles.input, styles.inputMultiline]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Description (optionnel)"
-            multiline
-          />
-          <View style={styles.prioritySelector}>
-            {PRIORITIES.map((p) => {
-              const active = priority === p;
-              return (
-                <TouchableOpacity
-                  key={p}
-                  style={[
-                    styles.priorityOption,
-                    active && {
-                      backgroundColor: getPriorityColor(p),
-                      borderColor: getPriorityColor(p),
-                    },
-                  ]}
-                  onPress={() => setPriority(p)}
-                >
-                  <Text
+          <ScrollView
+            style={styles.formScroll}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Titre de la tâche"
+              autoFocus
+            />
+            <TextInput
+              style={[styles.input, styles.inputMultiline]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Description (optionnel)"
+              multiline
+            />
+            <View style={styles.prioritySelector}>
+              {PRIORITIES.map((p) => {
+                const active = priority === p;
+                return (
+                  <TouchableOpacity
+                    key={p}
                     style={[
-                      styles.priorityOptionText,
-                      active && styles.priorityOptionTextActive,
+                      styles.priorityOption,
+                      active && {
+                        backgroundColor: getPriorityColor(p),
+                        borderColor: getPriorityColor(p),
+                      },
                     ]}
+                    onPress={() => setPriority(p)}
                   >
-                    {getPriorityText(p)}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          <Text style={styles.fieldLabel}>Récurrence</Text>
-          <View style={styles.recurrenceSelector}>
-            {RECURRENCE_OPTIONS.map((option) => {
-              const active = recurrence === option.value;
-              return (
-                <TouchableOpacity
-                  key={option.value}
-                  testID={`task-recurrence-${option.value}`}
-                  style={[
-                    styles.recurrenceOption,
-                    active && styles.recurrenceOptionActive,
-                  ]}
-                  onPress={() => setRecurrence(option.value)}
-                >
-                  <Text
+                    <Text
+                      style={[
+                        styles.priorityOptionText,
+                        active && styles.priorityOptionTextActive,
+                      ]}
+                    >
+                      {getPriorityText(p)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text style={styles.fieldLabel}>Récurrence</Text>
+            <View style={styles.recurrenceSelector}>
+              {RECURRENCE_OPTIONS.map((option) => {
+                const active = recurrence === option.value;
+                return (
+                  <TouchableOpacity
+                    key={option.value}
+                    testID={`task-recurrence-${option.value}`}
                     style={[
-                      styles.recurrenceText,
-                      active && styles.recurrenceTextActive,
+                      styles.recurrenceOption,
+                      active && styles.recurrenceOptionActive,
                     ]}
+                    onPress={() => setRecurrence(option.value)}
                   >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    <Text
+                      style={[
+                        styles.recurrenceText,
+                        active && styles.recurrenceTextActive,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
 
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>Annuler</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.confirmButton, !title.trim() && { opacity: 0.5 }]}
-              disabled={!title.trim()}
-              onPress={() =>
-                onSubmit({ title, description, priority, recurrence })
-              }
-            >
-              <Text style={styles.confirmText}>Créer</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.actions}>
+              <AppButton
+                label="Annuler"
+                variant="secondary"
+                fullWidth={false}
+                style={{ flex: 1 }}
+                onPress={onClose}
+              />
+              <AppButton
+                label="Créer"
+                testID="task-create-submit"
+                fullWidth={false}
+                style={{ flex: 1 }}
+                disabled={!title.trim()}
+                onPress={() =>
+                  onSubmit({ title, description, priority, recurrence })
+                }
+              />
+            </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -150,6 +177,16 @@ export function CreateTaskModal({
 }
 
 const styles = StyleSheet.create({
+  formScroll: { flexShrink: 1 },
+  closeButton: {
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.controlBorder,
+    borderRadius: radius.sm,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

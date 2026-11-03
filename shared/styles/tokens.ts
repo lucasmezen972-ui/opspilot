@@ -14,6 +14,12 @@ export const colors = {
   primaryInk: '#172554',
   navy: '#142641',
   navyDeep: '#0D1C32',
+  controlBorder: '#6B8BBC',
+  controlHover: '#E7EFFF',
+  controlPressed: '#D8E5FC',
+  disabledBackground: '#E2E8F0',
+  disabledBorder: '#94A3B8',
+  disabledText: '#475569',
 
   // Accents humains, utilisés avec parcimonie pour éviter un rendu froid.
   fieldWarm: '#FFFBF5',

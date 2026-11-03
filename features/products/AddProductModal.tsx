@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, ScrollView, StyleSheet } from 'react-native';
 
+import { AppButton } from '../../shared/components/AppButton';
 import { AppModal } from '../../shared/components/AppModal';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
@@ -179,25 +173,23 @@ export function AddProductModal({
         </View>
       </ScrollView>
       <View style={styles.actions}>
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.cancelButton}
+        <AppButton
+          label="Annuler"
+          variant="secondary"
+          fullWidth={false}
+          style={{ flex: 1 }}
           onPress={onClose}
-        >
-          <Text style={styles.cancelText}>Annuler</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        />
+        <AppButton
+          label={submitting ? 'Ajout…' : 'Ajouter'}
+          variant="success"
+          fullWidth={false}
+          style={{ flex: 1 }}
           testID="product-add-submit"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: submitting, busy: submitting }}
-          style={[styles.confirmButton, submitting && { opacity: 0.5 }]}
           onPress={handleSubmit}
-          disabled={submitting}
-        >
-          <Text style={styles.confirmText}>
-            {submitting ? 'Ajout…' : 'Ajouter'}
-          </Text>
-        </TouchableOpacity>
+          disabled={!name.trim() || submitting}
+          loading={submitting}
+        />
       </View>
     </AppModal>
   );

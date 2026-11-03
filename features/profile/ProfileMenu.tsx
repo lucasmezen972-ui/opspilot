@@ -1,7 +1,11 @@
-import { type LucideIcon, ChevronRight } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { type LucideIcon } from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-import { colors, shadow } from '../../shared/styles/tokens';
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
+import { colors } from '../../shared/styles/tokens';
 
 export interface ProfileMenuEntry {
   icon: LucideIcon;
@@ -22,15 +26,17 @@ export function ProfileMenu({ entries }: ProfileMenuProps) {
         {entries.map((entry) => {
           const Icon = entry.icon;
           return (
-            <TouchableOpacity
+            <AppActionRow
               key={entry.label}
               style={styles.item}
               onPress={entry.onPress}
+              accessibilityRole="button"
+              accessibilityLabel={entry.label}
             >
-              <Icon size={20} color="#6B7280" />
+              <Icon size={20} color={colors.primaryDark} />
               <Text style={styles.itemText}>{entry.label}</Text>
-              <ChevronRight size={16} color="#D1D5DB" style={styles.chevron} />
-            </TouchableOpacity>
+              <AppActionIndicator />
+            </AppActionRow>
           );
         })}
       </View>
@@ -50,26 +56,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   menu: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
+    gap: 8,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
   },
   itemText: {
     fontSize: 16,
-    color: '#111827',
+    color: colors.primaryDark,
+    lineHeight: 22,
+    flexShrink: 1,
     marginLeft: 12,
     flex: 1,
-  },
-  chevron: {
-    marginLeft: 'auto',
   },
 });

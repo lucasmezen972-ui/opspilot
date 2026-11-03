@@ -69,6 +69,26 @@ export default function Root({ children }: PropsWithChildren) {
               }
               input, textarea { font-variant-numeric: tabular-nums; }
               * { -webkit-tap-highlight-color: transparent; }
+              :where(a, button, [role="button"], [role="link"], [role="tab"]):not([aria-disabled="true"]):not(:disabled) {
+                cursor: pointer;
+              }
+              @media (hover: hover) {
+                :where(a, button, [role="button"], [role="link"], [role="tab"]):not([aria-disabled="true"]):not(:disabled):hover {
+                  filter: brightness(0.96);
+                }
+              }
+              :where(button:disabled, [aria-disabled="true"]:not(input):not(textarea):not(select):not([role="radio"]):not([role="checkbox"])) {
+                background-color: #E2E8F0 !important;
+                border: 1px solid #94A3B8 !important;
+                box-shadow: none !important;
+                opacity: 1 !important;
+                color: #475569 !important;
+                cursor: not-allowed !important;
+              }
+              :where(button:disabled, [aria-disabled="true"]:not(input):not(textarea):not(select):not([role="radio"]):not([role="checkbox"])) [dir="auto"] {
+                color: #475569 !important;
+              }
+              :where(button, [role="button"])[aria-busy="true"] { cursor: wait !important; }
               :where(a, button, input, textarea, select, [tabindex], [role="button"], [role="tab"]):focus-visible {
                 outline: 3px solid #2563EB !important;
                 outline-offset: 3px;

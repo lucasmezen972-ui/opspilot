@@ -5,6 +5,20 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Visibilité des actions — correction du 3 novembre 2026
+
+Après la PR 236, Lucas demande des actions plus reconnaissables : la sobriété ne
+doit pas laisser hésiter entre une commande et une information. Les accès ont un
+contour visible, une flèche et un titre bleu ; les boutons secondaires sont
+encadrés. Les compteurs restent statiques. Les commandes indisponibles sont
+grisées, avec cadenas sur les boutons partagés et état d’attente explicite.
+
+Les accès terrain sont de vrais liens web, utilisables avec Entrée. Le bouton
+d’ajout d’un produit reste indisponible sans nom obligatoire. La composition et
+l’identité précédentes sont conservées. Règles, preuves et limites :
+[DESIGN-ACTIONS-2026-11-03.md](DESIGN-ACTIONS-2026-11-03.md). La PR de cette
+correction conserve les résultats et identifiants exacts de publication.
+
 ## Finition identité et composition — 3 novembre 2026
 
 La passe suivant la PR 234 unifie la marque, charge Instrument Sans localement,

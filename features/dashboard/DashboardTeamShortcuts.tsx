@@ -1,7 +1,10 @@
-import { router } from 'expo-router';
-import { ChevronRight, TrendingUp, Users } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { TrendingUp, Users } from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
+import {
+  AppActionRow,
+  AppActionIndicator,
+} from '../../shared/components/AppActionRow';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
 
@@ -25,24 +28,24 @@ export function DashboardTeamShortcuts({
         <AppSectionHeader title="Gestion équipe" />
       )}
       <View style={[styles.row, compact && styles.compactRow]}>
-        <TouchableOpacity
+        <AppActionRow
           style={[styles.card, compact && styles.compactCard]}
-          onPress={() => router.push('/team')}
+          href="/team"
           accessibilityRole="link"
         >
           <Users size={compact ? 17 : 22} color={colors.primary} />
           <Text style={styles.title}>Équipe</Text>
-          {compact && <ChevronRight size={14} color={colors.textMuted} />}
-        </TouchableOpacity>
-        <TouchableOpacity
+          {compact && <AppActionIndicator />}
+        </AppActionRow>
+        <AppActionRow
           style={[styles.card, compact && styles.compactCard]}
-          onPress={() => router.push('/manager')}
+          href="/manager"
           accessibilityRole="link"
         >
           <TrendingUp size={compact ? 17 : 22} color={colors.primary} />
           <Text style={styles.title}>Multi-sites</Text>
-          {compact && <ChevronRight size={14} color={colors.textMuted} />}
-        </TouchableOpacity>
+          {compact && <AppActionIndicator />}
+        </AppActionRow>
       </View>
     </View>
   );
@@ -67,14 +70,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 14,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.controlBorder,
   },
   title: {
     flex: 1,
     flexShrink: 1,
     fontSize: 14,
     fontWeight: '600',
-    color: colors.textStrong,
+    color: colors.primaryDark,
   },
   compactTitle: {
     fontSize: 14,
@@ -85,15 +88,15 @@ const styles = StyleSheet.create({
   },
   compactRow: {
     flexDirection: 'column',
-    gap: 0,
+    gap: 8,
   },
   compactCard: {
     flex: 0,
-    minHeight: 44,
+    minHeight: 48,
     paddingVertical: spacing.sm,
-    paddingHorizontal: 0,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    borderRadius: 0,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderRadius: radius.sm,
   },
 });

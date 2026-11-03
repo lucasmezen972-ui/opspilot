@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
+import { AppButton } from './AppButton';
 import { colors, spacing } from '../styles/tokens';
 
 interface AppSectionHeaderProps {
@@ -31,13 +32,14 @@ export function AppSectionHeader({
         {title}
       </Text>
       {hasAction && (
-        <TouchableOpacity
-          onPress={onAction}
-          accessibilityRole="button"
+        <AppButton
+          label={actionLabel!}
+          onPress={onAction!}
+          variant="secondary"
+          size="sm"
+          fullWidth={false}
           style={styles.action}
-        >
-          <Text style={styles.link}>{actionLabel}</Text>
-        </TouchableOpacity>
+        />
       )}
     </View>
   );
@@ -48,6 +50,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
     marginBottom: spacing.md,
   },
   rowNoAction: {
@@ -59,17 +62,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textStrong,
   },
-  link: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '500',
-  },
   action: {
-    minHeight: 44,
-    minWidth: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 12,
-    paddingHorizontal: 4,
+    flexShrink: 0,
   },
 });
