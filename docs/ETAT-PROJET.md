@@ -7,7 +7,7 @@
 
 ## Vérification du 2 novembre 2026
 
-Application de référence : https://opspilot-mu-six.vercel.app/ (Vercel, production READY, commit applicatif `48ea6f6d8ec34507a7cf60c8817e686709c7765a`, PR #218). Les 309 tests unitaires, la qualité, la compilation et 44 parcours navigateur ont été vérifiés localement (38 + 6). Le raccordement au compte Qonto et l’application confirmée de sa migration restent nécessaires avant encaissement.
+Application de référence : https://opspilot-mu-six.vercel.app/ (Vercel, production READY, commit applicatif `48ea6f6d8ec34507a7cf60c8817e686709c7765a`, PR #218). Les 309 tests unitaires, la qualité, la compilation et 44 parcours navigateur ont été vérifiés localement (38 + 6). Le compte Qonto est connecté et la migration de facturation est appliquée et vérifiée. Les liens de paiement Mollie restent à activer par l’éditeur avant d’utiliser l’encaissement par carte. Le rapprochement des règlements reste manuel.
 
 - Les administrateurs clients ne disposent plus des RPC de plateforme. Les modifications directes de rôle, d'organisation et de statut d'un profil sont protégées ; la gestion d'équipe utilise des RPC limitées à l'organisation.
 - `platform_settings` est réservé au serveur. Le jeton worker a été renouvelé ; une nouvelle clé Resend limitée à l'envoi depuis tradikom.com remplace l'ancienne clé « Ops pilot », révoquée. Aucune clé n'est reproduite ici.

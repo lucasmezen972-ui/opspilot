@@ -15,8 +15,8 @@ Pour les échéances suivantes, utiliser les factures récurrentes Qonto ou les 
 
 ## Déploiement requis
 
-- Migration `20261103023738_qonto_billing_requests.sql` : préparation du schéma et des RPC sécurisées. La tentative MCP du 2 novembre a expiré à l'étape de confirmation ; vérifier `to_regclass('public.billing_requests')` avant d'annoncer sa mise en service.
-- Authentification au compte Qonto de l'éditeur, activation de l'encaissement si nécessaire et création d'une première facture réelle après accord commercial.
+- Migration `20261103023738_qonto_billing_requests.sql` appliquée et vérifiée (version enregistrée en base : `20261103034806`). Les tests SQL ont confirmé la déduplication, l’isolation des organisations et le refus d’une auto-activation par le client.
+- Compte Qonto de l’éditeur connecté et vérifié. L’écran des liens de paiement affiche encore « Activer les liens de paiement » : le service Mollie n’est pas activé. Son activation requiert l’autorisation de l’éditeur et, le cas échéant, son acceptation des conditions du prestataire. Aucune facture client ni aucun débit n’a été créé.
 - Les anciens endpoints de création de checkout et de portail Stripe renvoient HTTP 410. Le cron `stripe-sync-worker` est désactivé ; les données historiques et le webhook sont conservés.
 - Aucun débit, mandat, abonnement ou message client n'a été créé pendant cette intervention.
 
