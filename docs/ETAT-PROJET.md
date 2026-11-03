@@ -5,6 +5,35 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Espace client TRADIKOM — raccordement serveur du 3 novembre 2026
+
+Les achats confirmés peuvent désormais alimenter une file commerciale privée
+destinée à l’espace TRADIKOM commun. Le premier contact est ancré depuis une
+facture payée et son demandeur administrateur/owner dont l’e-mail est vérifié.
+Les essais et les employés ne créent pas d’accès commercial. Les messages
+conservent leur identifiant et leur révision ; les reprises utilisent un bail.
+
+Les migrations `customer_portal_sync` et
+`customer_portal_worker_token_compatibility` sont appliquées sur OPS PILOT V2,
+versions distantes **20261103195531** et **20261103200052**. La fonction
+`customer-portal-sync` est **ACTIVE v2**. Le jeton interne existant est une
+chaîne JSON ; le nouveau raccordement accepte cette représentation et l’objet
+historique sans faire tourner la clé ni modifier les autres workers.
+
+Huit tests Node passent, ainsi que la recette SQL réelle en transaction annulée.
+Les appels HTTP réels donnent 401 sans jeton, 403 avec Origin navigateur et 503
+`sync_unavailable` avec le bon jeton tant que le drapeau est désactivé.
+Les deux tables ont RLS et aucun droit client ; zéro compte commercial et zéro
+événement de fixture subsistent. Les nouvelles fonctions restent réservées au
+service_role.
+
+**La liaison reste désactivée** : secrets dédiés et livraison signée fictive à
+valider avant activation. Aucun achat existant n’est importé, aucun paiement,
+facture ou e-mail réel n’est émis. Le portail TRADIKOM (PR 25) affiche Mes services
+sur son domaine public ; le cycle d’achat TRADIKOM ONE et la connexion unique
+restent des travaux séparés. Contrat, activation et preuves :
+[CUSTOMER-PORTAL.md](CUSTOMER-PORTAL.md).
+
 ## Revue design transverse — candidat vérifié du 3 novembre 2026
 
 La reprise porte sur l’interface web au-delà de la formation : menu latéral dès

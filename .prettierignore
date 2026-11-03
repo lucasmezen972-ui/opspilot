@@ -8,3 +8,4 @@ coverage/
 package-lock.json
 supabase/migrations/
 admin/vendor/
+.vercel/
