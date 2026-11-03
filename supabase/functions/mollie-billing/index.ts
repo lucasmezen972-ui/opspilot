@@ -59,7 +59,11 @@ Deno.serve(async (req) => {
     ) {
       let aal = '';
       try {
-        aal = JSON.parse(atob(jwt.split('.')[1] ?? ''))?.aal ?? '';
+        const encoded = (jwt.split('.')[1] ?? '')
+          .replace(/-/g, '+')
+          .replace(/_/g, '/');
+        const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=');
+        aal = JSON.parse(atob(padded))?.aal ?? '';
       } catch {
         aal = '';
       }
