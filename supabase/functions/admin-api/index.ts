@@ -35,11 +35,14 @@ async function requireSuperadmin(req: Request) {
   }
   const { data: profile } = await admin
     .from('profiles')
-    .select('role')
+    .select('role,is_active')
     .eq('id', data.user.id)
     .single();
   const role = profile?.role ?? '';
-  if (role !== 'superadmin' && role !== 'support') {
+  if (
+    profile?.is_active !== true ||
+    (role !== 'superadmin' && role !== 'support')
+  ) {
     return {
       error: json({ error: 'Accès réservé à l’équipe plateforme' }, 403),
     };
@@ -56,16 +59,24 @@ async function requireSuperadmin(req: Request) {
 
   // 2FA : si un facteur TOTP vérifié existe, exiger une session aal2
   // (pas de porte dérobée une fois la 2FA activée).
-  const { data: factorData } = await admin.auth.admin.mfa.listFactors({
-    userId: data.user.id,
-  });
+  const { data: factorData, error: factorError } =
+    await admin.auth.admin.mfa.listFactors({
+      userId: data.user.id,
+    });
+  if (factorError)
+    return { error: json({ error: 'Vérification 2FA indisponible' }, 503) };
   const hasTotp = (factorData?.factors ?? []).some(
     (f) => f.factor_type === 'totp' && f.status === 'verified',
   );
   if (hasTotp) {
     let aal = '';
     try {
-      aal = JSON.parse(atob(token.split('.')[1] ?? ''))?.aal ?? '';
+      const part = (token.split('.')[1] ?? '')
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      aal =
+        JSON.parse(atob(part.padEnd(Math.ceil(part.length / 4) * 4, '=')))
+          ?.aal ?? '';
     } catch {
       aal = '';
     }

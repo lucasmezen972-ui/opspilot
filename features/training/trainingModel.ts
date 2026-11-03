@@ -7,6 +7,7 @@ export interface TrainingCourseView {
   ai_generated?: boolean;
   duration_minutes: number;
   chapterCount: number;
+  videoCount?: number;
   difficulty: string;
   progress: number;
   status: string;
@@ -15,9 +16,9 @@ export interface TrainingCourseView {
 export function getTrainingStatusColor(status: string): string {
   switch (status) {
     case 'completed':
-      return '#10B981';
+      return '#047857';
     case 'in_progress':
-      return '#F59E0B';
+      return '#92400E';
     default:
       return '#6B7280';
   }
@@ -25,6 +26,8 @@ export function getTrainingStatusColor(status: string): string {
 
 export function getTrainingStatusText(status: string): string {
   switch (status) {
+    case 'needs_review':
+      return 'À réévaluer';
     case 'completed':
       return 'Terminé';
     case 'in_progress':
@@ -39,11 +42,11 @@ export function getTrainingStatusText(status: string): string {
 export function getDifficultyColor(difficulty: string): string {
   switch (difficulty) {
     case 'beginner':
-      return '#10B981';
+      return '#047857';
     case 'intermediate':
-      return '#F59E0B';
+      return '#92400E';
     case 'advanced':
-      return '#EF4444';
+      return '#B91C1C';
     default:
       return '#6B7280';
   }
@@ -64,12 +67,13 @@ export function getDifficultyText(difficulty: string): string {
 
 /** Libellé du bouton d'action selon l'avancement du cours. */
 export function getCourseActionLabel(status: string): string {
+  if (status === 'needs_review') return 'Réévaluer';
   if (status === 'not_started') return 'Commencer';
   if (status === 'in_progress') return 'Continuer';
   return 'Revoir';
 }
 
-/** Temps d'étude cumulé (minutes) des cours terminés. */
+/** Durée annoncée cumulée des cours terminés, sans prétendre mesurer la présence. */
 export function computeStudyTime(
   courses: { status: string; duration_minutes?: number | null }[],
 ): number {
@@ -94,7 +98,7 @@ export interface MemberTrainingStatus {
   matricule: string;
   trainingId: string;
   trainingTitle: string;
-  status: 'not_started' | 'in_progress' | 'completed';
+  status: 'not_started' | 'in_progress' | 'completed' | 'needs_review';
   score: number | null;
   completedAt: string | null;
   hasCertificate: boolean;

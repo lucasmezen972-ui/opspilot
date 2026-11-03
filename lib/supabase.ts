@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
+import { customFetch } from './retryFetch';
 import { logger } from '../utils/logger';
 import { DEFAULT_SUPABASE_URL } from '../utils/supabaseConfig';
+export { customFetch } from './retryFetch';
 
 // `||` plutôt que `??` : en CI, un secret GitHub absent est injecté comme
 // chaîne vide, qui doit retomber sur le fallback.
@@ -31,24 +33,6 @@ if (
   !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
   logger.info('[Supabase] Clé publique absente, fallback OpsPilot utilisé.');
-
-export const customFetch = async (
-  input: RequestInfo | URL,
-  init?: RequestInit,
-) => {
-  let attempt = 0;
-  while (true) {
-    try {
-      const res = await fetch(input, init);
-      if (res.status !== 502) return res;
-      if (attempt++ >= 2) return res; // 3 tentatives max
-      await new Promise((r) => setTimeout(r, 300 * attempt));
-    } catch (error) {
-      if (attempt++ >= 2) throw error;
-      await new Promise((r) => setTimeout(r, 300 * attempt));
-    }
-  }
-};
 
 export const supabase: SupabaseClient = createClient(
   SUPABASE_URL,
@@ -227,6 +211,10 @@ export type TrainingChapter = {
   title: string;
   body: string;
   sort_order: number;
+  video_url?: string | null;
+  video_storage_path?: string | null;
+  video_duration_seconds?: number | null;
+  captions_url?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -246,6 +234,7 @@ export type TrainingQuizQuestion = {
   question: string;
   options: string[];
   correct_index: number;
+  correct_indexes?: number[] | null;
   sort_order: number;
   difficulty?: 'easy' | 'medium' | 'hard' | null;
   question_type?: QuizQuestionType | null;
@@ -285,6 +274,11 @@ export type UserTrainingProgress = {
   status: 'not_started' | 'in_progress' | 'completed';
   progress_percentage: number;
   completed_chapter_ids?: string[];
+  video_progress?: Record<
+    string,
+    { position: number; watched: number; last_seen?: string }
+  >;
+  server_verified_at?: string | null;
   score?: number | null;
   started_at?: string | null;
   completed_at?: string | null;

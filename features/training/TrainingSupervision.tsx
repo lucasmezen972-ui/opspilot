@@ -17,6 +17,7 @@ import {
 } from './trainingModel';
 import type { Training } from '../../lib/supabase';
 import { colors } from '../../shared/styles/tokens';
+import { dataToCSV } from '../../utils/export';
 
 interface Props {
   courses: Training[];
@@ -56,11 +57,13 @@ function StatusBadge({ status }: { status: MemberTrainingStatus['status'] }) {
     completed: '#ECFDF5',
     in_progress: '#FEF3C7',
     not_started: '#F3F4F6',
+    needs_review: '#FEF3C7',
   };
   const text_map: Record<string, string> = {
     completed: '#065F46',
     in_progress: '#92400E',
     not_started: '#6B7280',
+    needs_review: '#92400E',
   };
   return (
     <View style={[styles.statusBadge, { backgroundColor: colors_map[status] }]}>
@@ -73,15 +76,19 @@ function StatusBadge({ status }: { status: MemberTrainingStatus['status'] }) {
 
 function exportCSV(entries: MemberTrainingStatus[]) {
   if (Platform.OS !== 'web' || typeof document === 'undefined') return;
-  const header =
-    'Nom,Matricule,Rôle,Formation,Statut,Score,Attestation,Date de validation\n';
-  const rows = entries
-    .map(
-      (e) =>
-        `"${e.memberName}","${e.matricule}","${e.memberRole}","${e.trainingTitle}","${getTrainingStatusText(e.status)}",${e.score ?? ''},${e.hasCertificate ? 'Oui' : 'Non'},${e.completedAt ?? ''}`,
-    )
-    .join('\n');
-  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' });
+  const csv = dataToCSV(
+    entries.map((e) => ({
+      Nom: e.memberName,
+      Matricule: e.matricule,
+      Rôle: e.memberRole,
+      Formation: e.trainingTitle,
+      Statut: getTrainingStatusText(e.status),
+      Score: e.score,
+      Attestation: e.hasCertificate ? 'Oui' : 'Non',
+      'Date de validation': e.completedAt,
+    })),
+  );
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

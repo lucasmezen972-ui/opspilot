@@ -28,7 +28,7 @@ export function TrainingStatsOverview({
           <Text style={styles.statNumber}>
             {Math.floor(totalStudyTime / 60)}h {totalStudyTime % 60}m
           </Text>
-          <Text style={styles.statLabel}>Temps d'étude</Text>
+          <Text style={styles.statLabel}>Durée des cours validés</Text>
         </View>
         <View style={styles.statItem}>
           <TrendingUp size={20} color="#10B981" />

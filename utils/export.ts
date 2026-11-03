@@ -1,17 +1,14 @@
-import ExcelJS from 'exceljs';
 import { Platform, Share } from 'react-native';
+
+import { csvCell } from './csv';
 
 export function dataToCSV(data: Record<string, unknown>[]): string {
   const first = data[0];
   if (!first) return '';
   const headers = Object.keys(first);
-  const csv = [headers.join(',')];
+  const csv = [headers.map(csvCell).join(',')];
   for (const row of data) {
-    const values = headers.map((h) => {
-      const value = row[h] ?? '';
-      // Use JSON.stringify to properly escape commas and quotes
-      return JSON.stringify(value);
-    });
+    const values = headers.map((h) => csvCell(row[h]));
     csv.push(values.join(','));
   }
   return csv.join('\n');
@@ -19,7 +16,9 @@ export function dataToCSV(data: Record<string, unknown>[]): string {
 
 export async function dataToExcelBuffer(
   data: Record<string, unknown>[],
-): Promise<Buffer> {
+): Promise<ArrayBuffer> {
+  // Keep the spreadsheet engine out of the initial web application bundle.
+  const { default: ExcelJS } = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Data');
 
@@ -35,7 +34,8 @@ export async function dataToExcelBuffer(
   }
 
   const buffer = (await workbook.xlsx.writeBuffer()) as ArrayBuffer;
-  return Buffer.from(buffer);
+  // The browser has no Node Buffer global; normalize either SDK output shape.
+  return new Uint8Array(buffer).buffer;
 }
 
 function triggerWebDownload(blob: Blob, name: string): void {

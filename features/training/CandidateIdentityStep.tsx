@@ -27,6 +27,7 @@ interface Props {
   ) => void;
   onBack: () => void;
   onSign: () => void;
+  saving?: boolean;
 }
 
 function IdentityField({
@@ -52,6 +53,7 @@ function IdentityField({
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         testID={testID}
+        accessibilityLabel={label}
       />
     </View>
   );
@@ -59,7 +61,7 @@ function IdentityField({
 
 /**
  * Étape d'identité du candidat avant délivrance d'une attestation
- * quasi-certifiante : nom, matricule, poste, magasin et confirmation sur
+ * interne : nom, matricule, poste, magasin et confirmation sur
  * l'honneur, signés explicitement.
  */
 export function CandidateIdentityStep({
@@ -68,6 +70,7 @@ export function CandidateIdentityStep({
   onChange,
   onBack,
   onSign,
+  saving = false,
 }: Props) {
   return (
     <>
@@ -132,7 +135,11 @@ export function CandidateIdentityStep({
         </TouchableOpacity>
 
         {errors.length > 0 && (
-          <View style={styles.errors} testID="training-identity-errors">
+          <View
+            style={styles.errors}
+            testID="training-identity-errors"
+            accessibilityRole="alert"
+          >
             {errors.map((error) => (
               <Text key={error} style={styles.errorText}>
                 • {error}
@@ -143,7 +150,12 @@ export function CandidateIdentityStep({
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.secondaryButton} onPress={onBack}>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={onBack}
+          disabled={saving}
+          accessibilityRole="button"
+        >
           <ChevronLeft size={18} color={colors.primary} />
           <Text style={styles.secondaryButtonText}>Retour</Text>
         </TouchableOpacity>
@@ -151,9 +163,14 @@ export function CandidateIdentityStep({
           testID="training-certificate-sign"
           style={styles.primaryButton}
           onPress={onSign}
+          disabled={saving}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: saving, busy: saving }}
         >
           <PenLine size={18} color="#FFFFFF" />
-          <Text style={styles.primaryButtonText}>Valider et signer</Text>
+          <Text style={styles.primaryButtonText}>
+            {saving ? 'Enregistrement…' : 'Valider et signer'}
+          </Text>
         </TouchableOpacity>
       </View>
     </>
@@ -191,6 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   honorRow: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,

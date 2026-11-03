@@ -61,9 +61,21 @@ export function generateCertificateNumber(
 }
 
 /**
- * Construit le HTML d'un certificat quasi-certifiant pour affichage ou impression.
+ * Construit une attestation interne pour affichage ou impression.
  */
 export function buildCertificateHTML(ctx: CertificateContext): string {
+  const escape = (value: unknown): string =>
+    String(value ?? '').replace(
+      /[&<>"']/g,
+      (character) =>
+        ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[character]!,
+    );
   const date = new Date(ctx.issuedAt).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
@@ -94,7 +106,7 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
   const detailsHTML = detailRows
     .map(
       ([label, value]) =>
-        `<div class="detail"><span class="detail-label">${label}</span><span class="detail-value">${value}</span></div>`,
+        `<div class="detail"><span class="detail-label">${escape(label)}</span><span class="detail-value">${escape(value)}</span></div>`,
     )
     .join('');
 
@@ -102,7 +114,7 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Certificat — ${ctx.trainingTitle}</title>
+  <title>Attestation — ${escape(ctx.trainingTitle)}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -258,26 +270,26 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
 
     <div class="logo-line">
       <span class="logo-badge">OpsPilot</span>
-      ${ctx.organizationName ? `<span class="logo-org">${ctx.organizationName}</span>` : ''}
+      ${ctx.organizationName ? `<span class="logo-org">${escape(ctx.organizationName)}</span>` : ''}
     </div>
 
     <div class="eyebrow">Attestation de formation professionnelle</div>
-    <h1>${ctx.trainingTitle}</h1>
+    <h1>${escape(ctx.trainingTitle)}</h1>
 
     <div class="recipient-label">Délivré à</div>
-    <div class="recipient-name">${ctx.fullName}</div>
+    <div class="recipient-name">${escape(ctx.fullName)}</div>
 
     <p class="body-text">
-      La présente attestation certifie que <strong>${ctx.fullName}</strong> a
-      suivi et validé avec succès la formation <em>${ctx.trainingTitle}</em>${
-        ctx.category ? ` (${ctx.category})` : ''
+      La présente attestation indique que <strong>${escape(ctx.fullName)}</strong> a
+      ${isPassed ? 'validé' : 'passé'} l’évaluation de la formation <em>${escape(ctx.trainingTitle)}</em>${
+        ctx.category ? ` (${escape(ctx.category)})` : ''
       }.
-      Cette formation répond aux exigences réglementaires et procédurales de
-      l'organisation.
+      Le contenu et les exigences métier relèvent de l’organisation qui dispense
+      cette formation.
     </p>
 
     <div class="score-badge">
-      ${isPassed ? '✓' : '✗'} ${isPassed ? 'Formation validée' : 'Formation non validée'} — Score obtenu : ${ctx.score} %
+      ${isPassed ? '✓' : '✗'} ${isPassed ? 'Formation validée' : 'Formation non validée'} — Score obtenu : ${escape(ctx.score)} %
     </div>
 
     <div class="details">
@@ -288,13 +300,14 @@ export function buildCertificateHTML(ctx: CertificateContext): string {
       <div class="sig-block">
         <div class="sig-line"></div>
         <div class="sig-label">Responsable formation</div>
-        <div class="sig-name">${ctx.supervisorName ?? 'Responsable RH'}</div>
+        <div class="sig-name">${escape(ctx.supervisorName ?? 'Non renseigné')}</div>
       </div>
       <div class="cert-info">
-        <div class="cert-num">N° <span>${ctx.certificateNumber}</span></div>
-        <div class="cert-date">Émis le ${date}</div>
+        <div class="cert-num">N° <span>${escape(ctx.certificateNumber)}</span></div>
+        <div class="cert-date">Émis le ${escape(date)}</div>
       </div>
     </div>
+    <p class="cert-date">Attestation interne OpsPilot. Ce document ne constitue pas une certification officielle ni une vérification d’identité.</p>
   </div>
 </body>
 </html>`;
@@ -330,7 +343,7 @@ export function openCertificate(
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   }
 }

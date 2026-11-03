@@ -77,12 +77,25 @@ Deno.serve(async (req) => {
 
   const { data: profile, error: profileError } = await admin
     .from('profiles')
-    .select('organization_id, full_name, role')
+    .select('organization_id, full_name, role, is_active')
     .eq('id', userData.user.id)
     .single();
-  if (profileError || !profile?.organization_id) {
+  if (profileError || !profile?.organization_id || profile.is_active !== true) {
     return json({ error: 'Organisation introuvable' }, 403);
   }
+
+  const { data: organizationState, error: organizationError } = await admin
+    .from('organizations')
+    .select('settings')
+    .eq('id', profile.organization_id)
+    .maybeSingle();
+  if (
+    organizationError ||
+    !organizationState ||
+    (organizationState.settings?.status === 'suspended' &&
+      !['superadmin', 'support'].includes(profile.role))
+  )
+    return json({ error: 'Compte indisponible' }, 403);
 
   const { data: allowed, error: rateError } = await admin.rpc(
     'check_ai_rate_limit',

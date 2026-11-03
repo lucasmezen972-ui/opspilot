@@ -15,6 +15,7 @@ import RequireRole from '../../components/RequireRole';
 import { CurrentPlanCard } from '../../features/billing/CurrentPlanCard';
 import { PlanCard } from '../../features/billing/PlanCard';
 import { QontoAdminPanel } from '../../features/billing/QontoAdminPanel';
+import { SepaAgreementsPanel } from '../../features/billing/SepaAgreementsPanel';
 import { PLANS } from '../../features/billing/billingModel';
 import { isBillingPaymentUrl } from '../../features/billing/qonto';
 import { useAuth } from '../../hooks/useAuth';
@@ -102,7 +103,14 @@ function BillingScreenContent() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{
+        width: '100%',
+        maxWidth: 1040,
+        alignSelf: 'center',
+      }}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Abonnement</Text>
         <Text style={styles.subtitle}>
@@ -140,6 +148,16 @@ function BillingScreenContent() {
       )}
 
       <View style={styles.section}>
+        {profile?.role !== 'superadmin' && (
+          <View style={{ marginVertical: 20 }}>
+            <SepaAgreementsPanel
+              isLocalDemo={isLocalDemo}
+              onChanged={async () => {
+                await Promise.all([refreshRequests(), refreshSubscription()]);
+              }}
+            />
+          </View>
+        )}
         {requests
           .filter(
             (request) =>
@@ -161,7 +179,7 @@ function BillingScreenContent() {
                 >
                   <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
                     {request.payment_provider === 'mollie'
-                      ? 'Régler la facture par carte'
+                      ? 'Régler la facture chez Mollie'
                       : 'Régler sur Qonto'}
                   </Text>
                 </TouchableOpacity>
@@ -202,9 +220,9 @@ function BillingScreenContent() {
         <Text style={styles.footerText}>
           Facturation mensuelle avec Qonto. Votre facture précise le montant,
           les taxes applicables et le moyen de règlement. L’activation suit la
-          vérification du paiement. Chaque période facturée fait l’objet d’un
-          règlement ; aucun prélèvement automatique n’est effectué. Sans
-          engagement.
+          vérification du paiement. Le prélèvement SEPA nécessite un calendrier
+          accepté, un mandat valide et l’activation du service par Mollie. Vous
+          pouvez arrêter les prochaines échéances depuis ce calendrier.
         </Text>
       </View>
     </ScrollView>
@@ -260,5 +278,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   footer: { padding: 20, paddingTop: 4, paddingBottom: 40 },
-  footerText: { fontSize: 12, color: '#9CA3AF', textAlign: 'center' },
+  footerText: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
 });

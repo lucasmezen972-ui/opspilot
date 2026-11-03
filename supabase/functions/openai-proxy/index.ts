@@ -5,6 +5,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import OpenAI from 'npm:openai@4';
 
+import { readSmallBody } from '../_shared/mollie.ts';
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') ?? '';
@@ -52,6 +54,26 @@ Deno.serve(async (req) => {
     return json({ error: 'Session invalide' }, 401);
   }
 
+  const { data: profile, error: profileError } = await admin
+    .from('profiles')
+    .select('organization_id,role,is_active')
+    .eq('id', userData.user.id)
+    .maybeSingle();
+  if (profileError || profile?.is_active !== true || !profile.organization_id)
+    return json({ error: 'Compte indisponible' }, 403);
+  const { data: organization, error: organizationError } = await admin
+    .from('organizations')
+    .select('settings')
+    .eq('id', profile.organization_id)
+    .maybeSingle();
+  if (
+    organizationError ||
+    !organization ||
+    (organization.settings?.status === 'suspended' &&
+      !['superadmin', 'support'].includes(profile.role))
+  )
+    return json({ error: 'Compte indisponible' }, 403);
+
   const { data: allowed, error: rateError } = await admin.rpc(
     'check_ai_rate_limit',
     {
@@ -73,10 +95,27 @@ Deno.serve(async (req) => {
 
   let body: { action: Action; payload: Record<string, unknown> };
   try {
-    body = await req.json();
+    body = JSON.parse(await readSmallBody(req, 100_000));
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      !body.payload ||
+      typeof body.payload !== 'object' ||
+      Array.isArray(body.payload)
+    )
+      throw new Error('invalid_body');
   } catch {
     return json({ error: 'Corps de requête invalide' }, 400);
   }
+
+  if (
+    body.action === 'generate_training_content' &&
+    !['admin', 'manager', 'superadmin'].includes(profile.role)
+  )
+    return json(
+      { error: 'Création de formation réservée aux responsables' },
+      403,
+    );
 
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 

@@ -5,11 +5,13 @@ import {
   ActivityIndicator,
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   Alert,
   Modal,
+  useWindowDimensions,
 } from 'react-native';
 
 import { TrainingAchievements } from '../../features/training/TrainingAchievements';
@@ -21,6 +23,7 @@ import {
 import { TrainingLeaderboard } from '../../features/training/TrainingLeaderboard';
 import { TrainingStatsOverview } from '../../features/training/TrainingStatsOverview';
 import { TrainingSupervision } from '../../features/training/TrainingSupervision';
+import { TrainingVideoEditor } from '../../features/training/TrainingVideoEditor';
 import {
   computeAverageScore,
   computeStudyTime,
@@ -49,6 +52,7 @@ import { logger } from '../../utils/logger';
 import { isManagerRole } from '../../utils/roles';
 
 export default function TrainingScreen() {
+  const { width } = useWindowDimensions();
   const { profile, isDemoMode, session } = useAuth();
   const isLocalDemo = isDemoMode && !session;
   const { entries: leaderboard } = useLeaderboard();
@@ -58,6 +62,8 @@ export default function TrainingScreen() {
     error: coursesError,
     startCourse,
     markChapterRead,
+    startQuiz,
+    recordVideoProgress,
     completeQuiz,
     generateCertificate,
     getCourseProgress,
@@ -87,7 +93,7 @@ export default function TrainingScreen() {
     const result = await generateCertificate(courseId, score, options);
     if (result?.error) {
       Alert.alert('Erreur', String(result.error));
-      return;
+      return { error: result.error };
     }
     const course = dbCourses.find((c) => c.id === courseId);
     logEvent({
@@ -96,6 +102,7 @@ export default function TrainingScreen() {
       entityId: courseId,
       label: `Formation « ${course?.title ?? 'formation'} » validée par ${options.fullName} (matricule ${options.employeeId}, score ${score} %).`,
     });
+    return {};
   };
 
   const courses: TrainingCourseView[] = dbCourses.map((c) => {
@@ -108,14 +115,30 @@ export default function TrainingScreen() {
       ai_generated: c.ai_generated,
       duration_minutes: c.duration_minutes,
       chapterCount: getChaptersForCourse(c.id).length,
+      videoCount: getChaptersForCourse(c.id).filter(
+        (chapter) =>
+          Boolean(chapter.video_url) || Boolean(chapter.video_storage_path),
+      ).length,
       difficulty: c.difficulty,
       progress: progress?.progress_percentage ?? 0,
-      status: progress?.status ?? 'not_started',
+      status:
+        !isLocalDemo &&
+        progress?.status === 'completed' &&
+        !progress.server_verified_at
+          ? 'needs_review'
+          : (progress?.status ?? 'not_started'),
     };
   });
 
   const [generatingCourse, setGeneratingCourse] = useState(false);
+  const [search, setSearch] = useState('');
+  const visibleCourses = courses.filter((course) =>
+    `${course.title} ${course.description}`
+      .toLocaleLowerCase('fr')
+      .includes(search.trim().toLocaleLowerCase('fr')),
+  );
   const [showTopicPicker, setShowTopicPicker] = useState(false);
+  const [showVideoEditor, setShowVideoEditor] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const selectedCourse =
     dbCourses.find((course) => course.id === selectedCourseId) ?? null;
@@ -396,29 +419,68 @@ export default function TrainingScreen() {
           onSendReminder={sendReminder}
         />
       ) : (
-        <ScrollView style={styles.content}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={{
+            width: '100%',
+            maxWidth: 1120,
+            alignSelf: 'center',
+          }}
+        >
           <TrainingStatsOverview
             completedCourses={completedCourses}
             totalStudyTime={totalStudyTime}
             avgScore={avgScore}
           />
 
-          <TrainingAchievements />
+          <TrainingAchievements completedCourses={completedCourses} />
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Formations disponibles</Text>
-              <TouchableOpacity
-                style={styles.aiGenerateButton}
-                onPress={() => setShowTopicPicker(true)}
-                disabled={generatingCourse}
-              >
-                <Sparkles size={16} color={colors.warning} />
-                <Text style={styles.aiGenerateButtonText}>
-                  {generatingCourse ? 'Génération...' : 'IA'}
-                </Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {isManager && (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    testID="training-video-add"
+                    onPress={() => setShowVideoEditor(true)}
+                    style={styles.aiGenerateButton}
+                  >
+                    <Text style={styles.aiGenerateButtonText}>
+                      Ajouter une vidéo
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {isManager && (
+                  <TouchableOpacity
+                    style={styles.aiGenerateButton}
+                    accessibilityLabel="Générer une formation"
+                    onPress={() => setShowTopicPicker(true)}
+                    disabled={generatingCourse}
+                  >
+                    <Sparkles size={16} color={colors.warning} />
+                    <Text style={styles.aiGenerateButtonText}>
+                      {generatingCourse ? 'Génération...' : 'IA'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
+            <TextInput
+              accessibilityLabel="Rechercher une formation"
+              placeholder="Rechercher une formation"
+              value={search}
+              onChangeText={setSearch}
+              style={{
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 10,
+                padding: 14,
+                marginBottom: 16,
+                color: colors.textStrong,
+                backgroundColor: colors.surface,
+              }}
+            />
 
             {coursesLoading ? (
               <View style={styles.loadingBanner}>
@@ -435,14 +497,30 @@ export default function TrainingScreen() {
               <Text style={styles.emptyCourses}>
                 Aucune formation disponible pour le moment.
               </Text>
+            ) : visibleCourses.length === 0 ? (
+              <Text style={styles.emptyCourses}>
+                Aucune formation ne correspond à votre recherche.
+              </Text>
             ) : (
-              courses.map((course) => (
-                <TrainingCourseCard
-                  key={course.id}
-                  course={course}
-                  onOpen={handleOpenCourse}
-                />
-              ))
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  columnGap: 16,
+                }}
+              >
+                {visibleCourses.map((course) => (
+                  <View
+                    key={course.id}
+                    style={{ width: width >= 900 ? '48.5%' : '100%' }}
+                  >
+                    <TrainingCourseCard
+                      course={course}
+                      onOpen={handleOpenCourse}
+                    />
+                  </View>
+                ))}
+              </View>
             )}
           </View>
 
@@ -465,8 +543,20 @@ export default function TrainingScreen() {
         onClose={() => setSelectedCourseId(null)}
         onMarkChapterRead={markChapterRead}
         onCompleteQuiz={completeQuiz}
+        onStartQuiz={startQuiz}
+        onVideoProgress={recordVideoProgress}
         onGenerateCertificate={handleGenerateCertificate}
       />
+      {isManager && (
+        <TrainingVideoEditor
+          visible={showVideoEditor}
+          courses={dbCourses}
+          organizationId={profile?.organization_id ?? ''}
+          isLocalDemo={isLocalDemo}
+          onClose={() => setShowVideoEditor(false)}
+          onSaved={refetch}
+        />
+      )}
 
       <Modal
         visible={showTopicPicker}
@@ -538,7 +628,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   pointsText: {
-    color: colors.fieldAmber,
+    color: colors.warningText,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4,
@@ -557,12 +647,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionHeader: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'stretch',
     marginBottom: 16,
   },
   aiGenerateButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.warningSoft,
@@ -573,7 +664,7 @@ const styles = StyleSheet.create({
     borderColor: colors.warning,
   },
   aiGenerateButtonText: {
-    color: colors.fieldAmber,
+    color: colors.warningText,
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,

@@ -91,6 +91,8 @@ export function MolliePaymentControls({
             : 'Vérification du service de paiement indisponible.'}
       </Text>
       <TouchableOpacity
+        accessibilityRole="button"
+        style={{ minHeight: 44, justifyContent: 'center' }}
         onPress={() => refreshStatus().catch(() => setReady(null))}
       >
         <Text style={{ color: '#2563EB' }}>Actualiser l’état de Mollie</Text>
@@ -110,9 +112,14 @@ export function MolliePaymentControls({
             style={{ backgroundColor: 'white', padding: 12 }}
           />
           <TouchableOpacity
+            accessibilityRole="button"
             disabled={busy || ready !== true}
             onPress={() => perform(false)}
-            style={{ opacity: busy || ready !== true ? 0.5 : 1 }}
+            style={{
+              opacity: busy || ready !== true ? 0.5 : 1,
+              minHeight: 44,
+              justifyContent: 'center',
+            }}
           >
             <Text style={{ color: '#2563EB' }}>
               {busy
@@ -123,7 +130,12 @@ export function MolliePaymentControls({
         </>
       )}
       {request.mollie_payment_id && (
-        <TouchableOpacity disabled={busy} onPress={() => perform(true)}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={{ minHeight: 44, justifyContent: 'center' }}
+          disabled={busy}
+          onPress={() => perform(true)}
+        >
           <Text style={{ color: '#2563EB' }}>
             {busy ? 'Vérification…' : 'Revérifier ce paiement auprès de Mollie'}
           </Text>
