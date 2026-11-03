@@ -5,37 +5,42 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
-## Parcours internes texte + vidéo — livraison préparée le 3 novembre 2026
+## Parcours internes texte + vidéo — reprise du 3 novembre 2026
 
-Lucas précise que le catalogue doit couvrir les formations internes des salariés,
-pas les démarches des organismes de formation. Dix programmes sont rédigés :
-quatre familles de sécurité au travail, trois d’hygiène alimentaire selon les
-missions et trois de développement professionnel. Chaque parcours associe une
-capsule réellement créée, trois chapitres écrits, une application corrigée et
-six questions finales. Les durées sont mesurées pour la vidéo et indicatives
-pour la lecture et l’activité. Le responsable doit encore organiser les pratiques
-sur le site ; aucune certification officielle ou conformité globale n’est affirmée.
+Dix programmes associent chacun une capsule narrée et sous-titrée, trois chapitres
+écrits, un exercice corrigé et six questions finales. Le catalogue couvre les
+formations internes selon le poste et les risques ; les démarches des organismes
+et habilitations officielles restent exclues. Les pratiques au poste restent à
+organiser par l’employeur ; aucune certification Qualiopi n’est revendiquée.
 
-Le code ajoute un catalogue de programmes, l’installation par organisation sans
-doublon, les métadonnées pédagogiques et les repères vidéo. Les corrigés notés
-nouveaux sont hors du dépôt public et seront injectés dans le catalogue privé.
-Les anciens cours et leurs historiques ne sont pas réécrits. La lecture
-asynchrone est liée au compte pour écarter les réponses d’un compte précédent.
+Les deux migrations du catalogue sont présentes sur OPS PILOT V2 sous
+`20261103172837` et `20261103172906`. Dix médias privés et dix corrigés serveur
+sont chargés : **14 820 706 octets attendus et stockés**, bucket `training-library`
+privé. `training-content-release` est ACTIVE v2. L’import ne copie pas les cours
+chez les clients ; chaque responsable choisit les programmes de son organisation.
 
-Le catalogue et le programme d’accueil sécurité ont été vérifiés manuellement
-sur la prévisualisation Vercel, en démo fictive, à 1363 × 936 pixels : filtre
-au clavier, quatre formations de sécurité et objectifs/pratique affichés. Le
-parcours connecté et le téléphone restent à vérifier.
+Le correctif `training_unique_video_coverage`, version distante `20261103173636`,
+compte les segments vidéo distincts avec borne de temps serveur : répéter une
+portion ne gonfle plus le visionnage. Le crédit historique est conservé une fois,
+sans réécrire les chapitres validés, XP ou attestations. Des versions différentes
+d’un programme peuvent garder leur titre ; la copie des anciens cours est préservée.
 
-Les dix MP4, textes et sous-titres sont créés et sauvegardés, avec leur paquet
-formateur privé. La [PR #231](https://github.com/lucasmezen972-ui/opspilot/pull/231) est en brouillon.
-**Publication en attente** : migrations/import Supabase non
-appliqués après expiration de la confirmation native ; nouveaux parcours
-navigateur non validés à cause du refus des sockets Unix et de l’élévation de
-permissions dans l’environnement. La compilation, les contrôles de qualité,
-les scénarios SQL et le test d’import Deno sont consignés dans
-[FORMATION-PARCOURS.md](FORMATION-PARCOURS.md). Aucun téléversement pédagogique
-Supabase, prélèvement, facture client ni minute GitHub Actions dans cette reprise.
+Quatre scénarios SQL passent sur Supabase réel en transactions annulées : copie
+et isolation du catalogue/médias, couverture vidéo, versions et correction
+serveur avec XP unique/attestation. Aucun résidu des fixtures SQL. Onze scénarios
+et le rejeu des migrations passent localement ; l’import Deno passe ses quatre
+étapes. Qualité/compilation réussies et **371 tests unitaires** passent. Les trois
+nouveaux parcours navigateur passent à 375 et 1440 pixels avec les vraies capsules,
+lecture partielle Range, quiz et attestation fictive. Les API de ces tests UI sont
+interceptées ; les contrôles SQL réels sont une preuve distincte. Régression et
+publication finale : voir [FORMATION-PARCOURS.md](FORMATION-PARCOURS.md).
+
+Le serveur SEPA sélectionne désormais une méthode bancaire réellement proposée
+(Pay by Bank prioritaire, iDEAL possible), refuse la carte pour un mandat SEPA et
+maintient le contrôle des reversements. Les deux fonctions récurrentes sont ACTIVE
+v2. En test, Mollie propose directdebit et iDEAL pour la première séquence ; en
+production zéro méthode récurrente. Secrets dédiés absents et service désactivé.
+Qonto reste manuel. Cloudflare est traité dans une autre conversation.
 
 ## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
 

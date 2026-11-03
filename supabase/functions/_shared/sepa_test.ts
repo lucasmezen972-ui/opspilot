@@ -1,15 +1,17 @@
 import {
   buildFirstSepaPayment,
   buildSepaSubscription,
+  selectSepaFirstMethod,
   sepaPaymentBelongs,
   type SepaAgreement,
   type SepaPayment,
 } from './sepa.ts';
-import { sepaRequest } from './mollieRecurringClient.ts';
 
 const assert = (value: unknown, label: string) => {
   if (!value) throw new Error(label);
 };
+// Domain tests remain runnable when the external SDK registry is unavailable.
+const sdkPath = './mollieRecurringClient.ts';
 const agreement: SepaAgreement = {
   id: '10000000-0000-4000-a000-000000000001',
   organization_id: '20000000-0000-4000-a000-000000000001',
@@ -51,6 +53,7 @@ Deno.test(
     const body = buildFirstSepaPayment(
       agreement,
       'https://project.supabase.co',
+      'paybybank',
     );
     assert(
       body.amount.value === '199.00' &&
@@ -62,11 +65,56 @@ Deno.test(
   },
 );
 Deno.test(
+  'first SEPA checkout selects only an available bank mandate method',
+  () => {
+    assert(
+      selectSepaFirstMethod([{ id: 'ideal' }, { id: 'paybybank' }]) ===
+        'paybybank',
+      'Pay by Bank must be preferred when offered',
+    );
+    const method = selectSepaFirstMethod([
+      { id: 'creditcard' },
+      { id: 'ideal' },
+    ]);
+    assert(method === 'ideal', 'available iDEAL fallback rejected');
+    const body = buildFirstSepaPayment(
+      agreement,
+      'https://project.supabase.co',
+      method!,
+    );
+    assert(
+      body.method === 'ideal' && body.sequenceType === 'first',
+      'fallback was not bound to the first payment',
+    );
+    for (const methods of [[], [{ id: 'creditcard' }], [{ id: 'paypal' }]])
+      assert(
+        selectSepaFirstMethod(methods) === null,
+        'non-bank mandate method accepted',
+      );
+    let rejected = false;
+    try {
+      buildFirstSepaPayment(
+        agreement,
+        'https://project.supabase.co',
+        // @ts-expect-error Verify the runtime guard against untyped input too.
+        'creditcard',
+      );
+    } catch {
+      rejected = true;
+    }
+    assert(rejected, 'untyped card input created a SEPA checkout');
+  },
+);
+Deno.test(
   'provider payments require profile, mode, customer, amount and agreement binding',
   () => {
     assert(
       sepaPaymentBelongs(payment, agreement),
       'valid first payment rejected',
+    );
+    assert(
+      sepaPaymentBelongs({ ...payment, method: 'ideal' }, agreement),
+      'valid iDEAL first payment rejected',
     );
     for (const bad of [
       { mode: 'live' },
@@ -75,6 +123,8 @@ Deno.test(
       { amount: { currency: 'EUR', value: '1.00' } },
       { metadata: { agreement_id: 'other', purpose: 'opspilot_sepa_v1' } },
       { sequenceType: 'oneoff' },
+      { method: 'creditcard' },
+      { method: 'paypal' },
     ])
       assert(
         !sepaPaymentBelongs({ ...payment, ...bad }, agreement),
@@ -144,6 +194,7 @@ Deno.test(
 Deno.test(
   'SDK sends test mode/profile/idempotence and never retries a provider failure',
   async () => {
+    const { sepaRequest } = await import(sdkPath);
     const original = globalThis.fetch;
     const requests: Request[] = [];
     globalThis.fetch = async (input, init) => {
@@ -209,6 +260,7 @@ Deno.test(
 Deno.test(
   'SDK refuses provider paths outside the implemented lifecycle',
   async () => {
+    const { sepaRequest } = await import(sdkPath);
     let rejected = false;
     try {
       await sepaRequest(
@@ -231,6 +283,7 @@ Deno.test(
 Deno.test(
   'test configuration refuses live API credentials before any request',
   async () => {
+    const { sepaRequest } = await import(sdkPath);
     let rejected = false;
     try {
       await sepaRequest(
@@ -255,6 +308,7 @@ Deno.test(
 Deno.test(
   'SDK keeps customer, checkout, lookup and cancellation in explicit test mode',
   async () => {
+    const { sepaRequest } = await import(sdkPath);
     const original = globalThis.fetch,
       requests: Request[] = [];
     globalThis.fetch = async (input, init) => {
@@ -286,7 +340,11 @@ Deno.test(
         ],
         [
           'payments',
-          buildFirstSepaPayment(agreement, 'https://project.supabase.co'),
+          buildFirstSepaPayment(
+            agreement,
+            'https://project.supabase.co',
+            'ideal',
+          ),
           'POST',
         ],
         ['payments/tr_firstfixture', undefined, 'GET'],

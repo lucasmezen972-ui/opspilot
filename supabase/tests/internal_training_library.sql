@@ -56,7 +56,7 @@ end $$;
 reset role;
 do $$ begin
  if has_function_privilege('anon','public.install_internal_training_program(text,text)','execute') or has_function_privilege('authenticated','public.complete_training_media_release(text)','execute') then raise exception 'FAIL release grants'; end if;
- if (select count(*) from public.trainings where organization_id=current_setting('opstest.org')::uuid)<>1 then raise exception 'FAIL duplicate course'; end if;
+ if (select count(*) from public.trainings where organization_id=current_setting('opstest.org')::uuid and program_key='library-integrity-fixture')<>1 then raise exception 'FAIL duplicate course'; end if;
  if exists(select 1 from public.user_training_progress where training_id=current_setting('opstest.installed')::uuid) then raise exception 'FAIL manufactured completion'; end if;
 end $$;
 select 'PASS: library copies, replay protection, private answers, tenant/media isolation, inactive accounts and expiring release' as result;

@@ -17,6 +17,7 @@ import {
   cancelRecurring,
   reconcileRecurring,
   recurringConfig,
+  recurringFirstMethod,
   recurringReady,
   refreshRecurring,
 } from '../_shared/sepaLifecycle.ts';
@@ -162,7 +163,8 @@ Deno.serve(async (req: Request) => {
       actor.role === 'superadmin'
     )
       return json({ error: 'Accord du représentant client requis' }, 400);
-    if (!(await recurringReady(cfg)))
+    const firstMethod = await recurringFirstMethod(cfg);
+    if (!firstMethod)
       return json(
         {
           error:
@@ -228,7 +230,7 @@ Deno.serve(async (req: Request) => {
     const payment = await sepaRequest<SepaPayment>(
       cfg,
       'payments',
-      buildFirstSepaPayment(a, SUPABASE_URL),
+      buildFirstSepaPayment(a, SUPABASE_URL, firstMethod),
       `first-${a.id}`,
     );
     if (

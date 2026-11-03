@@ -30,6 +30,17 @@ export type SepaPayment = MolliePayment & {
   method?: string;
   createdAt?: string;
 };
+export type SepaFirstMethod = 'paybybank' | 'ideal';
+
+/** Both methods create a directdebit mandate; a card creates a card mandate. */
+export function selectSepaFirstMethod(
+  methods: { id: string }[],
+): SepaFirstMethod | null {
+  if (methods.some((method) => method.id === 'paybybank')) return 'paybybank';
+  if (methods.some((method) => method.id === 'ideal')) return 'ideal';
+  return null;
+}
+
 export function sepaPaymentBelongs(
   payment: SepaPayment,
   agreement: SepaAgreement,
@@ -45,6 +56,7 @@ export function sepaPaymentBelongs(
     return false;
   return payment.id === agreement.first_payment_id
     ? payment.sequenceType === 'first' &&
+        (payment.method === 'paybybank' || payment.method === 'ideal') &&
         payment.metadata?.purpose === 'opspilot_sepa_v1' &&
         payment.metadata?.agreement_id === agreement.id
     : Boolean(agreement.provider_subscription_id) &&
@@ -52,12 +64,18 @@ export function sepaPaymentBelongs(
         payment.sequenceType === 'recurring' &&
         payment.method === 'directdebit';
 }
-export function buildFirstSepaPayment(a: SepaAgreement, supabaseUrl: string) {
+export function buildFirstSepaPayment(
+  a: SepaAgreement,
+  supabaseUrl: string,
+  method: SepaFirstMethod,
+) {
+  if (method !== 'paybybank' && method !== 'ideal')
+    throw new Error('invalid_first_payment_method');
   return {
     amount: { currency: 'EUR', value: (a.amount_cents / 100).toFixed(2) },
     customerId: a.customer_id,
     sequenceType: 'first',
-    method: 'paybybank',
+    method,
     description: `OpsPilot — facture ${a.invoice_reference}`.slice(0, 255),
     locale: 'fr_FR',
     redirectUrl: 'https://opspilot-mu-six.vercel.app/billing?sepa_return=1',

@@ -3,8 +3,10 @@ import { billingAdmin as admin, SUPABASE_URL } from './billingAuth.ts';
 import { mollieRequest, type MollieConfig } from './mollie.ts';
 import {
   buildSepaSubscription,
+  selectSepaFirstMethod,
   sepaPaymentBelongs,
   type SepaAgreement,
+  type SepaFirstMethod,
   type SepaPayment,
 } from './sepa.ts';
 
@@ -19,6 +21,11 @@ export async function recurringConfig(
     : (data as MollieConfig);
 }
 export async function recurringReady(cfg: MollieConfig): Promise<boolean> {
+  return (await recurringFirstMethod(cfg)) !== null;
+}
+export async function recurringFirstMethod(
+  cfg: MollieConfig,
+): Promise<SepaFirstMethod | null> {
   const state = await mollieRequest<{
     canReceivePayments: boolean;
     canReceiveSettlements: boolean;
@@ -27,7 +34,7 @@ export async function recurringReady(cfg: MollieConfig): Promise<boolean> {
     cfg.mode === 'live' &&
     (!state.canReceivePayments || !state.canReceiveSettlements)
   )
-    return false;
+    return null;
   const [recurring, first] = await Promise.all([
     sepaRequest<{ _embedded: { methods: { id: string }[] } }>(
       cfg,
@@ -38,10 +45,9 @@ export async function recurringReady(cfg: MollieConfig): Promise<boolean> {
       'methods?sequenceType=first',
     ),
   ]);
-  return (
-    recurring._embedded.methods.some((m) => m.id === 'directdebit') &&
-    first._embedded.methods.some((m) => m.id === 'paybybank')
-  );
+  if (!recurring._embedded.methods.some((m) => m.id === 'directdebit'))
+    return null;
+  return selectSepaFirstMethod(first._embedded.methods);
 }
 export async function cancelRecurring(
   a: SepaAgreement,
