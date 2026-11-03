@@ -2,6 +2,35 @@
 
 Lucas a confirmé le 3 novembre 2026 le rattachement de ses offres Digital, TRADIKOM ONE et OpsPilot au portail existant : https://tradikom.lucas-mezen-972.workers.dev/espace-client.
 
+## Activation vérifiée du 3 novembre 2026
+
+Après confirmation de Lucas, la clé HMAC dédiée est enregistrée dans Supabase Vault
+et dans le secret d’exécution Cloudflare. Le drapeau de livraison est **activé**.
+La fonction `customer-portal-sync` reste ACTIVE v2 ; aucun secret n’est conservé
+dans le dépôt ou dans les variables publiques.
+
+Un premier message signé a reçu HTTP 200 avec `received:true, duplicate:false`.
+D1 contient un seul dossier fictif, un seul lien source et un seul membership.
+La file OpsPilot a ensuite livré le même événement : HTTP 200,
+`delivered:1, retrying:0, review:0`, sans doublon.
+
+La résiliation a été livrée par le worker. Le rejeu de l’ancien état actif n’a
+pas réactivé la prestation : D1 reste à `canceled`, révision source 7, avec
+un lien, un membership et deux reçus. Le changement d’e-mail présent dans le
+message fictif n’a pas ajouté d’accès : le contact initial est conservé.
+Le récepteur public refuse toujours les messages non signés (401) et ceux du
+navigateur (403). La file est vide de messages en attente ou à examiner.
+
+Le dossier `[TEST] Liaison OpsPilot 6b273500`, son organisation source sans
+profil et les deux événements techniques livrés restent identifiés comme
+données fictives. La confirmation native de leur suppression a expiré lors
+de la déconnexion de l’ordinateur ; aucune suppression n’a eu lieu.
+Ce dossier est résilié et n’a émis ni paiement, ni facture ni e-mail réel.
+
+Les achats confirmés suivants peuvent créer ou mettre à jour leur dossier
+TRADIKOM. Les achats antérieurs ne sont pas repris automatiquement.
+Le cycle d’achat TRADIKOM ONE et la connexion unique restent séparés.
+
 ## Cycle serveur OpsPilot
 
 Un abonnement réellement activé par le serveur et une demande de facture marquée payée, avec une référence correspondante et un demandeur administrateur/owner dont l’e-mail d’authentification est vérifié, permettent d’ancrer le contact commercial. Les essais, les boutons du navigateur et les paiements Mollie de test ne suffisent pas. Les salariés ne sont pas invités au portail.
@@ -30,4 +59,4 @@ La migration initiale est appliquée sur OPS PILOT V2 sous la version distante `
 
 La fonction `customer-portal-sync` est ACTIVE v2. Les huit tests Node ciblés passent. La recette SQL réelle passe en transaction annulée après les deux migrations : achat confirmé, refus des essais et impayés, déduplication, résiliation, contact ancré, ACL privées et reprise avec bail. Le contrôle HTTP réel via pg_net confirme 401 sans jeton, 403 avec Origin navigateur et 503 `sync_unavailable` avec le bon jeton lorsque la liaison reste désactivée. Zéro compte commercial et zéro événement subsistent après les fixtures.
 
-Le portail TRADIKOM a été fusionné dans la PR 25 et la rubrique Mes services est visible sur le domaine public après rechargement. Aucune synchronisation d’achat réelle n’est encore revendiquée : les deux valeurs du secret partagé et la livraison d’un événement fictif doivent être validées avant activation. Aucun paiement, facture, invitation ou e-mail de client n’est émis par cette reprise. La connexion unique et le cycle d’achat TRADIKOM ONE restent à réaliser séparément.
+Le portail TRADIKOM a été fusionné dans la PR 25 et la rubrique Mes services est visible sur le domaine public après rechargement. La recette d’activation décrite en tête de document confirme maintenant la réception réelle et l’envoi par le worker. Aucun achat de client réel n’a été utilisé pour cette recette. Aucun paiement, facture, invitation ou e-mail de client n’est émis par cette reprise. La connexion unique et le cycle d’achat TRADIKOM ONE restent à réaliser séparément.

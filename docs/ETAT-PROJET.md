@@ -23,12 +23,16 @@ historique sans faire tourner la clé ni modifier les autres workers.
 Huit tests Node passent, ainsi que la recette SQL réelle en transaction annulée.
 Les appels HTTP réels donnent 401 sans jeton, 403 avec Origin navigateur et 503
 `sync_unavailable` avec le bon jeton tant que le drapeau est désactivé.
-Les deux tables ont RLS et aucun droit client ; zéro compte commercial et zéro
-événement de fixture subsistent. Les nouvelles fonctions restent réservées au
-service_role.
+Les deux tables ont RLS et aucun droit client ; la recette SQL annulée ne
+laisse aucun résidu. Les nouvelles fonctions restent réservées au service_role.
 
-**La liaison reste désactivée** : secrets dédiés et livraison signée fictive à
-valider avant activation. Aucun achat existant n’est importé, aucun paiement,
+**La liaison OpsPilot est activée**, après confirmation de Lucas et configuration
+de la clé dédiée dans Vault et Cloudflare. La réception signée, la livraison par
+le worker, les doublons, la résiliation et le rejeu d’un ancien état ont été
+vérifiés réellement. Le contact initial reste seul autorisé ; la file n’a aucun
+message en attente ou à examiner. Un dossier clairement marqué TEST reste
+résilié avec deux reçus ; la confirmation native de suppression a expiré pendant
+la déconnexion de l’ordinateur. Aucun achat existant n’est importé, aucun paiement,
 facture ou e-mail réel n’est émis. Le portail TRADIKOM (PR 25) affiche Mes services
 sur son domaine public ; le cycle d’achat TRADIKOM ONE et la connexion unique
 restent des travaux séparés. Contrat, activation et preuves :
