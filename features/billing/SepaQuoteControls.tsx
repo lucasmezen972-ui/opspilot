@@ -70,6 +70,7 @@ export function SepaQuoteControls({
             key={n}
             accessibilityRole="radio"
             accessibilityState={{ checked: months === n }}
+            aria-checked={months === n}
             onPress={() => setMonths(n)}
             style={{
               padding: 12,

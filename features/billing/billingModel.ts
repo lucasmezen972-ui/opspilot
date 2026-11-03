@@ -71,7 +71,7 @@ export const PLANS: Plan[] = [
   },
 ];
 
-const DEFAULT_STATUS = { label: 'Essai gratuit', color: '#2563EB' };
+const DEFAULT_STATUS = { label: 'Statut à vérifier', color: '#6B7280' };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   trialing: { label: 'Essai gratuit', color: '#2563EB' },
@@ -94,8 +94,9 @@ export function getStatusInfo(status: string): {
   return STATUS_LABELS[status] ?? DEFAULT_STATUS;
 }
 
-/** Nom du plan capitalisé (« trial » → « Trial »). */
+/** Libellé français de l’essai ; noms commerciaux conservés pour les offres. */
 export function formatPlanName(plan: string): string {
+  if (plan === 'trial') return 'Essai';
   return plan.charAt(0).toUpperCase() + plan.slice(1);
 }
 

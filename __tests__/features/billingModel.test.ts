@@ -10,19 +10,19 @@ import {
 } from '../../features/billing/billingModel';
 
 describe('getStatusInfo', () => {
-  it('mappe les statuts connus et retombe sur l’essai gratuit', () => {
+  it('mappe les statuts connus sans présenter un statut inconnu comme un essai', () => {
     expect(getStatusInfo('active').label).toBe('Actif');
     expect(getStatusInfo('past_due').color).toBe('#DC2626');
     expect(getStatusInfo('inconnu')).toEqual({
-      label: 'Essai gratuit',
-      color: '#2563EB',
+      label: 'Statut à vérifier',
+      color: '#6B7280',
     });
   });
 });
 
 describe('formatPlanName', () => {
   it('capitalise le nom du plan', () => {
-    expect(formatPlanName('trial')).toBe('Trial');
+    expect(formatPlanName('trial')).toBe('Essai');
     expect(formatPlanName('business')).toBe('Business');
   });
 });

@@ -413,6 +413,7 @@ export function TrainingVideoEditor({
                   key={i}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: correct === i }}
+                  aria-checked={correct === i}
                   onPress={() => setCorrect(i)}
                   style={{
                     padding: 12,

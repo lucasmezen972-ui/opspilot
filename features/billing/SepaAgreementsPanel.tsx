@@ -303,6 +303,7 @@ export function SepaAgreementsPanel({
                 <TouchableOpacity
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: accepted[a.id] === true }}
+                  aria-checked={accepted[a.id] === true}
                   onPress={() =>
                     setAccepted((x) => ({ ...x, [a.id]: !x[a.id] }))
                   }

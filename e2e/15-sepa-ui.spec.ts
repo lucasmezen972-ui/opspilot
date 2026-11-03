@@ -75,7 +75,9 @@ for (const viewport of [
       'Le service peut recevoir les autorisations',
     );
     await expect(authorize).toBeDisabled();
+    await expect(panel.getByRole('checkbox')).not.toBeChecked();
     await panel.getByRole('checkbox').click();
+    await expect(panel.getByRole('checkbox')).toBeChecked();
     await expect(authorize).toBeEnabled();
     const popup = context.waitForEvent('page');
     await authorize.click();

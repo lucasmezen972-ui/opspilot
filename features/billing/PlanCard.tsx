@@ -9,6 +9,8 @@ interface PlanCardProps {
   currentPlan: string;
   onUpgrade: (planId: string) => void;
   onEnterprise: () => void;
+  disabled?: boolean;
+  pending?: boolean;
 }
 
 /** Carte d'un plan : titre, prix, fonctionnalités et bouton d'action. */
@@ -17,6 +19,8 @@ export function PlanCard({
   currentPlan,
   onUpgrade,
   onEnterprise,
+  disabled = false,
+  pending = false,
 }: PlanCardProps) {
   const Icon = plan.icon;
   const { isCurrent, isDowngrade } = getPlanState(plan.id, currentPlan);
@@ -56,6 +60,7 @@ export function PlanCard({
 
       {plan.id === 'enterprise' ? (
         <TouchableOpacity
+          accessibilityRole="button"
           style={[
             styles.upgradeButton,
             { backgroundColor: plan.bg, borderColor: plan.color },
@@ -74,8 +79,12 @@ export function PlanCard({
         </View>
       ) : (
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityState={{ disabled, busy: pending }}
+          disabled={disabled}
           style={[
             styles.upgradeButton,
+            disabled && { opacity: 0.5 },
             isDowngrade
               ? styles.downgradeButton
               : { backgroundColor: plan.color },
@@ -88,7 +97,11 @@ export function PlanCard({
               isDowngrade ? styles.downgradeText : styles.upgradeText,
             ]}
           >
-            {isDowngrade ? 'Rétrograder' : `Passer à ${plan.name}`}
+            {pending
+              ? 'Enregistrement…'
+              : isDowngrade
+                ? 'Rétrograder'
+                : `Passer à ${plan.name}`}
           </Text>
         </TouchableOpacity>
       )}
