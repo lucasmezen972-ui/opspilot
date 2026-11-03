@@ -16,9 +16,9 @@ test.describe('Résilience', () => {
     page,
   }) => {
     await page.reload();
-    await expect(
-      page.getByText('Carnet de bord terrain', { exact: true }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('page-home-title')).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByTestId('demo-login-button')).toHaveCount(0);
   });
 
@@ -62,9 +62,9 @@ test.describe('Résilience', () => {
     page,
   }) => {
     await page.reload();
-    await expect(
-      page.getByText('Carnet de bord terrain', { exact: true }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('page-home-title')).toBeVisible({
+      timeout: 15_000,
+    });
     await openTab(page, 'Audits', 'page-audits-title');
     await expect(
       page.getByText('Contrôle hygiène rayon frais').first(),

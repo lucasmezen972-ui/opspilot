@@ -1,5 +1,11 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { colors, radius, spacing, shadow, typography } from '../styles/tokens';
 
@@ -17,6 +23,7 @@ interface AppKpiCardProps {
   testID?: string;
   /** testID de la valeur (ex. `kpi-audits-done-value`). */
   valueTestID?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -31,13 +38,17 @@ export function AppKpiCard({
   icon: Icon,
   testID,
   valueTestID,
+  style,
 }: AppKpiCardProps) {
   return (
-    <View testID={testID} style={[styles.card, { borderLeftColor: accent }]}>
+    <View
+      testID={testID}
+      style={[styles.card, { borderLeftColor: accent }, style]}
+    >
       <View style={[styles.iconWrap, { backgroundColor: accentSoft }]}>
         <Icon size={20} color={accent} />
       </View>
-      <Text testID={valueTestID} style={[styles.value, { color: accent }]}>
+      <Text testID={valueTestID} style={styles.value}>
         {value}
       </Text>
       <Text style={styles.label}>{label}</Text>
@@ -48,6 +59,7 @@ export function AppKpiCard({
 const styles = StyleSheet.create({
   card: {
     width: '47%',
+    minHeight: 144,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.md + 2,
@@ -65,13 +77,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   value: {
+    color: colors.textStrong,
     fontSize: typography.kpiValue.fontSize,
     fontWeight: typography.kpiValue.fontWeight,
     marginBottom: 2,
   },
   label: {
-    fontSize: 11,
+    fontSize: 14,
     color: colors.textMuted,
-    lineHeight: 15,
+    lineHeight: 20,
   },
 });

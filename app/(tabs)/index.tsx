@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-import { LinearGradient } from 'expo-linear-gradient';
+import { CalendarDays } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import {
   View,
@@ -7,11 +7,13 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Platform,
   RefreshControl,
 } from 'react-native';
 
 import { DashboardDlcAlerts } from '../../features/dashboard/DashboardDlcAlerts';
 import { DashboardFieldBrief } from '../../features/dashboard/DashboardFieldBrief';
+import { DashboardGrid } from '../../features/dashboard/DashboardGrid';
 import { DashboardProgress } from '../../features/dashboard/DashboardProgress';
 import { DashboardQuickActions } from '../../features/dashboard/DashboardQuickActions';
 import { DashboardRecentAudits } from '../../features/dashboard/DashboardRecentAudits';
@@ -26,10 +28,8 @@ import { useCorrectiveActions } from '../../hooks/useCorrectiveActions';
 import { useProducts } from '../../hooks/useProducts';
 import { AppKpiCard } from '../../shared/components/AppKpiCard';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 import { isManagerRole } from '../../utils/roles';
-
-const heroGradientColors = [colors.primary, colors.primaryDark] as const;
 
 export default function HomeScreen() {
   const { profile } = useAuth();
@@ -90,6 +90,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -99,28 +100,36 @@ export default function HomeScreen() {
         />
       }
     >
-      <LinearGradient
-        colors={heroGradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.hero}
-      >
+      <View style={styles.hero}>
+        <View style={styles.dateLine}>
+          <CalendarDays size={15} color={colors.textMuted} />
+          <Text style={styles.dateText}>
+            {now.toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+            })}
+          </Text>
+        </View>
         <View style={styles.heroTop}>
           <View style={styles.heroTitleBlock}>
-            <Text style={styles.greeting}>
+            <Text
+              style={styles.greeting}
+              testID="page-home-title"
+              accessibilityRole="header"
+            >
               Bonjour, {profile?.full_name?.split(' ')[0] ?? 'Utilisateur'} !
             </Text>
-            <Text style={styles.subtitle}>Carnet de bord terrain</Text>
-          </View>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>OP</Text>
+            <Text style={styles.subtitle}>
+              Votre activité terrain, en un coup d’œil.
+            </Text>
           </View>
         </View>
         <View style={styles.heroSummary}>
           <View style={styles.heroDot} />
           <Text style={styles.heroSummaryText}>{summary}</Text>
         </View>
-      </LinearGradient>
+      </View>
 
       {isLoading && (
         <View style={styles.loadingBanner}>
@@ -139,7 +148,7 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <AppSectionHeader title="Ce qui compte aujourd’hui" />
-        <View style={styles.kpiGrid}>
+        <DashboardGrid columnOptions={[2, 3, 5]} minItemWidth={170}>
           {kpis.map((kpi) => (
             <AppKpiCard
               key={kpi.label}
@@ -150,9 +159,10 @@ export default function HomeScreen() {
               accent={kpi.accent}
               accentSoft={kpi.accentSoft}
               icon={kpi.icon}
+              style={styles.kpiCard}
             />
           ))}
-        </View>
+        </DashboardGrid>
       </View>
 
       <DashboardDlcAlerts products={products} now={now} />
@@ -175,12 +185,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  content: {
+    width: '100%',
+    maxWidth: 1280,
+    alignSelf: 'center',
+    paddingBottom: spacing.xl,
+  },
   hero: {
-    paddingHorizontal: 20,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
-    paddingBottom: 22,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingHorizontal: spacing.xl,
+    paddingTop:
+      Platform.OS === 'web' ? 28 : (Constants.statusBarHeight ?? 44) + 16,
+    paddingBottom: spacing.xl,
+  },
+  dateLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  dateText: {
+    fontSize: 13,
+    color: colors.textMuted,
+    textTransform: 'capitalize',
   },
   heroTop: {
     flexDirection: 'row',
@@ -191,52 +217,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   greeting: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: '700',
     letterSpacing: -0.5,
-    color: '#FFFFFF',
+    color: colors.textStrong,
   },
   subtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.82)',
-    marginTop: 3,
-  },
-  logo: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   heroSummary: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 16,
+    marginTop: spacing.lg,
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 999,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.sm,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: spacing.sm,
   },
   heroDot: {
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: colors.fieldWarm,
+    backgroundColor: colors.primary,
   },
   heroSummaryText: {
-    color: colors.fieldWarm,
-    fontSize: 12.5,
+    flexShrink: 1,
+    color: colors.primaryInk,
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: '600',
   },
   section: {
@@ -244,10 +258,10 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 0,
   },
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+  kpiCard: {
+    width: '100%',
+    minHeight: 144,
+    flex: 1,
   },
   bottomPadding: {
     height: 24,

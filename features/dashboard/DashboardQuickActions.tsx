@@ -12,12 +12,12 @@ import {
 } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
+import { DashboardGrid } from './DashboardGrid';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface QuickAction {
   icon: LucideIcon;
-  color: string;
   title: string;
   sub: string;
   route: Href;
@@ -27,59 +27,51 @@ interface QuickAction {
 const QUICK_ACTIONS: QuickAction[] = [
   {
     icon: BarChart3,
-    color: '#2563EB',
     title: 'Audits',
-    sub: 'Créer / gérer',
+    sub: 'Contrôles terrain',
     route: '/audits',
   },
   {
     icon: Scan,
-    color: '#059669',
     title: 'Produits',
-    sub: 'Stock & DLC',
+    sub: 'Stock et dates limites',
     route: '/products',
   },
   {
     icon: Wrench,
-    color: '#7C3AED',
     title: 'Actions correctives',
-    sub: 'Suivi des actions',
+    sub: 'Écarts et résolution',
     route: '/actions',
   },
   {
     icon: Target,
-    color: '#DC2626',
     title: 'Tâches',
-    sub: 'Planning',
+    sub: 'Planning du jour',
     route: '/tasks',
   },
   {
     icon: FileText,
-    color: '#0891B2',
     title: 'Rapports',
-    sub: 'Exporter PDF',
+    sub: 'Bilans et exports PDF',
     route: '/reports',
   },
   {
     icon: BookOpen,
-    color: '#D97706',
     title: 'Formation',
-    sub: 'Classement & cours',
+    sub: 'Parcours et validations',
     route: '/training',
   },
   {
     icon: CreditCard,
-    color: '#7C3AED',
     title: 'Facturation',
-    sub: 'Abonnement',
+    sub: 'Offre et abonnement',
     route: '/billing',
     roles: ['admin', 'superadmin'],
   },
   {
     icon: Settings,
-    color: '#6B7280',
     title: 'Paramètres',
-    sub: 'Profil & équipe',
+    sub: 'Profil et équipe',
     route: '/profile',
   },
 ];
@@ -97,7 +89,7 @@ export function DashboardQuickActions({ role }: DashboardQuickActionsProps) {
   return (
     <View style={styles.section}>
       <AppSectionHeader title="Accès rapide" />
-      <View style={styles.grid}>
+      <DashboardGrid minItemWidth={180} columnOptions={[2, 3, 4]}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -105,21 +97,18 @@ export function DashboardQuickActions({ role }: DashboardQuickActionsProps) {
               key={item.title}
               style={styles.card}
               onPress={() => router.push(item.route)}
+              accessibilityRole="link"
+              accessibilityLabel={`${item.title}, ${item.sub}`}
             >
-              <View
-                style={[
-                  styles.iconWrap,
-                  { backgroundColor: `${item.color}18` },
-                ]}
-              >
-                <Icon size={26} color={item.color} />
+              <View style={styles.iconWrap}>
+                <Icon size={21} color={colors.primary} />
               </View>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.sub}>{item.sub}</Text>
             </TouchableOpacity>
           );
         })}
-      </View>
+      </DashboardGrid>
     </View>
   );
 }
@@ -129,39 +118,34 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: 0,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm + 2,
-  },
   card: {
-    width: '47%',
+    flex: 1,
+    minHeight: 144,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
-    padding: 14,
-    alignItems: 'center',
+    padding: spacing.lg,
     borderWidth: 1,
     borderColor: colors.hairline,
-    ...shadow.card,
   },
   iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
+    backgroundColor: colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: '600',
     color: colors.textStrong,
-    textAlign: 'center',
   },
   sub: {
-    fontSize: 11,
+    fontSize: 13,
+    lineHeight: 18,
     color: colors.textMuted,
     marginTop: 2,
-    textAlign: 'center',
   },
 });

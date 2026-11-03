@@ -86,13 +86,17 @@ export function StockModal({
         {product?.name}
       </Text>
       <Text style={styles.subtitle}>
-        Stock actuel: {product?.stock_quantity}
+        Stock actuel : {product?.stock_quantity}
       </Text>
 
-      <ScrollView style={styles.scrollContent}>
+      <ScrollView
+        style={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.fieldLabel}>Stock</Text>
         <TextInput
           testID="product-stock-input"
+          accessibilityLabel="Quantité en stock"
           style={styles.input}
           value={stockValue}
           onChangeText={setStockValue}
@@ -108,6 +112,7 @@ export function StockModal({
             </Text>
             <TextInput
               testID="product-dlc-input"
+              accessibilityLabel="Date limite de consommation, au format année mois jour"
               style={styles.input}
               value={dlcValue}
               onChangeText={setDlcValue}
@@ -116,6 +121,7 @@ export function StockModal({
             <Text style={styles.fieldLabel}>Prix unitaire (€)</Text>
             <TextInput
               testID="product-price-input"
+              accessibilityLabel="Prix unitaire en euros"
               style={styles.input}
               value={priceValue}
               onChangeText={setPriceValue}
@@ -127,6 +133,7 @@ export function StockModal({
 
         {!showDetails && onUpdate && (
           <TouchableOpacity
+            accessibilityRole="button"
             style={styles.detailsToggle}
             onPress={() => setShowDetails(true)}
           >
@@ -138,15 +145,20 @@ export function StockModal({
       </ScrollView>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.cancelButton}
+          onPress={onClose}
+        >
           <Text style={styles.cancelText}>Annuler</Text>
         </TouchableOpacity>
         <TouchableOpacity
           testID="product-stock-confirm"
+          accessibilityRole="button"
           style={styles.confirmButton}
           onPress={handleConfirm}
         >
-          <Text style={styles.confirmText}>Valider</Text>
+          <Text style={styles.confirmText}>Enregistrer</Text>
         </TouchableOpacity>
       </View>
     </AppModal>
@@ -166,10 +178,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   scrollContent: {
-    maxHeight: 300,
+    flexShrink: 1,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.textStrong,
     marginBottom: 6,
@@ -181,10 +193,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     fontSize: 16,
+    minHeight: 48,
+    color: colors.textStrong,
+    backgroundColor: colors.surface,
     marginBottom: spacing.lg,
   },
   detailsToggle: {
-    paddingVertical: 8,
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
     marginBottom: 8,
   },
   detailsToggleText: {
@@ -198,6 +215,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   cancelButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: radius.sm,
@@ -208,6 +228,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   confirmButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: radius.sm,

@@ -35,7 +35,7 @@ export function ActionPlanModal({
 }: ActionPlanModalProps) {
   return (
     <AppModal visible={visible} onClose={onClose} testID="action-plan-modal">
-      <View>
+      <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Sparkles size={18} color="#7C3AED" />
@@ -202,6 +202,10 @@ function riskLabel(risk: ActionPlan['riskLevel']): string {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    flexShrink: 1,
+    minHeight: 0,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -246,6 +250,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   body: {
+    flexShrink: 1,
+    minHeight: 0,
     marginTop: 2,
     maxHeight: 520,
   },

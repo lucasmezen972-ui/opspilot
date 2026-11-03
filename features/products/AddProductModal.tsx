@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  ScrollView,
   StyleSheet,
 } from 'react-native';
 
@@ -89,62 +90,106 @@ export function AddProductModal({
       title="Ajouter un produit"
       testID="product-add-modal"
     >
-      <TextInput
-        testID="product-add-name"
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="Nom du produit *"
-        autoFocus
-      />
-      <TextInput
-        style={styles.input}
-        value={category}
-        onChangeText={setCategory}
-        placeholder="Catégorie (ex : Crèmerie)"
-      />
-      <TextInput
-        style={styles.input}
-        value={stock}
-        onChangeText={setStock}
-        keyboardType="numeric"
-        placeholder="Stock initial"
-      />
-      <TextInput
-        style={styles.input}
-        value={minStock}
-        onChangeText={setMinStock}
-        keyboardType="numeric"
-        placeholder="Seuil d'alerte stock bas (optionnel)"
-      />
-      <TextInput
-        style={styles.input}
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric"
-        placeholder="Prix (€)"
-      />
-      <TextInput
-        style={styles.input}
-        value={dlcDays}
-        onChangeText={setDlcDays}
-        keyboardType="numeric"
-        placeholder="DLC dans X jours (vide = sans DLC)"
-      />
-      <TextInput
-        testID="product-add-barcode"
-        style={styles.input}
-        value={barcode}
-        onChangeText={setBarcode}
-        keyboardType="numeric"
-        placeholder="Code-barres (optionnel)"
-      />
+      <ScrollView
+        style={styles.form}
+        contentContainerStyle={styles.formContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.formHint}>Le nom du produit est obligatoire.</Text>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Nom du produit *</Text>
+          <TextInput
+            testID="product-add-name"
+            accessibilityLabel="Nom du produit, obligatoire"
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Nom du produit *"
+            autoFocus
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Catégorie</Text>
+          <TextInput
+            accessibilityLabel="Catégorie"
+            style={styles.input}
+            value={category}
+            onChangeText={setCategory}
+            placeholder="Catégorie (ex : Crèmerie)"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Stock initial</Text>
+          <TextInput
+            accessibilityLabel="Stock initial"
+            style={styles.input}
+            value={stock}
+            onChangeText={setStock}
+            keyboardType="numeric"
+            placeholder="Stock initial"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Seuil de stock bas (optionnel)</Text>
+          <TextInput
+            accessibilityLabel="Seuil de stock bas, optionnel"
+            style={styles.input}
+            value={minStock}
+            onChangeText={setMinStock}
+            keyboardType="numeric"
+            placeholder="Seuil d'alerte stock bas (optionnel)"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Prix unitaire (€)</Text>
+          <TextInput
+            accessibilityLabel="Prix unitaire en euros"
+            style={styles.input}
+            value={price}
+            onChangeText={setPrice}
+            keyboardType="decimal-pad"
+            placeholder="Prix (€)"
+          />
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>DLC dans combien de jours ?</Text>
+          <TextInput
+            accessibilityLabel="DLC dans combien de jours, optionnel"
+            style={styles.input}
+            value={dlcDays}
+            onChangeText={setDlcDays}
+            keyboardType="numeric"
+            placeholder="DLC dans X jours (vide = sans DLC)"
+          />
+          <Text style={styles.fieldHint}>
+            Laissez vide si le produit n’a pas de DLC.
+          </Text>
+        </View>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Code-barres (optionnel)</Text>
+          <TextInput
+            testID="product-add-barcode"
+            accessibilityLabel="Code-barres, optionnel"
+            style={styles.input}
+            value={barcode}
+            onChangeText={setBarcode}
+            keyboardType="numeric"
+            placeholder="Code-barres (optionnel)"
+          />
+        </View>
+      </ScrollView>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.cancelButton}
+          onPress={onClose}
+        >
           <Text style={styles.cancelText}>Annuler</Text>
         </TouchableOpacity>
         <TouchableOpacity
           testID="product-add-submit"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: submitting, busy: submitting }}
           style={[styles.confirmButton, submitting && { opacity: 0.5 }]}
           onPress={handleSubmit}
           disabled={submitting}
@@ -159,6 +204,12 @@ export function AddProductModal({
 }
 
 const styles = StyleSheet.create({
+  form: { flexShrink: 1 },
+  formContent: { gap: spacing.lg, paddingBottom: spacing.xs },
+  formHint: { fontSize: 14, lineHeight: 20, color: colors.textMuted },
+  field: { gap: spacing.sm },
+  fieldLabel: { fontSize: 14, fontWeight: '600', color: colors.textStrong },
+  fieldHint: { fontSize: 13, lineHeight: 18, color: colors.textMuted },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -166,7 +217,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     fontSize: 16,
-    marginBottom: spacing.lg,
+    minHeight: 48,
+    color: colors.textStrong,
+    backgroundColor: colors.surface,
   },
   actions: {
     flexDirection: 'row',
@@ -174,6 +227,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   cancelButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: radius.sm,
@@ -184,6 +240,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   confirmButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: radius.sm,

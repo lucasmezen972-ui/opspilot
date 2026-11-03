@@ -24,13 +24,13 @@ export const colors = {
 
   // Statuts / criticités
   success: '#10B981',
-  successText: '#16A34A',
+  successText: '#166534',
   successSoft: '#DCFCE7',
   warning: '#F59E0B',
   warningText: '#B45309',
   warningSoft: '#FEF3C7',
   danger: '#EF4444',
-  dangerStrong: '#DC2626',
+  dangerStrong: '#B91C1C',
   dangerSoft: '#FEE2E2',
 
   // Surfaces & texte
@@ -43,8 +43,8 @@ export const colors = {
   hairline: '#ECEFF3',
   textStrong: '#111827',
   text: '#374151',
-  textMuted: '#6B7280',
-  textFaint: '#9CA3AF',
+  textMuted: '#5F6B7A',
+  textFaint: '#64748B',
 } as const;
 
 export const spacing = {
@@ -67,8 +67,8 @@ export const radius = {
 export const typography = {
   kpiValue: { fontSize: 26, fontWeight: '700' as const },
   sectionTitle: { fontSize: 18, fontWeight: '700' as const },
-  body: { fontSize: 14, fontWeight: '400' as const },
-  label: { fontSize: 11, fontWeight: '500' as const },
+  body: { fontSize: 15, fontWeight: '400' as const },
+  label: { fontSize: 12, fontWeight: '500' as const },
 } as const;
 
 /**

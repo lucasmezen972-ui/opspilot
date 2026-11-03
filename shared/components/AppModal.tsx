@@ -1,6 +1,16 @@
 import { X } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  useWindowDimensions,
+} from 'react-native';
 
 import { colors, radius, spacing, shadow, zIndex } from '../styles/tokens';
 
@@ -11,6 +21,7 @@ interface AppModalProps {
   children: ReactNode;
   testID?: string;
   maxWidth?: number;
+  scrollable?: boolean;
 }
 
 /** Modale premium tokenisée : overlay, carte centrée, en-tête + fermeture. */
@@ -21,45 +32,71 @@ export function AppModal({
   children,
   testID,
   maxWidth = 460,
+  scrollable = false,
 }: AppModalProps) {
+  const { height } = useWindowDimensions();
   return (
     <Modal
+      accessibilityLabel={title ?? 'Fenêtre'}
       visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay} testID={testID}>
-        <View style={[styles.card, { maxWidth }]}>
-          {title && (
-            <View style={styles.header}>
-              <Text style={styles.title}>{title}</Text>
-              <TouchableOpacity
-                testID={testID ? `${testID}-close` : undefined}
-                onPress={onClose}
-                accessibilityRole="button"
-                accessibilityLabel="Fermer"
-                style={styles.closeButton}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      <KeyboardAvoidingView
+        style={styles.keyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.overlay} testID={testID}>
+          <View
+            style={[
+              styles.card,
+              { maxWidth, maxHeight: Math.max(160, height - 32) },
+            ]}
+          >
+            {title && (
+              <View style={styles.header}>
+                <Text style={styles.title}>{title}</Text>
+                <TouchableOpacity
+                  testID={testID ? `${testID}-close` : undefined}
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fermer"
+                  style={styles.closeButton}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <X size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            )}
+            {scrollable ? (
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
               >
-                <X size={20} color={colors.textMuted} />
-              </TouchableOpacity>
-            </View>
-          )}
-          {children}
+                {children}
+              </ScrollView>
+            ) : (
+              children
+            )}
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboard: { flex: 1 },
+  scroll: { flexShrink: 1 },
+  scrollContent: { gap: spacing.lg, paddingBottom: 4 },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: spacing.xl,
+    padding: spacing.lg,
     zIndex: zIndex.modal,
   },
   card: {

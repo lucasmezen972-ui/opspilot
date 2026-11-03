@@ -66,6 +66,9 @@ function RenewalInvoice({
         Créez la facture dans Qonto, puis renseignez sa référence et la période
         exacte. L’accès n’est pas prolongé avant ce rapprochement.
       </Text>
+      <Text style={{ color: colors.textStrong, fontWeight: '600' }}>
+        Référence de la facture Qonto
+      </Text>
       <TextInput
         accessibilityLabel="Référence de la facture de renouvellement"
         placeholder="Référence Qonto"
@@ -73,6 +76,9 @@ function RenewalInvoice({
         onChangeText={setReference}
         style={inputStyle}
       />
+      <Text style={{ color: colors.textStrong, fontWeight: '600' }}>
+        Fin de la période facturée (AAAA-MM-JJ)
+      </Text>
       <TextInput
         accessibilityLabel="Fin de période du renouvellement"
         placeholder="Fin de période (AAAA-MM-JJ)"
@@ -407,4 +413,5 @@ const inputStyle = {
   borderRadius: 8,
   backgroundColor: colors.surface,
   color: colors.textStrong,
+  fontSize: 16,
 };

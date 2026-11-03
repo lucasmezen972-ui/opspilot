@@ -46,7 +46,16 @@ export default function Root({ children }: PropsWithChildren) {
         {/* Disable tap highlight on mobile */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `* { -webkit-tap-highlight-color: transparent; }`,
+            __html: `
+              * { -webkit-tap-highlight-color: transparent; }
+              :where(a, button, input, textarea, select, [tabindex], [role="button"], [role="tab"]):focus-visible {
+                outline: 3px solid #2563EB !important;
+                outline-offset: 3px;
+              }
+              .opspilot-skip-link { position: absolute; left: 244px; top: -100px; z-index: 10000; padding: 12px 16px; border-radius: 8px; background: #FFFFFF; color: #172554; font: 600 15px system-ui; }
+              .opspilot-skip-link:focus { top: 12px; }
+              @media (max-width: 1023px) { .opspilot-skip-link { left: 16px; } }
+            `,
           }}
         />
 

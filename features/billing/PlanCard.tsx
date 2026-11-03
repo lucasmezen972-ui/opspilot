@@ -1,8 +1,14 @@
 import { CircleCheck as CheckCircle, ExternalLink } from 'lucide-react-native';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+} from 'react-native';
 
 import { getPlanState, type Plan } from './billingModel';
-import { shadow } from '../../shared/styles/tokens';
+import { colors, radius, shadow, spacing } from '../../shared/styles/tokens';
 
 interface PlanCardProps {
   plan: Plan;
@@ -22,6 +28,8 @@ export function PlanCard({
   disabled = false,
   pending = false,
 }: PlanCardProps) {
+  const { width } = useWindowDimensions();
+  const compact = width < 600;
   const Icon = plan.icon;
   const { isCurrent, isDowngrade } = getPlanState(plan.id, currentPlan);
 
@@ -33,15 +41,19 @@ export function PlanCard({
         </View>
       )}
 
-      <View style={styles.header}>
-        <View style={[styles.iconWrapper, { backgroundColor: plan.bg }]}>
-          <Icon size={22} color={plan.color} />
+      <View style={[styles.header, compact && styles.headerCompact]}>
+        <View style={styles.identity}>
+          <View style={[styles.iconWrapper, { backgroundColor: plan.bg }]}>
+            <Icon size={22} color={plan.color} />
+          </View>
+          <View style={styles.titleBlock}>
+            <Text accessibilityRole="header" style={styles.name}>
+              {plan.name}
+            </Text>
+            <Text style={styles.description}>{plan.description}</Text>
+          </View>
         </View>
-        <View style={styles.titleBlock}>
-          <Text style={styles.name}>{plan.name}</Text>
-          <Text style={styles.description}>{plan.description}</Text>
-        </View>
-        <View style={styles.priceBlock}>
+        <View style={[styles.priceBlock, compact && styles.priceBlockCompact]}>
           <Text style={[styles.price, { color: plan.color }]}>
             {plan.price}
           </Text>
@@ -61,6 +73,7 @@ export function PlanCard({
       {plan.id === 'enterprise' ? (
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityHint={`Ouvre votre messagerie pour demander un devis ${plan.name}`}
           style={[
             styles.upgradeButton,
             { backgroundColor: plan.bg, borderColor: plan.color },
@@ -74,12 +87,13 @@ export function PlanCard({
         </TouchableOpacity>
       ) : isCurrent ? (
         <View style={styles.currentBadgeButton}>
-          <CheckCircle size={15} color="#16A34A" />
+          <CheckCircle size={15} color={colors.trustGreen} />
           <Text style={styles.currentBadgeText}>Plan actuel</Text>
         </View>
       ) : (
         <TouchableOpacity
           accessibilityRole="button"
+          accessibilityHint={`Demande une facture pour le plan ${plan.name}. L’accès est activé après vérification du règlement.`}
           accessibilityState={{ disabled, busy: pending }}
           disabled={disabled}
           style={[
@@ -111,10 +125,10 @@ export function PlanCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    marginBottom: spacing.lg,
     borderWidth: 1.5,
     borderColor: '#E5E7EB',
     ...shadow.card,
@@ -135,7 +149,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    gap: 12,
+    gap: spacing.md,
+  },
+  headerCompact: { flexDirection: 'column', alignItems: 'stretch' },
+  identity: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
   },
   iconWrapper: {
     width: 44,
@@ -144,26 +165,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  titleBlock: { flex: 1 },
+  titleBlock: { flex: 1, minWidth: 0 },
   name: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  description: { fontSize: 12, color: '#6B7280', marginTop: 2 },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
   priceBlock: { alignItems: 'flex-end' },
-  price: { fontSize: 20, fontWeight: '700' },
-  period: { fontSize: 12, color: '#6B7280' },
+  priceBlockCompact: { alignItems: 'flex-start', marginLeft: 56 },
+  price: { fontSize: 24, fontWeight: '700' },
+  period: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
   featuresBlock: { gap: 8, marginBottom: 16 },
-  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  featureText: { fontSize: 13, color: '#374151' },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  featureText: { flex: 1, fontSize: 14, lineHeight: 21, color: colors.text },
   upgradeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 13,
+    paddingHorizontal: spacing.md,
+    minHeight: 48,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
-  upgradeButtonText: { fontSize: 14, fontWeight: '600' },
+  upgradeButtonText: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontWeight: '600',
+    flexShrink: 1,
+  },
   upgradeText: { color: '#FFFFFF' },
   downgradeButton: {
     backgroundColor: '#F9FAFB',
@@ -176,8 +211,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 13,
+    minHeight: 48,
     borderRadius: 12,
     backgroundColor: '#F0FDF4',
   },
-  currentBadgeText: { fontSize: 14, fontWeight: '600', color: '#16A34A' },
+  currentBadgeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.trustGreen,
+  },
 });

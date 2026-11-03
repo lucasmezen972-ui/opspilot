@@ -5,13 +5,13 @@ export type TaskFilter = 'all' | 'my' | 'pending' | 'in_progress';
 export function getPriorityColor(priority: string): string {
   switch (priority) {
     case 'urgent':
-      return '#DC2626';
+      return '#B91C1C';
     case 'high':
-      return '#EF4444';
+      return '#B91C1C';
     case 'medium':
-      return '#F59E0B';
+      return '#92400E';
     case 'low':
-      return '#10B981';
+      return '#166534';
     default:
       return '#6B7280';
   }
@@ -35,9 +35,9 @@ export function getPriorityText(priority: string): string {
 export function getTaskStatusColor(status: string): string {
   switch (status) {
     case 'completed':
-      return '#10B981';
+      return '#166534';
     case 'in_progress':
-      return '#F59E0B';
+      return '#92400E';
     default:
       return '#6B7280';
   }

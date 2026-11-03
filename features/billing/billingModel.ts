@@ -1,6 +1,8 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { Crown, Building2, Rocket } from 'lucide-react-native';
 
+import { colors } from '../../shared/styles/tokens';
+
 export interface Plan {
   id: string;
   name: string;
@@ -58,7 +60,7 @@ export const PLANS: Plan[] = [
     price: 'Sur devis',
     period: '',
     icon: Crown,
-    color: '#D97706',
+    color: colors.warningText,
     bg: '#FFFBEB',
     description: 'Périmètre et accompagnement sur devis',
     features: [
@@ -75,7 +77,7 @@ const DEFAULT_STATUS = { label: 'Statut à vérifier', color: '#6B7280' };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   trialing: { label: 'Essai gratuit', color: '#2563EB' },
-  active: { label: 'Actif', color: '#16A34A' },
+  active: { label: 'Actif', color: colors.trustGreen },
   past_due: { label: 'Paiement en retard', color: '#DC2626' },
   canceled: { label: 'Annulé', color: '#6B7280' },
 };
