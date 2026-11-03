@@ -25,7 +25,7 @@ create policy billing_request_read on public.billing_requests for select to auth
 );
 
 create or replace function public.request_qonto_billing(p_plan text)
-returns public.billing_requests language plpgsql security definer set search_path=public
+returns jsonb language plpgsql security definer set search_path=public
 as $$
 declare actor public.profiles; result public.billing_requests;
 begin
@@ -38,7 +38,7 @@ begin
     values (actor.organization_id,actor.id,p_plan)
     on conflict (organization_id,plan) where status in ('requested','awaiting_payment')
     do update set updated_at=now() returning * into result;
-  return result;
+  return to_jsonb(result);
 end;
 $$;
 revoke all on function public.request_qonto_billing(text) from public,anon;
