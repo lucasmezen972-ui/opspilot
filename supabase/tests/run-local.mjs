@@ -14,6 +14,7 @@ const suffixes = [
   'active_access_and_performance',
   'sepa_recurring_billing',
   'onboarding_access_integrity',
+  'rate_limit_clock_integrity',
 ];
 const apply = async (url) => {
   await db.exec(await readFile(url, 'utf8'));
@@ -41,6 +42,7 @@ try {
     'video_storage_integrity.sql',
     'billing_plan_mapping.sql',
     'mollie_billing.sql',
+    'rate_limit_integrity.sql',
   ])
     await apply(new URL(file, root));
 } finally {

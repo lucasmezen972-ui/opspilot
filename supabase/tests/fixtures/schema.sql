@@ -106,6 +106,7 @@ grant usage on schema public,auth,storage to anon,authenticated,service_role; gr
 
 
 create table auth.users(id uuid primary key,email text);
+create table public.ai_rate_limits(rate_key text primary key,window_started_at timestamptz not null default now(),request_count integer not null default 0 check(request_count>=0),updated_at timestamptz not null default now());
 create table public.users(id uuid primary key,email text);
 create table public.stores(id uuid primary key default gen_random_uuid(),organization_id uuid,name text);
 create table public.invitations(id uuid primary key default gen_random_uuid(),organization_id uuid not null,email text not null,role text not null default 'employé',store_id uuid,token uuid not null default gen_random_uuid(),invited_by uuid,status text not null default 'pending',expires_at timestamptz not null default now()+interval '7 days',created_at timestamptz default now());
