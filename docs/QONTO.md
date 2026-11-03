@@ -23,6 +23,14 @@ Les tentatives sont privées et les opérations financières sont réservées au
 
 Une facture et sa tentative sont verrouillées dans le même ordre. Les doublons de facture et les notifications répétées n’ajoutent pas deux périodes. Une tentative de création ambiguë datant de plus de 50 minutes nécessite une vérification dans Mollie, car son cache d’idempotence expire après une heure. Les remboursements ou contestations détectés sont signalés pour examen ; un abonnement correspondant à ce paiement passe en retard de paiement. OpsPilot ne rembourse ni ne transfère de fonds par API.
 
+## Prélèvement SEPA : activation demandée le 3 novembre 2026
+
+Lucas a confirmé l’acceptation des conditions SEPA pour le profil Mollie **EI - Mezen Lucas** associé à OpsPilot. La demande a été soumise depuis les réglages des paiements en ligne. Mollie affiche désormais l’icône d’attente de contrôle ; l’API de production refuse encore `directdebit` et ne retourne aucun moyen récurrent activé. Il s’agit donc d’une demande en cours d’examen, pas d’un service déjà opérationnel. Ne pas soumettre une deuxième demande ni annoncer une date ferme d’activation.
+
+Le compte de reversement configuré chez Mollie a été rapproché du sous-compte Qonto **Trésorerie**, conformément au choix de Lucas. Aucune coordonnée bancaire n’a été modifiée et aucun prélèvement réel n’a été créé.
+
+L’intégration publiée reste celle des paiements ponctuels décrite ci-dessus. Le cycle SEPA (autorisation et preuve du mandat, échéances, prénotification, paiements récurrents, rejets et révocations) doit encore être raccordé et testé avant de proposer le prélèvement automatique aux clients. La validation du moyen de paiement par Mollie et celle des reversements restent des contrôles distincts.
+
 ## Secrets serveur
 
 Les clés sont chiffrées dans Supabase Vault. Elles ne sont jamais placées dans GitHub, les variables `EXPO_PUBLIC_*`, le navigateur ou les réponses des fonctions. Les rôles `anon` et `authenticated` ne peuvent pas lire le coffre ni la configuration privée.
