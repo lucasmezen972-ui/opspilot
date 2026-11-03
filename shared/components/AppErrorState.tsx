@@ -29,6 +29,8 @@ export function AppErrorState({
       <Text style={styles.message}>{message}</Text>
       {onRetry && (
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={retryLabel}
           testID={testID ? `${testID}-retry` : undefined}
           style={styles.retry}
           onPress={onRetry}
@@ -68,6 +70,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retry: {
+    minHeight: 44,
+    justifyContent: 'center',
     marginTop: spacing.sm,
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.xl,

@@ -9,21 +9,27 @@ interface ExperienceBarProps {
 
 /** Barre de progression d'expérience vers le niveau suivant. */
 export function ExperienceBar({ progress }: ExperienceBarProps) {
+  const percent = Math.max(0, Math.min(100, progress.percent));
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <Text style={styles.title}>Progression</Text>
-        <Text style={styles.points}>
-          {progress.xp}/{progress.xpForNextLevel} XP
-        </Text>
+        <Text style={styles.title}>Progression du niveau {progress.level}</Text>
+        <Text style={styles.points}>{Math.round(percent)} %</Text>
       </View>
-      <View style={styles.bar}>
-        <View style={[styles.fill, { width: `${progress.percent}%` }]} />
+      <View
+        style={styles.bar}
+        accessibilityRole="progressbar"
+        accessibilityLabel={`Progression vers le niveau ${progress.level + 1}`}
+        accessibilityValue={{ min: 0, max: 100, now: percent }}
+      >
+        <View style={[styles.fill, { width: `${percent}%` }]} />
       </View>
       <Text style={styles.subtext}>
         {progress.remaining > 0
-          ? `Plus que ${progress.remaining} XP pour atteindre le niveau ${progress.level + 1} !`
-          : 'Niveau maximum atteint !'}
+          ? `${progress.remaining} XP avant le niveau ${progress.level + 1}`
+          : 'Seuil du niveau suivant atteint'}
+        {' · '}
+        {progress.xp} XP cumulés
       </Text>
     </View>
   );
@@ -42,18 +48,21 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
   title: {
+    flexShrink: 1,
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
   },
   points: {
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textMuted,
     fontWeight: '500',
   },
   bar: {

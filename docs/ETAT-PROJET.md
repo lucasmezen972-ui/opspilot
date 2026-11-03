@@ -5,6 +5,19 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Finition identité et composition — 3 novembre 2026
+
+La passe suivant la PR 234 unifie la marque, charge Instrument Sans localement,
+répartit l’accueil en colonnes selon la largeur disponible et retire le résumé
+d’alertes répété. Connexion, cockpit, outils, profil et navigation sont harmonisés.
+Les états erreur/chargement restent explicites, la traçabilité est dépliable au
+clavier et les parcours métier existants sont conservés.
+
+La reprise s’effectue dans une copie isolée du candidat initial, conservé intact.
+Contrôles et limites : [DESIGN-IDENTITY-2026-11-03.md](DESIGN-IDENTITY-2026-11-03.md).
+La publication exacte est suivie dans la PR de cette passe. Aucun changement
+serveur, bancaire, média ou Cloudflare ; aucun usage de GitHub Actions.
+
 ## Espace client TRADIKOM — raccordement serveur du 3 novembre 2026
 
 Les achats confirmés peuvent désormais alimenter une file commerciale privée

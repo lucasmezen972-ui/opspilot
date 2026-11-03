@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import {
-  Camera,
+  ArrowUpRight,
+  ChevronDown,
   CircleCheck,
-  ShieldCheck,
   TriangleAlert,
 } from 'lucide-react-native';
+import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { DashboardFieldBrief as FieldBrief } from './dashboardModel';
@@ -12,6 +13,8 @@ import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 interface DashboardFieldBriefProps {
   brief: FieldBrief;
+  compact?: boolean;
+  embedded?: boolean;
 }
 
 function toneColor(tone: FieldBrief['tone']) {
@@ -20,71 +23,74 @@ function toneColor(tone: FieldBrief['tone']) {
   return colors.trustGreen;
 }
 
-function toneBackground(tone: FieldBrief['tone']) {
-  if (tone === 'danger') return colors.dangerSoft;
-  if (tone === 'warning') return colors.warningSoft;
-  return colors.successSoft;
-}
-
-function ToneIcon({ tone }: { tone: FieldBrief['tone'] }) {
-  const color = toneColor(tone);
-  if (tone === 'success') return <CircleCheck size={18} color={color} />;
-  return <TriangleAlert size={18} color={color} />;
-}
-
-export function DashboardFieldBrief({ brief }: DashboardFieldBriefProps) {
+export function DashboardFieldBrief({
+  brief,
+  compact = false,
+  embedded = false,
+}: DashboardFieldBriefProps) {
+  const [evidenceOpen, setEvidenceOpen] = useState(!compact);
   const accent = toneColor(brief.tone);
+  const StatusIcon = brief.tone === 'success' ? CircleCheck : TriangleAlert;
 
   return (
-    <View style={styles.section}>
-      <View
-        style={[styles.card, { borderLeftColor: accent }]}
-        testID="dashboard-field-brief"
-      >
+    <View style={!embedded && styles.section}>
+      <View style={styles.card} testID="dashboard-field-brief">
         <View style={styles.topRow}>
-          <View
-            style={[
-              styles.iconWrap,
-              { backgroundColor: toneBackground(brief.tone) },
-            ]}
-          >
-            <ToneIcon tone={brief.tone} />
-          </View>
           <View style={styles.titleBlock}>
             <Text style={styles.eyebrow}>Brief terrain du jour</Text>
-            <Text style={[styles.title, { color: accent }]}>
-              {brief.eyebrow}
-            </Text>
+            <View style={styles.statusLine}>
+              <StatusIcon size={14} color={accent} />
+              <Text style={[styles.status, { color: accent }]}>
+                {brief.eyebrow}
+              </Text>
+            </View>
           </View>
+          {compact && (
+            <TouchableOpacity
+              onPress={() => setEvidenceOpen((open) => !open)}
+              style={styles.evidenceToggle}
+              accessibilityRole="button"
+              accessibilityLabel="Preuves et traçabilité"
+              accessibilityState={{ expanded: evidenceOpen }}
+              aria-expanded={evidenceOpen}
+              aria-controls="dashboard-field-evidence"
+            >
+              <Text style={styles.evidenceToggleText}>Traçabilité</Text>
+              <ChevronDown
+                size={15}
+                color={colors.textMuted}
+                style={evidenceOpen ? styles.chevronOpen : undefined}
+              />
+            </TouchableOpacity>
+          )}
         </View>
 
-        <View style={styles.details}>
+        <View style={styles.mainRow}>
           <View style={styles.description}>
             <Text style={styles.priority}>{brief.title}</Text>
             <Text style={styles.message}>{brief.message}</Text>
           </View>
-          <View style={styles.proofBox}>
-            <Camera size={17} color={colors.textMuted} />
-            <Text style={styles.proofText}>{brief.proof}</Text>
-          </View>
-        </View>
-
-        <View style={styles.footer}>
-          <View style={styles.trustLine}>
-            <ShieldCheck size={14} color={colors.trustGreen} />
-            <Text style={styles.trustText}>{brief.trustLine}</Text>
-          </View>
           <TouchableOpacity
-            style={[styles.actionButton, { borderColor: accent }]}
+            style={styles.actionButton}
             onPress={() => router.push(brief.route)}
             testID="dashboard-field-brief-action"
             accessibilityRole="button"
           >
-            <Text style={[styles.actionText, { color: accent }]}>
-              {brief.actionLabel}
-            </Text>
+            <Text style={styles.actionText}>{brief.actionLabel}</Text>
+            <ArrowUpRight size={16} color={colors.surface} />
           </TouchableOpacity>
         </View>
+
+        {evidenceOpen && (
+          <View
+            style={styles.evidence}
+            nativeID="dashboard-field-evidence"
+            testID="dashboard-field-evidence"
+          >
+            <Text style={styles.proofText}>{brief.proof}</Text>
+            <Text style={styles.trustText}>{brief.trustLine}</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -96,110 +102,109 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xs,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 4,
-    padding: spacing.lg,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   titleBlock: {
     flex: 1,
+    minWidth: 0,
+    gap: spacing.xs,
   },
   eyebrow: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 17,
     color: colors.textMuted,
-    fontWeight: '500',
   },
-  title: {
-    marginTop: 2,
-    fontSize: 14,
-    lineHeight: 20,
+  statusLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  status: {
+    flexShrink: 1,
+    fontSize: 12,
+    lineHeight: 18,
     fontWeight: '600',
   },
-  details: {
+  evidenceToggle: {
+    minHeight: 44,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.lg,
-    marginTop: spacing.lg,
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingLeft: spacing.sm,
   },
-  description: {
-    flexGrow: 2,
-    flexBasis: 280,
-    minWidth: 0,
+  evidenceToggleText: {
+    fontSize: 12,
+    color: colors.textMuted,
   },
-  priority: {
-    fontSize: 20,
-    lineHeight: 27,
-    fontWeight: '700',
-    color: colors.textStrong,
+  chevronOpen: {
+    transform: [{ rotate: '180deg' }],
   },
-  message: {
-    marginTop: spacing.sm,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.text,
-  },
-  proofBox: {
-    flexGrow: 1,
-    flexBasis: 260,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    backgroundColor: colors.background,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  proofText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors.text,
-  },
-  footer: {
+  mainRow: {
     marginTop: spacing.md,
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
-  trustLine: {
-    flexDirection: 'row',
+  description: {
     flexGrow: 1,
-    flexBasis: 200,
-    alignItems: 'center',
-    gap: spacing.xs,
+    flexBasis: 360,
+    flexShrink: 1,
+    minWidth: 0,
   },
-  trustText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textMuted,
+  priority: {
+    fontSize: 21,
+    lineHeight: 28,
+    fontWeight: '600',
+    letterSpacing: -0.4,
+    color: colors.primaryInk,
+  },
+  message: {
+    marginTop: spacing.xs,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.text,
   },
   actionButton: {
     minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    gap: spacing.sm,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primary,
   },
   actionText: {
     fontSize: 14,
     fontWeight: '600',
+    color: colors.surface,
+  },
+  evidence: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: spacing.sm,
+  },
+  proofText: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.text,
+  },
+  trustText: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.textMuted,
   },
 });

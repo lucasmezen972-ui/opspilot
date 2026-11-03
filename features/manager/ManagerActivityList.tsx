@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { colors, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 
 export interface ActivityItem {
   id: string;
@@ -24,55 +24,67 @@ export function ManagerActivityList({
 }: ManagerActivityListProps) {
   return (
     <View style={[styles.section, last && styles.sectionLast]}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {items.map((item) => (
-        <View key={item.id} style={styles.item}>
-          <View style={styles.left}>
-            {item.icon}
-            <View style={styles.info}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
+      <Text accessibilityRole="header" style={styles.sectionTitle}>
+        {title}
+      </Text>
+      <View style={styles.list}>
+        {items.map((item, index) => (
+          <View
+            key={item.id}
+            style={[styles.item, index === items.length - 1 && styles.itemLast]}
+          >
+            <View style={styles.left}>
+              <View style={styles.icon}>{item.icon}</View>
+              <View style={styles.info}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.subtitle}>{item.subtitle}</Text>
+              </View>
             </View>
           </View>
-        </View>
-      ))}
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   section: {
-    marginHorizontal: 20,
-    marginTop: 20,
+    marginBottom: spacing.xxl,
   },
   sectionLast: {
-    marginBottom: 40,
+    marginBottom: 0,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.textStrong,
-    marginBottom: 12,
+    color: colors.primaryInk,
+    marginBottom: spacing.md,
+  },
+  list: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    ...shadow.card,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
   },
+  itemLast: { borderBottomWidth: 0 },
   left: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flex: 1,
   },
+  icon: { width: 24, alignItems: 'center', paddingTop: 2 },
   info: {
-    marginLeft: 12,
+    marginLeft: spacing.sm,
     flex: 1,
   },
   title: {

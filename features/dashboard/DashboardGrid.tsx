@@ -26,7 +26,12 @@ export function DashboardGrid({
   );
   const itemWidth =
     width > 0
-      ? Math.max(0, (width - (columns - 1) * spacing.md) / columns)
+      ? // onLayout rounds the measured width. Reserve a pixel and round down so
+        // browser subpixels cannot push the final column onto another row.
+        Math.max(
+          0,
+          Math.floor((width - 1 - (columns - 1) * spacing.md) / columns),
+        )
       : undefined;
 
   return (
@@ -39,7 +44,7 @@ export function DashboardGrid({
           style={[
             styles.item,
             itemWidth === undefined
-              ? { width: `${100 / columns - 2}%` }
+              ? { width: `${100 / columns - 3}%` }
               : { width: itemWidth },
           ]}
         >

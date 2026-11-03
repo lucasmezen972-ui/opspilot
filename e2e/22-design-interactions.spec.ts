@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import { loginAsLocalDemo } from './helpers';
 
 test.use({ timezoneId: 'America/Martinique' });
+const evidenceDir =
+  process.env.OPSPILOT_DESIGN_EVIDENCE_DIR ?? 'docs/evidence/2026-11-03/design';
 
 for (const [width, height] of [
   [375, 812],
@@ -48,7 +50,7 @@ for (const [width, height] of [
       'Réalisé par *',
     );
     await page.screenshot({
-      path: `docs/evidence/2026-11-03/design/after-task-form-${width}.jpg`,
+      path: `${evidenceDir}/after-task-form-${width}.jpg`,
       animations: 'disabled',
       type: 'jpeg',
       quality: 75,

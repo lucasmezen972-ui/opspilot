@@ -26,6 +26,7 @@ import {
   type PressableProps,
 } from 'react-native';
 
+import { AppBrand } from './AppBrand';
 import { useAppSettings } from '../../hooks/useAppSettings';
 import { useAuth } from '../../hooks/useAuth';
 import { can } from '../../utils/permissions';
@@ -76,13 +77,7 @@ export function AppDesktopNavigation() {
   return (
     <View testID="desktop-navigation" style={styles.sidebar}>
       <View style={styles.brand}>
-        <View style={styles.mark}>
-          <Text style={styles.markText}>OP</Text>
-        </View>
-        <View>
-          <Text style={styles.brandName}>OpsPilot</Text>
-          <Text style={styles.brandDetail}>Opérations terrain</Text>
-        </View>
+        <AppBrand size={38} wordmarkSize={23} inverted />
       </View>
       <ScrollView
         style={styles.scroll}
@@ -143,6 +138,7 @@ export function AppDesktopNavigation() {
               >
                 <Icon
                   size={19}
+                  style={{ flexShrink: 0 }}
                   color={active ? '#FFFFFF' : '#CBD5E1'}
                   accessible={false}
                 />
@@ -175,6 +171,7 @@ export function AppDesktopNavigation() {
                 >
                   <Icon
                     size={18}
+                    style={{ flexShrink: 0 }}
                     color={active ? '#FFFFFF' : '#CBD5E1'}
                     accessible={false}
                   />
@@ -214,7 +211,7 @@ export function AppDesktopNavigation() {
 const styles = StyleSheet.create({
   sidebar: {
     width: 228,
-    backgroundColor: '#0F172A',
+    backgroundColor: colors.navyDeep,
     borderRightWidth: 1,
     borderRightColor: '#1E293B',
   },
@@ -223,29 +220,14 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 28,
+    paddingTop: 30,
+    paddingBottom: 28,
   },
-  mark: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  markText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
-  brandName: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-  },
-  brandDetail: { color: '#CBD5E1', fontSize: 12, marginTop: 3 },
   scroll: { flex: 1 },
   navContent: { padding: 12, paddingTop: 8, paddingBottom: 24 },
   section: {
     color: '#94A3B8',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1,
     paddingHorizontal: 12,
@@ -262,12 +244,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  active: { backgroundColor: colors.primary },
-  toolActive: { backgroundColor: '#1E3A5F' },
+  active: { backgroundColor: '#245CDB' },
+  toolActive: { backgroundColor: '#223C60' },
   pressed: { backgroundColor: '#334155' },
   label: {
     color: '#CBD5E1',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500',
     flexShrink: 1,
     lineHeight: 20,

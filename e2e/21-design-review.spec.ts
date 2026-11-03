@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { loginAsLocalDemo } from './helpers';
+import { loginAsLocalDemo, waitForVisualLayout } from './helpers';
 import { signedInFixture } from './billingFixture';
 
 test.use({ timezoneId: 'America/Martinique' });
 
 const stage = process.env.OPSPILOT_DESIGN_STAGE ?? 'after';
+const evidenceDir =
+  process.env.OPSPILOT_DESIGN_EVIDENCE_DIR ?? 'docs/evidence/2026-11-03/design';
 for (const [width, height] of [
   [375, 812],
   [768, 1024],
@@ -45,8 +47,9 @@ for (const [width, height] of [
         ),
         `${route} déborde horizontalement`,
       ).toBe(true);
+      await waitForVisualLayout(page);
       await page.screenshot({
-        path: `docs/evidence/2026-11-03/design/${stage}-${route}-${width}.jpg`,
+        path: `${evidenceDir}/${stage}-${route}-${width}.jpg`,
         type: 'jpeg',
         quality: 75,
       });
@@ -78,8 +81,9 @@ for (const [width, height] of [
     ).toBeVisible();
     await page.getByTestId('auth-submit-button').scrollIntoViewIfNeeded();
     await expect(page.getByTestId('auth-submit-button')).toBeInViewport();
+    await waitForVisualLayout(page);
     await page.screenshot({
-      path: `docs/evidence/2026-11-03/design/${stage}-auth-${width}.jpg`,
+      path: `${evidenceDir}/${stage}-auth-${width}.jpg`,
       type: 'jpeg',
       quality: 75,
     });
@@ -96,8 +100,9 @@ for (const [width, height] of [
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
       ),
     ).toBe(true);
+    await waitForVisualLayout(page);
     await page.screenshot({
-      path: `docs/evidence/2026-11-03/design/${stage}-billing-${width}.jpg`,
+      path: `${evidenceDir}/${stage}-billing-${width}.jpg`,
       type: 'jpeg',
       quality: 75,
     });

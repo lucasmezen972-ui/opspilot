@@ -134,8 +134,12 @@ function ManagerDashboardContent() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>Pilotage multi-sites</Text>
-        <Text style={styles.title}>Cockpit Manager</Text>
+        <View style={styles.headerIntro}>
+          <Text style={styles.eyebrow}>Pilotage multi-sites</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            Cockpit Manager
+          </Text>
+        </View>
         <Text style={styles.subtitle}>
           Bienvenue, {profile?.full_name ?? 'Manager'}
         </Text>
@@ -247,40 +251,53 @@ function ManagerDetails({
         </View>
       </View>
 
-      {storeStats.length > 0 && <StorePerformanceList stores={storeStats} />}
+      {(storeStats.length > 0 ||
+        urgentTasks.length > 0 ||
+        recentAudits.length > 0) && (
+        <View style={styles.operationsRow}>
+          {storeStats.length > 0 && (
+            <View style={styles.operationsColumn}>
+              <StorePerformanceList stores={storeStats} />
+            </View>
+          )}
+          {(urgentTasks.length > 0 || recentAudits.length > 0) && (
+            <View style={styles.operationsColumn}>
+              {urgentTasks.length > 0 && (
+                <ManagerActivityList
+                  title="Tâches urgentes"
+                  items={urgentTasks.map((task) => ({
+                    id: task.id,
+                    icon: <AlertTriangle size={16} color={colors.danger} />,
+                    title: task.title,
+                    subtitle: `${task.location ?? 'Aucune localisation'} - ${
+                      task.status === 'in_progress' ? 'En cours' : 'À faire'
+                    }`,
+                  }))}
+                />
+              )}
 
-      {urgentTasks.length > 0 && (
-        <ManagerActivityList
-          title="Tâches urgentes"
-          items={urgentTasks.map((task) => ({
-            id: task.id,
-            icon: <AlertTriangle size={16} color={colors.danger} />,
-            title: task.title,
-            subtitle: `${task.location ?? 'Aucune localisation'} - ${
-              task.status === 'in_progress' ? 'En cours' : 'À faire'
-            }`,
-          }))}
-        />
-      )}
-
-      {recentAudits.length > 0 && (
-        <ManagerActivityList
-          title="Audits récents"
-          last
-          items={recentAudits.map((audit) => ({
-            id: audit.id,
-            icon: (
-              <ClipboardCheck
-                size={16}
-                color={auditStatusColor(audit.status)}
-              />
-            ),
-            title: audit.title,
-            subtitle: `${audit.location ?? ''} ${
-              audit.score != null ? `- Score: ${audit.score}%` : ''
-            }`,
-          }))}
-        />
+              {recentAudits.length > 0 && (
+                <ManagerActivityList
+                  title="Audits récents"
+                  last
+                  items={recentAudits.map((audit) => ({
+                    id: audit.id,
+                    icon: (
+                      <ClipboardCheck
+                        size={16}
+                        color={auditStatusColor(audit.status)}
+                      />
+                    ),
+                    title: audit.title,
+                    subtitle: `${audit.location ?? ''} ${
+                      audit.score != null ? `- Score: ${audit.score}%` : ''
+                    }`,
+                  }))}
+                />
+              )}
+            </View>
+          )}
+        </View>
       )}
 
       {auditsEmpty && (
@@ -311,39 +328,58 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingTop:
       Platform.OS === 'web' ? 28 : (Constants.statusBarHeight ?? 44) + 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
+  headerIntro: { flexGrow: 1, minWidth: 0 },
   eyebrow: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 18,
     color: colors.primary,
     fontWeight: '600',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   title: {
-    fontSize: 28,
-    lineHeight: 36,
-    letterSpacing: -0.4,
+    fontSize: 32,
+    lineHeight: 40,
+    letterSpacing: -0.8,
     fontWeight: '700',
-    color: colors.textStrong,
-    marginBottom: 4,
+    color: colors.primaryInk,
   },
   subtitle: {
     fontSize: 14,
     lineHeight: 21,
     color: colors.textMuted,
+    paddingBottom: spacing.xs,
   },
   detailsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginHorizontal: spacing.xl,
+    marginTop: spacing.xl,
+    gap: spacing.lg,
   },
   detailsColumn: {
     flexGrow: 1,
-    flexBasis: 340,
+    flexShrink: 1,
+    flexBasis: 320,
     minWidth: 0,
   },
+  operationsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: spacing.xl,
+    marginTop: spacing.xxl,
+    gap: spacing.xxl,
+  },
+  operationsColumn: { flexGrow: 1, flexShrink: 1, flexBasis: 400, minWidth: 0 },
   emptyState: {
     alignItems: 'center',
-    padding: 40,
+    paddingVertical: 48,
+    paddingHorizontal: spacing.xl,
   },
   emptyTitle: {
     fontSize: 18,
@@ -365,8 +401,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: 20,
     marginTop: 12,
-    backgroundColor: colors.primarySoft,
-    borderRadius: 10,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
   },
   loadingText: {
     fontSize: 13,

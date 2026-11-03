@@ -1,42 +1,68 @@
 import { router } from 'expo-router';
+import { ArrowUpRight } from 'lucide-react-native';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import type { Profile } from '../../lib/supabase';
 import { AppSectionHeader } from '../../shared/components/AppSectionHeader';
-import { colors, radius, spacing, shadow } from '../../shared/styles/tokens';
+import { colors, radius, spacing } from '../../shared/styles/tokens';
 import { computeXpProgress } from '../profile/profileModel';
 
 interface DashboardProgressProps {
   profile: Profile;
+  compact?: boolean;
+  embedded?: boolean;
 }
 
 /** Section « Votre progression » : niveau, XP et barre d'avancement. */
-export function DashboardProgress({ profile }: DashboardProgressProps) {
+export function DashboardProgress({
+  profile,
+  compact = false,
+  embedded = false,
+}: DashboardProgressProps) {
   const level = profile.level ?? 1;
   const xp = profile.xp ?? 0;
   const progress = computeXpProgress(level, xp);
   const remaining = Math.max(0, progress.remaining);
 
   return (
-    <View style={styles.section}>
-      <AppSectionHeader
-        title="Votre progression"
-        actionLabel="Classement →"
-        onAction={() => router.push('/training')}
-      />
-      <View style={styles.panel}>
+    <View style={!embedded && styles.section}>
+      {compact ? (
+        <View style={styles.compactHeading}>
+          <Text style={styles.compactTitle} accessibilityRole="header">
+            Votre progression
+          </Text>
+          <TouchableOpacity
+            style={styles.headingAction}
+            onPress={() => router.push('/training')}
+            accessibilityRole="link"
+            accessibilityLabel="Classement et formation"
+          >
+            <ArrowUpRight size={17} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <AppSectionHeader
+          title="Votre progression"
+          actionLabel="Classement →"
+          onAction={() => router.push('/training')}
+        />
+      )}
+      <View style={[styles.panel, embedded && styles.embeddedPanel]}>
         <View style={styles.levelRow}>
           <View style={styles.levelBadge}>
             <Text style={styles.levelBadgeText}>Niv. {level}</Text>
           </View>
           <View style={styles.levelInfo}>
-            <Text style={styles.levelName}>{profile.full_name}</Text>
-            <Text style={styles.levelXP}>
-              {xp} XP · {profile.completed_trainings ?? 0} formations
+            {!compact && (
+              <Text style={styles.levelName}>{profile.full_name}</Text>
+            )}
+            <Text style={styles.levelXP}>{xp} XP</Text>
+            <Text style={styles.trainingCount}>
+              {profile.completed_trainings ?? 0} formations
             </Text>
           </View>
           <TouchableOpacity
-            style={styles.profileBtn}
+            style={[styles.profileBtn, compact && styles.compactProfileBtn]}
             onPress={() => router.push('/profile')}
             accessibilityRole="link"
           >
@@ -52,7 +78,9 @@ export function DashboardProgress({ profile }: DashboardProgressProps) {
           />
         </View>
         <Text style={styles.progressText}>
-          {remaining} XP jusqu'au niveau suivant
+          {Math.round(Math.max(0, progress.percent))} % du niveau {level}
+          {' · '}
+          {remaining} XP avant le suivant
         </Text>
       </View>
     </View>
@@ -70,7 +98,29 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderWidth: 1,
     borderColor: colors.hairline,
-    ...shadow.card,
+  },
+  embeddedPanel: {
+    padding: 0,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+  },
+  compactHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  compactTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.primaryInk,
+    fontWeight: '600',
+  },
+  headingAction: {
+    width: 44,
+    height: 44,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   levelRow: {
     flexDirection: 'row',
@@ -79,13 +129,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm + 2,
   },
   levelBadge: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primarySoft,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs,
   },
   levelBadgeText: {
-    color: colors.surface,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -99,10 +149,16 @@ const styles = StyleSheet.create({
     color: colors.textStrong,
   },
   levelXP: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+    color: colors.primaryInk,
     marginTop: 2,
+  },
+  trainingCount: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: colors.textMuted,
   },
   profileBtn: {
     minHeight: 44,
@@ -119,8 +175,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  compactProfileBtn: {
+    backgroundColor: 'transparent',
+    minWidth: 44,
+    paddingHorizontal: 0,
+  },
   progressBar: {
-    height: 8,
+    height: 4,
     backgroundColor: colors.border,
     borderRadius: 3,
     marginBottom: spacing.xs + 2,
@@ -131,8 +192,8 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 18,
     color: colors.textMuted,
     marginTop: spacing.xs,
   },
