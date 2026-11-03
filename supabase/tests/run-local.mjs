@@ -15,6 +15,7 @@ const suffixes = [
   'sepa_recurring_billing',
   'onboarding_access_integrity',
   'rate_limit_clock_integrity',
+  'private_r2_training_media',
 ];
 const apply = async (url) => {
   await db.exec(await readFile(url, 'utf8'));
@@ -43,6 +44,7 @@ try {
     'billing_plan_mapping.sql',
     'mollie_billing.sql',
     'rate_limit_integrity.sql',
+    'r2_training_integrity.sql',
   ])
     await apply(new URL(file, root));
 } finally {

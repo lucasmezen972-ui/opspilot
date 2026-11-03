@@ -1,14 +1,16 @@
 import { useRef } from 'react';
 import { Text, View } from 'react-native';
 
-import { validateTrainingVideoFile } from './video';
+import { MAX_TRAINING_VIDEO_BYTES, validateTrainingVideoFile } from './video';
 import { AppButton } from '../../shared/components/AppButton';
 export function TrainingVideoFilePicker({
   onChoose,
   onError,
+  maxBytes = MAX_TRAINING_VIDEO_BYTES,
 }: {
   onChoose: (file: File, duration: number) => void;
   onError: (message: string) => void;
+  maxBytes?: number;
 }) {
   const input = useRef<HTMLInputElement>(null);
   return (
@@ -23,7 +25,7 @@ export function TrainingVideoFilePicker({
           const file = e.currentTarget.files?.[0];
           e.currentTarget.value = '';
           if (!file) return;
-          const error = validateTrainingVideoFile(file);
+          const error = validateTrainingVideoFile(file, maxBytes);
           if (error) {
             onError(error);
             return;
@@ -60,7 +62,8 @@ export function TrainingVideoFilePicker({
         onPress={() => input.current?.click()}
       />
       <Text style={{ fontSize: 12, color: '#64748B' }}>
-        50 Mo maximum. Le fichier reste privé à votre organisation.
+        {Math.round(maxBytes / 1024 / 1024)} Mo maximum. Le fichier reste privé
+        à votre organisation.
       </Text>
     </View>
   );

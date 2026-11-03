@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 
 import { TrainingVideoFilePicker } from './TrainingVideoFilePicker';
-import { isTrainingMediaUrl } from './video';
+import {
+  isTrainingMediaUrl,
+  MAX_R2_VIDEO_BYTES,
+  MAX_TRAINING_VIDEO_BYTES,
+} from './video';
+import { uploadR2Video } from './videoStorage';
 import { demoId } from '../../lib/demoData';
 import { updateDemoCollection } from '../../lib/demoStore';
 import { supabase, type Training } from '../../lib/supabase';
@@ -80,6 +85,7 @@ export function TrainingVideoEditor({
   const [correct, setCorrect] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [r2, setR2] = useState(false);
   const guard = useRef(false);
   const operation = useRef<{
     courseChoice: string;
@@ -89,6 +95,8 @@ export function TrainingVideoEditor({
     path: string | null;
     uploaded: boolean;
     dispatched: boolean;
+    r2: boolean;
+    uploadId: string;
   } | null>(null);
   useEffect(() => {
     if (visible) {
@@ -108,6 +116,28 @@ export function TrainingVideoEditor({
       setError('');
     }
   }, [visible]);
+  useEffect(() => {
+    let active = true;
+    setR2(false);
+    if (visible && !isLocalDemo) {
+      supabase.functions
+        .invoke('training-media', { body: { action: 'status' } })
+        .then(({ data, error }) => {
+          if (active)
+            setR2(
+              !error &&
+                data?.r2 === true &&
+                data?.max_bytes === MAX_R2_VIDEO_BYTES,
+            );
+        })
+        .catch(() => {
+          if (active) setR2(false);
+        });
+    }
+    return () => {
+      active = false;
+    };
+  }, [visible, isLocalDemo]);
   const save = async () => {
     if (guard.current) return;
     const duration = Math.round(Number(minutes.replace(',', '.')) * 60);
@@ -168,19 +198,32 @@ export function TrainingVideoEditor({
           : null,
         uploaded: false,
         dispatched: false,
+        r2,
+        uploadId: Crypto.randomUUID(),
       };
     }
     const attempt = operation.current;
     const targetCourse = attempt.courseId,
       chapterId = attempt.chapterId,
-      path = attempt.path;
+      initialPath = attempt.path;
+    let path = initialPath;
     let saved = false;
     try {
       if (file && path && !attempt.uploaded) {
-        const { error: uploadError } = await supabase.storage
-          .from('training-videos')
-          .upload(path, file, { contentType: 'video/mp4', upsert: false });
-        if (uploadError) throw uploadError;
+        if (attempt.r2) {
+          path = await uploadR2Video({
+            uploadId: attempt.uploadId,
+            courseId: targetCourse,
+            chapterId,
+            file,
+          });
+          attempt.path = path;
+        } else {
+          const { error: uploadError } = await supabase.storage
+            .from('training-videos')
+            .upload(path, file, { contentType: 'video/mp4', upsert: false });
+          if (uploadError) throw uploadError;
+        }
         attempt.uploaded = true;
       }
       if (isLocalDemo) {
@@ -265,7 +308,7 @@ export function TrainingVideoEditor({
       try {
         // A lost RPC response may have committed. Keep its private object and
         // stable identifiers for the next attempt; never delete it speculatively.
-        if (path && !saved && !attempt.dispatched)
+        if (path && !saved && !attempt.dispatched && !attempt.r2)
           await supabase.storage.from('training-videos').remove([path]);
       } finally {
         guard.current = false;
@@ -324,6 +367,7 @@ export function TrainingVideoEditor({
           multiline
         />
         <TrainingVideoFilePicker
+          maxBytes={r2 ? MAX_R2_VIDEO_BYTES : MAX_TRAINING_VIDEO_BYTES}
           onChoose={(chosen, duration) => {
             setFile(chosen);
             setUrl('');
@@ -332,6 +376,12 @@ export function TrainingVideoEditor({
           }}
           onError={setError}
         />
+        {r2 && (
+          <Text style={{ color: colors.textMuted, fontSize: 13 }}>
+            Stockage vidéo étendu activé. Les vidéos déjà publiées restent
+            disponibles.
+          </Text>
+        )}
         {file && <Text>{file.name}</Text>}
         <Field
           label="Ou lien direct MP4 (https)"

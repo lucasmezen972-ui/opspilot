@@ -25,6 +25,20 @@ export function TrainingVideoLesson({
     setError('');
     const load = async () => {
       if (chapter.video_storage_path) {
+        if (chapter.video_storage_path.startsWith('r2/')) {
+          const { data, error: issue } = await supabase.functions.invoke(
+            'training-media',
+            {
+              body: { action: 'playback', chapter_id: chapter.id },
+            },
+          );
+          if (active) {
+            if (issue || typeof data?.signed_url !== 'string')
+              setError('La vidéo est momentanément indisponible.');
+            else setSrc(data.signed_url);
+          }
+          return;
+        }
         const { data, error: issue } = await supabase.storage
           .from('training-videos')
           .createSignedUrl(chapter.video_storage_path, 3600);

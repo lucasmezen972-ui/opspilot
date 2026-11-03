@@ -4,9 +4,28 @@ import {
   canCompleteVideo,
   isTrainingMediaUrl,
   validateTrainingVideoFile,
+  MAX_R2_VIDEO_BYTES,
 } from '../../../features/training/video';
 
 describe('training video boundaries', () => {
+  it('allows larger MP4 files only when extended storage is available', () => {
+    const video = {
+      name: 'lesson.mp4',
+      type: 'video/mp4',
+      size: 60 * 1024 * 1024,
+    };
+    expect(validateTrainingVideoFile(video)).toBeTruthy();
+    expect(validateTrainingVideoFile(video, MAX_R2_VIDEO_BYTES)).toBeNull();
+    expect(
+      validateTrainingVideoFile(
+        { ...video, size: MAX_R2_VIDEO_BYTES + 1 },
+        MAX_R2_VIDEO_BYTES,
+      ),
+    ).toBeTruthy();
+    expect(
+      validateTrainingVideoFile({ ...video, size: -1 }, MAX_R2_VIDEO_BYTES),
+    ).toBeTruthy();
+  });
   it('accepts secure MP4 and VTT files including signed URLs', () => {
     expect(
       isTrainingMediaUrl('https://cdn.example.org/lesson.mp4?token=abc'),
