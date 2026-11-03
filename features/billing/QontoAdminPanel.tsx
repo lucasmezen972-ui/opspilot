@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 
+import { MolliePaymentControls } from './MolliePaymentControls';
+import { invoicePeriodEnd } from './invoice';
 import type { BillingRequest } from '../../hooks/useQontoBilling';
 import { supabase } from '../../lib/supabase';
 
@@ -46,11 +48,7 @@ export function QontoAdminPanel() {
   }, [refresh]);
   const save = async (confirm: boolean) => {
     if (!selected) return;
-    if (
-      confirm &&
-      (!/^\d{4}-\d{2}-\d{2}$/.test(paidUntil) ||
-        !Number.isFinite(Date.parse(paidUntil)))
-    ) {
+    if (confirm && !invoicePeriodEnd(paidUntil)) {
       Alert.alert(
         'Date requise',
         'Indiquez la fin de la période réellement réglée (AAAA-MM-JJ).',
@@ -118,7 +116,7 @@ export function QontoAdminPanel() {
             setSelected(request);
             setUrl(request.payment_url ?? '');
             setReference(request.qonto_reference ?? '');
-            setPaidUntil('');
+            setPaidUntil(request.paid_until?.slice(0, 10) ?? '');
           }}
           style={{ paddingVertical: 12 }}
         >
@@ -133,14 +131,16 @@ export function QontoAdminPanel() {
       ))}
       {selected && (
         <View style={{ gap: 12 }}>
-          <TextInput
-            accessibilityLabel="Lien de paiement Qonto"
-            placeholder="Lien de paiement Qonto"
-            value={url}
-            onChangeText={setUrl}
-            autoCapitalize="none"
-            style={{ backgroundColor: 'white', padding: 12 }}
-          />
+          {selected.payment_provider !== 'mollie' && (
+            <TextInput
+              accessibilityLabel="Lien de paiement Qonto"
+              placeholder="Lien de paiement Qonto"
+              value={url}
+              onChangeText={setUrl}
+              autoCapitalize="none"
+              style={{ backgroundColor: 'white', padding: 12 }}
+            />
+          )}
           <TextInput
             accessibilityLabel="Référence de facture Qonto"
             placeholder="Référence de facture Qonto"
@@ -148,9 +148,13 @@ export function QontoAdminPanel() {
             onChangeText={setReference}
             style={{ backgroundColor: 'white', padding: 12 }}
           />
-          <TouchableOpacity onPress={() => save(false)}>
-            <Text style={{ color: '#2563EB' }}>Enregistrer le lien Qonto</Text>
-          </TouchableOpacity>
+          {selected.payment_provider !== 'mollie' && (
+            <TouchableOpacity onPress={() => save(false)}>
+              <Text style={{ color: '#2563EB' }}>
+                Enregistrer le lien Qonto
+              </Text>
+            </TouchableOpacity>
+          )}
           <TextInput
             accessibilityLabel="Fin de période réglée"
             placeholder="Fin de période réglée (AAAA-MM-JJ)"
@@ -158,20 +162,34 @@ export function QontoAdminPanel() {
             onChangeText={setPaidUntil}
             style={{ backgroundColor: 'white', padding: 12 }}
           />
-          <TouchableOpacity
-            onPress={() =>
-              Alert.alert(
-                'Vérification du paiement',
-                'Confirmez uniquement si le règlement de cette facture est visible dans Qonto.',
-                [
-                  { text: 'Annuler', style: 'cancel' },
-                  { text: 'Paiement reçu', onPress: () => save(true) },
-                ],
-              )
-            }
-          >
-            <Text style={{ color: '#166534' }}>Confirmer le paiement reçu</Text>
-          </TouchableOpacity>
+          <MolliePaymentControls
+            key={selected.id}
+            request={selected}
+            reference={reference}
+            paidUntil={paidUntil}
+            onSaved={async () => {
+              setSelected(null);
+              await refresh();
+            }}
+          />
+          {selected.payment_provider !== 'mollie' && (
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  'Vérification du paiement',
+                  'Confirmez uniquement si le règlement de cette facture est visible dans Qonto.',
+                  [
+                    { text: 'Annuler', style: 'cancel' },
+                    { text: 'Paiement reçu', onPress: () => save(true) },
+                  ],
+                )
+              }
+            >
+              <Text style={{ color: '#166534' }}>
+                Confirmer le paiement reçu
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>

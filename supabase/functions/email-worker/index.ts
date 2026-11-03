@@ -57,7 +57,7 @@ const TEMPLATES: Record<string, Reminder> = {
       <p>L'essai gratuit d'OpsPilot pour <strong>${org}</strong> se termine le <strong>${date}</strong>.</p>
       <p>Pour continuer à piloter vos audits, actions et équipes sans interruption,
       activez votre abonnement depuis l'onglet <em>Abonnement</em> de l'application.</p>
-      <p><a href="https://lucasmezen972-ui.github.io/opspilot/">Ouvrir OpsPilot</a></p>
+      <p><a href="https://opspilot-mu-six.vercel.app/">Ouvrir OpsPilot</a></p>
       <p>— L'équipe OpsPilot</p>`,
   },
   trial_expired: {
@@ -68,7 +68,7 @@ const TEMPLATES: Record<string, Reminder> = {
       <p>L'essai gratuit d'OpsPilot pour <strong>${org}</strong> est arrivé à échéance.</p>
       <p>Vos données sont conservées : réactivez votre espace à tout moment depuis
       l'onglet <em>Abonnement</em>.</p>
-      <p><a href="https://lucasmezen972-ui.github.io/opspilot/">Réactiver mon espace</a></p>
+      <p><a href="https://opspilot-mu-six.vercel.app/">Réactiver mon espace</a></p>
       <p>— L'équipe OpsPilot</p>`,
   },
 };

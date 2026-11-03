@@ -24,7 +24,7 @@ export default function Screen() {
         {
           title: '4. Prix et règlement avec Qonto',
           content:
-            'Le devis accepté et la facture Qonto indiquent le prix, les taxes applicables ou la mention d’exonération et le total à régler. Le règlement s’effectue par le moyen proposé sur la facture Qonto. Les données de carte ne sont jamais collectées dans OpsPilot. Une demande ou un retour de page de paiement ne prouve pas un règlement : l’accès payant est activé après vérification de l’encaissement.',
+            'Le devis accepté et la facture Qonto indiquent le prix, les taxes applicables ou la mention d’exonération et le total à régler. Le règlement s’effectue par le moyen proposé sur la facture Qonto ou par le lien Mollie associé à cette facture dans OpsPilot. Les données de carte sont saisies sur la page sécurisée du prestataire et ne sont jamais collectées dans OpsPilot. Une demande ou un retour de page de paiement ne prouve pas un règlement : l’accès payant est activé après vérification du paiement. Le paiement proposé couvre la période indiquée sur la facture et ne constitue pas un mandat de prélèvement automatique.',
         },
         {
           title: '5. Durée et résiliation',
