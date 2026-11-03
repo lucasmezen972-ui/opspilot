@@ -5,6 +5,43 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Parcours internes texte + vidéo — reprise du 3 novembre 2026
+
+Dix programmes associent chacun une capsule narrée et sous-titrée, trois chapitres
+écrits, un exercice corrigé et six questions finales. Le catalogue couvre les
+formations internes selon le poste et les risques ; les démarches des organismes
+et habilitations officielles restent exclues. Les pratiques au poste restent à
+organiser par l’employeur ; aucune certification Qualiopi n’est revendiquée.
+
+Les deux migrations du catalogue sont présentes sur OPS PILOT V2 sous
+`20261103172837` et `20261103172906`. Dix médias privés et dix corrigés serveur
+sont chargés : **14 820 706 octets attendus et stockés**, bucket `training-library`
+privé. `training-content-release` est ACTIVE v2. L’import ne copie pas les cours
+chez les clients ; chaque responsable choisit les programmes de son organisation.
+
+Le correctif `training_unique_video_coverage`, version distante `20261103173636`,
+compte les segments vidéo distincts avec borne de temps serveur : répéter une
+portion ne gonfle plus le visionnage. Le crédit historique est conservé une fois,
+sans réécrire les chapitres validés, XP ou attestations. Des versions différentes
+d’un programme peuvent garder leur titre ; la copie des anciens cours est préservée.
+
+Quatre scénarios SQL passent sur Supabase réel en transactions annulées : copie
+et isolation du catalogue/médias, couverture vidéo, versions et correction
+serveur avec XP unique/attestation. Aucun résidu des fixtures SQL. Onze scénarios
+et le rejeu des migrations passent localement ; l’import Deno passe ses quatre
+étapes. Qualité/compilation réussies et **371 tests unitaires** passent. Les trois
+nouveaux parcours navigateur passent à 375 et 1440 pixels avec les vraies capsules,
+lecture partielle Range, quiz et attestation fictive. Les API de ces tests UI sont
+interceptées ; les contrôles SQL réels sont une preuve distincte. Régression et
+publication finale : voir [FORMATION-PARCOURS.md](FORMATION-PARCOURS.md).
+
+Le serveur SEPA sélectionne désormais une méthode bancaire réellement proposée
+(Pay by Bank prioritaire, iDEAL possible), refuse la carte pour un mandat SEPA et
+maintient le contrôle des reversements. Les deux fonctions récurrentes sont ACTIVE
+v2. En test, Mollie propose directdebit et iDEAL pour la première séquence ; en
+production zéro méthode récurrente. Secrets dédiés absents et service désactivé.
+Qonto reste manuel. Cloudflare est traité dans une autre conversation.
+
 ## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
 
 ### Finalisation des erreurs de facturation et évaluations connectées

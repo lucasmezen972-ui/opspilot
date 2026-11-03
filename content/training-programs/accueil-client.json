@@ -1,0 +1,155 @@
+{
+  "key": "accueil-client",
+  "version": "2026-11-03",
+  "title": "Accueil client et réclamations : agir avec méthode",
+  "category": "Relation client",
+  "summary": "Écouter une réclamation, vérifier les faits, proposer une suite précise et protéger les personnes.",
+  "audience": "Équipes d’accueil, de caisse, de vente et de restauration ; responsables de proximité.",
+  "prerequisites": "Connaître le relais responsable et disposer des procédures commerciales et de sécurité du site.",
+  "requirement": "professional",
+  "applicability": "Parcours de développement professionnel ; aucune obligation générale de suivre ce module n’est revendiquée.",
+  "onsite": "Jeu de rôle avec un collègue puis repérage du relais et du dispositif d’alerte du site. Le responsable observe la reformulation, le respect des limites et la suite annoncée.",
+  "objectives": [
+    "Reformuler une réclamation en séparant faits, ressenti et demande.",
+    "Choisir une réponse dans sa délégation et annoncer une prochaine action vérifiable.",
+    "Reconnaître une menace et appliquer le relais de sécurité du site."
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 8,
+  "sources": [],
+  "chapters": [
+    {
+      "title": "Écouter sans promettre avant de vérifier",
+      "body": "# À quoi sert la reformulation ?\nUne réclamation comporte souvent plusieurs éléments : un événement observable, une conséquence pour le client et une solution attendue. Reformuler consiste à vérifier cette compréhension avec lui. Ce n’est ni approuver une accusation ni reconnaître une responsabilité avant d’avoir vérifié les faits.\n\nCas pédagogique fictif : une cliente annonce que sa commande n’est pas prête et qu’elle va rater son rendez-vous. Répondez : « Vous attendiez votre commande à cette heure et vous devez partir bientôt. Je vérifie son état pour vous donner une réponse fiable. » Puis posez une question utile : numéro de commande ou heure annoncée. Évitez de lui faire raconter toute la situation une seconde fois.\n\n« Calmez-vous, ce n’est pas ma faute » déplace la discussion vers un conflit. « Nous allons forcément vous rembourser » promet une décision qui n’est peut-être pas dans votre délégation. Une écoute attentive peut faciliter l’échange, mais ne garantit pas que la personne se calme. Une insulte ou une menace reste un comportement à traiter selon les consignes de sécurité.\n\nAvant de regarder la capsule, formulez à voix haute la différence entre écouter et accepter toutes les demandes. Si vous débutez, utilisez les trois repères : ce qui s’est passé, la conséquence, la demande."
+    },
+    {
+      "title": "Décider, annoncer et passer le relais",
+      "body": "# Une réponse utile comporte une prochaine étape\nVérifiez la preuve disponible et la règle applicable : commande, ticket, engagement annoncé, procédure de retour ou de réclamation. Si la situation concerne un prix ou un droit du consommateur, faites vérifier la règle et les faits par le relais compétent ; une politique interne ne supprime pas un droit légal. N’improvisez pas une règle universelle.\n\nPrésentez ce que vous pouvez réellement faire, qui le fait et à quel moment le client recevra une réponse. Dans le cas fictif de la commande : « Je contacte la préparation maintenant. Je reviens vers vous dans deux minutes, même si la vérification n’est pas terminée. » Les deux minutes sont un engagement choisi pour ce cas, pas une norme imposée à tous les magasins. Si ce délai devient impossible, prévenez le client avant de le laisser attendre sans information.\n\nPour transmettre : donnez au collègue les faits vérifiés, la demande du client et ce qui a déjà été proposé. Consignez uniquement les informations nécessaires dans l’outil prévu. Un commentaire comme « client impossible » ne décrit pas un fait utile. Préférez « demande de retour sans ticket, recherche de preuve d’achat en cours ». N’inscrivez pas de donnée personnelle sensible sans nécessité et cadre prévu.\n\nEn cas de menace, gardez une possibilité de retrait, cessez la négociation et appliquez l’alerte du site. Ne poursuivez pas un client, ne cherchez pas à le maîtriser et ne vous exposez pas pour défendre une marchandise."
+    },
+    {
+      "title": "S’entraîner puis vérifier sa méthode",
+      "body": "# Cas pédagogique fictif — la commande en retard\nUne cliente affirme avoir payé une commande à retirer à 12 h. À 12 h 10, aucune commande n’est au comptoir. Vous ne savez pas encore si elle est en préparation. Votre délégation vous permet de vérifier et d’appeler le responsable, mais pas de décider seul d’un remboursement.\n\nTravail demandé : rédigez une réponse en trois phrases, puis jouez l’échange avec un collègue. La première reformule. La deuxième annonce une vérification concrète. La troisième précise un retour d’information et un relais si nécessaire. Produisez ensuite une note de transmission de deux lignes, sans jugement sur la personne.\n\nCritères de réussite : aucun remboursement promis avant vérification ; un interlocuteur et une prochaine action identifiés ; un délai réaliste présenté comme un engagement de ce cas ; une limite claire en cas de menace. Pour aller plus loin, rejouez la scène alors que le responsable est occupé : quel autre relais prévu pouvez-vous utiliser ?\n\nPiste de correction : « Vous aviez prévu de repartir à midi avec votre commande. Je vérifie son statut auprès de la préparation. Je reviens vers vous dans deux minutes avec l’information disponible, puis je sollicite le responsable si une décision dépasse ma délégation. » La transmission peut indiquer l’heure promise, l’absence de commande au comptoir et la vérification engagée.\n\nAvant le quiz, expliquez avec vos mots pourquoi une promesse vague ne suffit pas et ce qui change quand la sécurité est en jeu. En cas de difficulté, reprenez le chapitre concerné ou demandez une démonstration au responsable."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Une cliente attend une commande en retard. Quelle première réponse vérifie la compréhension ?",
+      "options": [
+        "Ce n’est pas mon service.",
+        "Vous deviez repartir avec votre commande ; je vérifie son statut.",
+        "Le remboursement est garanti."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Quelle promesse est suffisamment précise dans le cas étudié ?",
+      "options": [
+        "Quelqu’un s’en occupe.",
+        "Vous verrez cela plus tard.",
+        "Je vérifie auprès de la préparation et reviens dans le délai annoncé."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "La décision demandée dépasse votre délégation. Que faites-vous ?",
+      "options": [
+        "Transmettre les faits au relais compétent et informer le client de la suite.",
+        "Inventer une exception.",
+        "Dire que les règles légales ne s’appliquent pas dans le magasin."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Un client menace physiquement un collègue. Quelle priorité retenir ?",
+      "options": [
+        "Finir la vente coûte que coûte.",
+        "Préserver les personnes et appliquer la procédure d’alerte.",
+        "Le poursuivre à l’extérieur."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Quelle note facilite une transmission professionnelle ?",
+      "options": [
+        "Cliente insupportable.",
+        "Tous les détails de sa vie personnelle.",
+        "Commande annoncée à midi, statut vérifié, responsable sollicité."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Une écoute attentive garantit-elle que la personne deviendra raisonnable ?",
+      "options": [
+        "Non ; elle aide à comprendre, sans supprimer les limites de sécurité.",
+        "Oui, dans tous les cas.",
+        "Oui, à condition de tout accepter."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Une réclamation, une prochaine action",
+    "scenes": [
+      {
+        "heading": "Écouter. Vérifier. Agir.",
+        "lines": [
+          "Comprendre la demande",
+          "Annoncer une suite précise",
+          "Protéger les personnes"
+        ],
+        "narration": "Une réclamation ne se résout pas avec une formule magique. Le but est de comprendre le problème, de vérifier ce qui peut être fait et d’annoncer une suite précise. Dans cette capsule, nous suivons un cas pédagogique fictif. Une cliente devait récupérer sa commande à midi. Dix minutes plus tard, elle attend encore."
+      },
+      {
+        "heading": "Séparer les trois éléments",
+        "lines": [
+          "Fait : la commande manque",
+          "Conséquence : un rendez-vous",
+          "Demande : repartir rapidement"
+        ],
+        "narration": "Commencez par séparer le fait, sa conséquence et la demande. La commande n’est pas au comptoir. La cliente explique qu’elle va rater son rendez-vous. Elle veut repartir rapidement. Vous pouvez dire : vous deviez repartir avec votre commande ; je vérifie son statut. Reformuler ne signifie pas accepter une accusation ou garantir un remboursement."
+      },
+      {
+        "heading": "Vérifier avant de promettre",
+        "lines": [
+          "Chercher l’information utile",
+          "Respecter sa délégation",
+          "Identifier le bon relais"
+        ],
+        "narration": "Vérifiez l’état de la commande et ce qui avait été annoncé. Si une décision dépasse votre délégation, sollicitez le relais prévu. Ne promettez pas un remboursement pour faire cesser la discussion. Une règle interne ne supprime pas un droit légal : si la situation pose une question de droit, faites vérifier la règle et les faits par le responsable compétent."
+      },
+      {
+        "heading": "Action + personne + retour",
+        "lines": [
+          "Je contacte la préparation",
+          "Je m’en charge maintenant",
+          "Je reviens avec l’information"
+        ],
+        "narration": "Une prochaine étape utile comporte une action, une personne et un retour d’information. Par exemple : je contacte la préparation maintenant et je reviens vers vous dans deux minutes, même si la vérification n’est pas terminée. Deux minutes est ici un engagement fictif, pas une norme. Si vous ne pouvez plus le tenir, prévenez la cliente."
+      },
+      {
+        "heading": "À vous de jouer",
+        "lines": [
+          "Reformulez en une phrase",
+          "Annoncez votre vérification",
+          "Précisez la prochaine étape"
+        ],
+        "narration": "Mettez la vidéo en pause. Formulez votre réponse en trois phrases : compréhension, vérification, prochaine étape. Comparez-la ensuite avec cette proposition : vous attendiez votre commande à midi. Je vérifie son statut auprès de la préparation. Je reviens avec l’information disponible, puis je sollicite le responsable si une décision dépasse ma délégation."
+      },
+      {
+        "heading": "La sécurité reste prioritaire",
+        "lines": [
+          "Aucune promesse impossible",
+          "Une trace factuelle et utile",
+          "Une alerte si menace"
+        ],
+        "narration": "Une écoute attentive ne garantit pas que la personne se calme. En cas de menace, préservez les personnes et appliquez la procédure d’alerte du site. Pour transmettre le dossier, écrivez des faits utiles, sans jugement ni détail personnel inutile. Reprenez le cours écrit, réalisez le jeu de rôle, puis passez au quiz final. La mise en pratique compte autant que les mots choisis."
+      }
+    ]
+  }
+}

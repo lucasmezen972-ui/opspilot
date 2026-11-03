@@ -2,6 +2,26 @@
 
 Décision de Lucas Mezen : factures dans Qonto, traitement des cartes par Mollie. Les coordonnées de reversement restent celles du compte Mollie relié à Qonto ; aucune modification bancaire ni aucun transfert n’est effectué par OpsPilot.
 
+## Contrôle et correction du 3 novembre 2026
+
+Profil confirmé `pfl_pPJwqfQUtP` : verified. Zéro méthode récurrente en production ;
+en test, directdebit est disponible et les premières séquences proposent iDEAL
+et carte. Le serveur n’impose plus Pay by Bank lorsqu’il est absent : il choisit
+une méthode bancaire proposée et continue d’exiger un mandat directdebit valide.
+Les réponses carte/PayPal sont refusées. Les contrôles de montant/profil/mode et
+l’autorisation de reversement en réel sont conservés. Les deux fonctions SEPA
+sont ACTIVE v2, mais le service reste désactivé et les secrets dédiés absents.
+
+Six tests de disponibilité et quatre tests Deno métier passent ; les tests SDK
+supplémentaires ne sont pas exécutés dans ce runtime, car son téléchargement npm
+est refusé. Le déploiement Supabase compile les fonctions, sans constituer un test
+bancaire complet. Aucune nouvelle preuve de reversement n’est disponible et la
+demande d’activation existante n’a pas été recréée. Aucun paiement client émis.
+
+Sources : [paiements récurrents](https://docs.mollie.com/docs/recurring-payments),
+[SEPA](https://docs.mollie.com/docs/sepa-direct-debit),
+[méthodes disponibles](https://docs.mollie.com/reference/list-methods).
+
 ## Parcours client
 
 1. L’administrateur client demande une facture depuis **Abonnement**. Le serveur rattache la demande à son organisation et la déduplique.
@@ -43,7 +63,7 @@ validations Mollie ne sont pas acquises. Aucun débit ou facture réel n'a été
 
 1. Le superadmin crée d’abord la vraie facture dans Qonto puis prépare son calendrier dans OpsPilot : référence, montant TTC exact, fin de première période et fréquence mensuelle ou annuelle. La préparation ne crée aucun règlement. Le plafond conservateur est de 1 000 € TTC par échéance.
 2. Le représentant client voit et accepte le montant et le calendrier. La date, la version et le contenu de cet accord sont conservés côté serveur. La première échéance automatique doit laisser au moins 14 jours de préavis. Le calendrier accepté est la prénotification enregistrée dans l’app ; aucun envoi d’e-mail de prénotification n’est revendiqué.
-3. Après validation du service, le premier règlement s’effectue par Pay by Bank chez Mollie. Le code attend ensuite un mandat `directdebit` valide avant de programmer l’abonnement. Aucune donnée IBAN ne passe dans OpsPilot.
+3. Après validation du service, le premier règlement utilise une méthode bancaire effectivement retournée par Mollie : Pay by Bank prioritaire, ou iDEAL. Une carte crée un mandat carte et reste exclue de ce parcours SEPA. Le code attend ensuite un mandat `directdebit` valide avant de programmer l’abonnement. Aucune donnée IBAN ne passe dans OpsPilot.
 4. Les notifications sont relues chez Mollie ; le mode, le profil, le client, la séquence, l’abonnement et le montant doivent correspondre. Un paiement test ne modifie jamais l’abonnement réel. Une référence de facture ne peut pas être utilisée sur deux canaux.
 5. Les échéances suivantes apparaissent dans le journal. Le superadmin rapproche la référence et la période de la facture Qonto ; l’accès est prolongé après ce rapprochement, sans déduire de période commerciale d’une date technique Mollie.
 6. Les rejets et contestations demandent l’arrêt du calendrier pour vérification. Le client peut arrêter les prochaines échéances ; une confirmation du prestataire est nécessaire dès qu’un abonnement existe. Un règlement déjà en cours peut encore aboutir. Les paiements déjà reçus ne sont pas remboursés automatiquement.

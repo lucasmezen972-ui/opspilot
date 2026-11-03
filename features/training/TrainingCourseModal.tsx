@@ -14,6 +14,7 @@ import {
   CandidateIdentityStep,
   type CandidateIdentityValues,
 } from './CandidateIdentityStep';
+import { TrainingProgramOverview } from './TrainingProgramOverview';
 import { TrainingVideoLesson } from './TrainingVideoLesson';
 import {
   buildQuizAttemptTrace,
@@ -428,17 +429,21 @@ export function TrainingCourseModal({
                 >
                   {currentChapter.title}
                 </Text>
-                <MarkdownBody body={currentChapter.body} />
+                {chapterIndex === 0 && course.program_metadata && (
+                  <TrainingProgramOverview program={course.program_metadata} />
+                )}
                 {hasTrainingVideo(currentChapter) && onVideoProgress && (
                   <TrainingVideoLesson
                     key={currentChapter.id}
                     chapter={currentChapter}
                     position={videoState?.position ?? 0}
+                    chapters={course.program_metadata?.video_chapters}
                     onProgress={(seconds) =>
                       onVideoProgress(currentChapter.id, seconds)
                     }
                   />
                 )}
+                <MarkdownBody body={currentChapter.body} />
               </ScrollView>
 
               <View style={styles.footer}>

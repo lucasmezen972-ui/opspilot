@@ -1,0 +1,146 @@
+{
+  "date": "2026-11-03",
+  "base_commit": "8975d47bb881cfe380e1785c59973156a346a74c",
+  "branch": "codex/mixed-training-paths-20261103",
+  "programs": 10,
+  "written_chapters": 30,
+  "graded_questions": 60,
+  "new_graded_answer_keys_in_repository": false,
+  "media": {
+    "count": 10,
+    "total_seconds": 1194.136961,
+    "total_bytes": 14820706,
+    "checks": [
+      "SHA-256",
+      "H.264 720p",
+      "AAC audio",
+      "complete ffmpeg decode",
+      "short French captions",
+      "voice attribution"
+    ],
+    "full_decode": "passed"
+  },
+  "unit_tests": {
+    "passed": 365,
+    "files": 61
+  },
+  "quality": {
+    "typescript": "passed",
+    "eslint": "passed",
+    "prettier": "passed"
+  },
+  "sql": {
+    "scenarios_passed": 9,
+    "migration_replay": "passed",
+    "runtime": "PGlite 0.3.14",
+    "remote_library_scenarios": "not_run"
+  },
+  "deno_release": {
+    "tests_passed": 1,
+    "steps_passed": 4,
+    "sdk": "2.55.0",
+    "requests": "intercepted offline"
+  },
+  "web_build": "passed",
+  "browser": {
+    "new_tests": 3,
+    "status": "blocked before browser launch",
+    "error": "Unix socket operation not permitted",
+    "escalation": "rejected by environment policy: sandbox_approval=false",
+    "cloud_local_preview": "ERR_CONNECTION_REFUSED",
+    "mobile_and_desktop_verified": false,
+    "fixture_mode": "Technical MP4 by default; authored clips require OPSPILOT_TRAINING_MEDIA",
+    "desktop_catalogue_preview": {
+      "verified": true,
+      "viewport": {
+        "width": 1363,
+        "height": 936
+      },
+      "mode": "local fictitious demo",
+      "commit": "d2acda1dcb6b0d6508e4f8333b1f8e573630cb6a",
+      "deployment": "dpl_6AnNasFJDU9LT55rf4UdGKw7ZNR9",
+      "checks": [
+        "catalogue opens",
+        "Space activates security filter",
+        "four security programs shown",
+        "objectives and prerequisites shown",
+        "onsite practice and internal attestation limits shown",
+        "installation disabled without connected account",
+        "modal has no horizontal overflow"
+      ],
+      "screenshots": [
+        "internal-catalogue-preview.jpg",
+        "internal-programme-preview.jpg"
+      ]
+    },
+    "mobile_verified": false,
+    "connected_install_and_private_playback_verified": false
+  },
+  "publication": {
+    "supabase_migrations": "not_applied_after_expired_confirmation",
+    "library_bucket_count": 0,
+    "uploaded_mp4_count": 0,
+    "new_frontend_published": false,
+    "native_confirmation_attempts": 2,
+    "remote_library_table_exists": false,
+    "production_commit": "8975d47bb881cfe380e1785c59973156a346a74c",
+    "production_deployment": "dpl_6f9XcaMkzaME8A6RE8QZaZ4qMGxe",
+    "production_state": "READY",
+    "draft_pr": "https://github.com/lucasmezen972-ui/opspilot/pull/231"
+  },
+  "github_actions_minutes_used": 0,
+  "learner_package": "https://chatgpt.com/library?file_id=libfile_02cb2de3438881918ea173eb24258e09&account_id=personal",
+  "trainer_package": "https://chatgpt.com/library?file_id=libfile_b8ad2db77f2081918d72c0103a3d98e7&account_id=personal",
+  "preflight_storage_policies": "Existing permissive policies are bucket-scoped; evidence_active_profile is restrictive",
+  "resumption": {
+    "date": "2026-11-03",
+    "supabase_migrations": [
+      "20261103172837",
+      "20261103172906",
+      "20261103173636"
+    ],
+    "media_count": 10,
+    "stored_bytes": 14820706,
+    "assessment_keys_ready": 10,
+    "private_bucket": true,
+    "remote_sql_passed": [
+      "internal_training_library",
+      "training_video_coverage_integrity",
+      "training_program_versions",
+      "training_integrity"
+    ],
+    "sql_tests_local": 11,
+    "unit_tests": 371,
+    "ui_tests": 3,
+    "ui_widths": [375, 1440],
+    "ui_api_mode": "intercepted fictional API; actual authored MP4s",
+    "deno_import": "1 passed, 4 steps",
+    "sepa_functions_version": 2,
+    "sepa_enabled": false,
+    "github_actions_minutes": 0,
+    "http_storage": {
+      "actual_private_signed_range": 206,
+      "range_bytes": 1024,
+      "public_denied": true,
+      "anonymous_sign_denied": true,
+      "other_organization_sign_denied": true,
+      "sessions_signed_out": true,
+      "fixture_users_remaining": 0,
+      "fixture_organizations_remaining": 0,
+      "installed_client_courses": 0,
+      "library_objects_preserved": 10
+    },
+    "browser_regression": {
+      "passed": 67,
+      "failed": 0,
+      "duration": "3.8m",
+      "auth_api_mode": "fictional intercepted APIs and local demo; real Supabase HTTP checked separately",
+      "browser": "official Chrome headless-shell 156.0.8078.80"
+    },
+    "publication": {
+      "status": "awaiting_push_preview_merge_and_production_verification",
+      "pr": 231
+    },
+    "release_tokens_expired": true
+  }
+}

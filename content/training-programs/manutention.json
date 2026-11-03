@@ -1,0 +1,165 @@
+{
+  "key": "manutention",
+  "version": "2026-11-03",
+  "title": "Manutention : préparer le déplacement avant de porter",
+  "category": "Sécurité au travail",
+  "summary": "Éviter les ports inutiles, préparer le trajet et demander l’aide adaptée aux charges du poste.",
+  "audience": "Équipes manipulant manuellement cartons, bacs, marchandises, équipements ou charges en magasin et en restauration.",
+  "prerequisites": "Connaître les aides disponibles et disposer d’un encadrement pour l’entraînement pratique au poste.",
+  "requirement": "internal_required",
+  "applicability": "Pour les salariés dont l’activité comporte de la manutention manuelle : information sur les risques et formation adaptée, essentiellement pratique. À compléter avec les charges et conditions réelles.",
+  "onsite": "Observer un déplacement réel, choisir une aide, préparer le chemin et s’entraîner sous encadrement avec une charge adaptée. Le responsable vérifie l’organisation et les gestes ; aucun seuil universel de poids n’est donné par l’app.",
+  "objectives": [
+    "Analyser la charge, le trajet et la fréquence avant le déplacement.",
+    "Choisir une aide ou une organisation réduisant le port manuel.",
+    "Reconnaître une situation nécessitant l’arrêt et un relais."
+  ],
+  "positioning": [
+    "Identifiez-vous une aide disponible pour les charges de votre poste ?",
+    "Savez-vous qui demander quand une charge paraît inadaptée ?",
+    "Pouvez-vous repérer un obstacle avant de saisir un colis ?"
+  ],
+  "reading_minutes": 10,
+  "activity_minutes": 12,
+  "sources": [
+    {
+      "label": "Code du travail, R4541-8 : formation adaptée et essentiellement pratique",
+      "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000018528891/"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "La meilleure charge est parfois celle qu’on ne porte pas",
+      "body": "# Analyser la tâche complète\nLa manutention ne se réduit pas au moment où l’on soulève. Elle comprend la prise, le déplacement, la dépose, la répétition et les contraintes de l’environnement. Avant d’agir, regardez la stabilité du colis, sa prise possible, son encombrement, la hauteur de départ et d’arrivée, le trajet et la fréquence. Une charge légère répétée ou éloignée du corps peut aussi poser problème.\n\nCherchez d’abord à éviter ou à réduire le port : livrer plus près de la zone utile, fractionner si le conditionnement le permet, utiliser une aide de manutention ou changer l’organisation. Une aide doit être adaptée à la tâche et utilisée par une personne formée à cet équipement. Un transpalette ou un chariot ne rend pas sûr un trajet encombré.\n\nCas pédagogique fictif : un carton volumineux masque les pieds et doit passer par une porte puis une marche. Le prendre seul « parce qu’il n’est pas très lourd » ignore la visibilité et l’obstacle. Préparez le chemin et demandez une solution adaptée au responsable : aide, autre itinéraire ou organisation différente.\n\nIl n’existe pas ici de poids recommandé valable pour toute personne et toute situation. Les capacités, restrictions connues par les interlocuteurs compétents, prises, distances et répétitions changent l’évaluation. Si une tâche vous paraît inadaptée, signalez-la sans attendre une douleur pour demander une correction."
+    },
+    {
+      "title": "Préparer, déplacer et déposer avec contrôle",
+      "body": "# Le geste dépend de la situation réelle\nLa formation pratique doit montrer comment se placer, prendre la charge, se déplacer et la déposer dans le contexte du poste. Préparez une zone de dépose stable et accessible. Évitez les mouvements brusques, les torsions sous charge et les situations où la charge échappe à la prise. Une phrase comme « pliez les genoux » ne suffit pas à rendre toute manutention sûre.\n\nPour un déplacement à plusieurs, convenez de la manœuvre avant de commencer : qui coordonne, quand prendre et déposer, où passer et comment s’arrêter. Porter à deux sans coordination peut créer une chute de charge ou un déséquilibre. Ne placez pas les mains dans une zone de pincement et n’essayez pas de rattraper un colis qui tombe au risque d’être blessé.\n\nSi le trajet est glissant, si la charge bouge ou si la destination n’est pas libre, interrompez l’opération avant de vous retrouver engagé. Signalez le problème. En cas de douleur ou d’incident, cessez la tâche concernée, prévenez le relais prévu et demandez une prise en charge adaptée. Les informations de santé détaillées se traitent avec les interlocuteurs compétents, pas dans une discussion d’équipe ouverte.\n\nLe retour d’expérience sert à modifier le travail : hauteur d’une étagère, conditionnement, fréquence ou disponibilité d’une aide. Une formation efficace ne fait pas porter toute la prévention sur la vigilance du salarié ; elle aide aussi à repérer ce que l’organisation doit corriger."
+    },
+    {
+      "title": "Observer et essayer avec encadrement",
+      "body": "# Exercice pratique au poste\nAvec le responsable, choisissez une tâche habituelle et une charge adaptée à l’exercice. Avant toute prise, décrivez le trajet, la dépose, la prise disponible et l’aide envisageable. Produisez une fiche courte : risque observé, solution choisie, personne à prévenir si la situation change.\n\nCas pédagogique fictif : un bac doit être déplacé d’une étagère haute vers un chariot ; son contenu n’est pas stable. La réponse attendue n’est pas de trouver un mouvement héroïque. Il faut revoir la tâche, l’accès, le conditionnement ou l’aide avec le responsable avant de porter. N’utilisez pas une caisse comme marchepied.\n\nCritères observés : analyse avant prise ; trajet et dépose préparés ; aide choisie avec son mode d’emploi ; communication claire ; arrêt si la situation ne permet plus un déplacement maîtrisé. Le responsable fait démontrer, corrige et fait recommencer si nécessaire. L’apprenant explique ensuite pourquoi la solution est adaptée à cette tâche.\n\nPour un débutant, commencez par le repérage sans charge puis une démonstration commentée. Pour approfondir, comparez deux organisations et retenez celle qui réduit la manutention répétée. Le quiz qui suit mesure les choix de prévention ; il ne constitue pas la preuve que l’entraînement pratique a été réalisé ni une aptitude médicale."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Avant de saisir un carton volumineux, que faut-il examiner ?",
+      "options": [
+        "Le poids seulement.",
+        "La charge, la prise, le trajet, la dépose et les aides possibles.",
+        "La rapidité des collègues."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Un carton cache vos pieds et le trajet comporte une marche. Quelle décision prendre ?",
+      "options": [
+        "Avancer sans regarder.",
+        "Le porter plus haut devant le visage.",
+        "Préparer une solution sûre avec le responsable avant de porter."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Quelle mesure réduit d’abord la manutention ?",
+      "options": [
+        "Réorganiser la livraison ou utiliser une aide adaptée.",
+        "Demander à tout le monde d’aller plus vite.",
+        "Imposer le même poids à chacun."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Deux personnes portent une charge. Que faut-il prévoir ?",
+      "options": [
+        "Que la plus forte décide sans parler.",
+        "Une coordination de la prise, du trajet, de l’arrêt et de la dépose.",
+        "Aucune préparation."
+      ],
+      "question_type": "situation",
+      "is_critical": false
+    },
+    {
+      "question": "Une charge se met à tomber. Quelle erreur éviter ?",
+      "options": [
+        "Prévenir les personnes proches.",
+        "Se maintenir hors de la chute.",
+        "Tenter de la rattraper en s’exposant à l’écrasement."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    },
+    {
+      "question": "Que doit compléter ce parcours ?",
+      "options": [
+        "Une formation pratique adaptée aux manutentions réelles.",
+        "Un seuil de poids identique pour tous.",
+        "La signature d’un document sans démonstration."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "Avant de porter, changer la situation",
+    "scenes": [
+      {
+        "heading": "Porter n’est pas le point de départ",
+        "lines": [
+          "Peut-on éviter le port ?",
+          "Quelle aide est adaptée ?",
+          "Quel trajet est sûr ?"
+        ],
+        "narration": "La prévention commence avant de saisir une charge. Peut-on éviter le port, rapprocher la livraison ou utiliser une aide adaptée ? La tâche ne se résume pas au poids. La prise, l’encombrement, la hauteur, le trajet et la répétition changent aussi le risque. Une charge légère répétée mérite également une analyse."
+      },
+      {
+        "heading": "Cas fictif : le carton masque le sol",
+        "lines": [
+          "La visibilité manque",
+          "Une marche coupe le trajet",
+          "La destination doit être préparée"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, un carton vous cache les pieds. Il faut franchir une porte et une marche. Le porter seul parce qu’il paraît léger n’est pas une réponse suffisante. Préparez la dépose et cherchez avec le responsable une autre organisation, une aide ou un trajet réellement sûr."
+      },
+      {
+        "heading": "L’aide doit être adaptée",
+        "lines": [
+          "Matériel prévu pour la tâche",
+          "Mode d’emploi compris",
+          "Cheminement libre"
+        ],
+        "narration": "Une aide de manutention réduit certains efforts, mais crée aussi des conditions d’utilisation à respecter. Un chariot n’efface pas un sol glissant ou un passage bloqué. Utilisez seulement le matériel prévu et maîtrisé. Aucun poids universel ne garantit que toute personne peut réaliser toute manutention sans risque."
+      },
+      {
+        "heading": "À plusieurs : se coordonner",
+        "lines": [
+          "Décider avant la prise",
+          "Se donner un signal",
+          "Prévoir l’arrêt et la dépose"
+        ],
+        "narration": "À plusieurs, convenez du mouvement avant de commencer. Qui coordonne ? Quand prendre et déposer ? Comment s’arrêter si le trajet change ? Une manœuvre sans communication peut déséquilibrer l’équipe. Ne placez pas les mains dans une zone de pincement et ne tentez pas de rattraper une charge qui tombe en vous exposant."
+      },
+      {
+        "heading": "Exercice sur votre tâche",
+        "lines": [
+          "Observer sans charge",
+          "Choisir une solution",
+          "Démontrer sous encadrement"
+        ],
+        "narration": "Mettez la vidéo en pause. Choisissez une manutention habituelle avec le responsable. Décrivez la charge, le chemin et la dépose, puis choisissez une aide ou une modification de la tâche. La démonstration pratique doit utiliser une situation et une charge adaptées. Le responsable observe, corrige et vérifie la compréhension."
+      },
+      {
+        "heading": "La prévention change le travail",
+        "lines": [
+          "Réduire les ports inutiles",
+          "Interrompre une tâche inadaptée",
+          "Faire corriger l’organisation"
+        ],
+        "narration": "Retenez trois décisions : réduire les ports inutiles, interrompre une opération devenue inadaptée et faire corriger l’organisation. Une vidéo ou un quiz ne remplace pas la formation essentiellement pratique à vos manutentions. Le cours écrit vous aide à préparer cette mise en pratique et à expliquer les choix retenus."
+      }
+    ]
+  }
+}

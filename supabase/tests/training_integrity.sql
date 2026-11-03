@@ -54,9 +54,9 @@ do $$ begin
 end $$;
 reset role;
 -- Advance the clock fixture, instead of waiting through a real lesson in SQL.
-update public.user_training_progress set video_progress=jsonb_set(video_progress,array[current_setting('opstest.video')],jsonb_build_object('position',10,'watched',80,'last_seen',now()-interval '10 seconds')) where user_id=current_setting('opstest.actor')::uuid and training_id=current_setting('opstest.course')::uuid;
+update public.user_training_progress set video_progress=jsonb_set(video_progress,array[current_setting('opstest.video')],jsonb_build_object('position',80,'watched',80,'last_seen',now()-interval '10 seconds')) where user_id=current_setting('opstest.actor')::uuid and training_id=current_setting('opstest.course')::uuid;
 set local role authenticated;
-select public.record_training_video(current_setting('opstest.video')::uuid,20);
+select public.record_training_video(current_setting('opstest.video')::uuid,90);
 select public.mark_training_chapter(current_setting('opstest.course')::uuid,current_setting('opstest.video')::uuid);
 select set_config('opstest.session',public.start_training_quiz(current_setting('opstest.course')::uuid)->>'id',true);
 reset role;

@@ -1,0 +1,443 @@
+{
+  "rendered_at": "2026-11-03",
+  "checks": [
+    "SHA-256",
+    "H.264 720p",
+    "AAC audio",
+    "complete ffmpeg decode",
+    "short French captions",
+    "voice attribution"
+  ],
+  "programs": [
+    {
+      "key": "accueil-client",
+      "version": "2026-11-03",
+      "duration_seconds": 135.0,
+      "size_bytes": 1696355,
+      "sha256": "57cab70c47aa34b8ca474a681f6a97af566aafa4a841b0aeb368f271bbaae3df",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 53,
+      "chapters": [
+        {
+          "title": "Écouter. Vérifier. Agir.",
+          "seconds": 0.0
+        },
+        {
+          "title": "Séparer les trois éléments",
+          "seconds": 20.812
+        },
+        {
+          "title": "Vérifier avant de promettre",
+          "seconds": 42.308
+        },
+        {
+          "title": "Action + personne + retour",
+          "seconds": 64.177
+        },
+        {
+          "title": "À vous de jouer",
+          "seconds": 86.092
+        },
+        {
+          "title": "La sécurité reste prioritaire",
+          "seconds": 110.362
+        }
+      ]
+    },
+    {
+      "key": "accueil-securite",
+      "version": "2026-11-03",
+      "duration_seconds": 123.516372,
+      "size_bytes": 1541126,
+      "sha256": "da60cec15437c6a3a25721c2f84dacd8fb5893990fad626aec139cb58a51c064",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 44,
+      "chapters": [
+        {
+          "title": "Avant le premier geste",
+          "seconds": 0.0
+        },
+        {
+          "title": "Un danger + une exposition",
+          "seconds": 19.083
+        },
+        {
+          "title": "Cas fictif : passage bloqué",
+          "seconds": 38.132
+        },
+        {
+          "title": "Une alerte localisée",
+          "seconds": 58.608
+        },
+        {
+          "title": "À montrer sur place",
+          "seconds": 81.415
+        },
+        {
+          "title": "Comprendre puis démontrer",
+          "seconds": 103.701
+        }
+      ]
+    },
+    {
+      "key": "caisse",
+      "version": "2026-11-03",
+      "duration_seconds": 116.858458,
+      "size_bytes": 1445413,
+      "sha256": "582ec5c5cbed9a66a736fee2d9fab372981727c757599b7f8b67e5c2624ae8e9",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 34,
+      "chapters": [
+        {
+          "title": "Préparer avant d’encaisser",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : paiement incertain",
+          "seconds": 18.051
+        },
+        {
+          "title": "La délégation protège la décision",
+          "seconds": 37.262
+        },
+        {
+          "title": "Clôturer avec les vrais chiffres",
+          "seconds": 57.831
+        },
+        {
+          "title": "Les personnes passent avant les fonds",
+          "seconds": 77.32
+        },
+        {
+          "title": "S’entraîner sans paiement réel",
+          "seconds": 96.253
+        }
+      ]
+    },
+    {
+      "key": "chaine-froid",
+      "version": "2026-11-03",
+      "duration_seconds": 116.607438,
+      "size_bytes": 1439945,
+      "sha256": "929964251b8ab824a40cee4b18a74c8fd9bc3d6083f3fbf1ffb831e6c47b420c",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 44,
+      "chapters": [
+        {
+          "title": "Pas un seuil pour tout le frais",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : la caisse à quai",
+          "seconds": 19.802
+        },
+        {
+          "title": "Savoir ce que l’on mesure",
+          "seconds": 38.245
+        },
+        {
+          "title": "L’écart demande un relais",
+          "seconds": 58.025
+        },
+        {
+          "title": "Exercice de contrôle réel",
+          "seconds": 77.886
+        },
+        {
+          "title": "Mesurer. Comparer. Suivre.",
+          "seconds": 98.477
+        }
+      ]
+    },
+    {
+      "key": "dates-stocks",
+      "version": "2026-11-03",
+      "duration_seconds": 113.045442,
+      "size_bytes": 1394616,
+      "sha256": "0fc60f02ae8c3c3ebf005a5f365903d52204c0ddaf2669816197bdf102d58ebe",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 40,
+      "chapters": [
+        {
+          "title": "Lire trois informations",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : deux livraisons",
+          "seconds": 19.652
+        },
+        {
+          "title": "L’ouverture peut changer la limite",
+          "seconds": 40.73
+        },
+        {
+          "title": "Retirer : séparer et tracer",
+          "seconds": 60.301
+        },
+        {
+          "title": "À vous de classer les lots",
+          "seconds": 78.466
+        },
+        {
+          "title": "Prévenir sans raccourci",
+          "seconds": 95.773
+        }
+      ]
+    },
+    {
+      "key": "hygiene-alimentaire",
+      "version": "2026-11-03",
+      "duration_seconds": 119.55746,
+      "size_bytes": 1456723,
+      "sha256": "c99b26ce980b487b59b9f16a58776b02bbae65d9129681806836c8f53a7b5ed6",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 42,
+      "chapters": [
+        {
+          "title": "Un transfert peut rester invisible",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : le couteau partagé",
+          "seconds": 19.756
+        },
+        {
+          "title": "Le protocole fait la différence",
+          "seconds": 39.165
+        },
+        {
+          "title": "Allergènes : vérifier avant de dire",
+          "seconds": 59.663
+        },
+        {
+          "title": "À pratiquer au poste",
+          "seconds": 79.198
+        },
+        {
+          "title": "Ne pas deviner face au doute",
+          "seconds": 100.034
+        }
+      ]
+    },
+    {
+      "key": "incendie-evacuation",
+      "version": "2026-11-03",
+      "duration_seconds": 118.897415,
+      "size_bytes": 1505600,
+      "sha256": "968b22d7c7cb319322f9f013c6827e883586745e98847d7e5aeae8f38c335d62",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 39,
+      "chapters": [
+        {
+          "title": "Le chemin s’apprend avant",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : la veste oubliée",
+          "seconds": 18.341
+        },
+        {
+          "title": "Un trajet doit rester sûr",
+          "seconds": 39.234
+        },
+        {
+          "title": "Une absence : transmettre",
+          "seconds": 59.455
+        },
+        {
+          "title": "L’extincteur ne s’improvise pas",
+          "seconds": 78.804
+        },
+        {
+          "title": "À vérifier lors de l’exercice",
+          "seconds": 96.61
+        }
+      ]
+    },
+    {
+      "key": "management",
+      "version": "2026-11-03",
+      "duration_seconds": 113.41746,
+      "size_bytes": 1426740,
+      "sha256": "8a124951c3ecae2fa3a8d23e9ae687c6fa0793bb9bc596d35c93602141574f05",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 40,
+      "chapters": [
+        {
+          "title": "Une consigne ne suffit pas",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : les dates dépassées",
+          "seconds": 17.955
+        },
+        {
+          "title": "Un brief relié au travail réel",
+          "seconds": 37.526
+        },
+        {
+          "title": "Un signalement n’est pas un conflit banal",
+          "seconds": 58.316
+        },
+        {
+          "title": "Vérifier l’effet de l’action",
+          "seconds": 77.062
+        },
+        {
+          "title": "Votre exercice : une action complète",
+          "seconds": 94.822
+        }
+      ]
+    },
+    {
+      "key": "manutention",
+      "version": "2026-11-03",
+      "duration_seconds": 121.648435,
+      "size_bytes": 1506734,
+      "sha256": "b3607137876437cd86168ed8dd022b20be8da53dd7fac440b964a97b4d0b2895",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 42,
+      "chapters": [
+        {
+          "title": "Porter n’est pas le point de départ",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : le carton masque le sol",
+          "seconds": 22.321
+        },
+        {
+          "title": "L’aide doit être adaptée",
+          "seconds": 41.067
+        },
+        {
+          "title": "À plusieurs : se coordonner",
+          "seconds": 60.453
+        },
+        {
+          "title": "Exercice sur votre tâche",
+          "seconds": 79.628
+        },
+        {
+          "title": "La prévention change le travail",
+          "seconds": 102.39
+        }
+      ]
+    },
+    {
+      "key": "materiels-produits",
+      "version": "2026-11-03",
+      "duration_seconds": 115.588481,
+      "size_bytes": 1407454,
+      "sha256": "365f8f07fd72c50cc98748de421dc97515dd869ba83bc5ef28a5255e439848ec",
+      "width": 1280,
+      "height": 720,
+      "video_codec": "h264",
+      "audio_codec": "aac",
+      "narration": "synthetic",
+      "voice": "fr_FR-siwis-medium",
+      "voice_dataset_license": "CC-BY-4.0",
+      "voice_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "captions_burned_in": true,
+      "caption_cues": 39,
+      "chapters": [
+        {
+          "title": "Connaître avant d’utiliser",
+          "seconds": 0.0
+        },
+        {
+          "title": "Cas fictif : la machine bloque",
+          "seconds": 18.421
+        },
+        {
+          "title": "Le produit doit être identifié",
+          "seconds": 37.121
+        },
+        {
+          "title": "Une protection adaptée à la tâche",
+          "seconds": 55.635
+        },
+        {
+          "title": "Votre atelier encadré",
+          "seconds": 76.529
+        },
+        {
+          "title": "Trois décisions à retenir",
+          "seconds": 96.413
+        }
+      ]
+    }
+  ]
+}

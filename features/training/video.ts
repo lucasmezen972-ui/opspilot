@@ -56,6 +56,7 @@ export interface TrainingVideoPlayerProps {
   title: string;
   position: number;
   captionsUrl?: string | null;
+  chapters?: { title: string; seconds: number }[];
   onProgress: (seconds: number) => void;
   onError: () => void;
 }

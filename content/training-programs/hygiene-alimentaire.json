@@ -1,0 +1,173 @@
+{
+  "key": "hygiene-alimentaire",
+  "version": "2026-11-03",
+  "title": "Hygiène alimentaire au poste : prévenir les contaminations",
+  "category": "Hygiène alimentaire",
+  "summary": "Séparer les usages, appliquer le nettoyage prévu, vérifier les allergènes et isoler une denrée douteuse.",
+  "audience": "Personnes manipulant ou servant des denrées en commerce alimentaire et restauration.",
+  "prerequisites": "Plan de maîtrise sanitaire et consignes du poste disponibles ; accès à la composition des produits et au relais responsable.",
+  "requirement": "internal_required",
+  "applicability": "Instructions et formation à l’hygiène adaptées aux manipulations réellement effectuées. Ce parcours interne ne remplace pas la formation spécifique distincte exigible dans certaines activités de restauration.",
+  "onsite": "Démontrer le lavage des mains et la séparation cru/prêt à consommer ; appliquer le protocole de nettoyage avec le matériel réel ; retrouver une information écrite sur un allergène. Le responsable observe et corrige.",
+  "objectives": [
+    "Repérer une contamination possible et interrompre le transfert.",
+    "Appliquer les étapes et paramètres du nettoyage prévus au poste.",
+    "Retrouver une information fiable sur les allergènes et traiter une incertitude sans promettre."
+  ],
+  "positioning": [
+    "Savez-vous distinguer nettoyer et désinfecter ?",
+    "Pouvez-vous retrouver la composition actuelle d’un produit ?",
+    "Savez-vous où isoler une denrée douteuse et qui alerter ?"
+  ],
+  "reading_minutes": 12,
+  "activity_minutes": 12,
+  "sources": [
+    {
+      "label": "Ministère de l’Agriculture : obligations de formation à l’hygiène, 16 juillet 2026",
+      "url": "https://agriculture.gouv.fr/restauration-quelles-obligations-en-matiere-de-formation-a-lhygiene-des-aliments"
+    },
+    {
+      "label": "Ministère de l’Agriculture : contrôles et bonnes pratiques en restauration",
+      "url": "https://agriculture.gouv.fr/la-securite-sanitaire-de-lalimentation-que-controle-t-dans-un-restaurant"
+    },
+    {
+      "label": "Service Public : information écrite sur les allergènes",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F32192"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "Interrompre les transferts au bon moment",
+      "body": "# Un aliment peut être contaminé sans signe visible\nLes dangers peuvent être microbiologiques, chimiques, physiques ou liés aux allergènes. Un aliment apparemment normal n’est pas une preuve d’absence de danger. Les procédures de maîtrise sanitaire traduisent l’analyse des risques de l’activité en gestes, contrôles et actions à appliquer. Toutes les étapes ne sont pas automatiquement des points critiques HACCP : suivez les points réellement définis dans le plan du site.\n\nUne contamination croisée est un transfert par les mains, un outil, une surface, un emballage ou un aliment. Cas pédagogique fictif : après une préparation crue, un couteau est utilisé pour couper un produit prêt à consommer. Arrêtez la tâche, prévenez le responsable et appliquez le traitement prévu pour l’outil, la surface et les aliments potentiellement exposés. Nettoyer seulement le couteau après coup ne rend pas automatiquement sûres les denrées déjà touchées.\n\nRespectez la séparation des usages et l’organisation dans l’espace ou dans le temps, avec le nettoyage prévu entre tâches. Des couleurs de planches peuvent aider si le site les utilise, mais aucun code couleur ne garantit la propreté d’un outil. Le lavage des mains se réalise aux moments prévus et avec la technique du site ; les gants ne le remplacent pas.\n\nPortez une tenue adaptée, protégez les blessures selon les consignes et signalez au relais prévu les symptômes susceptibles d’affecter la sécurité des denrées. Les informations de santé se traitent avec discrétion. N’improvisez pas seul une adaptation d’un poste alimentaire."
+    },
+    {
+      "title": "Nettoyer avec méthode et informer sans deviner",
+      "body": "# Les paramètres ne se compensent pas au hasard\nNettoyer retire des salissures ; désinfecter vise à réduire les micro-organismes selon un protocole adapté. Le plan du site précise la surface, le produit, le dosage, les étapes, le temps de contact, le rinçage lorsqu’il est requis et la fréquence. Un produit combiné peut avoir une procédure spécifique : suivez son usage prévu. N’augmentez pas la concentration ou la température pour compenser un temps de contact raccourci.\n\nPréparez la zone et protégez les denrées contre les projections et les résidus. Utilisez les protections prévues, ne mélangez pas les produits et vérifiez le résultat avec les moyens du site. Consignez le contrôle demandé et signalez une anomalie. Une trace aide à démontrer et à vérifier les actions ; l’absence de signature n’est pas, à elle seule, la preuve universelle qu’aucun nettoyage n’a eu lieu.\n\nPour un allergène, consultez la composition actuelle, la fiche fournisseur ou le support écrit prévu pour le client. Une recette habituelle ou la mémoire d’un collègue ne suffit pas si un ingrédient a changé. Vérifiez aussi les risques de contact croisé selon la procédure. Ne promettez jamais « sans allergène » sur une simple impression.\n\nSi l’information manque, dites que vous devez vérifier et sollicitez le responsable avant de servir ou de répondre définitivement. L’information écrite accessible au client ne se remplace pas par une assurance orale approximative. Signalez également toute trace de nuisibles et appliquez les mesures prévues, sans déplacer au hasard un dispositif de lutte."
+    },
+    {
+      "title": "Exercice : un ustensile partagé et une recette modifiée",
+      "body": "# Deux cas pédagogiques fictifs\nCas 1 : une pince ayant servi à une denrée crue est posée près de produits prêts à consommer. Vous ne savez pas ce qu’elle a touché. Cas 2 : une cliente demande si une sauce contient du lait ; la recette fournisseur vient de changer et la fiche affichée n’est pas datée.\n\nTravail demandé : pour chaque cas, notez le risque, l’action immédiate, l’information à vérifier et le relais. Retrouvez ensuite sur place le protocole de nettoyage et une fiche d’allergènes actuelle. Livrable : deux décisions justifiées et une démonstration de nettoyage encadrée, sans exposer des aliments pendant l’exercice.\n\nCritères de réussite : ne pas remettre un aliment douteux à disposition sur la seule base de son aspect ; distinguer le traitement de l’outil de celui des denrées exposées ; respecter les paramètres du produit ; ne pas inventer la composition d’une recette.\n\nPistes de correction : dans le premier cas, interrompre l’usage, isoler ce qui peut être concerné, alerter puis appliquer la décision de maîtrise sanitaire. Dans le second, consulter une composition fiable et actuelle, faire corriger le support écrit si nécessaire et informer le client avec une donnée vérifiée. S’il reste une incertitude, ne pas garantir l’absence d’un allergène.\n\nLe responsable vérifie les gestes au poste. Si une difficulté persiste, revoir la démonstration avant de reprendre seul. Le quiz final mesure la compréhension de ces décisions, pas la conformité sanitaire globale de l’établissement."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Un couteau passe du cru à un produit prêt à consommer sans traitement prévu. Que faire ?",
+      "options": [
+        "Essuyer la lame puis poursuivre.",
+        "Arrêter et traiter l’outil ainsi que les denrées potentiellement exposées selon la procédure.",
+        "Attendre un changement visible du produit."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "La recette fournisseur change et un client demande les allergènes. Quelle réponse retenir ?",
+      "options": [
+        "Répondre de mémoire.",
+        "Garantir l’absence si rien n’est visible.",
+        "Vérifier une composition actuelle et le support écrit, puis répondre sans inventer."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Peut-on raccourcir le temps de contact en augmentant la dose d’un produit ?",
+      "options": [
+        "Non ; respecter le protocole et les paramètres prévus.",
+        "Oui, à volonté.",
+        "Oui, si la surface paraît propre."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Les gants remplacent-ils le lavage des mains ?",
+      "options": [
+        "Oui, toute la journée.",
+        "Non ; appliquer les règles d’hygiène prévues et changer de tâche avec précaution.",
+        "Oui, s’ils sont transparents."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Un aliment d’aspect normal est-il nécessairement sans danger ?",
+      "options": [
+        "Oui, s’il sent bon.",
+        "Oui, s’il est froid.",
+        "Non ; l’aspect ne remplace pas les contrôles et conditions de conservation."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "À quoi sert l’enregistrement d’une action d’hygiène ?",
+      "options": [
+        "À permettre son suivi et sa vérification, avec les autres éléments utiles.",
+        "À rendre automatiquement toute denrée sûre.",
+        "À remplacer le geste réel."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    }
+  ],
+  "video": {
+    "title": "L’hygiène se décide à chaque changement de tâche",
+    "scenes": [
+      {
+        "heading": "Un transfert peut rester invisible",
+        "lines": [
+          "Mains et ustensiles",
+          "Surfaces et emballages",
+          "Denrées et allergènes"
+        ],
+        "narration": "La sécurité alimentaire ne se juge pas seulement à l’aspect d’un produit. Un danger peut se transférer par les mains, les ustensiles, une surface ou un emballage. Le cours interne sert à appliquer les consignes de votre activité. Il ne transforme pas chaque geste en point critique : suivez le plan de maîtrise sanitaire du site."
+      },
+      {
+        "heading": "Cas fictif : le couteau partagé",
+        "lines": [
+          "Un usage cru",
+          "Puis un aliment prêt à consommer",
+          "Un transfert à interrompre"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, le même couteau passe d’une préparation crue à un aliment prêt à consommer. Il faut arrêter et prévenir le responsable. Le traitement concerne l’outil et les aliments potentiellement exposés. Nettoyer le couteau après coup ne rend pas automatiquement sûres les denrées qu’il a déjà touchées."
+      },
+      {
+        "heading": "Le protocole fait la différence",
+        "lines": [
+          "Produit et dosage prévus",
+          "Étapes et temps respectés",
+          "Contrôle puis trace utile"
+        ],
+        "narration": "Nettoyer et désinfecter ont des objectifs différents. Suivez le protocole réel : produit, dose, étapes, temps de contact et rinçage s’il est prescrit. Ne mélangez pas les produits et ne compensez pas un temps trop court en augmentant la concentration. Vérifiez le résultat et consignez ce qui est demandé."
+      },
+      {
+        "heading": "Allergènes : vérifier avant de dire",
+        "lines": [
+          "Composition actuelle",
+          "Information écrite disponible",
+          "Aucune promesse improvisée"
+        ],
+        "narration": "Une cliente demande si la sauce contient du lait. La recette vient de changer. Ne répondez pas de mémoire. Consultez une information actuelle et fiable, vérifiez le support écrit et les risques de contact croisé selon la procédure. Si l’information manque, demandez le relais avant de garantir quoi que ce soit."
+      },
+      {
+        "heading": "À pratiquer au poste",
+        "lines": [
+          "Lavage des mains",
+          "Séparation des usages",
+          "Recherche d’une fiche allergènes"
+        ],
+        "narration": "Mettez la vidéo en pause. Avec le responsable, montrez le lavage des mains prévu, le changement d’ustensile entre deux usages et l’endroit où vérifier une composition. Réalisez ensuite le nettoyage encadré. Les gants et les couleurs des planches ne remplacent ni l’hygiène des mains ni le traitement nécessaire du matériel."
+      },
+      {
+        "heading": "Ne pas deviner face au doute",
+        "lines": [
+          "Interrompre l’exposition",
+          "Isoler selon la procédure",
+          "Faire décider et tracer"
+        ],
+        "narration": "Face à une denrée douteuse, interrompez l’exposition, isolez selon la procédure et alertez le responsable. La trace facilite le suivi, mais ne remplace pas l’action réelle. Reprenez les cas du cours écrit puis le quiz. Le responsable doit encore observer les gestes alimentaires propres à votre poste."
+      }
+    ]
+  }
+}

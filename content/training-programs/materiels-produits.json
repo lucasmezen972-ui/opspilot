@@ -1,0 +1,173 @@
+{
+  "key": "materiels-produits",
+  "version": "2026-11-03",
+  "title": "Matériels, produits et protections : utiliser sans improviser",
+  "category": "Sécurité au travail",
+  "summary": "Vérifier avant usage, suivre les consignes et arrêter une utilisation anormale sans intervention improvisée.",
+  "audience": "Personnel utilisant outils, équipements de travail, produits de nettoyage ou équipements de protection au magasin et au restaurant.",
+  "prerequisites": "Notices, étiquettes, fiches de données de sécurité et consignes du poste accessibles ; démonstration par une personne compétente.",
+  "requirement": "internal_required",
+  "applicability": "Selon les équipements, les produits dangereux et les protections réellement utilisés : information et formation adaptées, renouvelées lorsque nécessaire. Les autorisations spécifiques restent hors du périmètre de ce module interne.",
+  "onsite": "Démonstration sur chaque équipement concerné, lecture d’une étiquette et d’une fiche de données de sécurité, choix et entraînement aux protections prévues. Vérifier l’arrêt normal et le relais en cas de défaut sans créer une situation dangereuse.",
+  "objectives": [
+    "Vérifier l’état et les conditions d’emploi avant l’utilisation.",
+    "Retrouver une précaution dans la notice, l’étiquette ou la fiche de données de sécurité.",
+    "Arrêter l’usage et solliciter le relais adapté en cas de défaut."
+  ],
+  "positioning": [
+    "Savez-vous quel matériel vous êtes formé à utiliser ?",
+    "Savez-vous retrouver la fiche du produit de nettoyage de votre poste ?",
+    "Pouvez-vous expliquer le choix et les limites des protections prévues ?"
+  ],
+  "reading_minutes": 11,
+  "activity_minutes": 12,
+  "sources": [
+    {
+      "label": "Code du travail, R4323-1 à R4323-5 : équipements de travail",
+      "url": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000018489707/"
+    },
+    {
+      "label": "Code du travail, R4323-106 : entraînement aux protections individuelles",
+      "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000018531280/"
+    },
+    {
+      "label": "Code du travail, R4412-38 : information et formation au risque chimique",
+      "url": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036483735/"
+    }
+  ],
+  "chapters": [
+    {
+      "title": "Un équipement connu et vérifié",
+      "body": "# L’habitude ne remplace pas la consigne\nAvant d’utiliser un équipement, identifiez la tâche autorisée, les protections, les limites d’emploi et la conduite à tenir en situation anormale. La notice et la consigne du poste donnent les repères ; une démonstration permet de les relier au matériel réel. Ne supposez pas que deux modèles proches se commandent de la même manière.\n\nContrôlez ce qui est prévu avant usage : état apparent, stabilité, accessoires, protecteurs et zone de travail. Un bruit inhabituel, une pièce abîmée ou un protecteur manquant impose d’arrêter l’utilisation concernée et de prévenir le relais compétent. N’effectuez pas de réparation improvisée et ne neutralisez pas un dispositif de sécurité.\n\nCas pédagogique fictif : un produit est coincé dans une machine et un collègue propose de pousser la main derrière le protecteur. Refusez cette manœuvre et appliquez l’arrêt et le relais prévus. Un simple bouton arrêté ne garantit pas que toutes les énergies sont maîtrisées. Le déblocage, le nettoyage exposant à un mécanisme ou une maintenance relèvent de procédures et de personnes compétentes.\n\nPour les outils manuels, adaptez aussi la méthode : outil en bon état, support stable, direction de coupe maîtrisée, mains et collègues hors de la trajectoire. N’utilisez pas un outil pour une fonction non prévue. Le responsable observe l’essai et complète la formation lorsque le matériel ou les conditions d’emploi changent."
+    },
+    {
+      "title": "Produit identifié, protection adaptée",
+      "body": "# Lire avant de doser ou de transvaser\nUn produit de nettoyage se choisit pour un usage défini. L’étiquette précise les dangers et les précautions ; la fiche de données de sécurité apporte notamment les informations de protection, de stockage et de conduite en cas d’exposition. Demandez où se trouvent ces fiches et comment appliquer les consignes du site.\n\nNe mélangez pas des produits pour renforcer leur efficacité et ne transvasez jamais dans un emballage alimentaire. Utilisez le contenant et l’identification prévus. Respectez la dilution, la ventilation, le temps de contact et le rinçage lorsqu’ils sont prescrits. Ne modifiez pas ces paramètres en vous fondant sur l’odeur ou l’apparence.\n\nLes protections individuelles dépendent du produit et de la tâche. Des gants quelconques ne protègent pas de tout ; un gant détérioré ou inadapté peut être inefficace. Le responsable doit expliquer le choix, la mise en place, le retrait, l’entretien et les limites de la protection, avec entraînement si nécessaire. Les protections ne remplacent pas les mesures collectives prévues.\n\nEn cas de projection, fuite ou malaise, arrêtez la tâche, évitez d’exposer d’autres personnes et appliquez immédiatement les consignes d’urgence et les instructions des secours. Rendez disponible l’identification du produit aux personnes qui interviennent. Ne tentez pas une neutralisation chimique improvisée. L’exercice de ce cours ne prévoit aucun mélange ni exposition réelle."
+    },
+    {
+      "title": "Décrire puis démontrer la bonne utilisation",
+      "body": "# Atelier encadré sans mise en danger\nChoisissez avec le responsable un équipement du poste et un produit réellement utilisé. Montrez la consigne et la fiche associée. Avant toute manipulation, expliquez l’usage prévu, une situation anormale et le relais à prévenir. Décrivez les contrôles à faire puis réalisez un essai selon la procédure, sous encadrement.\n\nCas pédagogique fictif : un flacon sans étiquette est posé à côté d’un produit connu. Le collègue affirme que c’est le même. La réponse attendue est de ne pas l’utiliser, d’éviter qu’il soit pris par erreur et de demander son identification et son traitement selon la procédure. Deviner le contenu en le sentant ou en le mélangeant constitue une exposition inutile.\n\nLivrable : une fiche pratique comportant tâche, matériel ou produit, consigne accessible, protection prévue, défaut entraînant l’arrêt et fonction du relais. Aucun mot de passe, donnée de santé ou identité de client n’y est nécessaire.\n\nCritères observés : document pertinent retrouvé ; conditions d’emploi expliquées ; protection adaptée démontrée ; arrêt et signalement corrects face à un défaut fictif. Pour un débutant, le responsable réalise d’abord une démonstration commentée. Pour approfondir, l’apprenant explique ce qui change lorsque le modèle ou le produit est remplacé. Le quiz final vérifie les décisions ; il n’attribue aucune autorisation de conduite, habilitation électrique ou certification technique."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Une machine est bloquée. Peut-on passer la main derrière un protecteur ?",
+      "options": [
+        "Oui, si l’on va vite.",
+        "Non ; appliquer l’arrêt et le relais compétent prévus.",
+        "Oui, si un collègue surveille."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Un flacon n’a plus d’étiquette. Quelle décision prendre ?",
+      "options": [
+        "Le sentir pour l’identifier.",
+        "Le mélanger au produit habituel.",
+        "Ne pas l’utiliser et demander son traitement selon la procédure."
+      ],
+      "question_type": "situation",
+      "is_critical": true
+    },
+    {
+      "question": "Où vérifier les précautions d’un produit dangereux ?",
+      "options": [
+        "Dans l’étiquette, la fiche de données de sécurité et les consignes du site.",
+        "Uniquement dans les habitudes d’un collègue.",
+        "Dans une publicité générale."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Que faire lorsqu’un produit ou un équipement change ?",
+      "options": [
+        "Conserver automatiquement l’ancienne méthode.",
+        "Revoir les instructions et compléter la formation adaptée.",
+        "Essayer d’abord sans protection."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Quels gants choisir ?",
+      "options": [
+        "N’importe quels gants propres.",
+        "Les plus épais sans autre vérification.",
+        "Ceux prévus pour le produit et la tâche, en bon état et correctement utilisés."
+      ],
+      "question_type": "qcm_single",
+      "is_critical": false
+    },
+    {
+      "question": "Peut-on améliorer un produit en le mélangeant à un autre ?",
+      "options": [
+        "Non ; respecter les usages et ne pas improviser de mélange.",
+        "Oui, si les odeurs sont proches.",
+        "Oui, avec un récipient alimentaire."
+      ],
+      "question_type": "critical",
+      "is_critical": true
+    }
+  ],
+  "video": {
+    "title": "Utiliser sans improviser",
+    "scenes": [
+      {
+        "heading": "Connaître avant d’utiliser",
+        "lines": [
+          "La tâche autorisée",
+          "La consigne du modèle",
+          "Le relais en cas de défaut"
+        ],
+        "narration": "Un équipement familier n’est pas automatiquement maîtrisé. Avant de l’utiliser, connaissez la tâche autorisée, les protections et la conduite à tenir si quelque chose est anormal. Deux modèles proches peuvent fonctionner différemment. Une démonstration sur le matériel réel relie la notice à votre travail."
+      },
+      {
+        "heading": "Cas fictif : la machine bloque",
+        "lines": [
+          "Ne pas contourner le protecteur",
+          "Arrêter selon la procédure",
+          "Prévenir la personne compétente"
+        ],
+        "narration": "Dans ce cas pédagogique fictif, un produit se coince dans une machine. Un collègue propose de passer la main derrière le protecteur. Ne le faites pas. Appliquez l’arrêt et le relais prévus. Un bouton arrêté ne garantit pas que toutes les énergies sont maîtrisées. Le déblocage et la maintenance ne s’improvisent pas."
+      },
+      {
+        "heading": "Le produit doit être identifié",
+        "lines": [
+          "Étiquette lisible",
+          "Fiche de sécurité accessible",
+          "Usage et dilution respectés"
+        ],
+        "narration": "Pour un produit de nettoyage, l’étiquette et la fiche de données de sécurité donnent les précautions à appliquer. Ne devinez pas le contenu d’un flacon sans étiquette. Ne mélangez pas les produits pour renforcer leur effet et ne les transvasez pas dans un emballage alimentaire. Respectez l’usage et la dilution prévus."
+      },
+      {
+        "heading": "Une protection adaptée à la tâche",
+        "lines": [
+          "Choisir le bon équipement",
+          "Vérifier son état",
+          "S’entraîner à le porter"
+        ],
+        "narration": "Une protection individuelle doit être adaptée au risque. Des gants quelconques ne protègent pas de tout. Vérifiez leur état et apprenez la mise en place, le retrait et l’entretien prévus. La protection ne remplace pas les mesures collectives. Si le produit ou le matériel change, faites revoir les consignes et la formation nécessaire."
+      },
+      {
+        "heading": "Votre atelier encadré",
+        "lines": [
+          "Retrouver une consigne",
+          "Montrer les vérifications",
+          "Expliquer l’arrêt et le relais"
+        ],
+        "narration": "Mettez la vidéo en pause. Avec le responsable, choisissez un matériel et un produit du poste. Retrouvez leurs consignes. Expliquez une anomalie qui impose l’arrêt, puis démontrez les contrôles et les protections sans créer de danger. L’exercice ne comporte aucun mélange de produit ni essai dangereux."
+      },
+      {
+        "heading": "Trois décisions à retenir",
+        "lines": [
+          "Vérifier avant usage",
+          "Respecter les limites",
+          "Alerter sans réparer au hasard"
+        ],
+        "narration": "Retenez ces trois décisions : vérifier avant usage, respecter les limites et alerter sans réparation improvisée. Le texte et le quiz reprennent ces choix. La démonstration pratique reste à organiser sur chaque matériel concerné ; cette capsule ne délivre aucune habilitation ou autorisation technique."
+      }
+    ]
+  }
+}
