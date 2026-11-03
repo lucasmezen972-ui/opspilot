@@ -69,6 +69,7 @@ export function AppButton({
       disabled={isDisabled}
       activeOpacity={0.85}
       accessibilityRole="button"
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
       style={[
         styles.base,
         size === 'lg' ? styles.lg : styles.md,
@@ -120,11 +121,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   content: {
+    maxWidth: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
   label: {
+    flexShrink: 1,
+    textAlign: 'center',
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.2,

@@ -9,9 +9,13 @@ import {
 } from 'react-native';
 
 import { MolliePaymentControls } from './MolliePaymentControls';
+import { SepaAgreementsPanel } from './SepaAgreementsPanel';
+import { SepaQuoteControls } from './SepaQuoteControls';
 import { invoicePeriodEnd } from './invoice';
 import type { BillingRequest } from '../../hooks/useQontoBilling';
 import { supabase } from '../../lib/supabase';
+import { AppButton } from '../../shared/components/AppButton';
+import { colors } from '../../shared/styles/tokens';
 
 /** Only rendered for the platform owner; RPCs also enforce this on the server. */
 export function QontoAdminPanel() {
@@ -22,18 +26,27 @@ export function QontoAdminPanel() {
   const [reference, setReference] = useState('');
   const [paidUntil, setPaidUntil] = useState('');
   const [error, setError] = useState(false);
+  const [revision, setRevision] = useState(0);
+  const [sepaRequests, setSepaRequests] = useState<string[]>([]);
   const refresh = useCallback(async () => {
-    const [{ data, error: loadError }, portfolio] = await Promise.all([
-      supabase
-        .from('billing_requests')
-        .select('*')
-        .in('status', ['requested', 'awaiting_payment'])
-        .order('created_at')
-        .limit(100),
-      supabase.rpc('superadmin_organizations'),
-    ]);
+    const [{ data, error: loadError }, portfolio, calendars] =
+      await Promise.all([
+        supabase
+          .from('billing_requests')
+          .select('*')
+          .in('status', ['requested', 'awaiting_payment'])
+          .order('created_at')
+          .limit(100),
+        supabase.rpc('superadmin_organizations'),
+        supabase.rpc('get_sepa_agreements'),
+      ]);
     setError(Boolean(loadError));
     setRequests(data ?? []);
+    setSepaRequests(
+      (calendars.data ?? [])
+        .filter((a: { status: string }) => a.status !== 'canceled')
+        .map((a: { request_id: string }) => a.request_id),
+    );
     setNames(
       Object.fromEntries(
         (portfolio.data ?? []).map((org: { id: string; name: string }) => [
@@ -77,121 +90,174 @@ export function QontoAdminPanel() {
     await refresh();
   };
   return (
-    <View
-      style={{
-        padding: 16,
-        backgroundColor: '#EFF6FF',
-        marginBottom: 16,
-        borderRadius: 12,
-      }}
-    >
-      <Text style={{ fontSize: 18, fontWeight: '600' }}>
-        Facturation clients Qonto
-      </Text>
-      <Text>
-        Créez la facture dans Qonto, rattachez son lien, puis confirmez
-        uniquement un paiement effectivement reçu.
-      </Text>
-      <TouchableOpacity
-        accessibilityRole="link"
-        onPress={() => Linking.openURL('https://app.qonto.com/')}
+    <View style={{ gap: 16 }}>
+      <View
+        style={{
+          padding: 16,
+          backgroundColor: '#EFF6FF',
+          marginBottom: 16,
+          borderRadius: 12,
+        }}
       >
-        <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
-          Ouvrir Qonto
+        <Text style={{ fontSize: 18, fontWeight: '600' }}>
+          Facturation clients Qonto
         </Text>
-      </TouchableOpacity>
-      {error && (
         <Text>
-          Le raccordement de la facturation est en attente. Les abonnements ne
-          sont pas activés automatiquement.
+          Créez la facture dans Qonto, rattachez son lien, puis confirmez
+          uniquement un paiement effectivement reçu.
         </Text>
-      )}
-      {!error && requests.length === 0 && (
-        <Text>Aucune demande en attente.</Text>
-      )}
-      {requests.map((request) => (
         <TouchableOpacity
-          key={request.id}
-          onPress={() => {
-            setSelected(request);
-            setUrl(request.payment_url ?? '');
-            setReference(request.qonto_reference ?? '');
-            setPaidUntil(request.paid_until?.slice(0, 10) ?? '');
-          }}
-          style={{ paddingVertical: 12 }}
+          accessibilityRole="link"
+          onPress={() => Linking.openURL('https://app.qonto.com/')}
         >
-          <Text>
-            {names[request.organization_id] ?? 'Organisation cliente'} —{' '}
-            {request.plan} —{' '}
-            {request.status === 'requested'
-              ? 'facture à préparer'
-              : 'règlement attendu'}
+          <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
+            Ouvrir Qonto
           </Text>
         </TouchableOpacity>
-      ))}
-      {selected && (
-        <View style={{ gap: 12 }}>
-          {selected.payment_provider !== 'mollie' && (
-            <TextInput
-              accessibilityLabel="Lien de paiement Qonto"
-              placeholder="Lien de paiement Qonto"
-              value={url}
-              onChangeText={setUrl}
-              autoCapitalize="none"
-              style={{ backgroundColor: 'white', padding: 12 }}
-            />
-          )}
-          <TextInput
-            accessibilityLabel="Référence de facture Qonto"
-            placeholder="Référence de facture Qonto"
-            value={reference}
-            onChangeText={setReference}
-            style={{ backgroundColor: 'white', padding: 12 }}
-          />
-          {selected.payment_provider !== 'mollie' && (
-            <TouchableOpacity onPress={() => save(false)}>
-              <Text style={{ color: '#2563EB' }}>
-                Enregistrer le lien Qonto
-              </Text>
-            </TouchableOpacity>
-          )}
-          <TextInput
-            accessibilityLabel="Fin de période réglée"
-            placeholder="Fin de période réglée (AAAA-MM-JJ)"
-            value={paidUntil}
-            onChangeText={setPaidUntil}
-            style={{ backgroundColor: 'white', padding: 12 }}
-          />
-          <MolliePaymentControls
-            key={selected.id}
-            request={selected}
-            reference={reference}
-            paidUntil={paidUntil}
-            onSaved={async () => {
-              setSelected(null);
-              await refresh();
+        {error && (
+          <Text>
+            Le raccordement de la facturation est en attente. Les abonnements ne
+            sont pas activés automatiquement.
+          </Text>
+        )}
+        {!error && requests.length === 0 && (
+          <Text>Aucune demande en attente.</Text>
+        )}
+        <AppButton
+          label="Actualiser les demandes de facturation"
+          variant="secondary"
+          onPress={() => refresh().catch(() => setError(true))}
+        />
+        {requests.map((request) => (
+          <TouchableOpacity
+            key={request.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: selected?.id === request.id }}
+            onPress={() => {
+              setSelected(request);
+              setUrl(request.payment_url ?? '');
+              setReference(request.qonto_reference ?? '');
+              setPaidUntil(request.paid_until?.slice(0, 10) ?? '');
             }}
-          />
-          {selected.payment_provider !== 'mollie' && (
-            <TouchableOpacity
-              onPress={() =>
-                Alert.alert(
-                  'Vérification du paiement',
-                  'Confirmez uniquement si le règlement de cette facture est visible dans Qonto.',
-                  [
-                    { text: 'Annuler', style: 'cancel' },
-                    { text: 'Paiement reçu', onPress: () => save(true) },
-                  ],
-                )
-              }
-            >
-              <Text style={{ color: '#166534' }}>
-                Confirmer le paiement reçu
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+            style={{
+              padding: 12,
+              minHeight: 44,
+              borderRadius: 8,
+              backgroundColor:
+                selected?.id === request.id
+                  ? colors.primarySoft
+                  : colors.surface,
+              marginTop: 8,
+            }}
+          >
+            <Text>
+              {names[request.organization_id] ?? 'Organisation cliente'} —{' '}
+              {request.plan} —{' '}
+              {request.status === 'requested'
+                ? 'facture à préparer'
+                : 'règlement attendu'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        {selected && sepaRequests.includes(selected.id) && (
+          <Text
+            style={{ paddingVertical: 16, lineHeight: 21, color: colors.text }}
+          >
+            Cette facture appartient à un calendrier SEPA. Utilisez les
+            contrôles du calendrier ci-dessous pour éviter un second règlement.
+          </Text>
+        )}
+        {selected && !sepaRequests.includes(selected.id) && (
+          <View style={{ gap: 12 }}>
+            {selected.payment_provider !== 'mollie' && (
+              <View style={{ gap: 6 }}>
+                <Text>Lien de règlement Qonto</Text>
+                <TextInput
+                  accessibilityLabel="Lien de paiement Qonto"
+                  placeholder="Lien de paiement Qonto"
+                  value={url}
+                  onChangeText={setUrl}
+                  autoCapitalize="none"
+                  style={fieldStyle}
+                />
+              </View>
+            )}
+            <Text>Référence de facture Qonto</Text>
+            <TextInput
+              accessibilityLabel="Référence de facture Qonto"
+              placeholder="Référence de facture Qonto"
+              value={reference}
+              onChangeText={setReference}
+              style={fieldStyle}
+            />
+            {selected.payment_provider !== 'mollie' && (
+              <AppButton
+                label="Enregistrer le lien Qonto"
+                variant="secondary"
+                onPress={() => save(false)}
+              />
+            )}
+            <Text>Fin de la période facturée — AAAA-MM-JJ</Text>
+            <TextInput
+              accessibilityLabel="Fin de période réglée"
+              placeholder="Fin de période réglée (AAAA-MM-JJ)"
+              value={paidUntil}
+              onChangeText={setPaidUntil}
+              style={fieldStyle}
+            />
+            <MolliePaymentControls
+              key={selected.id}
+              request={selected}
+              reference={reference}
+              paidUntil={paidUntil}
+              onSaved={async () => {
+                setSelected(null);
+                await refresh();
+              }}
+            />
+            <SepaQuoteControls
+              request={selected}
+              reference={reference}
+              paidUntil={paidUntil}
+              onSaved={async () => {
+                setSelected(null);
+                setRevision((n) => n + 1);
+                await refresh();
+              }}
+            />
+            {selected.payment_provider !== 'mollie' && (
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={{ minHeight: 44, paddingVertical: 12 }}
+                onPress={() =>
+                  Alert.alert(
+                    'Vérification du paiement',
+                    'Confirmez uniquement si le règlement de cette facture est visible dans Qonto.',
+                    [
+                      { text: 'Annuler', style: 'cancel' },
+                      { text: 'Paiement reçu', onPress: () => save(true) },
+                    ],
+                  )
+                }
+              >
+                <Text style={{ color: '#166534' }}>
+                  Confirmer le paiement reçu
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </View>
+      <SepaAgreementsPanel administrator refreshKey={revision} />
     </View>
   );
 }
+const fieldStyle = {
+  backgroundColor: colors.surface,
+  padding: 12,
+  minHeight: 44,
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: 8,
+  color: colors.textStrong,
+};

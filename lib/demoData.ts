@@ -2115,7 +2115,7 @@ export function getDemoTrainings(): Training[] {
     organization_id: DEMO_ORG_ID,
     title,
     content:
-      'Module de formation interactif avec chapitres, cas pratiques et quiz certifiant.',
+      'Module de formation interactif avec chapitres, cas pratiques et quiz de validation interne.',
     category,
     difficulty,
     duration_minutes: duration,

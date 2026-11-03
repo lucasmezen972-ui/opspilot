@@ -8,6 +8,7 @@ import {
 import {
   getDemoOrgTrainingProgress,
   getDemoTeamMembers,
+  getDemoTrainingCertificates,
 } from '../lib/demoData';
 import { useDemoCollection } from '../lib/demoStore';
 import {
@@ -27,6 +28,12 @@ function buildEntries(
   members: { id: string; full_name: string; role: string }[],
   courses: Training[],
   orgProgress: UserTrainingProgress[],
+  certificates: {
+    user_id: string;
+    training_id: string;
+    employee_id?: string | null;
+  }[],
+  localDemo: boolean,
 ): MemberTrainingStatus[] {
   return courses.flatMap((course) =>
     members.map((member) => {
@@ -37,13 +44,27 @@ function buildEntries(
         memberId: member.id,
         memberName: member.full_name,
         memberRole: member.role,
-        matricule: deriveMatricule(member.id),
+        matricule:
+          certificates.find(
+            (c) => c.user_id === member.id && c.training_id === course.id,
+          )?.employee_id ?? (localDemo ? deriveMatricule(member.id) : '—'),
         trainingId: course.id,
         trainingTitle: course.title,
-        status: prog?.status ?? 'not_started',
-        score: prog?.score ?? null,
-        completedAt: prog?.completed_at ?? null,
-        hasCertificate: prog?.status === 'completed',
+        status:
+          !localDemo && prog?.status === 'completed' && !prog.server_verified_at
+            ? 'needs_review'
+            : (prog?.status ?? 'not_started'),
+        score:
+          localDemo || prog?.server_verified_at ? (prog?.score ?? null) : null,
+        completedAt:
+          localDemo || prog?.server_verified_at
+            ? (prog?.completed_at ?? null)
+            : null,
+        hasCertificate:
+          certificates.some(
+            (c) => c.user_id === member.id && c.training_id === course.id,
+          ) &&
+          (localDemo || Boolean(prog?.server_verified_at)),
       };
     }),
   );
@@ -59,6 +80,9 @@ export function useTrainingSupervision() {
     UserTrainingProgress[]
   >([]);
   const [remoteCourses, setRemoteCourses] = useState<Training[]>([]);
+  const [remoteCertificates, setRemoteCertificates] = useState<
+    { user_id: string; training_id: string; employee_id?: string | null }[]
+  >([]);
   const [loading, setLoading] = useState(!isLocalDemo);
   const [error, setError] = useState<string | null>(null);
 
@@ -112,10 +136,21 @@ export function useTrainingSupervision() {
 
       const courseIds = fetchedCourses.map((c) => c.id);
       if (courseIds.length > 0) {
-        const { data: progressData, error: progressError } = await supabase
-          .from('user_training_progress')
-          .select('*')
-          .in('training_id', courseIds);
+        const [
+          { data: progressData, error: progressError },
+          certificateResult,
+        ] = await Promise.all([
+          supabase
+            .from('user_training_progress')
+            .select('*')
+            .in('training_id', courseIds),
+          supabase
+            .from('training_certificates')
+            .select('user_id,training_id,employee_id')
+            .eq('organization_id', profile.organization_id)
+            .in('training_id', courseIds)
+            .order('issued_at', { ascending: false }),
+        ]);
         if (progressError) {
           setError(
             mapSupabaseError('Erreur chargement progression', progressError),
@@ -123,6 +158,10 @@ export function useTrainingSupervision() {
           return;
         }
         setRemoteOrgProgress((progressData ?? []) as UserTrainingProgress[]);
+        if (certificateResult.error) {
+          setRemoteCertificates([]);
+          setError('Les attestations ne peuvent pas être vérifiées.');
+        } else setRemoteCertificates(certificateResult.data ?? []);
       }
     } finally {
       setLoading(false);
@@ -139,8 +178,15 @@ export function useTrainingSupervision() {
   }, [profile?.organization_id, isLocalDemo, fetchOrgData]);
 
   const entries = useMemo(
-    () => buildEntries(members, courses, orgProgress),
-    [members, courses, orgProgress],
+    () =>
+      buildEntries(
+        members,
+        courses,
+        orgProgress,
+        isLocalDemo ? getDemoTrainingCertificates() : remoteCertificates,
+        isLocalDemo,
+      ),
+    [members, courses, orgProgress, remoteCertificates, isLocalDemo],
   );
 
   const sendReminder = async (memberId: string, trainingId: string) => {

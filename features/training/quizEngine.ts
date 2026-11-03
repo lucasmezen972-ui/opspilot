@@ -15,7 +15,7 @@ export interface QuizQuestion {
   question: string;
   options: string[];
   correct_index: number;
-  correct_indexes?: number[];
+  correct_indexes?: number[] | null;
   sort_order: number;
   question_type?: QuestionType;
   difficulty?: QuestionDifficulty;
@@ -155,7 +155,11 @@ export function createQuizSession(
 
   const shuffledQuestions: ShuffledQuestion[] = selected.map((q) => {
     const { options, correctAnswerIndex, correctAnswerIndexes } =
-      shuffleOptions(q.options, q.correct_index, q.correct_indexes);
+      shuffleOptions(
+        q.options,
+        q.correct_index,
+        q.correct_indexes ?? undefined,
+      );
     return {
       id: q.id,
       question: q.question,

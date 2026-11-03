@@ -10,6 +10,7 @@ interface AppModalProps {
   title?: string;
   children: ReactNode;
   testID?: string;
+  maxWidth?: number;
 }
 
 /** Modale premium tokenisée : overlay, carte centrée, en-tête + fermeture. */
@@ -19,6 +20,7 @@ export function AppModal({
   title,
   children,
   testID,
+  maxWidth = 460,
 }: AppModalProps) {
   return (
     <Modal
@@ -28,13 +30,16 @@ export function AppModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay} testID={testID}>
-        <View style={styles.card}>
+        <View style={[styles.card, { maxWidth }]}>
           {title && (
             <View style={styles.header}>
               <Text style={styles.title}>{title}</Text>
               <TouchableOpacity
                 testID={testID ? `${testID}-close` : undefined}
                 onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="Fermer"
+                style={styles.closeButton}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <X size={20} color={colors.textMuted} />
@@ -72,8 +77,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: {
+    flex: 1,
+    paddingRight: 8,
     fontSize: 18,
     fontWeight: '700',
     color: colors.textStrong,
+  },
+  closeButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 22,
+    backgroundColor: colors.background,
   },
 });

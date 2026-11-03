@@ -5,7 +5,34 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
-## Vérifications des 2 et 3 novembre 2026
+## Reprise audit, vidéo, design et SEPA — 3 novembre 2026
+
+Branche `codex/audit-sepa-video-20261103`, base `c3a2e01`.
+Les changements comprennent la correction serveur des quiz/XP/attestations,
+les accès des comptes inactifs et organisations suspendues, les invitations et
+la création d’organisation, les injections HTML/CSV et les écritures rejouées.
+Le lecteur vidéo comporte import MP4 privé, chapitres, reprise, progression et
+administration de publication. Le catalogue et la facturation ont été vérifiés
+sur ordinateur, téléphone, tablette et téléphone en paysage.
+
+Preuves locales : **350 tests unitaires**, **55 tests Chromium** (45 de
+régression et 10 nouveaux parcours), **7 tests Deno**, six scénarios SQL et
+rejeu des quatre migrations. Aucune minute GitHub Actions utilisée. Les
+API de comptes fictifs sont interceptées dans les tests navigateur ; ce n’est
+pas une preuve de paiement bancaire bout en bout. Voir
+[AUDIT-2026-11-03.md](AUDIT-2026-11-03.md) et ses limites.
+
+Le cycle SEPA est préparé, **désactivé** et non opérationnel : zéro méthode
+récurrente réelle retournée par Mollie, secrets récurrents de test/réel non
+configurés et pas de nouvelle preuve d’autorisation des reversements. La
+demande d’activation existante n’a pas été répétée. Le rapprochement des
+renouvellements exige la référence et la période exactes de la facture Qonto ;
+la création des factures et le rapprochement bancaire Qonto restent manuels.
+
+Publication et contrôles Supabase réels : à consigner après leur vérification.
+Ne pas annoncer cette branche déployée sur la seule base des tests locaux.
+
+## Vérifications antérieures des 2 et 3 novembre 2026
 
 Application de référence : https://opspilot-mu-six.vercel.app/ (Vercel). Les correctifs de sécurité et la facturation Qonto ont été complétés par un raccordement Mollie côté serveur : secrets chiffrés, liens associés aux vraies factures et activation après vérification du paiement. Les 330 tests unitaires, la qualité, la compilation et les invariants SQL sont vérifiés. Un paiement carte simulé est allé jusqu’au webhook et à la base, sans activer un abonnement réel. Mollie contrôle encore le compte : les reversements ne sont pas autorisés au dernier contrôle et les paiements réels restent bloqués dans OpsPilot. Fin de contrôle annoncée d’ici le 5 novembre 2026, estimation du prestataire. Voir [QONTO.md](QONTO.md) pour le parcours, les limites et les preuves.
 

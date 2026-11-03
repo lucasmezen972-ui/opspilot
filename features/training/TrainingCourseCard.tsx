@@ -36,11 +36,13 @@ export function TrainingCourseCard({
       <View style={styles.header}>
         <View style={styles.titleSection}>
           <Text style={styles.title}>{course.title}</Text>
-          <Text style={styles.description}>{course.description}</Text>
+          <Text style={styles.description} numberOfLines={2}>
+            {course.description}
+          </Text>
         </View>
         <View style={styles.points}>
           <Star size={14} color="#F59E0B" />
-          <Text style={styles.pointsText}>{course.xp_reward}</Text>
+          <Text style={styles.pointsText}>{course.xp_reward} XP</Text>
         </View>
         {course.ai_generated && (
           <View style={styles.aiBadge}>
@@ -59,6 +61,9 @@ export function TrainingCourseCard({
           <BookOpen size={14} color="#6B7280" />
           <Text style={styles.metaText}>
             {course.chapterCount} chapitres · quiz final
+            {course.videoCount
+              ? ` · ${course.videoCount} vidéo${course.videoCount > 1 ? 's' : ''}`
+              : ''}
           </Text>
         </View>
         <View
@@ -73,9 +78,18 @@ export function TrainingCourseCard({
         </View>
       </View>
 
-      {course.progress > 0 && (
+      {course.status !== 'needs_review' && course.progress > 0 && (
         <View style={styles.progressSection}>
-          <View style={styles.progressBar}>
+          <View
+            style={styles.progressBar}
+            accessibilityRole="progressbar"
+            accessibilityLabel={`Progression de ${course.title}`}
+            accessibilityValue={{
+              min: 0,
+              max: 100,
+              now: Math.min(100, Math.max(0, course.progress)),
+            }}
+          >
             <View
               style={[styles.progressFill, { width: `${course.progress}%` }]}
             />
@@ -107,6 +121,8 @@ export function TrainingCourseCard({
           testID={`training-open-${course.id}`}
           style={styles.actionButton}
           onPress={() => onOpen(course.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`${getCourseActionLabel(course.status)} : ${course.title}`}
         >
           <Play size={16} color="#2563EB" />
           <Text style={styles.actionButtonText}>
@@ -114,6 +130,19 @@ export function TrainingCourseCard({
           </Text>
         </TouchableOpacity>
       </View>
+      {course.status === 'needs_review' && (
+        <Text
+          style={{
+            fontSize: 13,
+            lineHeight: 19,
+            color: colors.warningText,
+            marginTop: 10,
+          }}
+        >
+          Ce résultat antérieur doit être réévalué côté serveur avant une
+          nouvelle attestation.
+        </Text>
+      )}
     </View>
   );
 }
@@ -149,6 +178,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   points: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF3C7',
@@ -157,12 +187,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   pointsText: {
-    color: '#D97706',
+    color: colors.warningText,
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 2,
   },
   aiBadge: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3E8FF',
@@ -172,22 +203,25 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   aiText: {
-    color: '#8B5CF6',
-    fontSize: 10,
+    color: '#6D28D9',
+    fontSize: 12,
     fontWeight: '600',
     marginLeft: 2,
   },
   meta: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     marginBottom: 12,
-    gap: 16,
+    gap: 8,
   },
   metaItem: {
+    maxWidth: '100%',
     flexDirection: 'row',
     alignItems: 'center',
   },
   metaText: {
+    flexShrink: 1,
     fontSize: 12,
     color: colors.textMuted,
     marginLeft: 4,
@@ -198,7 +232,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   difficultyText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '500',
   },
   progressSection: {
@@ -237,6 +271,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   actionButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#EFF6FF',

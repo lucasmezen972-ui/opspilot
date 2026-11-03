@@ -48,6 +48,27 @@ describe('generateCertificateNumber', () => {
 });
 
 describe('buildCertificateHTML', () => {
+  it('escapes every customer-provided HTML field', () => {
+    const attack =
+      '<img src=x onerror="window.opener.location=\'https://invalid.example\'">';
+    const html = buildCertificateHTML({
+      ...base,
+      fullName: attack,
+      trainingTitle: attack,
+      certificateNumber: attack,
+      employeeId: attack,
+      position: attack,
+      store: attack,
+      category: attack,
+      version: attack,
+      supervisorName: attack,
+      organizationName: attack,
+    });
+    expect(html).not.toContain('<img');
+    expect(html).toContain('&lt;img');
+    expect(html).toContain('&quot;');
+    expect(html).toContain('ne constitue pas une certification officielle');
+  });
   it('intègre identité, matricule, poste et magasin', () => {
     const html = buildCertificateHTML(base);
     expect(html).toContain('Jean Martin');

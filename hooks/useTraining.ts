@@ -12,7 +12,11 @@ import {
 } from '../features/training/progress';
 import { isQuizPassed } from '../features/training/quizEngine';
 import { demoId } from '../lib/demoData';
-import { updateDemoCollection, useDemoCollection } from '../lib/demoStore';
+import {
+  getDemoState,
+  updateDemoCollection,
+  useDemoCollection,
+} from '../lib/demoStore';
 import {
   supabase,
   type Training,
@@ -102,7 +106,7 @@ export function useTraining() {
             .in('training_id', courseIds)
             .order('sort_order', { ascending: true }),
           supabase
-            .from('training_quiz_questions')
+            .from('training_question_bank')
             .select('*')
             .in('training_id', courseIds)
             .order('sort_order', { ascending: true }),
@@ -219,19 +223,9 @@ export function useTraining() {
         return { data };
       }
 
-      // Créer une nouvelle progression
-      const { data, error } = await supabase
-        .from('user_training_progress')
-        .insert({
-          user_id: profile.id,
-          training_id: courseId,
-          status: 'in_progress',
-          progress_percentage: 0,
-          completed_chapter_ids: [],
-          started_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('start_training', {
+        p_training_id: courseId,
+      });
 
       if (error) {
         return {
@@ -252,6 +246,27 @@ export function useTraining() {
     totalChapters: number,
   ) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
+    if (!isLocalDemo) {
+      try {
+        const { data, error } = await supabase.rpc('mark_training_chapter', {
+          p_training_id: courseId,
+          p_chapter_id: chapterId,
+        });
+        if (error)
+          return {
+            error: mapSupabaseError('Validation du chapitre impossible', error),
+          };
+        setRemoteProgress((current) => [
+          ...current.filter((p) => p.training_id !== courseId),
+          data,
+        ]);
+        return { data };
+      } catch (error) {
+        return {
+          error: mapSupabaseError('Validation du chapitre impossible', error),
+        };
+      }
+    }
 
     let courseProgress = progress.find((item) => item.training_id === courseId);
     if (!courseProgress) {
@@ -291,39 +306,14 @@ export function useTraining() {
       return { data: updated };
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('user_training_progress')
-        .update(updates)
-        .eq('user_id', profile.id)
-        .eq('training_id', courseId)
-        .select()
-        .single();
-
-      if (error) {
-        return {
-          error: mapSupabaseError(
-            'Erreur lors de la validation du chapitre',
-            error,
-          ),
-        };
-      }
-
-      setRemoteProgress((current) =>
-        current.map((item) => (item.training_id === courseId ? data : item)),
-      );
-      return { data };
-    } catch (error) {
-      return {
-        error: mapSupabaseError('Erreur markChapterRead', error),
-      };
-    }
+    return { error: 'Progression indisponible' };
   };
 
   const completeQuiz = async (
     courseId: string,
     score: number,
     failedCritical = false,
+    submission?: { sessionId: string; answers: (number | number[])[] },
   ) => {
     if (!profile) return { error: 'Utilisateur non connecté' };
 
@@ -384,75 +374,88 @@ export function useTraining() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('user_training_progress')
-        .update({
-          score: savedScore,
-          status: remainsCompleted ? 'completed' : 'in_progress',
-          progress_percentage: remainsCompleted
-            ? 100
-            : (existingProgress?.progress_percentage ?? 0),
-          completed_at: remainsCompleted
-            ? (existingProgress?.completed_at ?? new Date().toISOString())
-            : null,
-        })
-        .eq('user_id', profile.id)
-        .eq('training_id', courseId)
-        .select()
-        .single();
-
-      if (error) {
+      if (!submission?.sessionId)
         return {
-          error: mapSupabaseError(
-            'Erreur lors de la validation du quiz',
-            error,
-          ),
+          error: 'Relancez l’évaluation avant de valider vos réponses.',
         };
-      }
-
-      setRemoteProgress((prev) =>
-        prev.map((p) => (p.training_id === courseId ? data : p)),
+      const { data: result, error } = await supabase.rpc(
+        'submit_training_quiz',
+        { p_session_id: submission.sessionId, p_answers: submission.answers },
       );
-
-      // Si réussi, ajouter les XP
-      if (passed && !alreadyCompleted) {
-        await addXP(course.xp_reward);
-      }
-
-      return { data, passed };
+      if (error !== null || !result?.data)
+        return { error: mapSupabaseError('Évaluation non enregistrée', error) };
+      setRemoteProgress((current) => [
+        ...current.filter((p) => p.training_id !== courseId),
+        result.data,
+      ]);
+      if (result.passed) await fetchProfile(profile.id);
+      return result as {
+        data: UserTrainingProgress;
+        passed: boolean;
+        score: number;
+        failedCritical: boolean;
+      };
     } catch (error) {
-      return { error: mapSupabaseError('Erreur completeQuiz', error) };
+      return { error: mapSupabaseError('Évaluation non enregistrée', error) };
     }
   };
 
-  const addXP = async (xpAmount: number) => {
-    if (!profile) return;
+  const startQuiz = async (courseId: string) => {
+    if (isLocalDemo) return { data: null };
+    const { data, error } = await supabase.rpc('start_training_quiz', {
+      p_training_id: courseId,
+    });
+    if (error)
+      return {
+        error: mapSupabaseError('Impossible de démarrer le quiz', error),
+      };
+    return { data };
+  };
 
-    try {
-      const newXP = (profile.xp ?? 0) + xpAmount;
-      const newLevel = Math.floor(newXP / 100) + 1;
-
-      const { error: xpErr } = await supabase
-        .from('profiles')
-        .update({
-          xp: newXP,
-          level: newLevel,
-          completed_trainings: (profile.completed_trainings ?? 0) + 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', profile.id);
-
-      if (xpErr) {
-        setError(mapSupabaseError("Erreur lors de l'ajout d'XP", xpErr));
-        return;
-      }
-
-      if (profile?.id) {
-        await fetchProfile(profile.id);
-      }
-    } catch (err) {
-      setError(mapSupabaseError("Erreur lors de l'ajout d'XP", err));
+  const recordVideoProgress = async (chapterId: string, seconds: number) => {
+    const chapter = chapters.find((c) => c.id === chapterId);
+    if (!chapter || !Number.isFinite(seconds))
+      return { error: 'Lecture indisponible' };
+    if (isLocalDemo) {
+      const current = getDemoState().trainingProgress.find(
+        (p) => p.training_id === chapter.training_id,
+      );
+      const previous = current?.video_progress?.[chapterId];
+      const delta = seconds - (previous?.position ?? seconds);
+      const data = {
+        position: seconds,
+        watched: Math.min(
+          chapter.video_duration_seconds ?? 0,
+          (previous?.watched ?? 0) + (delta >= 0 && delta <= 15 ? delta : 0),
+        ),
+        last_seen: new Date().toISOString(),
+      };
+      updateDemoCollection('trainingProgress', (items) =>
+        items.map((p) =>
+          p.training_id === chapter.training_id
+            ? {
+                ...p,
+                video_progress: { ...p.video_progress, [chapterId]: data },
+              }
+            : p,
+        ),
+      );
+      return { data };
     }
+    const { data, error } = await supabase.rpc('record_training_video', {
+      p_chapter_id: chapterId,
+      p_position: Math.round(seconds * 10) / 10,
+    });
+    if (error !== null || !data)
+      return { error: mapSupabaseError('Lecture non enregistrée', error) };
+    setRemoteProgress((current) =>
+      current.map((p) =>
+        p.training_id === chapter.training_id
+          ? { ...p, video_progress: { ...p.video_progress, [chapterId]: data } }
+          : p,
+      ),
+    );
+    return { data };
   };
 
   const getCourseProgress = (courseId: string) => {
@@ -460,7 +463,11 @@ export function useTraining() {
   };
 
   const getCompletedCourses = () => {
-    return progress.filter((p) => p.status === 'completed');
+    return progress.filter(
+      (p) =>
+        p.status === 'completed' &&
+        (isLocalDemo || Boolean(p.server_verified_at)),
+    );
   };
 
   const getInProgressCourses = () => {
@@ -496,7 +503,7 @@ export function useTraining() {
     if (!course) return { error: 'Cours non trouvé' };
 
     const existing = getCertificateForCourse(courseId);
-    if (existing) {
+    if (existing && isLocalDemo) {
       openCertificate(existing, {
         category: course.category,
         durationMinutes: course.duration_minutes,
@@ -549,68 +556,23 @@ export function useTraining() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('training_certificates')
-        .insert({
-          user_id: cert.user_id,
-          training_id: cert.training_id,
-          organization_id: cert.organization_id,
-          full_name: cert.full_name,
-          training_title: cert.training_title,
-          score: cert.score,
-          issued_at: cert.issued_at,
-          certificate_number: cert.certificate_number,
-          employee_id: cert.employee_id,
-          position: cert.position,
-          store_name: cert.store_name,
-          category: cert.category,
-          duration_minutes: cert.duration_minutes,
-          quiz_version: cert.quiz_version,
-          attempt_number: cert.attempt_number,
-          status: cert.status,
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('issue_training_certificate', {
+        p_training_id: courseId,
+        p_identity: options,
+      });
 
       if (error) {
-        // Un certificat existe déjà (état local périmé ou double clic) :
-        // on récupère l'existant plutôt que d'échouer sur la contrainte
-        // d'unicité, et on l'ouvre.
-        const { data: found } = await supabase
-          .from('training_certificates')
-          .select('*')
-          .eq('user_id', cert.user_id)
-          .eq('training_id', cert.training_id)
-          .maybeSingle();
-
-        if (found) {
-          const existingCert = found as TrainingCertificate;
-          setRemoteCertificates((prev) =>
-            prev.some((c) => c.id === existingCert.id)
-              ? prev
-              : [...prev, existingCert],
-          );
-          openCertificate(existingCert, { category: course.category });
-          return { data: existingCert };
-        }
-
         return {
           error: mapSupabaseError('Erreur génération certificat', error),
         };
       }
 
-      setRemoteCertificates((prev) => [...prev, data as TrainingCertificate]);
-      // Les colonnes d'identité/traçabilité peuvent ne pas exister côté base :
-      // on alimente l'attestation depuis les valeurs confirmées en mémoire.
+      setRemoteCertificates((prev) => [
+        ...prev.filter((c) => c.training_id !== courseId),
+        data as TrainingCertificate,
+      ]);
       openCertificate(data as TrainingCertificate, {
         category: course.category,
-        employeeId: cert.employee_id,
-        position: cert.position,
-        store: cert.store_name,
-        durationMinutes: cert.duration_minutes,
-        version: cert.quiz_version,
-        attemptNumber: cert.attempt_number,
-        status: cert.status,
       });
       return { data };
     } catch (error) {
@@ -628,6 +590,8 @@ export function useTraining() {
     error,
     startCourse,
     markChapterRead,
+    startQuiz,
+    recordVideoProgress,
     completeQuiz,
     getCourseProgress,
     getCertificateForCourse,

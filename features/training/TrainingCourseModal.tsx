@@ -14,6 +14,7 @@ import {
   CandidateIdentityStep,
   type CandidateIdentityValues,
 } from './CandidateIdentityStep';
+import { TrainingVideoLesson } from './TrainingVideoLesson';
 import {
   buildQuizAttemptTrace,
   validateCandidateIdentity,
@@ -25,6 +26,7 @@ import {
   scoreQuizSession,
   type QuizSession,
 } from './quizEngine';
+import { canCompleteVideo, hasTrainingVideo } from './video';
 import type {
   Training,
   TrainingChapter,
@@ -36,6 +38,8 @@ type OperationResult = {
   data?: unknown;
   error?: unknown;
   passed?: boolean;
+  score?: number;
+  failedCritical?: boolean;
 };
 
 export interface CertificateSubmitOptions {
@@ -66,12 +70,21 @@ type Props = {
     courseId: string,
     score: number,
     failedCritical: boolean,
+    submission?: { sessionId: string; answers: (number | number[])[] },
+  ) => Promise<OperationResult>;
+  onStartQuiz?: (courseId: string) => Promise<{
+    data?: (QuizSession & { id: string }) | null;
+    error?: unknown;
+  }>;
+  onVideoProgress?: (
+    chapterId: string,
+    seconds: number,
   ) => Promise<OperationResult>;
   onGenerateCertificate?: (
     courseId: string,
     score: number,
     options: CertificateSubmitOptions,
-  ) => void;
+  ) => Promise<OperationResult | void> | void;
 };
 
 function MarkdownBody({ body }: { body: string }) {
@@ -114,6 +127,8 @@ export function TrainingCourseModal({
   onClose,
   onMarkChapterRead,
   onCompleteQuiz,
+  onStartQuiz,
+  onVideoProgress,
   onGenerateCertificate,
 }: Props) {
   const [mode, setMode] = useState<'chapters' | 'quiz' | 'result' | 'identity'>(
@@ -127,10 +142,11 @@ export function TrainingCourseModal({
   const [score, setScore] = useState<number | null>(null);
   const [failedCritical, setFailedCritical] = useState(false);
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
+  const [serverSessionId, setServerSessionId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [wasCompletedOnOpen, setWasCompletedOnOpen] = useState(false);
 
-  // Formulaire d'identité du candidat (attestation quasi-certifiante).
+  // Identité déclarée pour l’attestation interne de formation.
   const [identityName, setIdentityName] = useState('');
   const [employeeId, setEmployeeId] = useState('');
   const [position, setPosition] = useState('');
@@ -141,9 +157,9 @@ export function TrainingCourseModal({
   useEffect(() => {
     if (!visible || !course) return;
     const completed = uniqueChapterIds(progress?.completed_chapter_ids ?? []);
-    const firstUnread = chapters.findIndex(
-      (chapter) => !completed.includes(chapter.id),
-    );
+    const firstUnread = [...chapters]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .findIndex((chapter) => !completed.includes(chapter.id));
     setMode('chapters');
     setChapterIndex(firstUnread >= 0 ? firstUnread : 0);
     setQuestionIndex(0);
@@ -153,6 +169,7 @@ export function TrainingCourseModal({
     setScore(null);
     setFailedCritical(false);
     setQuizSession(null);
+    setServerSessionId(null);
     setWasCompletedOnOpen(progress?.status === 'completed');
     setIdentityName(candidateName ?? '');
     setEmployeeId('');
@@ -174,6 +191,13 @@ export function TrainingCourseModal({
   const minScore = course?.min_score ?? 70;
   const passed = isQuizPassed(score ?? 0, failedCritical, minScore);
   const currentChapter = sortedChapters[chapterIndex];
+  const videoState = currentChapter
+    ? progress?.video_progress?.[currentChapter.id]
+    : undefined;
+  const videoReady =
+    !currentChapter ||
+    localCompletedIds.includes(currentChapter.id) ||
+    canCompleteVideo(currentChapter, videoState?.watched);
   const currentQuestion = sessionQuestions[questionIndex];
   const allChaptersRead =
     sortedChapters.length > 0 &&
@@ -183,7 +207,7 @@ export function TrainingCourseModal({
   if (!course) return null;
 
   const markCurrentChapterRead = async () => {
-    if (!currentChapter || saving) return;
+    if (!currentChapter || saving || !videoReady) return;
     setSaving(true);
     const result = await onMarkChapterRead(
       course.id,
@@ -249,14 +273,19 @@ export function TrainingCourseModal({
       answers,
     );
     setSaving(true);
-    const result = await onCompleteQuiz(course.id, finalScore, fc);
+    const result = await onCompleteQuiz(
+      course.id,
+      finalScore,
+      fc,
+      serverSessionId ? { sessionId: serverSessionId, answers } : undefined,
+    );
     setSaving(false);
     if (result.error) {
       Alert.alert('Erreur', String(result.error));
       return;
     }
-    setScore(finalScore);
-    setFailedCritical(fc);
+    setScore(result.score ?? finalScore);
+    setFailedCritical(result.failedCritical ?? fc);
     setMode('result');
   };
 
@@ -271,8 +300,8 @@ export function TrainingCourseModal({
     else if (field === 'honorConfirmed') setHonorConfirmed(value as boolean);
   };
 
-  const submitIdentity = () => {
-    if (score === null || !course || !onGenerateCertificate) return;
+  const submitIdentity = async () => {
+    if (saving || score === null || !course || !onGenerateCertificate) return;
     const identity = {
       fullName: identityName,
       employeeId,
@@ -290,20 +319,33 @@ export function TrainingCourseModal({
       answers,
       attemptNumber: wasCompletedOnOpen ? 2 : 1,
     });
-    onGenerateCertificate(course.id, score, {
-      fullName: identityName.trim(),
-      employeeId: employeeId.trim(),
-      position: position.trim(),
-      store: store.trim(),
-      quizVersion: trace.version,
-      attemptNumber: trace.attemptNumber,
-      status: 'validé',
-    });
-    onClose();
+    setSaving(true);
+    try {
+      const result = await onGenerateCertificate(course.id, score, {
+        fullName: identityName.trim(),
+        employeeId: employeeId.trim(),
+        position: position.trim(),
+        store: store.trim(),
+        quizVersion: trace.version,
+        attemptNumber: trace.attemptNumber,
+        status: 'validé',
+      });
+      if (result?.error) setIdentityErrors([String(result.error)]);
+      else onClose();
+    } catch {
+      setIdentityErrors(['L’attestation n’a pas pu être délivrée. Réessayez.']);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <View style={styles.overlay} testID="training-course-modal">
         <View style={styles.modal}>
           <View style={styles.header}>
@@ -319,6 +361,7 @@ export function TrainingCourseModal({
             </View>
             <TouchableOpacity
               accessibilityLabel="Fermer la formation"
+              accessibilityRole="button"
               onPress={onClose}
               style={styles.closeButton}
             >
@@ -357,6 +400,16 @@ export function TrainingCourseModal({
                   {currentChapter.title}
                 </Text>
                 <MarkdownBody body={currentChapter.body} />
+                {hasTrainingVideo(currentChapter) && onVideoProgress && (
+                  <TrainingVideoLesson
+                    key={currentChapter.id}
+                    chapter={currentChapter}
+                    position={videoState?.position ?? 0}
+                    onProgress={(seconds) =>
+                      onVideoProgress(currentChapter.id, seconds)
+                    }
+                  />
+                )}
               </ScrollView>
 
               <View style={styles.footer}>
@@ -372,8 +425,40 @@ export function TrainingCourseModal({
                 {allChaptersRead ? (
                   <TouchableOpacity
                     testID="training-quiz-start"
+                    accessibilityRole="button"
                     style={styles.primaryButton}
-                    onPress={() => {
+                    disabled={saving}
+                    onPress={async () => {
+                      if (saving) return;
+                      if (onStartQuiz) {
+                        setSaving(true);
+                        try {
+                          const result = await onStartQuiz(course.id);
+                          if (result.error) {
+                            Alert.alert(
+                              'Quiz indisponible',
+                              String(result.error),
+                            );
+                            return;
+                          }
+                          if (result.data) {
+                            setQuizSession(result.data);
+                            setServerSessionId(result.data.id);
+                            setQuestionIndex(0);
+                            setAnswers([]);
+                            setMode('quiz');
+                            return;
+                          }
+                        } catch {
+                          Alert.alert(
+                            'Quiz indisponible',
+                            'Vérifiez votre connexion et réessayez.',
+                          );
+                          return;
+                        } finally {
+                          setSaving(false);
+                        }
+                      }
                       setQuizSession(
                         createQuizSession(
                           sortedQuestionsForBank.map((q) => ({
@@ -397,13 +482,24 @@ export function TrainingCourseModal({
                 ) : (
                   <TouchableOpacity
                     testID="training-chapter-complete"
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      disabled: saving || !videoReady,
+                      busy: saving,
+                    }}
                     style={styles.primaryButton}
                     onPress={markCurrentChapterRead}
-                    disabled={saving}
+                    disabled={saving || !videoReady}
                   >
                     <Check size={18} color="#FFFFFF" />
                     <Text style={styles.primaryButtonText}>
-                      {saving ? 'Enregistrement...' : 'Marquer comme lu'}
+                      {saving
+                        ? 'Enregistrement...'
+                        : hasTrainingVideo(currentChapter)
+                          ? videoReady
+                            ? 'Valider le chapitre'
+                            : 'Regardez la vidéo pour continuer'
+                          : 'Marquer comme lu'}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -467,6 +563,11 @@ export function TrainingCourseModal({
                       isAnswerCorrect =
                         optionIndex === currentQuestion.correctAnswerIndex;
                     }
+                    if (serverSessionId) {
+                      isCorrect = false;
+                      isWrong = false;
+                      isAnswerCorrect = false;
+                    }
                     return (
                       <TouchableOpacity
                         key={option}
@@ -510,27 +611,30 @@ export function TrainingCourseModal({
                     </Text>
                   </TouchableOpacity>
                 )}
-                {!isMulti && selectedAnswer !== undefined && (
-                  <View
-                    style={[
-                      styles.feedback,
-                      selectedAnswer === currentQuestion.correctAnswerIndex
-                        ? styles.feedbackCorrect
-                        : styles.feedbackWrong,
-                    ]}
-                  >
-                    <Text style={styles.feedbackText}>
-                      {selectedAnswer === currentQuestion.correctAnswerIndex
-                        ? 'Bonne réponse.'
-                        : `Réponse incorrecte. La bonne réponse est : ${
-                            currentQuestion.options[
-                              currentQuestion.correctAnswerIndex
-                            ]
-                          }.`}
-                    </Text>
-                  </View>
-                )}
-                {isMulti &&
+                {!serverSessionId &&
+                  !isMulti &&
+                  selectedAnswer !== undefined && (
+                    <View
+                      style={[
+                        styles.feedback,
+                        selectedAnswer === currentQuestion.correctAnswerIndex
+                          ? styles.feedbackCorrect
+                          : styles.feedbackWrong,
+                      ]}
+                    >
+                      <Text style={styles.feedbackText}>
+                        {selectedAnswer === currentQuestion.correctAnswerIndex
+                          ? 'Bonne réponse.'
+                          : `Réponse incorrecte. La bonne réponse est : ${
+                              currentQuestion.options[
+                                currentQuestion.correctAnswerIndex
+                              ]
+                            }.`}
+                      </Text>
+                    </View>
+                  )}
+                {!serverSessionId &&
+                  isMulti &&
                   isMultiAnswered &&
                   (() => {
                     const correctIdxs =
@@ -654,6 +758,7 @@ export function TrainingCourseModal({
               onChange={handleIdentityChange}
               onBack={() => setMode('result')}
               onSign={submitIdentity}
+              saving={saving}
             />
           )}
         </View>
@@ -696,9 +801,9 @@ const styles = StyleSheet.create({
   },
   title: { color: '#111827', fontSize: 20, fontWeight: '700' },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -758,6 +863,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   primaryButton: {
+    maxWidth: '100%',
+    flexShrink: 1,
     minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
@@ -767,7 +874,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#2563EB',
   },
-  primaryButtonText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+    flexShrink: 1,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
   certificateButton: {
     minHeight: 44,
     alignItems: 'center',
