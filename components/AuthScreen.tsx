@@ -10,9 +10,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from 'react-native';
 
-import ConnectedStatus from './ConnectedStatus';
 import { useAuth } from '../hooks/useAuth';
 import { colors, radius, spacing, shadow } from '../shared/styles/tokens';
 import { extractErrorMessage } from '../utils/error';
@@ -143,10 +143,6 @@ export default function AuthScreen() {
         </Text>
       </View>
 
-      <View style={styles.statusContainer}>
-        <ConnectedStatus />
-      </View>
-
       {isOffline && (
         <View style={styles.offlineBanner}>
           <Text style={styles.offlineText}>
@@ -163,7 +159,7 @@ export default function AuthScreen() {
       )}
 
       {displayError && !isOffline && (
-        <View style={styles.errorContainer}>
+        <View style={styles.errorContainer} accessibilityRole="alert">
           <Text style={styles.errorText}>{displayError}</Text>
         </View>
       )}
@@ -172,7 +168,7 @@ export default function AuthScreen() {
         <View style={styles.demoHeader}>
           <Zap size={16} color={colors.warning} />
           <Text style={styles.demoTitle}>Démo terrain guidée</Text>
-          <Text style={styles.demoSubtitle}> (fonctionne hors ligne)</Text>
+          <Text style={styles.demoSubtitle}>Sans inscription</Text>
         </View>
         <TouchableOpacity
           testID="demo-login-button"
@@ -205,16 +201,27 @@ export default function AuthScreen() {
         </Text>
 
         {!isLogin && (
-          <TextInput
-            style={styles.input}
-            placeholder="Nom complet"
-            value={fullName}
-            onChangeText={setFullName}
-            autoCapitalize="words"
-          />
+          <>
+            <Text style={styles.inputLabel}>Nom complet</Text>
+            <TextInput
+              accessibilityLabel="Nom complet"
+              autoComplete="name"
+              style={styles.input}
+              placeholder="Nom complet"
+              value={fullName}
+              onChangeText={setFullName}
+              autoCapitalize="words"
+            />
+          </>
         )}
 
+        <Text nativeID="auth-email-label" style={styles.inputLabel}>
+          Adresse e-mail
+        </Text>
         <TextInput
+          aria-labelledby="auth-email-label"
+          accessibilityLabel="Adresse e-mail"
+          autoComplete="email"
           style={styles.input}
           placeholder="Email"
           value={email}
@@ -224,7 +231,13 @@ export default function AuthScreen() {
           testID="email-input"
         />
 
+        <Text nativeID="auth-password-label" style={styles.inputLabel}>
+          Mot de passe
+        </Text>
         <TextInput
+          aria-labelledby="auth-password-label"
+          accessibilityLabel="Mot de passe"
+          autoComplete={isLogin ? 'current-password' : 'new-password'}
           style={styles.input}
           placeholder="Mot de passe"
           value={password}
@@ -240,6 +253,7 @@ export default function AuthScreen() {
               Entrez votre email ci-dessus puis appuyez sur le bouton.
             </Text>
             <TouchableOpacity
+              accessibilityRole="button"
               testID="reset-password-button"
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleResetPassword}
@@ -254,6 +268,7 @@ export default function AuthScreen() {
               )}
             </TouchableOpacity>
             <TouchableOpacity
+              accessibilityRole="button"
               style={styles.switchButton}
               onPress={() => {
                 setShowReset(false);
@@ -267,6 +282,7 @@ export default function AuthScreen() {
         ) : (
           <>
             <TouchableOpacity
+              accessibilityRole="button"
               testID="auth-submit-button"
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleAuth}
@@ -290,6 +306,7 @@ export default function AuthScreen() {
 
             {isLogin && (
               <TouchableOpacity
+                accessibilityRole="button"
                 testID="forgot-password-button"
                 style={styles.switchButton}
                 onPress={() => {
@@ -305,6 +322,7 @@ export default function AuthScreen() {
             )}
 
             <TouchableOpacity
+              accessibilityRole="button"
               style={styles.switchButton}
               onPress={() => {
                 setIsLogin(!isLogin);
@@ -350,9 +368,13 @@ const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: colors.background },
   container: {
     flexGrow: 1,
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
+    paddingTop:
+      Platform.OS === 'web' ? 32 : (Constants.statusBarHeight ?? 44) + 16,
     paddingBottom: 40,
   },
   header: { alignItems: 'center', marginBottom: spacing.xxl },
@@ -422,23 +444,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   demoContainer: {
-    backgroundColor: colors.fieldWarm,
+    backgroundColor: colors.primarySoft,
     borderRadius: radius.lg,
     padding: 14,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.fieldBorder,
+    borderColor: '#C7D2FE',
   },
   demoHeader: {
+    flexWrap: 'wrap',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     marginBottom: 10,
   },
-  demoTitle: { fontWeight: '600', fontSize: 14, color: colors.warningText },
+  demoTitle: { fontWeight: '600', fontSize: 14, color: colors.primaryDark },
   demoSubtitle: {
     fontSize: 12,
-    color: colors.warningText,
+    color: colors.primaryDark,
     fontStyle: 'italic',
   },
   demoButton: {
@@ -446,7 +469,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.warning,
+    backgroundColor: colors.primaryInk,
     paddingVertical: spacing.md,
     borderRadius: radius.md,
   },
@@ -475,13 +498,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
     textAlign: 'center',
   },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 6,
+  },
   input: {
+    minHeight: 48,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 11,
-    fontSize: 15,
+    fontSize: 16,
     marginBottom: spacing.md,
     backgroundColor: colors.surface,
   },
@@ -504,7 +534,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     lineHeight: 18,
   },
-  switchButton: { alignItems: 'center', paddingVertical: 6 },
+  switchButton: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
   switchButtonText: { color: colors.primary, fontSize: 14, fontWeight: '500' },
   forgotPasswordText: {
     color: colors.textMuted,

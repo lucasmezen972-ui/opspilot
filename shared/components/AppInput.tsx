@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import {
   View,
   Text,
@@ -36,10 +36,20 @@ export function AppInput({
   testID,
 }: AppInputProps) {
   const [focused, setFocused] = useState(false);
+  const fieldId = useId();
   return (
     <View style={styles.wrap}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text nativeID={`${fieldId}-label`} style={styles.label}>
+          {label}
+        </Text>
+      )}
       <TextInput
+        nativeID={fieldId}
+        accessibilityLabel={label ?? placeholder}
+        aria-labelledby={label ? `${fieldId}-label` : undefined}
+        aria-describedby={error ? `${fieldId}-error` : undefined}
+        aria-invalid={Boolean(error)}
         testID={testID}
         style={[
           styles.input,
@@ -58,7 +68,15 @@ export function AppInput({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text
+          nativeID={`${fieldId}-error`}
+          style={styles.error}
+          accessibilityRole="alert"
+        >
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -68,18 +86,20 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   label: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.text,
   },
   input: {
+    minHeight: 48,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: 10,
-    fontSize: 14,
+    fontSize: 16,
+    lineHeight: 24,
     color: colors.textStrong,
   },
   multiline: {

@@ -39,12 +39,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 12,
   },
   row: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
   },
   item: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
   },
   dot: {
@@ -62,13 +63,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   label: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    color: colors.textMuted,
     marginBottom: 4,
   },
   count: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111827',
+    color: colors.textStrong,
   },
 });

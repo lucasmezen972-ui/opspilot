@@ -37,20 +37,19 @@ export function DashboardDlcAlerts({ products, now }: DashboardDlcAlertsProps) {
                 idx < alerts.length - 1 && styles.itemBorder,
               ]}
               onPress={() => router.push('/products')}
+              accessibilityRole="link"
             >
               <View style={[styles.icon, { backgroundColor: urgency.iconBg }]}>
-                <Package size={14} color={urgency.color} />
+                <Package size={18} color={colors.text} />
               </View>
-              <Text style={styles.name} numberOfLines={1}>
+              <Text style={styles.name} numberOfLines={2}>
                 {product.name}
               </Text>
               <View
                 style={[styles.badge, { backgroundColor: urgency.badgeBg }]}
               >
-                <Calendar size={11} color={urgency.color} />
-                <Text style={[styles.badgeText, { color: urgency.color }]}>
-                  {urgency.label}
-                </Text>
+                <Calendar size={13} color={colors.textStrong} />
+                <Text style={styles.badgeText}>{urgency.label}</Text>
               </View>
             </TouchableOpacity>
           );
@@ -74,6 +73,7 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   item: {
+    minHeight: 64,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -82,19 +82,21 @@ const styles = StyleSheet.create({
   },
   itemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.hairline,
   },
   icon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   name: {
     flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
+    minWidth: 0,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
     color: colors.textStrong,
   },
   badge: {
@@ -106,7 +108,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 12,
+    color: colors.textStrong,
     fontWeight: '600',
   },
 });

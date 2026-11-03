@@ -20,6 +20,8 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  useWindowDimensions,
+  Platform,
 } from 'react-native';
 
 import { useAppSettings } from '../../hooks/useAppSettings';
@@ -28,7 +30,6 @@ import {
   colors,
   radius,
   spacing,
-  shadow,
   typography,
 } from '../../shared/styles/tokens';
 import { can } from '../../utils/permissions';
@@ -47,6 +48,10 @@ type HubLink = {
 /** Hub « Plus » : accès à tous les modules secondaires depuis une vue épurée. */
 export default function MoreScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const availableWidth =
+    width - (Platform.OS === 'web' && width >= 1024 ? 228 : 0);
+  const columns = availableWidth >= 680 ? 2 : 1;
   const { profile, isDemoMode, session } = useAuth();
   const { isEnabled } = useAppSettings();
   const isManager = isManagerRole(profile?.role);
@@ -165,10 +170,10 @@ export default function MoreScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.title} testID="page-more-title">
-          Plus
+          Tous les outils
         </Text>
         <Text style={styles.subtitle}>
-          Modules terrain, preuves et pilotage au même endroit
+          Retrouvez les outils et les réglages de votre équipe
         </Text>
       </View>
 
@@ -177,7 +182,12 @@ export default function MoreScreen() {
           <TouchableOpacity
             key={link.slug}
             testID={`more-link-${link.slug}`}
-            style={styles.row}
+            accessibilityRole="button"
+            accessibilityLabel={link.label}
+            style={[
+              styles.row,
+              { width: columns === 2 ? (availableWidth - 52) / 2 : '100%' },
+            ]}
             activeOpacity={0.7}
             onPress={() => router.push(link.href)}
           >
@@ -208,7 +218,8 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: spacing.xl,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
+    paddingTop:
+      Platform.OS === 'web' ? 24 : (Constants.statusBarHeight ?? 44) + 16,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -226,12 +237,9 @@ const styles = StyleSheet.create({
   },
   list: {
     margin: spacing.xl,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-    ...shadow.card,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   row: {
     flexDirection: 'row',
@@ -239,8 +247,11 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.hairline,
+    minHeight: 88,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
   },
   iconWrap: {
     width: 40,
@@ -251,6 +262,7 @@ const styles = StyleSheet.create({
   },
   rowBody: {
     flex: 1,
+    minWidth: 0,
   },
   rowLabel: {
     ...typography.body,
@@ -258,8 +270,9 @@ const styles = StyleSheet.create({
     color: colors.textStrong,
   },
   rowDesc: {
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: 20,
     color: colors.textMuted,
-    marginTop: 1,
+    marginTop: 4,
   },
 });

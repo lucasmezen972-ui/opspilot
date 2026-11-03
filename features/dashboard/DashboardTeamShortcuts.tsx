@@ -14,15 +14,17 @@ export function DashboardTeamShortcuts() {
         <TouchableOpacity
           style={styles.card}
           onPress={() => router.push('/team')}
+          accessibilityRole="link"
         >
-          <Users size={22} color="#2563EB" />
+          <Users size={22} color={colors.primary} />
           <Text style={styles.title}>Équipe</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
           onPress={() => router.push('/manager')}
+          accessibilityRole="link"
         >
-          <TrendingUp size={22} color="#059669" />
+          <TrendingUp size={22} color={colors.primary} />
           <Text style={styles.title}>Multi-sites</Text>
         </TouchableOpacity>
       </View>
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
+    minHeight: 60,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
@@ -52,6 +55,7 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   title: {
+    flexShrink: 1,
     fontSize: 14,
     fontWeight: '600',
     color: colors.textStrong,

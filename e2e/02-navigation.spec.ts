@@ -31,8 +31,8 @@ test.describe('Navigation principale', () => {
 
   test('refresh navigateur — session démo conservée', async ({ page }) => {
     await page.reload();
-    await expect(
-      page.getByText('Carnet de bord terrain', { exact: true }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('page-home-title')).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

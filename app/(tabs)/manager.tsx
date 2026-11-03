@@ -7,6 +7,7 @@ import {
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   RefreshControl,
   ScrollView,
   View,
@@ -40,7 +41,7 @@ import { useStores } from '../../hooks/useStores';
 import { useTasks } from '../../hooks/useTasks';
 import { useTrainingSupervision } from '../../hooks/useTrainingSupervision';
 import { AppTabBar } from '../../shared/components/AppTabBar';
-import { colors } from '../../shared/styles/tokens';
+import { colors, spacing } from '../../shared/styles/tokens';
 
 function auditStatusColor(status: string): string {
   if (status === 'completed') return colors.success;
@@ -127,11 +128,13 @@ function ManagerDashboardContent() {
   return (
     <ScrollView
       style={styles.container}
+      contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Pilotage multi-sites</Text>
         <Text style={styles.title}>Cockpit Manager</Text>
         <Text style={styles.subtitle}>
           Bienvenue, {profile?.full_name ?? 'Manager'}
@@ -197,47 +200,52 @@ function ManagerDetails({
     <>
       <ManagerStatCards stats={stats} />
 
-      <StatusBreakdown
-        title="Statut des audits"
-        entries={[
-          {
-            label: 'En attente',
-            count: stats.pendingAudits,
-            color: colors.textMuted,
-          },
-          {
-            label: 'En cours',
-            count: stats.inProgressAudits,
-            color: colors.warning,
-          },
-          {
-            label: 'Terminés',
-            count: stats.completedAudits,
-            color: colors.success,
-          },
-        ]}
-      />
-
-      <StatusBreakdown
-        title="Statut des tâches"
-        entries={[
-          {
-            label: 'À faire',
-            count: stats.pendingTasks,
-            color: colors.textMuted,
-          },
-          {
-            label: 'En cours',
-            count: stats.inProgressTasks,
-            color: colors.warning,
-          },
-          {
-            label: 'Terminées',
-            count: stats.completedTasks,
-            color: colors.success,
-          },
-        ]}
-      />
+      <View style={styles.detailsRow}>
+        <View style={styles.detailsColumn}>
+          <StatusBreakdown
+            title="Statut des audits"
+            entries={[
+              {
+                label: 'En attente',
+                count: stats.pendingAudits,
+                color: colors.textMuted,
+              },
+              {
+                label: 'En cours',
+                count: stats.inProgressAudits,
+                color: colors.warning,
+              },
+              {
+                label: 'Terminés',
+                count: stats.completedAudits,
+                color: colors.success,
+              },
+            ]}
+          />
+        </View>
+        <View style={styles.detailsColumn}>
+          <StatusBreakdown
+            title="Statut des tâches"
+            entries={[
+              {
+                label: 'À faire',
+                count: stats.pendingTasks,
+                color: colors.textMuted,
+              },
+              {
+                label: 'En cours',
+                count: stats.inProgressTasks,
+                color: colors.warning,
+              },
+              {
+                label: 'Terminées',
+                count: stats.completedTasks,
+                color: colors.success,
+              },
+            ]}
+          />
+        </View>
+      </View>
 
       {storeStats.length > 0 && <StorePerformanceList stores={storeStats} />}
 
@@ -293,23 +301,45 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  content: {
+    width: '100%',
+    maxWidth: 1280,
+    alignSelf: 'center',
+    paddingBottom: spacing.xl,
+  },
   header: {
-    padding: 20,
-    paddingTop: (Constants.statusBarHeight ?? 44) + 16,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    padding: spacing.xl,
+    paddingTop:
+      Platform.OS === 'web' ? 28 : (Constants.statusBarHeight ?? 44) + 16,
+  },
+  eyebrow: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.primary,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
   },
   title: {
     fontSize: 28,
+    lineHeight: 36,
     letterSpacing: -0.4,
     fontWeight: '700',
     color: colors.textStrong,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
+    lineHeight: 21,
     color: colors.textMuted,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  detailsColumn: {
+    flexGrow: 1,
+    flexBasis: 340,
+    minWidth: 0,
   },
   emptyState: {
     alignItems: 'center',

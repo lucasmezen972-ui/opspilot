@@ -57,10 +57,12 @@ export function CreateActionModal({
       visible={visible}
       onClose={onClose}
       title="Nouvelle action corrective"
+      scrollable
     >
       <View style={styles.field}>
         <AppInput
           testID="action-create-title"
+          label="Titre de l'action *"
           placeholder="Titre de l'action *"
           value={title}
           onChangeText={setTitle}
@@ -68,6 +70,7 @@ export function CreateActionModal({
       </View>
       <View style={styles.field}>
         <AppInput
+          label="Description"
           placeholder="Description"
           value={description}
           onChangeText={setDescription}
@@ -80,6 +83,9 @@ export function CreateActionModal({
         {(['low', 'medium', 'high', 'critical'] as const).map((p) => (
           <TouchableOpacity
             key={p}
+            accessibilityRole="button"
+            accessibilityState={{ selected: priority === p }}
+            aria-pressed={priority === p}
             style={[
               styles.priorityOption,
               priority === p && {
@@ -117,6 +123,8 @@ export function CreateActionModal({
           !title.trim() && styles.submitButtonDisabled,
         ]}
         testID="action-create-submit"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !title.trim() }}
         onPress={handleSubmit}
         disabled={!title.trim()}
       >
@@ -143,6 +151,8 @@ const styles = StyleSheet.create({
   },
   priorityOption: {
     flex: 1,
+    minHeight: 44,
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.sm,

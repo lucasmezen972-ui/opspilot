@@ -126,6 +126,8 @@ export function ActionCard({
             <TouchableOpacity
               style={styles.planButton}
               testID={`action-plan-${action.id}`}
+              accessibilityRole="button"
+              accessibilityLabel={`Voir le plan de l'action ${action.title}`}
               onPress={() => onGeneratePlan(action)}
             >
               <Sparkles size={13} color="#7C3AED" />
@@ -136,6 +138,7 @@ export function ActionCard({
             <TouchableOpacity
               style={styles.advanceButton}
               testID={`action-advance-${action.id}`}
+              accessibilityRole="button"
               onPress={() => onAdvance(action)}
             >
               <Text style={styles.advanceButtonText}>
@@ -308,6 +311,8 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 12,
@@ -323,11 +328,14 @@ const styles = StyleSheet.create({
   },
   footerActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    maxWidth: '100%',
     alignItems: 'center',
     gap: 8,
     marginLeft: 'auto',
   },
   planButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -342,6 +350,7 @@ const styles = StyleSheet.create({
     color: '#7C3AED',
   },
   advanceButton: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,

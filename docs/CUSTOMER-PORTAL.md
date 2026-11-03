@@ -22,4 +22,12 @@ La connexion unique entre applications et la récupération automatique des orig
 
 ## Vérification
 
-`node --experimental-strip-types --test supabase/tests/customer_portal_transport.test.ts` vérifie signature/corps exact, destination fixe, reçu obligatoire, limites, erreurs/reprise et identifiants conservés. Les tests SQL transactionnels doivent être exécutés après application de la migration, sans activer le raccordement ni émettre de message ou paiement réel.
+`node --experimental-strip-types --test supabase/tests/customer_portal_*.test.mjs` vérifie signature/corps exact, destination fixe, reçu obligatoire, limites, erreurs/reprise et identifiants conservés. Les tests SQL transactionnels doivent être exécutés après application de la migration, sans activer le raccordement ni émettre de message ou paiement réel.
+
+## Reprise vérifiée du 3 novembre 2026
+
+La migration initiale est appliquée sur OPS PILOT V2 sous la version distante `20261103195531`. Le jeton interne de ce projet est une chaîne JSON ; le nouveau raccordement accepte cette représentation et l’objet historique `{token}` sans changer le jeton ni les autres workers. Le correctif SQL exact est conservé sous `20261103200052_customer_portal_worker_token_compatibility.sql`, version attribuée par le fournisseur ; le CLI Supabase n’est pas installé dans l’environnement de reprise.
+
+La fonction `customer-portal-sync` est ACTIVE v2. Les huit tests Node ciblés passent. La recette SQL réelle passe en transaction annulée après les deux migrations : achat confirmé, refus des essais et impayés, déduplication, résiliation, contact ancré, ACL privées et reprise avec bail. Le contrôle HTTP réel via pg_net confirme 401 sans jeton, 403 avec Origin navigateur et 503 `sync_unavailable` avec le bon jeton lorsque la liaison reste désactivée. Zéro compte commercial et zéro événement subsistent après les fixtures.
+
+Le portail TRADIKOM a été fusionné dans la PR 25 et la rubrique Mes services est visible sur le domaine public après rechargement. Aucune synchronisation d’achat réelle n’est encore revendiquée : les deux valeurs du secret partagé et la livraison d’un événement fictif doivent être validées avant activation. Aucun paiement, facture, invitation ou e-mail de client n’est émis par cette reprise. La connexion unique et le cycle d’achat TRADIKOM ONE restent à réaliser séparément.

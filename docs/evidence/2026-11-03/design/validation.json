@@ -1,0 +1,462 @@
+{
+  "date": "2026-11-03",
+  "base_commit": "dbbb13cf672592e50e014d5733cfcd12feedfdb1",
+  "scope": "Web light theme; local demo and intercepted fictitious account APIs",
+  "quality": {
+    "typecheck": "passed",
+    "eslint": {
+      "errors": 0,
+      "preexisting_warnings": 1
+    },
+    "prettier": "passed",
+    "web_build": "passed"
+  },
+  "unit": {
+    "passed": 376,
+    "files": 63
+  },
+  "browser": {
+    "passed_distinct": 86,
+    "batches": [
+      {
+        "passed": 43,
+        "scope": "specs 01–11; stopped at an ambiguous profile-name selector in spec 12"
+      },
+      {
+        "passed": 43,
+        "scope": "specs 12–23 after selector scoped to main; same application build"
+      }
+    ],
+    "capture_repeat_passed": 3,
+    "notes": "Final modal images use disabled CSS animations to capture the settled state; no application code changed between browser batches",
+    "scenarios": [
+      "e2e/01-demo-login.spec.ts:11:7 › Authentification démo › l'écran de connexion s'affiche sans crash",
+      "e2e/01-demo-login.spec.ts:21:7 › Authentification démo › connexion démo redirige vers le dashboard",
+      "e2e/01-demo-login.spec.ts:33:7 › Authentification démo › connexion démo avec Supabase bloqué — KPIs non nuls",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Audits affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Produits affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Actions affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Tâches affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Rapports affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Formation affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Messages affiche sa page",
+      "e2e/02-navigation.spec.ts:27:9 › Navigation principale › onglet Profil affiche sa page",
+      "e2e/02-navigation.spec.ts:32:7 › Navigation principale › refresh navigateur — session démo conservée",
+      "e2e/03-audits.spec.ts:18:7 › Gestion des audits › liste des audits démo affichée",
+      "e2e/03-audits.spec.ts:27:7 › Gestion des audits › bouton créer un audit et bibliothèque de modèles visibles",
+      "e2e/03-audits.spec.ts:41:7 › Gestion des audits › créer un audit depuis un modèle puis le démarrer",
+      "e2e/03-audits.spec.ts:61:7 › Gestion des audits › démarrer un audit en attente le passe en cours",
+      "e2e/03-audits.spec.ts:68:7 › Gestion des audits › clôture avec non-conformité → action corrective visible dans Actions",
+      "e2e/03-audits.spec.ts:99:7 › Gestion des audits › audit structuré : score pondéré, preuve photo et action liée",
+      "e2e/04-actions.spec.ts:16:7 › Actions correctives › compteurs initiaux cohérents avec les données démo",
+      "e2e/04-actions.spec.ts:24:7 › Actions correctives › créer une action met à jour la liste et les compteurs",
+      "e2e/04-actions.spec.ts:41:7 › Actions correctives › avancer une action : open → in_progress → done",
+      "e2e/04-actions.spec.ts:86:7 › Actions correctives › vue Kanban affiche les trois colonnes",
+      "e2e/05-products.spec.ts:17:7 › Produits › liste des produits démo affichée avec stats",
+      "e2e/05-products.spec.ts:27:7 › Produits › modifier le stock d’un produit persiste dans la liste",
+      "e2e/05-products.spec.ts:42:7 › Produits › scanner un code connu ouvre la fiche de stock du produit",
+      "e2e/05-products.spec.ts:61:7 › Produits › scanner un code inconnu ouvre l’ajout avec le code prérempli",
+      "e2e/05-products.spec.ts:83:7 › Produits › ajouter un produit DLC critique → visible dans la liste et le dashboard",
+      "e2e/06-resilience.spec.ts:15:7 › Résilience › reload — session démo conservée, dashboard affiché",
+      "e2e/06-resilience.spec.ts:25:7 › Résilience › deep-link /actions — reste connecté",
+      "e2e/06-resilience.spec.ts:33:7 › Résilience › navigation rapide entre onglets — chaque page se charge",
+      "e2e/06-resilience.spec.ts:43:7 › Résilience › déconnexion — retour au login, reload reste déconnecté",
+      "e2e/06-resilience.spec.ts:61:7 › Résilience › Supabase injoignable après reload — dashboard toujours fonctionnel",
+      "e2e/07-legal.spec.ts:3:5 › la politique de confidentialité est publique",
+      "e2e/08-demo-offline.spec.ts:16:7 › Démo offline (B2/B3) › B2 — KPIs dashboard non nuls en démo locale",
+      "e2e/08-demo-offline.spec.ts:21:7 › Démo offline (B2/B3) › B3 — reload conserve la session démo",
+      "e2e/08-demo-offline.spec.ts:29:7 › Démo offline (B2/B3) › B3 — deep-link /actions reste connecté",
+      "e2e/08-demo-offline.spec.ts:38:7 › Démo offline (B2/B3) › B2 — écran Formation alimenté en démo locale",
+      "e2e/08-demo-offline.spec.ts:48:7 › Démo offline (B2/B3) › B2 — écran Audits cohérent avec le dashboard (store partagé)",
+      "e2e/09-admin.spec.ts:10:7 › Back-office admin › l'écran de connexion admin s'affiche",
+      "e2e/09-admin.spec.ts:19:7 › Back-office admin › identifiants invalides ou réseau coupé → erreur affichée",
+      "e2e/10-training.spec.ts:56:7 › Formations réelles › lit les chapitres, corrige le quiz et attribue les XP une seule fois",
+      "e2e/10-training.spec.ts:88:7 › Formations réelles › exige une identité confirmée avant de délivrer une attestation",
+      "e2e/11-ai-assistant.spec.ts:6:7 › Assistant IA OpsPilot › répond avec les KPIs démo même lorsque Supabase est bloqué",
+      "e2e/12-settings.spec.ts:6:7 › Réglages utilisateur › modifie le profil et les notifications sans Supabase",
+      "e2e/13-billing.spec.ts:5:5 › la facturation refuse le manager démo et ne crée aucun paiement",
+      "e2e/14-training-video.spec.ts:15:7 › catalogue et lecteur vidéo utilisables à 375px",
+      "e2e/14-training-video.spec.ts:15:7 › catalogue et lecteur vidéo utilisables à 768px",
+      "e2e/14-training-video.spec.ts:15:7 › catalogue et lecteur vidéo utilisables à 812px",
+      "e2e/14-training-video.spec.ts:15:7 › catalogue et lecteur vidéo utilisables à 1440px",
+      "e2e/14-training-video.spec.ts:125:5 › import MP4 : métadonnées contrôlées et aucun téléversement en démo",
+      "e2e/15-sepa-ui.spec.ts:9:7 › SEPA : accord, disponibilité et résiliation à 375px",
+      "e2e/15-sepa-ui.spec.ts:9:7 › SEPA : accord, disponibilité et résiliation à 1440px",
+      "e2e/16-connected-video-fixture.spec.ts:7:5 › import privé connecté : fichier, publication et URL signée passent par les API attendues",
+      "e2e/16-connected-video-fixture.spec.ts:134:5 › préparation SEPA en back-office : données exactes de facture et absence de débit",
+      "e2e/17-lazy-excel.spec.ts:6:5 › le moteur Excel chargé à la demande produit un vrai classeur",
+      "e2e/18-r2-video.spec.ts:7:7 › R2 private import and retry preserve one object at 375px",
+      "e2e/18-r2-video.spec.ts:7:7 › R2 private import and retry preserve one object at 1440px",
+      "e2e/19-billing-recovery.spec.ts:6:7 › facturation : erreur, reprise et demande confirmée à 375px",
+      "e2e/19-billing-recovery.spec.ts:85:7 › abonnement : pas d’essai inventé après erreur à 375px",
+      "e2e/19-billing-recovery.spec.ts:6:7 › facturation : erreur, reprise et demande confirmée à 1440px",
+      "e2e/19-billing-recovery.spec.ts:85:7 › abonnement : pas d’essai inventé après erreur à 1440px",
+      "e2e/19-billing-recovery.spec.ts:130:5 › back-office : une erreur de calendrier SEPA bloque les contrôles de facture",
+      "e2e/20-internal-training-programs.spec.ts:199:7 › parcours mixte privé : catalogue, ajout et capsule réelle à 375px",
+      "e2e/20-internal-training-programs.spec.ts:199:7 › parcours mixte privé : catalogue, ajout et capsule réelle à 1440px",
+      "e2e/20-internal-training-programs.spec.ts:361:5 › un ajout confirmé reste récupérable après un échec de relecture",
+      "e2e/20-server-quiz-recovery.spec.ts:6:7 › quiz connecté : choix multiples, reprise et résultat serveur à 375px",
+      "e2e/20-server-quiz-recovery.spec.ts:6:7 › quiz connecté : choix multiples, reprise et résultat serveur à 1440px",
+      "e2e/21-design-review.spec.ts:14:7 › lecture et navigation des modules à 375x812",
+      "e2e/21-design-review.spec.ts:69:7 › connexion lisible à 375x812",
+      "e2e/21-design-review.spec.ts:87:7 › facturation lisible à 375x812",
+      "e2e/21-design-review.spec.ts:14:7 › lecture et navigation des modules à 768x1024",
+      "e2e/21-design-review.spec.ts:69:7 › connexion lisible à 768x1024",
+      "e2e/21-design-review.spec.ts:87:7 › facturation lisible à 768x1024",
+      "e2e/21-design-review.spec.ts:14:7 › lecture et navigation des modules à 812x375",
+      "e2e/21-design-review.spec.ts:69:7 › connexion lisible à 812x375",
+      "e2e/21-design-review.spec.ts:87:7 › facturation lisible à 812x375",
+      "e2e/21-design-review.spec.ts:14:7 › lecture et navigation des modules à 1440x960",
+      "e2e/21-design-review.spec.ts:69:7 › connexion lisible à 1440x960",
+      "e2e/21-design-review.spec.ts:87:7 › facturation lisible à 1440x960",
+      "e2e/22-design-interactions.spec.ts:11:7 › formulaires accessibles et défilables à 375x812",
+      "e2e/22-design-interactions.spec.ts:11:7 › formulaires accessibles et défilables à 812x375",
+      "e2e/22-design-interactions.spec.ts:11:7 › formulaires accessibles et défilables à 1440x900",
+      "e2e/22-design-interactions.spec.ts:60:5 › navigation clavier et lien vers le contenu sur ordinateur",
+      "e2e/23-action-layout.spec.ts:17:7 › Modales des actions en paysage › création : échéance et bouton final accessibles sans enregistrer",
+      "e2e/23-action-layout.spec.ts:57:7 › Modales des actions en paysage › clôture : fin du formulaire et commandes restent accessibles",
+      "e2e/23-action-layout.spec.ts:86:7 › Modales des actions en paysage › plan : dernière procédure lisible et fermeture toujours accessible"
+    ]
+  },
+  "viewports": [
+    [375, 812],
+    [768, 1024],
+    [812, 375],
+    [1440, 960]
+  ],
+  "limits": [
+    "No native device or virtual keyboard audit",
+    "No complete screen reader or WCAG certification",
+    "No real customer financial action or external business message",
+    "No GitHub Actions execution"
+  ],
+  "source_files": [
+    {
+      "path": "__tests__/shared/statusContrast.test.ts",
+      "sha256": "e573eb8a1f5b5ffe713d77ffe5b1330c339b3cdda05535fbc63c31f7d0e06cdb"
+    },
+    {
+      "path": "app/(tabs)/_layout.tsx",
+      "sha256": "f2ed21fc19300c980b77ec4304e6e91a6266d63eb0210bc3add2c510f6653349"
+    },
+    {
+      "path": "app/(tabs)/actions.tsx",
+      "sha256": "dddc3146fedd666c18087d8dd0eedca382a79c3469d1c439ae81c279f58e3e95"
+    },
+    {
+      "path": "app/(tabs)/audits.tsx",
+      "sha256": "750defaa093dec7c902ea5eef9bc67fb439a0dcba44a76fc2160aaa85430436e"
+    },
+    {
+      "path": "app/(tabs)/billing.tsx",
+      "sha256": "73b72cf76ab3a58bf18dee8074d875af58bf76160092e4ae05ab21bc5f7c5ee7"
+    },
+    {
+      "path": "app/(tabs)/index.tsx",
+      "sha256": "24ee9734204fa94505e890a52eab17c4a693c76eab91aef5f53148d3f60b86e1"
+    },
+    {
+      "path": "app/(tabs)/manager.tsx",
+      "sha256": "e54acc031b780167f9062dd077438e9e9c0c5c94b5b8e02f8789407868193f93"
+    },
+    {
+      "path": "app/(tabs)/more.tsx",
+      "sha256": "319e6a6a37854a8f97f0bc67b7c7d21bd1fb4778534f83d07d52c45d7642ca01"
+    },
+    {
+      "path": "app/(tabs)/profile.tsx",
+      "sha256": "c190570e0983ef254d29de37940dafe08e03a8df118c423af31d3750b53e8fa4"
+    },
+    {
+      "path": "app/(tabs)/tasks.tsx",
+      "sha256": "5b1a558f64222b66cceb4cc84b7889eb08e3419d66f9255055bb94fd57f30791"
+    },
+    {
+      "path": "app/+html.tsx",
+      "sha256": "07979a3351aad88d545b2cd05dd66b79b4f4f30440e8dc26739759cbd29312bd"
+    },
+    {
+      "path": "components/AuthScreen.tsx",
+      "sha256": "89c5ce3b5b7ca117a4519f1ea3c9cec32d9978e29bbffbe5c94061168bccddf4"
+    },
+    {
+      "path": "e2e/01-demo-login.spec.ts",
+      "sha256": "27bfe3f82091483901c9d304028441233c4455eeecf1b904dfa9e50fce0f1b4d"
+    },
+    {
+      "path": "e2e/02-navigation.spec.ts",
+      "sha256": "70b6385032be6e0de08a6454022f5b6012ebf5124bad427b4252872989466e99"
+    },
+    {
+      "path": "e2e/05-products.spec.ts",
+      "sha256": "fbe36e787e924fad50370c58907d5ae45d6470a6a04c7b53ae6461f292ecb3fb"
+    },
+    {
+      "path": "e2e/06-resilience.spec.ts",
+      "sha256": "75a7e91b3d28a0d7cecad2e1ea496dfd3462a993a12d0971d5eebc19e47a23c1"
+    },
+    {
+      "path": "e2e/08-demo-offline.spec.ts",
+      "sha256": "4d5b17c43e1f4133e45fe98ce719e2e1a901a4e248367074ffd2fb79f8091083"
+    },
+    {
+      "path": "e2e/12-settings.spec.ts",
+      "sha256": "25506de455dc1be57cf20b65a3d0a799379dc1b04b4dee27aa7eb48d0f2f67d8"
+    },
+    {
+      "path": "e2e/21-design-review.spec.ts",
+      "sha256": "acec288bdab0d6637172858665c819b364c1454e5468e8f040ca7babc680244e"
+    },
+    {
+      "path": "e2e/22-design-interactions.spec.ts",
+      "sha256": "2387d0a12b667ca2ba47bf02a3952a19b3548ed50b6cc8b7e7cc540a5995d404"
+    },
+    {
+      "path": "e2e/23-action-layout.spec.ts",
+      "sha256": "9aa8cbd8da0c41147cc943e5eac02a21e6d738e0abc2a1c703bbaad4b447b60f"
+    },
+    {
+      "path": "e2e/helpers.ts",
+      "sha256": "fdad341195fd142412ead43f33aece30288ef077f82d75ace8b48e28ad95fe7d"
+    },
+    {
+      "path": "features/actions/ActionCard.tsx",
+      "sha256": "b591829e5d43e072a4022784958fa8aed76f982cebb349e60e9409ae0fc7e2f6"
+    },
+    {
+      "path": "features/actions/ActionPlanModal.tsx",
+      "sha256": "09ca0043a68cd1a7a2365298b12f81bf914328c8a2b78bc37ab69351041a2682"
+    },
+    {
+      "path": "features/actions/CreateActionModal.tsx",
+      "sha256": "b6c71cccb29d3422601890adbdf4eb7acdb3ce4f122e7ae01ab65cad459a074a"
+    },
+    {
+      "path": "features/actions/ResolveActionModal.tsx",
+      "sha256": "86a97256501560c5d9740606835e63f9538a11c119101bfb5d1778db3bfbcd28"
+    },
+    {
+      "path": "features/actions/constants.ts",
+      "sha256": "74cf9134ea81d47f8ffdd01f2513dc2e8d3dd3a8ef352d0ece84186ee750d4d4"
+    },
+    {
+      "path": "features/billing/CurrentPlanCard.tsx",
+      "sha256": "e771c5b52ee919ba574595e60665bc455aaa1d6280e8664f1f0a9ac012f8958b"
+    },
+    {
+      "path": "features/billing/MolliePaymentControls.tsx",
+      "sha256": "e3ee04c950a0d540890334c0244eb7fb88c3538d8b89932d7f22aa9aa375e9e2"
+    },
+    {
+      "path": "features/billing/PlanCard.tsx",
+      "sha256": "8c31903e3c623c6638c9403d70bd77058d98fae59e78f586d3f0a2547eaf30d3"
+    },
+    {
+      "path": "features/billing/QontoAdminPanel.tsx",
+      "sha256": "f0b8649b5343303aa55f554e2ad940bba385f0842855ef76512fe9a5d96b0bd1"
+    },
+    {
+      "path": "features/billing/SepaAgreementsPanel.tsx",
+      "sha256": "9fd4d41af7d6498cb22e75a40ec86c4ac07f6d3e840835d4b71b5737dc1ba853"
+    },
+    {
+      "path": "features/billing/SepaQuoteControls.tsx",
+      "sha256": "e02417ad0cd1b5ff7041a810a8308ae41549156b6542f3298e37edda48e6938b"
+    },
+    {
+      "path": "features/billing/billingModel.ts",
+      "sha256": "db17f187e4ea9876d245d1dba00b6578efbd54be12d8f6b46b8209ee7612359a"
+    },
+    {
+      "path": "features/dashboard/DashboardDlcAlerts.tsx",
+      "sha256": "137076b91bf822d80aecc8743348b0d1ddcd3d7478ff0734080fc44d7970532a"
+    },
+    {
+      "path": "features/dashboard/DashboardFieldBrief.tsx",
+      "sha256": "32c61adb9e9ba8f0987505e048d68244427cb20981993a13f5537946585f8d53"
+    },
+    {
+      "path": "features/dashboard/DashboardGrid.tsx",
+      "sha256": "4cfa8c88a73e6ce67c3ed118d7638c6503c83470aa7e356be2914765769094c0"
+    },
+    {
+      "path": "features/dashboard/DashboardProgress.tsx",
+      "sha256": "12d66ecf65c9230e2ed217c163ea5fda4dbe1bbfb0df85c8477813e2b562584f"
+    },
+    {
+      "path": "features/dashboard/DashboardQuickActions.tsx",
+      "sha256": "d0ea963a31ae5e8837f8ca52f35d76c88b8aed001aee17a4bf0eda9506962b63"
+    },
+    {
+      "path": "features/dashboard/DashboardRecentAudits.tsx",
+      "sha256": "9dcf3cb0eac794025a121cec15459119e499f7b6c9643fa5d4d207a2f810f4b5"
+    },
+    {
+      "path": "features/dashboard/DashboardTeamShortcuts.tsx",
+      "sha256": "891ff3c58ca0b5fb1494b19000d4b6b445fdf26bcb486fe3bf8ed0428fb92d01"
+    },
+    {
+      "path": "features/governance/ActivityFeed.tsx",
+      "sha256": "6cbdd6d79e07564de7b1a3ad3d7ffffb71a7db36bb363a96acce4c00b1d15377"
+    },
+    {
+      "path": "features/manager/ManagerActivityList.tsx",
+      "sha256": "b9197da91fb8c703841fdf564beac75e5d60b1296c5440af43d771ceb467b50c"
+    },
+    {
+      "path": "features/manager/ManagerCockpit.tsx",
+      "sha256": "ada80fc75e4933053931efdd50ce778926a28f0cf70f6443f7483836fab30dd3"
+    },
+    {
+      "path": "features/manager/ManagerStatCards.tsx",
+      "sha256": "0ddcdf3816fa97c961ca839537b69b2a14d873ea9b4a42e57b49cbb061cbd8b4"
+    },
+    {
+      "path": "features/manager/StatusBreakdown.tsx",
+      "sha256": "3e6ebdb220202b5bfff5ab6c6d42b75f86635d75f36a73cc116a5ba684da824a"
+    },
+    {
+      "path": "features/manager/StorePerformanceList.tsx",
+      "sha256": "49a7612d180e145cfe36194a0327c05b2a4f70a01e3be62a15f84c11e68230ec"
+    },
+    {
+      "path": "features/products/AddProductModal.tsx",
+      "sha256": "868c4ea2971e0dde0cb82688060cfe975365a2c2f00ac6bd5a99a90a5ac4fa9c"
+    },
+    {
+      "path": "features/products/BarcodeScannerModal.tsx",
+      "sha256": "39c0aa652262d2b9d60514f92e0e28e6b10d02e4b9b9e0117d0a127f79ada0d8"
+    },
+    {
+      "path": "features/products/StockModal.tsx",
+      "sha256": "5d7fdc997dc2f89d9836263cccc5dcdad3b67101867369d72b945e005cd04964"
+    },
+    {
+      "path": "features/profile/ProfileSummary.tsx",
+      "sha256": "92d13a21c6b1cae09f170fd71c2d1e528ede8075643bfc2a25940684687b4d06"
+    },
+    {
+      "path": "features/tasks/TaskCard.tsx",
+      "sha256": "3a7c5c4e00f9312c698fa92526ed95ce22c2dc3f1c8e1b30c9ce90f1390270df"
+    },
+    {
+      "path": "features/tasks/TaskCompletionModal.tsx",
+      "sha256": "74994cd382250b003cc60c7216c7b0b6e1da38e23b78c461154bdeb8354f4544"
+    },
+    {
+      "path": "features/tasks/taskModel.ts",
+      "sha256": "5ae66e540263237dcb51eb19202b49e827fcd94a0bdd916252f0d5c52a7181a0"
+    },
+    {
+      "path": "shared/components/AppButton.tsx",
+      "sha256": "9cb220246b04fbff12fd0e4cd3354138352c19d8ea958a35bdbfe9d8cb979509"
+    },
+    {
+      "path": "shared/components/AppDesktopNavigation.tsx",
+      "sha256": "05358a3bd5cdfd339e284096e177b8cc15febc3ce6d399a4a5150777ee35acf3"
+    },
+    {
+      "path": "shared/components/AppInput.tsx",
+      "sha256": "61baf1e4c47003bf708ac8e0942457e79974b536893ffa6cf04950a100bbd594"
+    },
+    {
+      "path": "shared/components/AppKpiCard.tsx",
+      "sha256": "e6e2c32eab1877e5742570b2a7fdf35291b32d71817a6586b190c85d48e0441c"
+    },
+    {
+      "path": "shared/components/AppModal.tsx",
+      "sha256": "b08cacfe4fbb9a8da7e6e0ce5b886b580d7976abbb80290a4fa302455daeca17"
+    },
+    {
+      "path": "shared/components/AppScreenHeader.tsx",
+      "sha256": "8706da38f9ebad67b63a1f325e3b16f6754a546962853544712e6bfbd8f418ce"
+    },
+    {
+      "path": "shared/components/AppSectionHeader.tsx",
+      "sha256": "68e8f41c5bba7c06cd2ece08675353b0b962a1e48c61bdf225853c231fe05604"
+    },
+    {
+      "path": "shared/components/AppTabBar.tsx",
+      "sha256": "618ecbe006239c04bfda2aaa3cceb129852735c3adae4749994536a2732a9a99"
+    },
+    {
+      "path": "shared/styles/tokens.ts",
+      "sha256": "4cafac44831813c86d8543b30f0a6ed2667c5f1237fe5400517f56c3641aeaf1"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "docs/evidence/2026-11-03/design/before-home-375.jpg",
+      "sha256": "66d6d3b32b26d50209ef34f9262a7ce4b778187f6c61f1d1cf0722e69784d21b"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/before-home-1440.jpg",
+      "sha256": "dd2209d1051299f628525fccf9aff5a8d5db0621605a32106f8b05c60a491c7e"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/before-manager-1440.jpg",
+      "sha256": "7700d7b12c37a04fafa5fdc24b6381c6374dbdd4ccaa580524c1ee7394db65a9"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/before-billing-375.jpg",
+      "sha256": "4326a93f73ae4c3b08baa1e31a35dd326278f4aa32cecbff9f2da62307d25ae3"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-home-375.jpg",
+      "sha256": "03f39427171796106470f4f1f9f5c58a97d6ea074876f13d829b50ac86817cd9"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-home-768.jpg",
+      "sha256": "e655332335fabc1ec9a68b27b912c6528180f6e97d15b5dfc4c97fad3cebb5bb"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-home-812.jpg",
+      "sha256": "ff81d5d2d7c842c5e2d24c767176f9c474d3a6708fbc90300d7d8cfd2a2df72d"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-home-1440.jpg",
+      "sha256": "103e7b9bd96892023ed3240193d34a6099dc19d8a293eaaa8435760d79729dcb"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-manager-1440.jpg",
+      "sha256": "783b1a50647d6769b39fb36eddb2072f73345ce362fd5ec5f59d18098cc9e2ed"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-more-1440.jpg",
+      "sha256": "485c5154dbebb2a1b459855ff1bf47cd309311ed65e04e47070516013ff00fa5"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-profile-375.jpg",
+      "sha256": "f1c60bd937516a47983e66d6fae5c1e3602b31af0744534fc038114f9a17cce0"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-billing-375.jpg",
+      "sha256": "7d73f977aa14fc221e16a242a89d78bba36c374ba509d991be4fad10388a1d23"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-billing-1440.jpg",
+      "sha256": "725596b0ad3c66efee9d404eca47f3b1c72a2ed3113ada79d5056641d1d204b1"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-auth-375.jpg",
+      "sha256": "2064e6ada9ee1525579c9cbdf505198440f2cce1c516cb308591e8414d4bc0ea"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-audits-812.jpg",
+      "sha256": "845b8270f984977e72a4fbc9a2c81820ce6099206763910d991d604b897fa5af"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-task-form-375.jpg",
+      "sha256": "06b002c25861eb0629e17a2e1f11094050b0d2df1f94aec9cc544b18dfafb1bd"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-task-form-812.jpg",
+      "sha256": "cb3957db0d6649575b377107fa9aa89306a611f0903d31471f4c8bd607b75439"
+    },
+    {
+      "path": "docs/evidence/2026-11-03/design/after-task-form-1440.jpg",
+      "sha256": "f905d053406ac307c0912db059ad094006193517676c353a310647e95a89ff51"
+    }
+  ],
+  "publication": "See delivery PR for the verified deployment and merged commit"
+}

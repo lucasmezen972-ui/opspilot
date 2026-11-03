@@ -51,14 +51,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 12,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
@@ -77,12 +77,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
+    lineHeight: 20,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textStrong,
     marginBottom: 2,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textMuted,
   },
 });

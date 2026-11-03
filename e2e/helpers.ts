@@ -24,9 +24,9 @@ export async function loginAsDemo(page: Page) {
   const demoBtn = page.getByTestId('demo-login-button');
   await expect(demoBtn).toBeVisible({ timeout: 15_000 });
   await demoBtn.click();
-  await expect(
-    page.getByText('Carnet de bord terrain', { exact: true }),
-  ).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId('page-home-title')).toBeVisible({
+    timeout: 20_000,
+  });
 }
 
 /** Connexion démo avec Supabase bloqué : données locales déterministes. */

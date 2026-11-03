@@ -1,4 +1,4 @@
-import { Search, Plus, Camera, X, Download } from 'lucide-react-native';
+import { Search, Plus, X, Download } from 'lucide-react-native';
 import { useState, useMemo, useCallback } from 'react';
 import {
   View,
@@ -40,7 +40,7 @@ import type { AuditTemplate } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
 import { AppLoadingState } from '../../shared/components/AppLoadingState';
 import { AppScreenHeader } from '../../shared/components/AppScreenHeader';
-import { colors, shadow } from '../../shared/styles/tokens';
+import { colors } from '../../shared/styles/tokens';
 import { exportAuditReport } from '../../utils/auditReport';
 import { exportAuditsAsCSV } from '../../utils/exportAudits';
 import { isManagerRole } from '../../utils/roles';
@@ -334,6 +334,11 @@ export default function AuditsScreen() {
           <>
             <TouchableOpacity
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel={
+                showSearch ? 'Masquer la recherche' : 'Rechercher un audit'
+              }
+              accessibilityState={{ expanded: showSearch }}
               onPress={() => setShowSearch(!showSearch)}
             >
               <Search
@@ -343,6 +348,8 @@ export default function AuditsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
+              accessibilityRole="button"
+              accessibilityLabel="Exporter les audits au format CSV"
               onPress={async () => {
                 try {
                   await exportAuditsAsCSV(dbAudits);
@@ -357,41 +364,10 @@ export default function AuditsScreen() {
         }
       />
 
-      {showSearch && (
-        <View style={styles.searchBar}>
-          <Search size={16} color={colors.textFaint} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Rechercher un audit..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoFocus
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <X size={16} color={colors.textFaint} />
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
-      <AuditFilters statusFilter={statusFilter} onChange={setStatusFilter} />
-
-      <AuditQuickStats counts={counts} />
-
-      {/* Create New Audit Button */}
-      <AppButton
-        testID="audit-create-button"
-        label="Créer un audit"
-        icon={Plus}
-        size="lg"
-        onPress={() => handleCreateAudit()}
-        style={styles.createButton}
-      />
-
-      {/* Audits List */}
       <ScrollView
         style={styles.auditsList}
+        contentContainerStyle={styles.auditsListContent}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -401,53 +377,90 @@ export default function AuditsScreen() {
           />
         }
       >
-        <AuditTemplateLibrary
-          templates={templates}
-          expanded={showTemplates}
-          loading={templatesLoading}
-          onToggle={() => setShowTemplates(!showTemplates)}
-          onSelectTemplate={(template) => handleCreateAudit(template)}
-          getItemCount={(templateId) => getItemsForTemplate(templateId).length}
-          getVersion={getTemplateVersion}
-          getSectionCount={(templateId) =>
-            getSectionsForTemplate(templateId).length
-          }
-        />
-
-        {loading && audits.length === 0 && (
-          <AppLoadingState
-            testID="audit-loading"
-            label="Chargement des audits..."
-          />
-        )}
-        {!loading && auditsError && audits.length === 0 && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>{auditsError}</Text>
+        {showSearch && (
+          <View style={styles.searchBar}>
+            <Search size={16} color={colors.textFaint} />
+            <TextInput
+              style={styles.searchInput}
+              accessibilityLabel="Rechercher un audit"
+              placeholder="Rechercher un audit..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.searchClearButton}
+                accessibilityRole="button"
+                accessibilityLabel="Effacer la recherche"
+                onPress={() => setSearchQuery('')}
+              >
+                <X size={18} color={colors.textMuted} />
+              </TouchableOpacity>
+            )}
           </View>
         )}
-        {audits.map((audit) => {
-          const sigs = getSignaturesForAudit(audit.id);
-          return (
-            <AuditListCard
-              key={audit.id}
-              audit={audit}
-              signatures={sigs}
-              canSign={
-                audit.status === 'completed' && !hasRoleSigned(sigs, signRole)
-              }
-              onOpenCamera={handleOpenCamera}
-              onExportReport={handleExportReport}
-              onChangeStatus={handleStatusChange}
-              onSign={handleSignAudit}
-            />
-          );
-        })}
-      </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => handleOpenCamera()}>
-        <Camera size={24} color={colors.surface} />
-      </TouchableOpacity>
+        <AuditFilters statusFilter={statusFilter} onChange={setStatusFilter} />
+
+        <AuditQuickStats counts={counts} />
+
+        {/* Create New Audit Button */}
+        <AppButton
+          testID="audit-create-button"
+          label="Créer un audit"
+          icon={Plus}
+          size="lg"
+          onPress={() => handleCreateAudit()}
+          style={styles.createButton}
+        />
+
+        <View style={styles.auditCards}>
+          <AuditTemplateLibrary
+            templates={templates}
+            expanded={showTemplates}
+            loading={templatesLoading}
+            onToggle={() => setShowTemplates(!showTemplates)}
+            onSelectTemplate={(template) => handleCreateAudit(template)}
+            getItemCount={(templateId) =>
+              getItemsForTemplate(templateId).length
+            }
+            getVersion={getTemplateVersion}
+            getSectionCount={(templateId) =>
+              getSectionsForTemplate(templateId).length
+            }
+          />
+
+          {loading && audits.length === 0 && (
+            <AppLoadingState
+              testID="audit-loading"
+              label="Chargement des audits..."
+            />
+          )}
+          {!loading && auditsError && audits.length === 0 && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{auditsError}</Text>
+            </View>
+          )}
+          {audits.map((audit) => {
+            const sigs = getSignaturesForAudit(audit.id);
+            return (
+              <AuditListCard
+                key={audit.id}
+                audit={audit}
+                signatures={sigs}
+                canSign={
+                  audit.status === 'completed' && !hasRoleSigned(sigs, signRole)
+                }
+                onOpenCamera={handleOpenCamera}
+                onExportReport={handleExportReport}
+                onChangeStatus={handleStatusChange}
+                onSign={handleSignAudit}
+              />
+            );
+          })}
+        </View>
+      </ScrollView>
 
       <CameraModal
         visible={cameraVisible}
@@ -486,9 +499,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
@@ -505,29 +518,29 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    minHeight: 44,
     fontSize: 14,
     paddingVertical: 6,
     color: colors.textStrong,
+  },
+  searchClearButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   createButton: {
     margin: 20,
   },
   auditsList: {
     flex: 1,
+  },
+  auditsListContent: {
+    paddingBottom: 100,
+  },
+  auditCards: {
     padding: 20,
     paddingTop: 0,
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 90,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...shadow.floating,
   },
   errorBanner: {
     margin: 20,

@@ -38,7 +38,9 @@ export function ProfileSummary({
 const styles = StyleSheet.create({
   section: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
+    gap: 12,
     backgroundColor: '#FFFFFF',
     margin: 20,
     padding: 20,
@@ -54,10 +56,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
   },
   info: {
-    flex: 1,
+    flexBasis: 140,
+    flexGrow: 1,
+    minWidth: 0,
   },
   name: {
     fontSize: 18,
@@ -74,6 +77,7 @@ const styles = StyleSheet.create({
   location: {
     fontSize: 12,
     color: '#6B7280',
+    lineHeight: 18,
   },
   levelBadge: {
     flexDirection: 'row',
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   levelText: {
-    color: '#D97706',
+    color: colors.warningText,
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,

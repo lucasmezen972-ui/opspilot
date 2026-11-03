@@ -27,9 +27,15 @@ export function AppSectionHeader({
       testID={testID}
       style={[styles.row, !hasAction && styles.rowNoAction]}
     >
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {title}
+      </Text>
       {hasAction && (
-        <TouchableOpacity onPress={onAction}>
+        <TouchableOpacity
+          onPress={onAction}
+          accessibilityRole="button"
+          style={styles.action}
+        >
           <Text style={styles.link}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
@@ -48,6 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   title: {
+    flexShrink: 1,
     fontSize: 18,
     fontWeight: '600',
     color: colors.textStrong,
@@ -56,5 +63,13 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 13,
     fontWeight: '500',
+  },
+  action: {
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+    paddingHorizontal: 4,
   },
 });

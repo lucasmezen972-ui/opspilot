@@ -135,7 +135,9 @@ function BillingScreenContent() {
       }}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Abonnement</Text>
+        <Text accessibilityRole="header" style={styles.title}>
+          Abonnement
+        </Text>
         <Text style={styles.subtitle}>
           {profile?.full_name ?? 'Mon compte'}
         </Text>
@@ -183,6 +185,8 @@ function BillingScreenContent() {
 
       <TouchableOpacity
         testID="manage-subscription-button"
+        accessibilityRole="button"
+        accessibilityHint="Ouvre votre messagerie pour contacter le service abonnement"
         style={styles.manageButton}
         onPress={handleManageSubscription}
       >
@@ -193,6 +197,15 @@ function BillingScreenContent() {
       {!isLocalDemo && ['essential', 'business'].includes(currentPlan) && (
         <TouchableOpacity
           accessibilityRole="button"
+          style={styles.renewButton}
+          accessibilityState={{
+            disabled:
+              !!pendingPlan ||
+              requestsLoading ||
+              !!requestsError ||
+              !!subscriptionError,
+            busy: pendingPlan === currentPlan,
+          }}
           disabled={
             !!pendingPlan ||
             requestsLoading ||
@@ -201,7 +214,7 @@ function BillingScreenContent() {
           }
           onPress={() => handleUpgrade(currentPlan)}
         >
-          <Text style={{ color: '#2563EB', padding: 20 }}>
+          <Text style={styles.linkText}>
             Demander une facture de renouvellement
           </Text>
         </TouchableOpacity>
@@ -265,7 +278,7 @@ function BillingScreenContent() {
           )
           .map((request) => (
             <View key={request.id} style={styles.invoiceSummary}>
-              <Text>
+              <Text style={styles.noticeText}>
                 Facture Qonto — {request.plan} :{' '}
                 {request.status === 'requested'
                   ? 'préparation en cours'
@@ -274,9 +287,10 @@ function BillingScreenContent() {
               {isBillingPaymentUrl(request) && (
                 <TouchableOpacity
                   accessibilityRole="link"
+                  style={styles.linkButton}
                   onPress={() => Linking.openURL(request.payment_url!)}
                 >
-                  <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
+                  <Text style={styles.linkText}>
                     {request.payment_provider === 'mollie'
                       ? 'Régler la facture chez Mollie'
                       : 'Régler sur Qonto'}
@@ -285,10 +299,17 @@ function BillingScreenContent() {
               )}
             </View>
           ))}
-        <Text style={styles.sectionTitle}>Choisir un plan</Text>
+        <Text accessibilityRole="header" style={styles.sectionTitle}>
+          Choisir un plan
+        </Text>
+        <Text style={styles.sectionDescription}>
+          Votre choix prépare une demande de facture. L’accès est activé après
+          vérification du règlement.
+        </Text>
         {!isLocalDemo && (
           <TouchableOpacity
             accessibilityRole="button"
+            style={styles.linkButton}
             onPress={async () => {
               try {
                 await Promise.all([refreshRequests(), refreshSubscription()]);
@@ -300,9 +321,7 @@ function BillingScreenContent() {
               }
             }}
           >
-            <Text style={{ color: '#2563EB', paddingVertical: 12 }}>
-              Actualiser mon règlement
-            </Text>
+            <Text style={styles.linkText}>Actualiser mon règlement</Text>
           </TouchableOpacity>
         )}
         {PLANS.map((plan) => (
@@ -392,20 +411,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFF6FF',
     borderRadius: 12,
     paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 48,
     borderWidth: 1,
     borderColor: '#BFDBFE',
   },
   manageButtonText: {
+    flexShrink: 1,
+    textAlign: 'center',
     color: '#2563EB',
     fontSize: 14,
     fontWeight: '600',
   },
   section: { paddingHorizontal: 20 },
+  renewButton: {
+    marginHorizontal: 20,
+    paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  linkButton: { minHeight: 44, justifyContent: 'center', paddingVertical: 12 },
+  linkText: {
+    color: colors.primaryDark,
+    fontSize: 14,
+    lineHeight: 21,
+    fontWeight: '600',
+  },
+  sectionDescription: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 8,
   },
   footer: { padding: 20, paddingTop: 4, paddingBottom: 40 },
   footerText: {

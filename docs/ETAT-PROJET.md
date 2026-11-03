@@ -5,6 +5,34 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Revue design transverse — candidat vérifié du 3 novembre 2026
+
+La reprise porte sur l’interface web au-delà de la formation : menu latéral dès
+1 024 px, zone centrale bornée à 1 280 px, grilles adaptées à la largeur utile,
+hiérarchie des priorités, contrastes sémantiques et repères clavier. Les listes
+Audits/Tâches défilent avec leurs contrôles en paysage. Les cartes de tâches
+n’exposent plus un bouton sans action ; l’identité de profil et le pied des cartes
+kanban peuvent se répartir sur plusieurs lignes.
+
+Les fenêtres de formulaire sont bornées et défilables selon leur contenu. Les
+champs partagés ciblés disposent de labels persistants, d’un texte de 16 px et
+d’une hauteur minimale de 48 px. La caméra globale sans rattachement à un audit
+est supprimée ; la capture reste disponible sur les cartes d’audit. Les API,
+permissions, données métier et médias de formation ne changent pas.
+
+Les contrôles visuels couvrent **375 × 812, 768 × 1 024, 812 × 375 et
+1 440 × 960**, avec démo locale et sessions fictives dont les API sont interceptées.
+**376 tests unitaires sur 63 fichiers et 86 scénarios Chromium distincts passent**,
+avec TypeScript, ESLint, formatage et compilation web réussis. Les scénarios
+navigateur passent en deux lots de 43 sur la même compilation. La publication
+et son déploiement sont suivis dans la PR de cette livraison. La préférence de
+réduction des mouvements est activée dans les captures, sans revendication de
+suppression de toutes les animations ni audit natif iOS/Android.
+
+Périmètre, limites et référence des résultats finaux :
+[DESIGN-2026-11-03.md](DESIGN-2026-11-03.md). Les sections suivantes conservent
+l’historique des livraisons précédentes.
+
 ## Parcours internes texte + vidéo — reprise du 3 novembre 2026
 
 Dix programmes associent chacun une capsule narrée et sous-titrée, trois chapitres

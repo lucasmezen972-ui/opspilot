@@ -98,9 +98,9 @@ test.describe('Produits', () => {
 
     // …et dans les alertes DLC du dashboard (DLC ≤ 7 jours, tri croissant).
     await page.getByRole('tab', { name: 'Accueil' }).click();
-    await expect(
-      page.getByText('Carnet de bord terrain', { exact: true }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('page-home-title')).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(page.getByTestId('dlc-alerts')).toContainText(
       'Tartare de saumon',
       { timeout: 10_000 },

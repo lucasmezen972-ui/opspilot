@@ -150,21 +150,27 @@ export default function TasksScreen() {
         }
       />
 
-      <TaskQuickStats stats={stats} />
-
-      {showFilters && (
-        <TaskFilters selected={selectedFilter} onSelect={setSelectedFilter} />
-      )}
-
-      <AppButton
-        label="Nouvelle tâche"
-        icon={Plus}
-        size="lg"
-        onPress={() => setCreateModalVisible(true)}
-        style={styles.createButton}
-      />
-
       <FlatList
+        ListHeaderComponent={
+          <View style={styles.listHeader}>
+            <TaskQuickStats stats={stats} />
+
+            {showFilters && (
+              <TaskFilters
+                selected={selectedFilter}
+                onSelect={setSelectedFilter}
+              />
+            )}
+
+            <AppButton
+              label="Nouvelle tâche"
+              icon={Plus}
+              size="lg"
+              onPress={() => setCreateModalVisible(true)}
+              style={styles.createButton}
+            />
+          </View>
+        }
         data={filteredTasks}
         keyExtractor={(task) => task.id}
         style={styles.tasksList}
@@ -241,22 +247,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   headerButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: 20,
     backgroundColor: colors.backgroundAlt,
     justifyContent: 'center',
     alignItems: 'center',
   },
   createButton: {
-    margin: 20,
+    marginVertical: 20,
   },
+  listHeader: { paddingBottom: 8 },
   tasksList: {
     flex: 1,
   },
   tasksListContent: {
     padding: 20,
     paddingTop: 0,
+    paddingBottom: 100,
   },
   loadingContainer: {
     padding: 40,
@@ -285,7 +293,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 90,
+    bottom: 24,
     right: 20,
     width: 56,
     height: 56,

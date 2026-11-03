@@ -29,9 +29,9 @@ interface AppButtonProps {
 
 const VARIANT_BG: Record<Variant, string> = {
   primary: colors.primary,
-  success: colors.success,
+  success: colors.trustGreen,
   secondary: colors.primarySoft,
-  danger: colors.danger,
+  danger: colors.dangerStrong,
 };
 
 const VARIANT_FG: Record<Variant, string> = {
@@ -103,6 +103,7 @@ export function AppButton({
 
 const styles = StyleSheet.create({
   base: {
+    minHeight: 48,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
