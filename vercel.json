@@ -1,22 +1,33 @@
 {
-  "buildCommand": "npm run build:web",
+  "buildCommand": "npm run quality && node --experimental-strip-types --test supabase/tests/customer_portal_*.test.mjs && npm run build:web",
   "outputDirectory": "dist",
   "framework": null,
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
         },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     },
     {
       "source": "/sw.js",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ],
   "rewrites": [
