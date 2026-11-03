@@ -49,6 +49,22 @@ Deno.serve(async (req) => {
       .single();
     if (!actor?.is_active || actor.role !== 'superadmin')
       return json({ error: 'Accès réservé à la facturation' }, 403);
+    // Preserve the platform's MFA requirement on this new privileged endpoint.
+    const { data: factorData, error: factorError } =
+      await admin.auth.admin.mfa.listFactors({ userId: auth.user.id });
+    if (factorError)
+      return json({ error: 'Vérification de sécurité indisponible' }, 503);
+    if (
+      (factorData?.factors ?? []).some((factor) => factor.status === 'verified')
+    ) {
+      let aal = '';
+      try {
+        aal = JSON.parse(atob(jwt.split('.')[1] ?? ''))?.aal ?? '';
+      } catch {
+        aal = '';
+      }
+      if (aal !== 'aal2') return json({ error: 'Validation 2FA requise' }, 401);
+    }
     const { data: allowed, error: rateError } = await admin.rpc(
       'check_ai_rate_limit',
       {
