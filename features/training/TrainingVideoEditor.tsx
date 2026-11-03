@@ -21,6 +21,7 @@ import { updateDemoCollection } from '../../lib/demoStore';
 import { supabase, type Training } from '../../lib/supabase';
 import { AppButton } from '../../shared/components/AppButton';
 import { AppModal } from '../../shared/components/AppModal';
+import { ChoiceControl } from '../../shared/components/ChoiceControl';
 import { colors } from '../../shared/styles/tokens';
 import { mapSupabaseError } from '../../utils/error';
 
@@ -409,7 +410,7 @@ export function TrainingVideoEditor({
             <Field label="Réponse B" value={answerB} set={setAnswerB} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {[0, 1].map((i) => (
-                <TouchableOpacity
+                <ChoiceControl
                   key={i}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: correct === i }}
@@ -422,7 +423,7 @@ export function TrainingVideoEditor({
                   }}
                 >
                   <Text>Bonne réponse : {i === 0 ? 'A' : 'B'}</Text>
-                </TouchableOpacity>
+                </ChoiceControl>
               ))}
             </View>
           </>

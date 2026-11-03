@@ -91,6 +91,18 @@ test('import privé connecté : fichier, publication et URL signée passent par 
     .fill('Contrôle technique, sans contenu pédagogique publié ?');
   await page.getByLabel('Réponse A', { exact: true }).fill('Oui');
   await page.getByLabel('Réponse B', { exact: true }).fill('Non');
+  await page
+    .getByRole('radio', { name: 'Bonne réponse : B', exact: true })
+    .press('Space');
+  await expect(
+    page.getByRole('radio', { name: 'Bonne réponse : B', exact: true }),
+  ).toBeChecked();
+  await page
+    .getByRole('radio', { name: 'Bonne réponse : A', exact: true })
+    .press('Enter');
+  await expect(
+    page.getByRole('radio', { name: 'Bonne réponse : A', exact: true }),
+  ).toBeChecked();
   await page.getByTestId('training-video-save').click();
   await expect(page.getByTestId('training-video-editor')).toHaveCount(0);
   expect(uploads).toHaveLength(1);
@@ -184,6 +196,16 @@ test('préparation SEPA en back-office : données exactes de facture et absence 
   await page
     .getByLabel('Montant TTC de chaque échéance SEPA', { exact: true })
     .fill('199,00');
+  await page.getByRole('radio', { name: 'Annuel', exact: true }).press('Space');
+  await expect(
+    page.getByRole('radio', { name: 'Annuel', exact: true }),
+  ).toBeChecked();
+  await page
+    .getByRole('radio', { name: 'Mensuel', exact: true })
+    .press('Enter');
+  await expect(
+    page.getByRole('radio', { name: 'Mensuel', exact: true }),
+  ).toBeChecked();
   await page
     .getByRole('button', {
       name: 'Préparer le calendrier à faire accepter',

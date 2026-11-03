@@ -76,7 +76,11 @@ for (const viewport of [
     );
     await expect(authorize).toBeDisabled();
     await expect(panel.getByRole('checkbox')).not.toBeChecked();
-    await panel.getByRole('checkbox').click();
+    await panel.getByRole('checkbox').press('Space');
+    await expect(panel.getByRole('checkbox')).toBeChecked();
+    await panel.getByRole('checkbox').press('Space');
+    await expect(panel.getByRole('checkbox')).not.toBeChecked();
+    await panel.getByRole('checkbox').press('Enter');
     await expect(panel.getByRole('checkbox')).toBeChecked();
     await expect(authorize).toBeEnabled();
     const popup = context.waitForEvent('page');

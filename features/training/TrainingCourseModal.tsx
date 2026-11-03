@@ -33,6 +33,7 @@ import type {
   TrainingQuizQuestion,
   UserTrainingProgress,
 } from '../../lib/supabase';
+import { ChoiceControl } from '../../shared/components/ChoiceControl';
 
 type OperationResult = {
   data?: unknown;
@@ -597,7 +598,7 @@ export function TrainingCourseModal({
                       isAnswerCorrect = false;
                     }
                     return (
-                      <TouchableOpacity
+                      <ChoiceControl
                         key={`${currentQuestion.id}-${optionIndex}`}
                         accessibilityRole={isMulti ? 'checkbox' : 'radio'}
                         accessibilityLabel={option}
@@ -633,7 +634,7 @@ export function TrainingCourseModal({
                           {String.fromCharCode(65 + optionIndex)}
                         </Text>
                         <Text style={styles.optionText}>{option}</Text>
-                      </TouchableOpacity>
+                      </ChoiceControl>
                     );
                   })}
                 </View>
