@@ -22,8 +22,14 @@ nouveaux sont hors du dépôt public et seront injectés dans le catalogue priv�
 Les anciens cours et leurs historiques ne sont pas réécrits. La lecture
 asynchrone est liée au compte pour écarter les réponses d’un compte précédent.
 
+Le catalogue et le programme d’accueil sécurité ont été vérifiés manuellement
+sur la prévisualisation Vercel, en démo fictive, à 1363 × 936 pixels : filtre
+au clavier, quatre formations de sécurité et objectifs/pratique affichés. Le
+parcours connecté et le téléphone restent à vérifier.
+
 Les dix MP4, textes et sous-titres sont créés et sauvegardés, avec leur paquet
-formateur privé. **Publication en attente** : migrations/import Supabase non
+formateur privé. La [PR #231](https://github.com/lucasmezen972-ui/opspilot/pull/231) est en brouillon.
+**Publication en attente** : migrations/import Supabase non
 appliqués après expiration de la confirmation native ; nouveaux parcours
 navigateur non validés à cause du refus des sockets Unix et de l’élévation de
 permissions dans l’environnement. La compilation, les contrôles de qualité,

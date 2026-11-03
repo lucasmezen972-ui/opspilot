@@ -7,6 +7,7 @@ import { internalProgramCatalogue } from '../features/training/internalPrograms'
 
 const id = '90000000-0000-4000-a000-000000000080';
 const chapterId = '90000000-0000-4000-a000-000000000081';
+const mediaDirectory = process.env.OPSPILOT_TRAINING_MEDIA;
 
 async function prepareLibrary(page: Page, failRefresh = false) {
   const program = internalProgramCatalogue.find(
@@ -56,6 +57,7 @@ async function prepareLibrary(page: Page, failRefresh = false) {
               difficulty: 'beginner',
               duration_minutes: 23,
               xp_reward: 30,
+              ai_generated: true,
               is_active: true,
               min_score: 80,
               program_key: program.key,
@@ -110,12 +112,12 @@ async function prepareLibrary(page: Page, failRefresh = false) {
 }
 
 for (const width of [375, 1440])
-  test(`parcours mixte privé : catalogue, ajout et vraie capsule à ${width}px`, async ({
+  test(`parcours mixte privé : catalogue, ajout et ${mediaDirectory ? 'capsule réelle' : 'fixture technique'} à ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
     const state = await prepareLibrary(page);
-    const media = process.env.OPSPILOT_TRAINING_MEDIA;
+    const media = mediaDirectory;
     const bytes = await readFile(
       media
         ? resolve(media, 'accueil-securite/accueil-securite.mp4')
@@ -167,10 +169,14 @@ for (const width of [375, 1440])
       quality: 80,
     });
     const bookmark = page.getByRole('button', { name: /Aller à Cas fictif/ });
+    const requestedPosition = internalProgramCatalogue
+      .find((p) => p.key === 'accueil-securite')!
+      .video_chapters.find((c) => c.title.startsWith('Cas fictif'))!.seconds;
+    const duration = await video.evaluate((v: HTMLVideoElement) => v.duration);
     await bookmark.click();
     await expect
       .poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime))
-      .toBeGreaterThan(15);
+      .toBeCloseTo(Math.min(requestedPosition, duration), 0);
     // Seeking alone cannot manufacture watched progress or unlock the chapter.
     await expect(page.getByTestId('training-chapter-complete')).toBeDisabled();
     expect(state.copies).toBe(1);

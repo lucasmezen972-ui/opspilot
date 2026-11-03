@@ -48,15 +48,48 @@
     "error": "Unix socket operation not permitted",
     "escalation": "rejected by environment policy: sandbox_approval=false",
     "cloud_local_preview": "ERR_CONNECTION_REFUSED",
-    "mobile_and_desktop_verified": false
+    "mobile_and_desktop_verified": false,
+    "fixture_mode": "Technical MP4 by default; authored clips require OPSPILOT_TRAINING_MEDIA",
+    "desktop_catalogue_preview": {
+      "verified": true,
+      "viewport": {
+        "width": 1363,
+        "height": 936
+      },
+      "mode": "local fictitious demo",
+      "commit": "d2acda1dcb6b0d6508e4f8333b1f8e573630cb6a",
+      "deployment": "dpl_6AnNasFJDU9LT55rf4UdGKw7ZNR9",
+      "checks": [
+        "catalogue opens",
+        "Space activates security filter",
+        "four security programs shown",
+        "objectives and prerequisites shown",
+        "onsite practice and internal attestation limits shown",
+        "installation disabled without connected account",
+        "modal has no horizontal overflow"
+      ],
+      "screenshots": [
+        "internal-catalogue-preview.jpg",
+        "internal-programme-preview.jpg"
+      ]
+    },
+    "mobile_verified": false,
+    "connected_install_and_private_playback_verified": false
   },
   "publication": {
     "supabase_migrations": "not_applied_after_expired_confirmation",
     "library_bucket_count": 0,
     "uploaded_mp4_count": 0,
-    "new_frontend_published": false
+    "new_frontend_published": false,
+    "native_confirmation_attempts": 2,
+    "remote_library_table_exists": false,
+    "production_commit": "8975d47bb881cfe380e1785c59973156a346a74c",
+    "production_deployment": "dpl_6f9XcaMkzaME8A6RE8QZaZ4qMGxe",
+    "production_state": "READY",
+    "draft_pr": "https://github.com/lucasmezen972-ui/opspilot/pull/231"
   },
   "github_actions_minutes_used": 0,
   "learner_package": "https://chatgpt.com/library?file_id=libfile_02cb2de3438881918ea173eb24258e09&account_id=personal",
-  "trainer_package": "https://chatgpt.com/library?file_id=libfile_b8ad2db77f2081918d72c0103a3d98e7&account_id=personal"
+  "trainer_package": "https://chatgpt.com/library?file_id=libfile_b8ad2db77f2081918d72c0103a3d98e7&account_id=personal",
+  "preflight_storage_policies": "Existing permissive policies are bucket-scoped; evidence_active_profile is restrictive"
 }

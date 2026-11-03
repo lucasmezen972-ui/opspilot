@@ -127,8 +127,8 @@ reste récupérable par nouvel essai, sans création d’une seconde copie.
 
 ## Déploiement et limites constatées
 
-Les nouveautés ne sont pas publiées au moment de ce relevé. La première
-confirmation native Supabase a expiré ; le contrôle distant a confirmé zéro
+Les nouveautés ne sont pas publiées au moment de ce relevé. Les deux tentatives de
+confirmation native Supabase ont expiré ; le contrôle distant a confirmé zéro
 migration `internal_training_library` et zéro bucket `training-library`.
 Aucun MP4 du paquet n’a encore été téléversé dans Supabase.
 
@@ -140,12 +140,14 @@ taille/type/hash, rejeu et conflit d’objet. Les dix MP4 passent le décodage
 complet FFmpeg, le SHA-256, la présence H.264/AAC, les sous-titres courts et
 les crédits de voix. Le relevé des tests unitaires est dans la preuve JSON.
 
-Les trois nouveaux scénarios Playwright sont écrits mais **ne sont pas validés** :
+Les trois nouveaux scénarios Playwright sont écrits mais **ne sont pas validés**.
+Le mode par défaut utilise le MP4 technique du dépôt ; définir
+`OPSPILOT_TRAINING_MEDIA` sur le dossier des dix capsules pour contrôler leur lecture réelle.
+Le lancement reste bloqué :
 le lancement de Chrome échoue sur un socket Unix interdit par l’environnement.
 Le contrôle d’autorisation a refusé l’élévation des permissions (`sandbox_approval=false`).
 Le navigateur distant disponible ne peut pas joindre `localhost:3000` et renvoie
-`ERR_CONNECTION_REFUSED`. Aucun contrôle mobile/ordinateur de ces nouveaux
-écrans ni capture d’interface réussie n’est revendiqué. Les images des capsules
+`ERR_CONNECTION_REFUSED`. Le parcours connecté complet et le téléphone ne sont pas validés. Les images des capsules
 sont des captures des MP4, pas des preuves de parcours applicatif.
 
 Aucune minute GitHub Actions utilisée. Les anciens contrôles de production
@@ -172,3 +174,16 @@ consignés dans ETAT-PROJET ne prouvent pas la publication de cette livraison.
 
 Les démarches Cloudflare restent reportées à la demande de Lucas. Le SEPA et
 les étapes Qonto ne changent pas avec cette livraison pédagogique.
+
+La [PR #231](https://github.com/lucasmezen972-ui/opspilot/pull/231) reste en brouillon. Le domaine public sert toujours `8975d47b`, Vercel `READY` ; ce contrôle ne valide pas les nouveaux parcours.
+
+### Contrôle manuel de la prévisualisation
+
+Vercel `READY` sur `d2acda1d`, déploiement `dpl_6AnNasFJDU9LT55rf4UdGKw7ZNR9`.
+La démo fictive permet de vérifier le catalogue à 1363 × 936 pixels : ouverture,
+filtre Sécurité avec Espace, quatre programmes affichés, aperçu des objectifs,
+prérequis, positionnement et pratique au poste. Le bouton d’ajout est désactivé
+pour le mode local, comme prévu. La modale mesure 1000 pixels de large, sans
+débordement horizontal constaté. Captures : `internal-catalogue-preview.jpg` et
+`internal-programme-preview.jpg`. Ce contrôle ne valide pas l’installation
+connectée, la lecture privée, le quiz de ces nouveaux programmes ni le téléphone.
