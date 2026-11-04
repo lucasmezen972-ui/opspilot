@@ -1,0 +1,69 @@
+{
+  "checked_at_utc": "2026-11-04T00:01:29.940517+00:00",
+  "base_commit": "2adc97f8428817370d65fb710252548c3c2e5e50",
+  "checks": {
+    "exit_codes": {
+      "typecheck": 0,
+      "lint": 0,
+      "format": 0,
+      "unit": 0
+    },
+    "unit_tests": 376,
+    "unit_files": 63,
+    "browser_scenarios": 110,
+    "new_accessibility_scenarios": 11,
+    "build": "passed",
+    "lint": "one pre-existing import warning"
+  },
+  "sources_sha256": {
+    "app/(tabs)/_layout.tsx": "bc2f4b143f5e36d7bff07dd033341c536d15208c0c852e77833790b9d54d3592",
+    "app/(tabs)/chat.tsx": "4d7f5db64adcd05229f6dce908b120cfde951e5a6dd75684fe00fa8f7f78a013",
+    "app/(tabs)/manager.tsx": "fd28964248bcf0c7d7921d5cc2e4538dc899b9fd63531c6565fb555b67f19f9e",
+    "app/(tabs)/training.tsx": "74e16ccb7057444215a0e587f67b74a032efdde6129a892c09045ed1cadb5c76",
+    "app/+html.tsx": "ee04d99cd30ea1e988eb31945cf2d8b19f74de5df749b337c2dbbf135007032c",
+    "features/audits/CreateAuditModal.tsx": "c72e51d0dc97edca98a8dc88aa08d6ac9043ebcddb6fc81fa14f185e474a3385",
+    "features/tasks/CreateTaskModal.tsx": "69ed470d9ab773c487d75bb8b16e12f2d7164e28a0571b2f78822f17ded83ca3",
+    "shared/components/AppInput.tsx": "fa64a0655d200b438ead98431ab8ab9608c3ac2b7b6b3b48087339ff2788d298",
+    "shared/components/AppModal.tsx": "7aa1feb1aee61af440a6496ffc7a0d9642490dbc8420bbcbae5037d2b5a2f65b",
+    "shared/components/AppTabBar.tsx": "cf6fb39cff6e7cf92551d5b8e128bad842068782fc627aaf431e25013f405ce6",
+    "shared/components/AppRadioGroup.tsx": "97ebe2984c586976a2f58a3bb30acc45764b95e9399da43a20299b78fa70bd80",
+    "e2e/26-accessible-journeys.spec.ts": "e8b79386bfe2f0f89b2587b1d9229677321d76fa7444695ad6644fc8783939d4"
+  },
+  "compiled_html_sha256": "63e860abc6e662f488ea5c77840b1912981bd187ec31dff54fa4004968cc431f",
+  "capture_sha256": {
+    "audit-375.jpg": "47343b6f0bb9a9198fe15349f3267b2ff417d19b3fba2a05a0baced98ae5980c",
+    "before-task-375.jpg": "16c8b10530a81a9bc5144189f7a656627d8697234d2bcd635f6dc43c3ba6c642",
+    "chat-375.jpg": "cdd31fcfd9ef8c513963394c8eeaf9b082a66100dbe3f58eb16e95c694501513",
+    "manager-1920.jpg": "58133841613b6b43d9d290f9b80f969b58b00af8524d8a6b05245ac917856b0e",
+    "manager-768.jpg": "36aad6cf8973ab273e260a5766722d775d7a437f1b8d75750590d50227b14e2d",
+    "tabs-chat-1440.jpg": "7754ab475c5fda76019133e16c3cad83370304a6b97141b0634883b3bb54b4da",
+    "tabs-manager-1440.jpg": "9639774e45a1ec161ae4340cd62693ffb76b5e11f98826efaef93863dd55c682",
+    "tabs-training-1440.jpg": "503b8dfc0d6fd8ade69630a828abfa41340be2cebc918e5e8236e21c5b2d897b",
+    "task-320.jpg": "386ef0df0f710387b7d9367e4223f16bad42655c91faafa881ba662a8536524f",
+    "task-375-text200.jpg": "0f37678d8c6187c7939052d2bf5ebc36a9c3a7eba83153f0670cf269d9071ada",
+    "task-812.jpg": "6e589a6ae4f5fbe13d77458c0822e3afebc5d1f91f1781985255883cd7c457e5",
+    "task-keyboard-1440.jpg": "dc3ca12eb171bb64399fda9f5936ff388c3528a2967d1d377b0b3d98dcc2743a",
+    "task-keyboard-375.jpg": "75d1cae70bbe2d4f3928232d8660ac2c7891cb63a8a285a55d3d01bcfcc166a4",
+    "training-375.jpg": "81904976e60effa1b56bee3aa0be97e871971b51350bc031f3b7715580f42074"
+  },
+  "widths_css_px": [320, 375, 768, 812, 1440, 1920],
+  "text_resize": {
+    "factor": 2,
+    "scope": "task form, existing home/navigation regression"
+  },
+  "keyboard": [
+    "Tab/Shift+Tab within dialog",
+    "Escape and return to opener",
+    "radio arrows/Home/End/Space",
+    "tabs arrows/Home/Enter/Space and named panels"
+  ],
+  "browser_history": "Back, Forward and revisited routes pass",
+  "roles": "local manager demo and intercepted employee fixture",
+  "limits": [
+    "web only",
+    "no assistive-technology or native device audit",
+    "no claim of full WCAG compliance"
+  ],
+  "api_scope": "local demo and intercepted fictitious API responses; no production write or payment",
+  "publication": "exact candidate, preview READY, merged tree and public verification recorded in the pull request"
+}

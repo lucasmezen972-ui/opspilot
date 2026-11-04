@@ -1,14 +1,9 @@
-import { X } from 'lucide-react-native';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { AppButton } from '../../shared/components/AppButton';
+import { AppInput } from '../../shared/components/AppInput';
+import { AppModal } from '../../shared/components/AppModal';
+import { colors } from '../../shared/styles/tokens';
 
 interface CreateAuditModalProps {
   visible: boolean;
@@ -19,7 +14,7 @@ interface CreateAuditModalProps {
   onConfirm: () => void;
 }
 
-/** Modale de création d'un audit : titre et rappel du modèle choisi. */
+/** Audit title and template stay named while filling the form. */
 export function CreateAuditModal({
   visible,
   title,
@@ -29,115 +24,53 @@ export function CreateAuditModal({
   onConfirm,
 }: CreateAuditModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Nouvel audit</Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            testID="audit-create-title-input"
-            style={styles.input}
-            value={title}
-            onChangeText={onChangeTitle}
-            placeholder="Titre de l'audit"
-            autoFocus
-          />
-          <Text style={styles.templateText}>
-            {selectedTemplateName
-              ? `Modèle : ${selectedTemplateName}`
-              : 'Audit libre : questionnaire standard à la clôture'}
-          </Text>
-          <View style={styles.actions}>
-            <AppButton
-              label="Annuler"
-              variant="secondary"
-              fullWidth={false}
-              style={{ flex: 1 }}
-              onPress={onClose}
-            />
-            <AppButton
-              label="Créer"
-              testID="audit-create-submit"
-              fullWidth={false}
-              style={{ flex: 1 }}
-              disabled={!title.trim()}
-              onPress={onConfirm}
-            />
-          </View>
-        </View>
+    <AppModal
+      visible={visible}
+      onClose={onClose}
+      title="Nouvel audit"
+      testID="audit-create-modal"
+      closeLabel="Fermer la création d’audit"
+      maxWidth={440}
+      scrollable
+    >
+      <Text style={styles.hint}>
+        Le titre est obligatoire pour retrouver cet audit.
+      </Text>
+      <AppInput
+        label="Titre de l’audit"
+        placeholder="Titre de l'audit"
+        testID="audit-create-title-input"
+        value={title}
+        onChangeText={onChangeTitle}
+        autoFocus
+        required
+      />
+      <Text style={styles.hint}>
+        {selectedTemplateName
+          ? `Modèle : ${selectedTemplateName}`
+          : 'Audit libre : questionnaire standard à la clôture'}
+      </Text>
+      <View style={styles.actions}>
+        <AppButton
+          label="Annuler"
+          variant="secondary"
+          fullWidth={false}
+          style={{ flex: 1 }}
+          onPress={onClose}
+        />
+        <AppButton
+          label="Créer"
+          testID="audit-create-submit"
+          fullWidth={false}
+          style={{ flex: 1 }}
+          disabled={!title.trim()}
+          onPress={onConfirm}
+        />
       </View>
-    </Modal>
+    </AppModal>
   );
 }
-
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  templateText: {
-    marginTop: -6,
-    marginBottom: 16,
-    color: '#6B7280',
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  cancelText: {
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  confirmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#2563EB',
-  },
-  confirmText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
+  hint: { fontSize: 13, lineHeight: 19, color: colors.textMuted },
+  actions: { flexDirection: 'row', gap: 12 },
 });

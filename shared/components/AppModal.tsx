@@ -1,5 +1,5 @@
 import { X } from 'lucide-react-native';
-import type { ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import {
   Modal,
   View,
@@ -22,6 +22,7 @@ interface AppModalProps {
   testID?: string;
   maxWidth?: number;
   scrollable?: boolean;
+  closeLabel?: string;
 }
 
 /** Modale premium tokenisée : overlay, carte centrée, en-tête + fermeture. */
@@ -33,15 +34,47 @@ export function AppModal({
   testID,
   maxWidth = 460,
   scrollable = false,
+  closeLabel = 'Fermer',
 }: AppModalProps) {
   const { height } = useWindowDimensions();
+  const titleId = useId();
+  const returnFocus = useRef<HTMLElement | null>(null);
+  // RN Web's trap can remember the auto-focused field instead of the opener.
+  // Remember focus outside dialogs while closed, then restore after dismissal.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || visible) return;
+    const remember = (target: EventTarget | null) => {
+      if (
+        target instanceof HTMLElement &&
+        target !== document.body &&
+        !target.closest('[aria-modal="true"]')
+      )
+        returnFocus.current = target;
+    };
+    remember(document.activeElement);
+    const listener = (event: FocusEvent) => remember(event.target);
+    document.addEventListener('focusin', listener);
+    return () => document.removeEventListener('focusin', listener);
+  }, [visible]);
   return (
     <Modal
       accessibilityLabel={title ?? 'Fenêtre'}
+      aria-labelledby={title ? titleId : undefined}
       visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      onDismiss={() => {
+        if (Platform.OS === 'web')
+          requestAnimationFrame(() => {
+            if (
+              returnFocus.current?.isConnected &&
+              !document.querySelector('[role="dialog"][aria-modal="true"]')
+            ) {
+              returnFocus.current.focus({ preventScroll: true });
+            }
+          });
+      }}
     >
       <KeyboardAvoidingView
         style={styles.keyboard}
@@ -56,12 +89,18 @@ export function AppModal({
           >
             {title && (
               <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
+                <Text
+                  nativeID={titleId}
+                  accessibilityRole="header"
+                  style={styles.title}
+                >
+                  {title}
+                </Text>
                 <TouchableOpacity
                   testID={testID ? `${testID}-close` : undefined}
                   onPress={onClose}
                   accessibilityRole="button"
-                  accessibilityLabel="Fermer"
+                  accessibilityLabel={closeLabel}
                   style={styles.closeButton}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >

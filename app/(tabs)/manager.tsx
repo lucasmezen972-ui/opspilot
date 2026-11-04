@@ -159,6 +159,9 @@ function ManagerDashboardContent() {
       )}
 
       <AppTabBar
+        id="manager-views"
+        label="Vues du cockpit"
+        panelID="manager-views-panel"
         activeKey={activeTab}
         onChange={setActiveTab}
         tabs={[
@@ -167,20 +170,28 @@ function ManagerDashboardContent() {
         ]}
       />
 
-      {activeTab === 'cockpit' ? (
-        <>
-          <ManagerCockpit signals={cockpitSignals} risks={cockpitRisks} />
-          <ActivityFeed events={activityEvents} />
-        </>
-      ) : (
-        <ManagerDetails
-          stats={stats}
-          storeStats={storeStats}
-          urgentTasks={urgentTasks}
-          recentAudits={recentAudits}
-          auditsEmpty={audits.length === 0 && tasks.length === 0}
-        />
-      )}
+      <View
+        nativeID="manager-views-panel"
+        role="tabpanel"
+        aria-labelledby={`manager-views-${activeTab}`}
+        tabIndex={0}
+        style={{ gap: 16 }}
+      >
+        {activeTab === 'cockpit' ? (
+          <>
+            <ManagerCockpit signals={cockpitSignals} risks={cockpitRisks} />
+            <ActivityFeed events={activityEvents} />
+          </>
+        ) : (
+          <ManagerDetails
+            stats={stats}
+            storeStats={storeStats}
+            urgentTasks={urgentTasks}
+            recentAudits={recentAudits}
+            auditsEmpty={audits.length === 0 && tasks.length === 0}
+          />
+        )}
+      </View>
     </ScrollView>
   );
 }

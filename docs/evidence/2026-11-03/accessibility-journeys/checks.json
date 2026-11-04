@@ -1,0 +1,11 @@
+{
+  "exit_codes": {
+    "typecheck": 0,
+    "lint": 0,
+    "format": 0,
+    "unit": 0
+  },
+  "unit_tests": 376,
+  "unit_files": 63,
+  "lint_note": "one pre-existing import warning in trainingReadState.test.ts"
+}

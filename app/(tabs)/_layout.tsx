@@ -1,4 +1,5 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
+import Head from 'expo-router/head';
 import {
   Home,
   ClipboardCheck,
@@ -20,10 +21,33 @@ import { colors, shadow } from '../../shared/styles/tokens';
  * Profil) restent routables et sont regroupés dans le hub « Plus ».
  */
 export default function TabLayout() {
+  const pathname = usePathname();
+  const titles: Record<string, string> = {
+    '/': 'Accueil',
+    '/audits': 'Audits',
+    '/tasks': 'Tâches',
+    '/training': 'Formation',
+    '/more': 'Tous les outils',
+    '/products': 'Produits',
+    '/actions': 'Actions correctives',
+    '/reports': 'Rapports',
+    '/chat': 'Communication',
+    '/team': 'Équipe',
+    '/manager': 'Cockpit manager',
+    '/billing': 'Abonnement',
+    '/commercial': 'Présenter OpsPilot',
+    '/backoffice': 'Pilotage clients',
+    '/profile': 'Profil et réglages',
+  };
   const { width } = useWindowDimensions();
   const desktop = Platform.OS === 'web' && width >= 1024;
   return (
     <View style={styles.shell}>
+      {Platform.OS === 'web' && (
+        <Head>
+          <title>{titles[pathname] ?? 'Espace de travail'} · OpsPilot</title>
+        </Head>
+      )}
       {Platform.OS === 'web' && (
         <a className="opspilot-skip-link" href="#opspilot-main">
           Aller au contenu
@@ -39,6 +63,7 @@ export default function TabLayout() {
         >
           <AnnouncementBanner />
           <Tabs
+            backBehavior={Platform.OS === 'web' ? 'fullHistory' : undefined}
             screenOptions={{
               headerShown: false,
               tabBarActiveTintColor: colors.primary,

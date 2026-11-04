@@ -1,20 +1,13 @@
-import { X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  ScrollView,
-  useWindowDimensions,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { getPriorityColor, getPriorityText } from './taskModel';
 import { RECURRENCE_OPTIONS, type Recurrence } from './taskRecurrence';
 import { AppButton } from '../../shared/components/AppButton';
-import { colors, radius } from '../../shared/styles/tokens';
+import { AppInput } from '../../shared/components/AppInput';
+import { AppModal } from '../../shared/components/AppModal';
+import { AppRadioGroup } from '../../shared/components/AppRadioGroup';
+import { colors } from '../../shared/styles/tokens';
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
@@ -33,19 +26,16 @@ interface CreateTaskModalProps {
 
 const PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
-/** Modale de création d'une tâche : titre, description, priorité, récurrence. */
+/** Named form with persistent labels and one keyboard stop per choice group. */
 export function CreateTaskModal({
   visible,
   onClose,
   onSubmit,
 }: CreateTaskModalProps) {
-  const { height } = useWindowDimensions();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
-
-  // Réinitialise le formulaire à chaque ouverture.
   useEffect(() => {
     if (visible) {
       setTitle('');
@@ -54,252 +44,77 @@ export function CreateTaskModal({
       setRecurrence('none');
     }
   }, [visible]);
-
   return (
-    <Modal
+    <AppModal
       visible={visible}
-      transparent
-      animationType="fade"
-      accessibilityLabel="Nouvelle tâche"
+      onClose={onClose}
+      title="Nouvelle tâche"
+      testID="task-create-modal"
+      closeLabel="Fermer la création de tâche"
+      maxWidth={440}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <View
-          style={[styles.content, { maxHeight: Math.max(160, height - 32) }]}
-          testID="task-create-modal"
-        >
-          <View style={styles.header}>
-            <Text style={styles.title}>Nouvelle tâche</Text>
-            <TouchableOpacity
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="Fermer la création de tâche"
-              style={styles.closeButton}
-            >
-              <X size={20} color="#6B7280" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            style={styles.formScroll}
-            keyboardShouldPersistTaps="handled"
-          >
-            <TextInput
-              style={styles.input}
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Titre de la tâche"
-              autoFocus
-            />
-            <TextInput
-              style={[styles.input, styles.inputMultiline]}
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Description (optionnel)"
-              multiline
-            />
-            <View style={styles.prioritySelector}>
-              {PRIORITIES.map((p) => {
-                const active = priority === p;
-                return (
-                  <TouchableOpacity
-                    key={p}
-                    style={[
-                      styles.priorityOption,
-                      active && {
-                        backgroundColor: getPriorityColor(p),
-                        borderColor: getPriorityColor(p),
-                      },
-                    ]}
-                    onPress={() => setPriority(p)}
-                  >
-                    <Text
-                      style={[
-                        styles.priorityOptionText,
-                        active && styles.priorityOptionTextActive,
-                      ]}
-                    >
-                      {getPriorityText(p)}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            <Text style={styles.fieldLabel}>Récurrence</Text>
-            <View style={styles.recurrenceSelector}>
-              {RECURRENCE_OPTIONS.map((option) => {
-                const active = recurrence === option.value;
-                return (
-                  <TouchableOpacity
-                    key={option.value}
-                    testID={`task-recurrence-${option.value}`}
-                    style={[
-                      styles.recurrenceOption,
-                      active && styles.recurrenceOptionActive,
-                    ]}
-                    onPress={() => setRecurrence(option.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.recurrenceText,
-                        active && styles.recurrenceTextActive,
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.actions}>
-              <AppButton
-                label="Annuler"
-                variant="secondary"
-                fullWidth={false}
-                style={{ flex: 1 }}
-                onPress={onClose}
-              />
-              <AppButton
-                label="Créer"
-                testID="task-create-submit"
-                fullWidth={false}
-                style={{ flex: 1 }}
-                disabled={!title.trim()}
-                onPress={() =>
-                  onSubmit({ title, description, priority, recurrence })
-                }
-              />
-            </View>
-          </ScrollView>
-        </View>
+      <Text style={styles.hint}>
+        Le titre est obligatoire. Les autres choix peuvent être ajustés avant de
+        créer la tâche.
+      </Text>
+      <AppInput
+        label="Titre de la tâche"
+        placeholder="Titre de la tâche"
+        value={title}
+        onChangeText={setTitle}
+        required
+        autoFocus
+        testID="task-create-title"
+      />
+      <AppInput
+        label="Description (optionnel)"
+        placeholder="Description (optionnel)"
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
+      <AppRadioGroup
+        label="Priorité"
+        value={priority}
+        onChange={setPriority}
+        choices={PRIORITIES.map((key) => ({
+          key,
+          label: getPriorityText(key),
+          selectedColor: getPriorityColor(key),
+        }))}
+      />
+      <AppRadioGroup
+        label="Récurrence"
+        value={recurrence}
+        onChange={setRecurrence}
+        choices={RECURRENCE_OPTIONS.map((option) => ({
+          key: option.value,
+          label: option.label,
+          testID: `task-recurrence-${option.value}`,
+        }))}
+      />
+      <View style={styles.actions}>
+        <AppButton
+          label="Annuler"
+          variant="secondary"
+          fullWidth={false}
+          style={{ flex: 1 }}
+          onPress={onClose}
+        />
+        <AppButton
+          label="Créer"
+          testID="task-create-submit"
+          fullWidth={false}
+          style={{ flex: 1 }}
+          disabled={!title.trim()}
+          onPress={() => onSubmit({ title, description, priority, recurrence })}
+        />
       </View>
-    </Modal>
+    </AppModal>
   );
 }
-
 const styles = StyleSheet.create({
-  formScroll: { flexShrink: 1 },
-  closeButton: {
-    minHeight: 44,
-    minWidth: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.controlBorder,
-    borderRadius: radius.sm,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textStrong,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  inputMultiline: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  prioritySelector: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  priorityOption: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-  priorityOptionText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.textMuted,
-  },
-  priorityOptionTextActive: {
-    color: '#FFFFFF',
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textMuted,
-    marginBottom: 6,
-  },
-  recurrenceSelector: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 14,
-  },
-  recurrenceOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  recurrenceOptionActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  recurrenceText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textMuted,
-  },
-  recurrenceTextActive: {
-    color: '#FFFFFF',
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 4,
-  },
-  cancelButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: radius.sm,
-    backgroundColor: '#F3F4F6',
-  },
-  cancelText: {
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-  confirmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: radius.sm,
-    backgroundColor: colors.primary,
-  },
-  confirmText: {
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
+  hint: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
+  actions: { flexDirection: 'row', gap: 12 },
 });
