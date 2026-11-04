@@ -20,6 +20,8 @@ interface AppInputProps {
   multiline?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   testID?: string;
+  required?: boolean;
+  autoFocus?: boolean;
 }
 
 /** Champ de saisie premium tokenisé : label, focus, état d'erreur. */
@@ -34,6 +36,8 @@ export function AppInput({
   multiline,
   autoCapitalize,
   testID,
+  required = false,
+  autoFocus = false,
 }: AppInputProps) {
   const [focused, setFocused] = useState(false);
   const fieldId = useId();
@@ -42,6 +46,7 @@ export function AppInput({
       {label && (
         <Text nativeID={`${fieldId}-label`} style={styles.label}>
           {label}
+          {required ? ' *' : ''}
         </Text>
       )}
       <TextInput
@@ -50,6 +55,8 @@ export function AppInput({
         aria-labelledby={label ? `${fieldId}-label` : undefined}
         aria-describedby={error ? `${fieldId}-error` : undefined}
         aria-invalid={Boolean(error)}
+        aria-required={required}
+        autoFocus={autoFocus}
         testID={testID}
         style={[
           styles.input,

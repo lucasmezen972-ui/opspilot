@@ -5,6 +5,19 @@
 > intervention, avec `docs/DEVELOPER.md` (architecture/conventions) et
 > `supabase/migrations/README.md` (règles migrations).
 
+## Accessibilité et parcours — 3 novembre 2026
+
+Lucas demande d’améliorer l’accessibilité et le parcours après la PR 237.
+Les créations de tâche/audit gardent leurs labels et se ferment avec Échap,
+avec retour au déclencheur. Les choix et onglets secondaires sont utilisables
+au clavier et exposent leurs noms/états. Le web conserve les étapes dans
+l’historique et donne un titre propre à chaque écran.
+
+Périmètre, preuves et limites :
+[ACCESSIBILITE-PARCOURS-2026-11-03.md](ACCESSIBILITE-PARCOURS-2026-11-03.md).
+La PR de cette passe consigne le candidat exact, sa preview et la production.
+Cette amélioration du web ne vaut pas conformité complète ni audit natif.
+
 ## Visibilité des actions — correction du 3 novembre 2026
 
 Après la PR 236, Lucas demande des actions plus reconnaissables : la sobriété ne

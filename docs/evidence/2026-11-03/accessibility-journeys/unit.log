@@ -1,0 +1,16 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:56:12 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "babel-plugin" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+ RUN  v5.1.0 /workspace/scratch/7ca595e497b7/opspilot-identity-recovery
+
+
+ Test Files  63 passed (63)
+      Tests  376 passed (376)
+   Start at  08:56:12
+   Duration  125.21s (environment 65%, import 18%, tests 9%, transform 4%, setup 2%, worker 1%)
+
+Environment  jsdom was created 63 times · 62.58s total, 65% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

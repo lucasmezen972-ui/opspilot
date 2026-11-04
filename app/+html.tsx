@@ -68,6 +68,8 @@ export default function Root({ children }: PropsWithChildren) {
                 font-synthesis: none;
               }
               input, textarea { font-variant-numeric: tabular-nums; }
+              [role="radiogroup"] > [role="radio"] { min-width: min-content; max-width: 100%; }
+              [role="radio"] [dir="auto"] { flex-shrink: 0; }
               * { -webkit-tap-highlight-color: transparent; }
               :where(a, button, [role="button"], [role="link"], [role="tab"]):not([aria-disabled="true"]):not(:disabled) {
                 cursor: pointer;

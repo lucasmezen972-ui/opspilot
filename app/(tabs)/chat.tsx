@@ -344,6 +344,9 @@ export default function ChatScreen() {
       )}
 
       <AppTabBar
+        id="chat-views"
+        label="Vues de la communication"
+        panelID="chat-views-panel"
         activeKey={activeTab}
         onChange={setActiveTab}
         tabs={[
@@ -352,83 +355,94 @@ export default function ChatScreen() {
         ]}
       />
 
-      {activeTab === 'canaux' ? (
-        <View style={styles.channelContainer} testID="chat-channels-container">
-          {activeChannel ? (
-            <ChannelView
-              channel={activeChannel}
-              messages={getMessagesForChannel(activeChannel.id)}
-              pinnedMessage={getPinnedMessage(activeChannel.id)}
-              currentUserId={currentUserId}
-              canModerate={isManager}
-              onBack={() => setActiveChannelId(null)}
-              onSend={(content, type) => {
-                sendChannelMessage(activeChannel.id, content, type).then(
-                  (result) => {
-                    if (result?.error) {
-                      Alert.alert(
-                        'Message non envoyé',
-                        'La communication interne reste disponible en mode démo.',
-                      );
-                    }
-                  },
-                  () => {
-                    Alert.alert('Erreur', "Impossible d'envoyer le message.");
-                  },
-                );
-              }}
-              onTogglePin={togglePin}
-              onDelete={deleteMessage}
-              onSearch={searchMessages}
-            />
-          ) : (
-            <ScrollView>
-              <ChannelList
-                channels={channels}
-                activeChannelId={activeChannelId}
-                getUnreadCount={getChannelUnread}
-                onSelect={handleSelectChannel}
+      <View
+        nativeID="chat-views-panel"
+        role="tabpanel"
+        aria-labelledby={`chat-views-${activeTab}`}
+        tabIndex={0}
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        {activeTab === 'canaux' ? (
+          <View
+            style={styles.channelContainer}
+            testID="chat-channels-container"
+          >
+            {activeChannel ? (
+              <ChannelView
+                channel={activeChannel}
+                messages={getMessagesForChannel(activeChannel.id)}
+                pinnedMessage={getPinnedMessage(activeChannel.id)}
+                currentUserId={currentUserId}
+                canModerate={isManager}
+                onBack={() => setActiveChannelId(null)}
+                onSend={(content, type) => {
+                  sendChannelMessage(activeChannel.id, content, type).then(
+                    (result) => {
+                      if (result?.error) {
+                        Alert.alert(
+                          'Message non envoyé',
+                          'La communication interne reste disponible en mode démo.',
+                        );
+                      }
+                    },
+                    () => {
+                      Alert.alert('Erreur', "Impossible d'envoyer le message.");
+                    },
+                  );
+                }}
+                onTogglePin={togglePin}
+                onDelete={deleteMessage}
+                onSearch={searchMessages}
               />
-            </ScrollView>
-          )}
-        </View>
-      ) : selectedConversation ? (
-        <ConversationPanel
-          name={selectedConvName}
-          isAI={Boolean(isAIConversation)}
-          assistantLoading={assistantLoading}
-          loading={loading}
-          messages={displayMessages}
-          draft={newMessage}
-          onChangeDraft={setNewMessage}
-          onSend={handleSendMessage}
-          onBack={() => setSelectedConversation(null)}
-        />
-      ) : (
-        <ScrollView style={styles.conversationsList}>
-          <Text style={styles.sectionTitle}>Conversations</Text>
-          {filteredConversations.length === 0 ? (
-            <AppEmptyState
-              icon={MessageCircle}
-              title={searchQuery ? 'Aucun résultat' : 'Aucune conversation'}
-              description={
-                searchQuery
-                  ? "Essayez avec d'autres termes de recherche."
-                  : "Vos conversations et l'assistant IA apparaîtront ici."
-              }
-            />
-          ) : (
-            filteredConversations.map((conversation) => (
-              <ConversationCard
-                key={conversation.id}
-                conversation={conversation}
-                active={false}
-                onPress={() => setSelectedConversation(conversation.id)}
+            ) : (
+              <ScrollView>
+                <ChannelList
+                  channels={channels}
+                  activeChannelId={activeChannelId}
+                  getUnreadCount={getChannelUnread}
+                  onSelect={handleSelectChannel}
+                />
+              </ScrollView>
+            )}
+          </View>
+        ) : selectedConversation ? (
+          <ConversationPanel
+            name={selectedConvName}
+            isAI={Boolean(isAIConversation)}
+            assistantLoading={assistantLoading}
+            loading={loading}
+            messages={displayMessages}
+            draft={newMessage}
+            onChangeDraft={setNewMessage}
+            onSend={handleSendMessage}
+            onBack={() => setSelectedConversation(null)}
+          />
+        ) : (
+          <ScrollView style={styles.conversationsList}>
+            <Text style={styles.sectionTitle}>Conversations</Text>
+            {filteredConversations.length === 0 ? (
+              <AppEmptyState
+                icon={MessageCircle}
+                title={searchQuery ? 'Aucun résultat' : 'Aucune conversation'}
+                description={
+                  searchQuery
+                    ? "Essayez avec d'autres termes de recherche."
+                    : "Vos conversations et l'assistant IA apparaîtront ici."
+                }
               />
-            ))
-          )}
-        </ScrollView>
-      )}
+            ) : (
+              filteredConversations.map((conversation) => (
+                <ConversationCard
+                  key={conversation.id}
+                  conversation={conversation}
+                  active={false}
+                  onPress={() => setSelectedConversation(conversation.id)}
+                />
+              ))
+            )}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }

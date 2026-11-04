@@ -397,6 +397,9 @@ export default function TrainingScreen() {
 
       {isManager && (
         <AppTabBar
+          id="training-views"
+          label="Vues de la formation"
+          panelID="training-views-panel"
           activeKey={activeTab}
           onChange={setActiveTab}
           tabs={[
@@ -414,141 +417,151 @@ export default function TrainingScreen() {
         />
       )}
 
-      {isManager && activeTab === 'supervision' ? (
-        <TrainingSupervision
-          courses={supervisionCourses}
-          entries={supervisionEntries}
-          onSendReminder={sendReminder}
-        />
-      ) : (
-        <ScrollView
-          style={styles.content}
-          contentContainerStyle={{
-            width: '100%',
-            maxWidth: 1120,
-            alignSelf: 'center',
-          }}
-        >
-          <TrainingStatsOverview
-            completedCourses={completedCourses}
-            totalStudyTime={totalStudyTime}
-            avgScore={avgScore}
+      <View
+        nativeID="training-views-panel"
+        role={isManager ? 'tabpanel' : undefined}
+        aria-labelledby={isManager ? `training-views-${activeTab}` : undefined}
+        tabIndex={isManager ? 0 : undefined}
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        {isManager && activeTab === 'supervision' ? (
+          <TrainingSupervision
+            courses={supervisionCourses}
+            entries={supervisionEntries}
+            onSendReminder={sendReminder}
           />
-
-          <TrainingAchievements completedCourses={completedCourses} />
-
-          {isManager && (
-            <TrainingProgramLibrary
-              organizationId={profile?.organization_id ?? ''}
-              actorId={profile?.id ?? ''}
-              isLocalDemo={isLocalDemo}
-              courses={dbCourses}
-              onInstalled={async (id) => {
-                const loaded = await refetch();
-                if (!loaded?.some((course) => course.id === id))
-                  throw new Error('Parcours non actualisé');
-                const started = await startCourse(id);
-                if (started.error) throw new Error(String(started.error));
-                setSelectedCourseId(id);
-              }}
-            />
-          )}
-
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Formations disponibles</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {isManager && (
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    testID="training-video-add"
-                    onPress={() => setShowVideoEditor(true)}
-                    style={styles.aiGenerateButton}
-                  >
-                    <Text style={styles.aiGenerateButtonText}>
-                      Ajouter une vidéo
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                {isManager && (
-                  <TouchableOpacity
-                    style={styles.aiGenerateButton}
-                    accessibilityLabel="Générer une formation"
-                    onPress={() => setShowTopicPicker(true)}
-                    disabled={generatingCourse}
-                  >
-                    <Sparkles size={16} color={colors.warning} />
-                    <Text style={styles.aiGenerateButtonText}>
-                      {generatingCourse ? 'Génération...' : 'IA'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-            <TextInput
-              accessibilityLabel="Rechercher une formation"
-              placeholder="Rechercher une formation"
-              value={search}
-              onChangeText={setSearch}
-              style={{
-                borderWidth: 1,
-                borderColor: colors.border,
-                borderRadius: 10,
-                padding: 14,
-                marginBottom: 16,
-                color: colors.textStrong,
-                backgroundColor: colors.surface,
-              }}
+        ) : (
+          <ScrollView
+            style={styles.content}
+            contentContainerStyle={{
+              width: '100%',
+              maxWidth: 1120,
+              alignSelf: 'center',
+            }}
+          >
+            <TrainingStatsOverview
+              completedCourses={completedCourses}
+              totalStudyTime={totalStudyTime}
+              avgScore={avgScore}
             />
 
-            {coursesLoading ? (
-              <View style={styles.loadingBanner}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={styles.loadingText}>
-                  Chargement des formations…
-                </Text>
-              </View>
-            ) : coursesError ? (
-              <View style={styles.errorBanner}>
-                <Text style={styles.errorText}>{coursesError}</Text>
-              </View>
-            ) : courses.length === 0 ? (
-              <Text style={styles.emptyCourses}>
-                Aucune formation disponible pour le moment.
-              </Text>
-            ) : visibleCourses.length === 0 ? (
-              <Text style={styles.emptyCourses}>
-                Aucune formation ne correspond à votre recherche.
-              </Text>
-            ) : (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  columnGap: 16,
+            <TrainingAchievements completedCourses={completedCourses} />
+
+            {isManager && (
+              <TrainingProgramLibrary
+                organizationId={profile?.organization_id ?? ''}
+                actorId={profile?.id ?? ''}
+                isLocalDemo={isLocalDemo}
+                courses={dbCourses}
+                onInstalled={async (id) => {
+                  const loaded = await refetch();
+                  if (!loaded?.some((course) => course.id === id))
+                    throw new Error('Parcours non actualisé');
+                  const started = await startCourse(id);
+                  if (started.error) throw new Error(String(started.error));
+                  setSelectedCourseId(id);
                 }}
-              >
-                {visibleCourses.map((course) => (
-                  <View
-                    key={course.id}
-                    style={{ width: width >= 900 ? '48.5%' : '100%' }}
-                  >
-                    <TrainingCourseCard
-                      course={course}
-                      onOpen={handleOpenCourse}
-                    />
-                  </View>
-                ))}
-              </View>
+              />
             )}
-          </View>
 
-          <TrainingLeaderboard
-            entries={leaderboardEntries}
-            currentUserId={profile?.id}
-          />
-        </ScrollView>
-      )}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Formations disponibles</Text>
+                <View
+                  style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
+                >
+                  {isManager && (
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      testID="training-video-add"
+                      onPress={() => setShowVideoEditor(true)}
+                      style={styles.aiGenerateButton}
+                    >
+                      <Text style={styles.aiGenerateButtonText}>
+                        Ajouter une vidéo
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {isManager && (
+                    <TouchableOpacity
+                      style={styles.aiGenerateButton}
+                      accessibilityLabel="Générer une formation"
+                      onPress={() => setShowTopicPicker(true)}
+                      disabled={generatingCourse}
+                    >
+                      <Sparkles size={16} color={colors.warning} />
+                      <Text style={styles.aiGenerateButtonText}>
+                        {generatingCourse ? 'Génération...' : 'IA'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+              <TextInput
+                accessibilityLabel="Rechercher une formation"
+                placeholder="Rechercher une formation"
+                value={search}
+                onChangeText={setSearch}
+                style={{
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: 10,
+                  padding: 14,
+                  marginBottom: 16,
+                  color: colors.textStrong,
+                  backgroundColor: colors.surface,
+                }}
+              />
+
+              {coursesLoading ? (
+                <View style={styles.loadingBanner}>
+                  <ActivityIndicator size="small" color={colors.primary} />
+                  <Text style={styles.loadingText}>
+                    Chargement des formations…
+                  </Text>
+                </View>
+              ) : coursesError ? (
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorText}>{coursesError}</Text>
+                </View>
+              ) : courses.length === 0 ? (
+                <Text style={styles.emptyCourses}>
+                  Aucune formation disponible pour le moment.
+                </Text>
+              ) : visibleCourses.length === 0 ? (
+                <Text style={styles.emptyCourses}>
+                  Aucune formation ne correspond à votre recherche.
+                </Text>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    columnGap: 16,
+                  }}
+                >
+                  {visibleCourses.map((course) => (
+                    <View
+                      key={course.id}
+                      style={{ width: width >= 900 ? '48.5%' : '100%' }}
+                    >
+                      <TrainingCourseCard
+                        course={course}
+                        onOpen={handleOpenCourse}
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            <TrainingLeaderboard
+              entries={leaderboardEntries}
+              currentUserId={profile?.id}
+            />
+          </ScrollView>
+        )}
+      </View>
 
       <TrainingCourseModal
         visible={selectedCourse !== null}

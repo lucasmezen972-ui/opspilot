@@ -1,0 +1,26 @@
+{
+  "base": "2adc97f8428817370d65fb710252548c3c2e5e50",
+  "task": {
+    "name": "Nouvelle tâche",
+    "inputs": [
+      {
+        "placeholder": "Titre de la tâche",
+        "label": null,
+        "labelledby": null
+      },
+      {
+        "placeholder": "Description (optionnel)",
+        "label": null,
+        "labelledby": null
+      }
+    ],
+    "groups": 0,
+    "escapeCloses": false
+  },
+  "tabs": {
+    "afterArrow": "Cockpit",
+    "detailsSelected": "false",
+    "spaceSelects": "false"
+  },
+  "documentTitle": ""
+}
