@@ -16,12 +16,11 @@ export async function customFetch(
     }
     try {
       const response = await fetch(input, init);
-      if (
-        !retryable ||
-        response.status !== 502 ||
-        attempt >= 2 ||
-        signal?.aborted === true
-      )
+      const transient =
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 429;
+      if (!retryable || !transient || attempt >= 2 || signal?.aborted === true)
         return response;
       await response.body?.cancel();
     } catch (error) {

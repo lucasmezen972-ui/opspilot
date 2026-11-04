@@ -171,7 +171,7 @@ export function useCorrectiveActions() {
           entityType: 'corrective_action',
           entityId: id,
           uri,
-          uploadedBy: user?.id,
+          uploadedBy: user?.id ?? null,
         });
         if (!path)
           return {
