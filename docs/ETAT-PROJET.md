@@ -16,6 +16,10 @@ l’historique et donne un titre propre à chaque écran.
 Périmètre, preuves et limites :
 [ACCESSIBILITE-PARCOURS-2026-11-03.md](ACCESSIBILITE-PARCOURS-2026-11-03.md).
 La PR de cette passe consigne le candidat exact, sa preview et la production.
+La revue publique a aussi révélé des filtres de supervision trop hauts.
+Ils restent maintenant compacts, avec cibles de 44 px, et la liste retrouve
+l’espace utile. Les 22 contrôles ciblés du correctif passent ; la PR de suivi
+conserve sa publication exacte. Aucun média ou contenu de formation ne change.
 Cette amélioration du web ne vaut pas conformité complète ni audit natif.
 
 ## Visibilité des actions — correction du 3 novembre 2026

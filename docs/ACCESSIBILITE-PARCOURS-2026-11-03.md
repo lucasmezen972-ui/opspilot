@@ -61,3 +61,24 @@ Références primaires : [WAI, dialogues modaux](https://www.w3.org/WAI/ARIA/apg
 [React Navigation, historique sur le web](https://reactnavigation.org/docs/web-support/).
 L’option `fullHistory` et le comportement du piège de focus ont été contrôlés
 dans les versions effectivement installées, sans mise à jour de dépendance.
+
+## Revue publique complémentaire — filtres de supervision
+
+La revue des captures publiques de la PR 238 a révélé des filtres étirés :
+environ 290 px à 375 px et 334 px sur ordinateur lors de la reproduction locale.
+Le parcours clavier passait mais cette présentation n’était pas satisfaisante.
+Le ScrollView horizontal ne grandit plus dans l’espace restant ; ses choix sont
+centrés et gardent une cible d’au moins 44 px. La liste des salariés retrouve
+l’espace utile. Aucun contenu, média, droit ou envoi de relance n’est modifié.
+
+Deux contrôles reproduisent le défaut de hauteur avant correction ; trois autres
+vérifient la barre mobile après focus des panneaux. Les cinq passent après
+correction. La compilation corrigée passe 22 scénarios ciblés : création et
+fermeture des formulaires, clavier, historique, texte doublé, rôle salarié,
+formation et panneaux. TypeScript, ESLint et formatage passent. Les 110 scénarios
+de la PR 238 restent la preuve de la passe précédente ; ils ne sont pas présentés
+comme une nouvelle exécution complète de ce correctif de cinq lignes de style.
+
+Captures avant/après et résultats : `evidence/2026-11-03/accessibility-panels/`.
+Le SHA exact du correctif, sa preview READY et la production revérifiée sont
+consignés dans la PR de suivi.

@@ -1,0 +1,37 @@
+{
+  "checked_at_utc": "2026-11-04T00:13:57.536787+00:00",
+  "base_commit": "717203761c4008ca50775b01d23b74ffee774e6b",
+  "baseline": {
+    "expected_failed_height_checks": 2,
+    "passed_navigation_checks": 3,
+    "filter_heights_css_px": {
+      "375": 290,
+      "1440": 333.5
+    }
+  },
+  "final_checks": {
+    "chromium_scenarios": 22,
+    "new_layout_checks": 5,
+    "typecheck": "no diagnostics",
+    "lint": "no diagnostics",
+    "format": "passed",
+    "build": "passed"
+  },
+  "sources_sha256": {
+    "features/training/TrainingSupervision.tsx": "29a3847d8e97c0f6b42b76918e38e2b0173da03c4c8ea5fbd910667bbd21e230",
+    "e2e/27-panel-layout.spec.ts": "a8c58e22202b64db463cbb25bfcb540335b5eaa9e062f06bb223df870522d9b8"
+  },
+  "compiled_html_sha256": "db4d9cdf25ab6dcbdfe1b1f0536d9f9403941f35f5f99c607a92243c73bfffcf",
+  "captures_sha256": {
+    "panel-fixed-chat-375.jpg": "a08ef54dbef7315d0d33efaf80797302346956db16016bca1e956fe2e327b979",
+    "panel-fixed-manager-375.jpg": "1df43c07fb528180a31683ad7aab968ec3906f39d9a98f4405114366824cfa77",
+    "panel-fixed-training-375.jpg": "5bb43c4e081e10c6a2dde02cd048a9df2cd03220ac4502e9f09bbf92c9bb863f",
+    "supervision-before-1440.jpg": "9875126dd6a407ad324b7267d7587bff0b935f696cfa513d23dd9a4080ac6ea9",
+    "supervision-before-375.jpg": "6fdeca845bfc8e7be524a28cdca864d722135bbd29d64cdc736a74fc82465bc2",
+    "supervision-fixed-1440.jpg": "358c6d2fa8a74125a1ade18846e37474ad76f44a447a24db666139bf6fe63fb6",
+    "supervision-fixed-375.jpg": "b745c54df259ed82fa03d6600397b752778db9486fc703110775389c906b90a0"
+  },
+  "scope": "five style declarations for horizontal filter sizing; no media, content, data, permission or reminder changes",
+  "prior_full_regression": "110 Chromium scenarios and 376 unit tests on PR 238; this follow-up reruns 22 relevant browser scenarios, provider quality tracked in PR",
+  "publication": "exact candidate, preview READY, merged tree and final public verification recorded in follow-up PR"
+}
