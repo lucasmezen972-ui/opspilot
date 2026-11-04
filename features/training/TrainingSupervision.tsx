@@ -387,13 +387,18 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   filterScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
     marginBottom: 8,
   },
   filterScrollContent: {
+    alignItems: 'center',
     paddingHorizontal: 20,
     gap: 8,
   },
   filterChip: {
+    minHeight: 44,
+    justifyContent: 'center',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,

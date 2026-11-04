@@ -1,0 +1,65 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> opspilot@1.0.0 build:web
+> EXPO_NO_TELEMETRY=1 expo export --platform web --max-workers 2 && rm -rf dist/admin && cp -R admin dist/admin && cp dist/index.html dist/404.html && touch dist/.nojekyll
+
+Starting Metro Bundler
+Static rendering is enabled. Learn more: https://docs.expo.dev/router/reference/static-rendering/
+| (node:36) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:35) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Web node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 23.6% (247/508)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.3% (598/740)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 95.2% (2759/2827)
+λ node_modules/expo-router/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 97.6% (3328/3369)
+Web Bundled 5164ms node_modules/expo-router/entry.js (2827 modules)
+λ Bundled 5250ms node_modules/expo-router/node/render.js (3397 modules)
+
+› web bundles (4):
+_expo/static/js/web/entry-2ead44ba05f26d42bfa40b1b5c082f98.js (4.15 MB)
+_expo/static/js/web/exceljs-e9a560a12d4916d217770fa600866496.js (944 kB)
+_expo/static/js/web/index-c9e0093227dc8205ff6d096830b22624.js (572 kB)
+_expo/static/js/web/mollie-f8bb3c62cb5dac6b4eda1144ccb6e312.js (2.32 kB)
+
+› Static routes (38):
+/chat (31.1 kB)
+/more (31.1 kB)
+/team (31.1 kB)
+/ (index) (31.1 kB)
+/tasks (31.1 kB)
+/audits (31.1 kB)
+/actions (31.1 kB)
+/billing (31.1 kB)
+/manager (31.1 kB)
+/profile (31.1 kB)
+/reports (31.1 kB)
+/settings (31.1 kB)
+/_sitemap (31.1 kB)
+/products (31.1 kB)
+/training (31.1 kB)
+/legal/cgu (37 kB)
+/legal/cgv (37.8 kB)
+/+not-found (31.1 kB)
+/backoffice (31.1 kB)
+/commercial (31.1 kB)
+/(tabs)/chat (31.1 kB)
+/(tabs)/more (31.1 kB)
+/(tabs)/team (31.1 kB)
+/(tabs) (31.1 kB)
+/(tabs)/tasks (31.1 kB)
+/(tabs)/audits (31.1 kB)
+/(tabs)/actions (31.1 kB)
+/(tabs)/billing (31.1 kB)
+/(tabs)/manager (31.1 kB)
+/(tabs)/profile (31.1 kB)
+/(tabs)/reports (31.1 kB)
+/(tabs)/products (31.1 kB)
+/(tabs)/training (31.1 kB)
+/(tabs)/backoffice (31.1 kB)
+/(tabs)/commercial (31.1 kB)
+/legal/sous-traitance (36.7 kB)
+/legal/confidentialite (37.9 kB)
+/legal/mentions-legales (33.8 kB)
+
+Exported: dist
