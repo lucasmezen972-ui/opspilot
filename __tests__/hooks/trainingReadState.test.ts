@@ -65,6 +65,7 @@ vi.mock('../../lib/supabase', () => ({
     },
   },
 }));
+// eslint-disable-next-line import/first
 import { useTraining } from '../../hooks/useTraining';
 
 describe('lecture des formations et changement de compte', () => {

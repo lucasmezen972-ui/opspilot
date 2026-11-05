@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   manageButtonText: {
     flexShrink: 1,
     textAlign: 'center',
-    color: '#2563EB',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -92,6 +92,7 @@ for (const viewport of [
       agreement_id: agreement.id,
       accepted: true,
     });
+    await expect(panel).toBeAttached();
     await panel.scrollIntoViewIfNeeded();
     await panel.screenshot({
       path: `test-results/design-sepa-${viewport.width}.jpg`,
