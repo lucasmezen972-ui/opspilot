@@ -119,7 +119,7 @@ function BillingScreenContent() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Chargement de l'abonnement…</Text>
       </View>
     );
@@ -190,7 +190,7 @@ function BillingScreenContent() {
         style={styles.manageButton}
         onPress={handleManageSubscription}
       >
-        <ExternalLink size={16} color="#2563EB" />
+        <ExternalLink size={16} color={colors.primary} />
         <Text style={styles.manageButtonText}>Gérer mon abonnement Qonto</Text>
       </TouchableOpacity>
 
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   manageButtonText: {
     flexShrink: 1,
     textAlign: 'center',
-    color: '#2563EB',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

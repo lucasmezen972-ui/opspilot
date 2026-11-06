@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     height: 76,
     paddingTop: 10,
     paddingBottom: 12,
+    zIndex: 10,
     ...shadow.card,
   },
   tabBarItem: {

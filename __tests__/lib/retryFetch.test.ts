@@ -39,6 +39,30 @@ describe('HTTP retries', () => {
     expect(await (await result).text()).toBe('ok');
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
+  it('retries a 503 Service Unavailable on reads', async () => {
+    vi.useFakeTimers();
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockResolvedValue(new Response('recovered'));
+    vi.stubGlobal('fetch', fetcher);
+    const result = customFetch('https://example.org');
+    await vi.runAllTimersAsync();
+    expect(await (await result).text()).toBe('recovered');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+  it('retries a 429 Too Many Requests on reads', async () => {
+    vi.useFakeTimers();
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('', { status: 429 }))
+      .mockResolvedValue(new Response('ok'));
+    vi.stubGlobal('fetch', fetcher);
+    const result = customFetch('https://example.org');
+    await vi.runAllTimersAsync();
+    expect(await (await result).text()).toBe('ok');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
   it('does not retry cancellation', async () => {
     const fetcher = vi
       .fn()

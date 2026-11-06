@@ -181,10 +181,10 @@ async function prepareLibrary(page: Page, failRefresh = false) {
     }
   });
   if (failRefresh) {
-    let failed = false;
+    let failCount = 0;
     await page.route('**/rest/v1/training_chapters?**', async (route) => {
-      if (state.installed && !failed) {
-        failed = true;
+      if (state.installed && state.calls < 2) {
+        failCount++;
         await route.fulfill({
           status: 503,
           json: { message: 'Échec de lecture fictif' },
