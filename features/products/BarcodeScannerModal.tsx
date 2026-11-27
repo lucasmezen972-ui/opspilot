@@ -1,4 +1,3 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Camera, Keyboard, ScanLine, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -16,6 +15,17 @@ import {
 
 import { normalizeBarcode, validateBarcode } from './barcode';
 import { colors, radius, spacing } from '../../shared/styles/tokens';
+
+// expo-camera eagerly creates a web worker that loads jsQR from a CDN URL
+// (useWebQRScanner.js), which fails in proxied environments and is unused on
+// web anyway (this component rolls its own camera + BarcodeDetector / @zxing
+// fallback).  Lazy-import it only on native to avoid the error.
+const useCameraPermissions =
+  Platform.OS !== 'web'
+    ? require('expo-camera').useCameraPermissions
+    : () => [null, () => Promise.resolve({ granted: false })];
+const CameraView =
+  Platform.OS !== 'web' ? require('expo-camera').CameraView : View;
 
 type BarcodeDetectorResult = { rawValue?: string };
 type BarcodeDetectorInstance = {

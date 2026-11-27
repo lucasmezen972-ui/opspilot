@@ -1,4 +1,3 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import Constants from 'expo-constants';
 import {
   X,
@@ -24,6 +23,16 @@ import Svg, { Path } from 'react-native-svg';
 import { analyzeAuditImage, type AuditAnalysis } from '../lib/openai';
 import { colors, shadow } from '../shared/styles/tokens';
 import { logger } from '../utils/logger';
+
+// expo-camera eagerly creates a web worker that loads jsQR from a CDN URL,
+// which fails in proxied environments. Lazy-import on native only.
+type CameraType = 'front' | 'back';
+const useCameraPermissions =
+  Platform.OS !== 'web'
+    ? require('expo-camera').useCameraPermissions
+    : () => [null, () => Promise.resolve({ granted: false })];
+const CameraView =
+  Platform.OS !== 'web' ? require('expo-camera').CameraView : View;
 
 interface CameraModalProps {
   visible: boolean;
@@ -72,7 +81,7 @@ export default function CameraModal({
       },
     }),
   ).current;
-  const cameraRef = useRef<CameraView>(null);
+  const cameraRef = useRef<typeof CameraView>(null);
   const isE2ECameraMode =
     Platform.OS === 'web' &&
     typeof localStorage !== 'undefined' &&
