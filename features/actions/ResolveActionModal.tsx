@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   summaryTitle: {
     color: colors.textStrong,
@@ -332,7 +332,6 @@ const styles = StyleSheet.create({
   body: {
     flexShrink: 1,
     minHeight: 0,
-    maxHeight: 430,
   },
   field: {
     marginBottom: 12,
@@ -417,6 +416,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    paddingVertical: 2,
     marginBottom: 10,
   },
   checkbox: {
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
-    marginTop: 14,
+    marginTop: 10,
   },
   cancelButton: {
     minHeight: 44,
